@@ -293,6 +293,21 @@
           "data_upload": {
             "type": "integer"
           },
+          "fleet_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^HF[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "iso_country": {
+            "type": "string"
+          },
+          "network_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^HW[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
           "period": {
             "type": "object"
           },
@@ -326,7 +341,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Supersim",
-    "version": "81ff5a4"
+    "version": "0.1.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -581,7 +596,7 @@
         "description": "Retrieve a list of Fleets from your account.",
         "parameters": [
           {
-            "description": "The SID or unique name of the Network Access Profile that controls which cellular networks the Fleet's SIMs can connect to",
+            "description": "The SID or unique name of the Network Access Profile that controls which cellular networks the Fleet's SIMs can connect to.",
             "in": "query",
             "name": "NetworkAccessProfile",
             "schema": {
@@ -666,11 +681,11 @@
               "schema": {
                 "properties": {
                   "CommandsEnabled": {
-                    "description": "Defines whether SIMs in the Fleet are capable of sending and receiving machine-to-machine SMS via Commands.",
+                    "description": "Defines whether SIMs in the Fleet are capable of sending and receiving machine-to-machine SMS via Commands. Defaults to `true`.",
                     "type": "boolean"
                   },
                   "CommandsMethod": {
-                    "description": "A string representing the HTTP method to use when making a request to `commands_url`. Can be one of POST or GET. Defaults to POST.",
+                    "description": "A string representing the HTTP method to use when making a request to `commands_url`. Can be one of `POST` or `GET`. Defaults to `POST`.",
                     "enum": [
                       "head",
                       "get",
@@ -693,15 +708,15 @@
                     "type": "string"
                   },
                   "DataEnabled": {
-                    "description": "Defines whether SIMs in the Fleet are capable of using 2G/3G/4G/LTE/CAT-M data connectivity",
+                    "description": "Defines whether SIMs in the Fleet are capable of using 2G/3G/4G/LTE/CAT-M data connectivity. Defaults to `true`.",
                     "type": "boolean"
                   },
                   "DataLimit": {
-                    "description": "The total data usage (download and upload combined) in Megabytes that each Sim resource assigned to the Fleet resource can consume during a billing period (normally one month). Value must be between 1MB (1) and 2TB (2,000,000).",
+                    "description": "The total data usage (download and upload combined) in Megabytes that each Sim resource assigned to the Fleet resource can consume during a billing period (normally one month). Value must be between 1MB (1) and 2TB (2,000,000). Defaults to 1GB (1,000).",
                     "type": "integer"
                   },
                   "NetworkAccessProfile": {
-                    "description": "The SID or unique name of the Network Access Profile that will control which cellular networks the Fleet's SIMs can connect to",
+                    "description": "The SID or unique name of the Network Access Profile that will control which cellular networks the Fleet's SIMs can connect to.",
                     "type": "string"
                   },
                   "UniqueName": {
@@ -805,7 +820,7 @@
               "schema": {
                 "properties": {
                   "NetworkAccessProfile": {
-                    "description": "The SID or unique name of the Network Access Profile that will control which cellular networks the Fleet's SIMs can connect to",
+                    "description": "The SID or unique name of the Network Access Profile that will control which cellular networks the Fleet's SIMs can connect to.",
                     "type": "string"
                   },
                   "UniqueName": {
@@ -1754,10 +1769,51 @@
         "description": "List UsageRecords",
         "parameters": [
           {
-            "description": "SID of a Sim resource. Only show UsageRecords representing usage incurred by this Super SIM.",
+            "description": "SID or unique name of a Sim resource. Only show UsageRecords representing usage incurred by this Super SIM.",
             "in": "query",
             "name": "Sim",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "SID or unique name of a Fleet resource. Only show UsageRecords representing usage for Super SIMs belonging to this Fleet resource at the time the usage occurred.",
+            "in": "query",
+            "name": "Fleet",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "SID of a Network resource. Only show UsageRecords representing usage on this network.",
+            "in": "query",
+            "name": "Network",
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^HW[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Alpha-2 ISO Country Code. Only show UsageRecords representing usage in this country.",
+            "in": "query",
+            "name": "IsoCountry",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Dimension over which to aggregate usage records. Can be: `sim`, `fleet`, `network`, `isoCountry`. Default is to not aggregate across any of these dimensions, UsageRecords will be aggregated into the time buckets described by the `Granularity` parameter.",
+            "in": "query",
+            "name": "Group",
+            "schema": {
+              "enum": [
+                "sim",
+                "fleet",
+                "network",
+                "isoCountry"
+              ],
               "type": "string"
             }
           },
