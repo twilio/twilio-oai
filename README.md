@@ -16,7 +16,7 @@ From the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification):
 
 ## Project Status
 
-This project is currently in **BETA**. We expect this description to be accurate but it is currently in **active development**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue.](https://github.com/twilio/twilio-oai/issues/new).
+This project is currently in **BETA**. We expect the spec to be accurate but it is currently in **active development** and **unsupported**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue.](https://github.com/twilio/twilio-oai/issues/new).
 
 ## Contributing
 
