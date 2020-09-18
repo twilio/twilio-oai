@@ -1,6 +1,3 @@
-@twilio/twilio-oai
-========================
-
 # Twilio's OpenAPI Specification
 
 This repository contains [OpenAPI](https://www.openapis.org/) descriptions for [Twilio's API](https://docs.twilio.com).
@@ -15,8 +12,8 @@ From the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification):
 
 ## Project Status
 
-This project is currently in **BETA**. We expect the spec to be accurate but it is currently in **active development** and **unsupported**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue.](https://github.com/twilio/twilio-oai/issues/new).
+This project is currently in **BETA**. We expect the spec to be accurate, but it is currently in **active development** and **unsupported**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue](https://github.com/twilio/twilio-oai/issues/new).
 
 ## Contributing
 
-Because this description is used across Twilio's whole API development experience, we don't currently accept pull requests that directly modify the specification. This repository is automatically kept up to date with the specificiation used to validate Twilio API requests.
+Because this description is used across Twilio's whole API development experience, this repository is automatically kept up to date with the specificiation used to validate Twilio API requests.
