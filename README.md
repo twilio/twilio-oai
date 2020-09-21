@@ -16,4 +16,4 @@ This project is currently in **BETA**. We expect the spec to be accurate, but it
 
 ## Contributing
 
-Because this description is used across Twilio's whole API development experience, this repository is automatically kept up to date with the description used to validate Twilio API requests.
+Because this description is used across Twilio's whole API development experience, these documents are automatically kept up to date with the description used to validate Twilio API requests.
