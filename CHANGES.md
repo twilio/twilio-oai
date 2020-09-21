@@ -1,5 +1,20 @@
 twilio-oai changelog
 ====================
+[2020-09-21] Version 1.0.0
+--------------------------
+**Library - Docs**
+- [PR #4](https://github.com/twilio/twilio-oai/pull/4): Adding README.md. Thanks to [@garethpaul](https://github.com/garethpaul)!
+
+**Accounts**
+- Add Auth Token rotation API
+
+**Conversations**
+- Change resource path for Webhook Configuration
+
+**Events**
+- Schemas API get all Schemas names and versions
+
+
 [2020-09-17] Version 0.1.1
 --------------------------
 **Conversations**

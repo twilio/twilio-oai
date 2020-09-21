@@ -394,6 +394,38 @@
           }
         },
         "type": "object"
+      },
+      "trunking.v1.trunk.recording": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "do-not-record",
+              "record-from-ringing",
+              "record-from-answer",
+              "record-from-ringing-dual",
+              "record-from-answer-dual"
+            ],
+            "type": "string"
+          },
+          "trim": {
+            "enum": [
+              "trim-silence",
+              "do-not-trim"
+            ],
+            "type": "string"
+          },
+          "trunk_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^TK[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -416,7 +448,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Trunking",
-    "version": "0.1.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -535,15 +567,6 @@
                   },
                   "FriendlyName": {
                     "description": "A descriptive string that you create to describe the resource. It can be up to 64 characters long.",
-                    "type": "string"
-                  },
-                  "Recording": {
-                    "description": "The recording settings for the trunk. Can be: `do-not-record`, `record-from-ringing`, `record-from-answer`. If set to `record-from-ringing` or `record-from-answer`, all calls going through the trunk will be recorded. The only way to change recording parameters is on a sub-resource of a Trunk after it has been created. e.g.`/Trunks/[Trunk_SID]/Recording -XPOST -d'Mode=record-from-answer'`. See [Recording](https://www.twilio.com/docs/sip-trunking#recording) for more information.",
-                    "enum": [
-                      "do-not-record",
-                      "record-from-ringing",
-                      "record-from-answer"
-                    ],
                     "type": "string"
                   },
                   "Secure": {
@@ -721,15 +744,6 @@
                   },
                   "FriendlyName": {
                     "description": "A descriptive string that you create to describe the resource. It can be up to 64 characters long.",
-                    "type": "string"
-                  },
-                  "Recording": {
-                    "description": "The recording settings for the trunk. Can be: `do-not-record`, `record-from-ringing`, `record-from-answer`. If set to `record-from-ringing` or `record-from-answer`, all calls going through the trunk will be recorded. See [Recording](https://www.twilio.com/docs/sip-trunking#recording) for more information.",
-                    "enum": [
-                      "do-not-record",
-                      "record-from-ringing",
-                      "record-from-answer"
-                    ],
                     "type": "string"
                   },
                   "Secure": {
@@ -1932,6 +1946,103 @@
         "sid",
         "friendly_name",
         "phone_number"
+      ],
+      "x-path-type": "instance"
+    },
+    "/v1/Trunks/{TrunkSid}/Recording": {
+      "description": "Recording settings for a trunk",
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "description": "The SID of the Trunk from which to fetch the recording settings.",
+            "in": "path",
+            "name": "TrunkSid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^TK[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/trunking.v1.trunk.recording"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "tags": [
+          "GA"
+        ]
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "TrunkSid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^TK[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {},
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/trunking.v1.trunk.recording"
+                }
+              }
+            },
+            "description": "Accepted"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "tags": [
+          "GA"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://trunking.twilio.com"
+        }
+      ],
+      "x-default-output-properties": [
+        "mode",
+        "trim"
       ],
       "x-path-type": "instance"
     }

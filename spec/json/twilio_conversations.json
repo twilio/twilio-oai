@@ -37,6 +37,47 @@
         },
         "type": "object"
       },
+      "conversations.v1.configuration.configuration_webhook": {
+        "properties": {
+          "account_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "filters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "method": {
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "type": "string"
+          },
+          "post_webhook_url": {
+            "type": "string"
+          },
+          "pre_webhook_url": {
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "webhook",
+              "flex"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "conversations.v1.conversation": {
         "properties": {
           "account_sid": {
@@ -323,47 +364,6 @@
         },
         "type": "object"
       },
-      "conversations.v1.conversation_webhook": {
-        "properties": {
-          "account_sid": {
-            "maxLength": 34,
-            "minLength": 34,
-            "pattern": "^AC[0-9a-fA-F]{32}$",
-            "type": "string"
-          },
-          "filters": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "method": {
-            "enum": [
-              "GET",
-              "POST"
-            ],
-            "type": "string"
-          },
-          "post_webhook_url": {
-            "type": "string"
-          },
-          "pre_webhook_url": {
-            "type": "string"
-          },
-          "target": {
-            "enum": [
-              "webhook",
-              "flex"
-            ],
-            "type": "string"
-          },
-          "url": {
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "conversations.v1.credential": {
         "properties": {
           "account_sid": {
@@ -581,6 +581,39 @@
             "type": "string"
           },
           "links": {
+            "type": "object"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "conversations.v1.service.service_configuration.service_notification": {
+        "properties": {
+          "account_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "added_to_conversation": {
+            "type": "object"
+          },
+          "chat_service_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "log_enabled": {
+            "type": "boolean"
+          },
+          "new_message": {
+            "type": "object"
+          },
+          "removed_from_conversation": {
             "type": "object"
           },
           "url": {
@@ -1004,39 +1037,6 @@
         },
         "type": "object"
       },
-      "conversations.v1.service_notification": {
-        "properties": {
-          "account_sid": {
-            "maxLength": 34,
-            "minLength": 34,
-            "pattern": "^AC[0-9a-fA-F]{32}$",
-            "type": "string"
-          },
-          "added_to_conversation": {
-            "type": "object"
-          },
-          "chat_service_sid": {
-            "maxLength": 34,
-            "minLength": 34,
-            "pattern": "^IS[0-9a-fA-F]{32}$",
-            "type": "string"
-          },
-          "log_enabled": {
-            "type": "boolean"
-          },
-          "new_message": {
-            "type": "object"
-          },
-          "removed_from_conversation": {
-            "type": "object"
-          },
-          "url": {
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "conversations.v1.user": {
         "properties": {
           "account_sid": {
@@ -1111,12 +1111,12 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Conversations",
-    "version": "0.1.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
     "/v1/Configuration": {
-      "description": "TODO: Resource-level docs",
+      "description": "The Configuration resource manages a set of account-level settings applicable to the Conversations API.",
       "get": {
         "description": "",
         "responses": {
@@ -1148,7 +1148,7 @@
               "schema": {
                 "properties": {
                   "DefaultChatServiceSid": {
-                    "description": "The SID of the default [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to use when creating a conversation.",
+                    "description": "The SID of the default [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to use when creating a conversation.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^IS[0-9a-fA-F]{32}$",
@@ -1208,8 +1208,107 @@
       ],
       "x-path-type": "instance"
     },
+    "/v1/Configuration/Webhooks": {
+      "description": "A Webhook resource manages a service-level set of callback URLs and their configuration for receiving all conversation events.",
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.configuration.configuration_webhook"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "tags": [
+          "Beta"
+        ]
+      },
+      "post": {
+        "description": "",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "Filters": {
+                    "description": "The list of webhook event triggers that are enabled for this Service: `onMessageAdded`, `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`, `onConversationRemoved`, `onParticipantAdded`, `onParticipantUpdated`, `onParticipantRemoved`",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "Method": {
+                    "description": "The HTTP method to be used when sending a webhook request.",
+                    "type": "string"
+                  },
+                  "PostWebhookUrl": {
+                    "description": "The absolute url the post-event webhook request should be sent to.",
+                    "type": "string"
+                  },
+                  "PreWebhookUrl": {
+                    "description": "The absolute url the pre-event webhook request should be sent to.",
+                    "type": "string"
+                  },
+                  "Target": {
+                    "description": "The routing target of the webhook.",
+                    "enum": [
+                      "webhook",
+                      "flex"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.configuration.configuration_webhook"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "tags": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://conversations.twilio.com"
+        }
+      ],
+      "x-default-output-properties": [
+        "target",
+        "method",
+        "pre_webhook_url",
+        "post_webhook_url"
+      ],
+      "x-path-type": "instance"
+    },
     "/v1/Conversations": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Conversation resource represents an omnichannel group conversation with an ordered list of messages and a participant roster.",
       "get": {
         "description": "",
         "parameters": [
@@ -1323,7 +1422,7 @@
                     "type": "string"
                   },
                   "MessagingServiceSid": {
-                    "description": "The unique id of the [SMS Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
+                    "description": "The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^MG[0-9a-fA-F]{32}$",
@@ -1390,112 +1489,13 @@
       ],
       "x-path-type": "list"
     },
-    "/v1/Conversations/Webhooks": {
-      "description": "TODO: Resource-level docs",
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/conversations.v1.conversation_webhook"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "accountSid_authToken": []
-          }
-        ],
-        "tags": [
-          "Beta"
-        ]
-      },
-      "post": {
-        "description": "",
-        "requestBody": {
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "properties": {
-                  "Filters": {
-                    "description": "The list of webhook event triggers that are enabled for this Service: `onMessageAdded`, `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`, `onConversationRemoved`, `onParticipantAdded`, `onParticipantUpdated`, `onParticipantRemoved`",
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "Method": {
-                    "description": "The HTTP method to be used when sending a webhook request.",
-                    "type": "string"
-                  },
-                  "PostWebhookUrl": {
-                    "description": "The absolute url the post-event webhook request should be sent to.",
-                    "type": "string"
-                  },
-                  "PreWebhookUrl": {
-                    "description": "The absolute url the pre-event webhook request should be sent to.",
-                    "type": "string"
-                  },
-                  "Target": {
-                    "description": "The routing target of the webhook. Can be ordinary or route internally to Flex",
-                    "enum": [
-                      "webhook",
-                      "flex"
-                    ],
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/conversations.v1.conversation_webhook"
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "accountSid_authToken": []
-          }
-        ],
-        "tags": [
-          "Beta"
-        ]
-      },
-      "servers": [
-        {
-          "url": "https://conversations.twilio.com"
-        }
-      ],
-      "x-default-output-properties": [
-        "target",
-        "method",
-        "pre_webhook_url",
-        "post_webhook_url"
-      ],
-      "x-path-type": "instance"
-    },
     "/v1/Conversations/{ConversationSid}/Messages": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Message resource represents a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for messages.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for messages.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1577,7 +1577,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1626,7 +1626,7 @@
                     "type": "string"
                   },
                   "MediaSid": {
-                    "description": "The Media Sid to be attached to the new Message.",
+                    "description": "The Media SID to be attached to the new Message.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^ME[0-9a-fA-F]{32}$",
@@ -1673,12 +1673,12 @@
       "x-path-type": "list"
     },
     "/v1/Conversations/{ConversationSid}/Messages/{MessageSid}/Receipts": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Message Receipt resource represents a delivery/read receipt of a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1687,7 +1687,7 @@
             }
           },
           {
-            "description": "The sid of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
+            "description": "The SID of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
             "in": "path",
             "name": "MessageSid",
             "required": true,
@@ -1782,12 +1782,12 @@
       "x-path-type": "list"
     },
     "/v1/Conversations/{ConversationSid}/Messages/{MessageSid}/Receipts/{Sid}": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Message Receipt resource represents a delivery/read receipt of a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1796,7 +1796,7 @@
             }
           },
           {
-            "description": "The sid of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
+            "description": "The SID of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
             "in": "path",
             "name": "MessageSid",
             "required": true,
@@ -1859,7 +1859,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1906,12 +1906,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Message resource represents a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -1957,7 +1957,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2058,12 +2058,12 @@
       "x-path-type": "instance"
     },
     "/v1/Conversations/{ConversationSid}/Participants": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Participant resource represents a member of the conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for participants.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for participants.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2145,7 +2145,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2186,23 +2186,23 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "A unique string identifier for the conversation participant as [Chat User](https://www.twilio.com/docs/chat/rest/user-resource). This parameter is non-null if (and only if) the participant is using the Programmable Chat SDK to communicate. Limited to 256 characters.",
+                    "description": "A unique string identifier for the conversation participant as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource). This parameter is non-null if (and only if) the participant is using the Conversations SDK to communicate. Limited to 256 characters.",
                     "type": "string"
                   },
                   "MessagingBinding.Address": {
-                    "description": "The address of the participant's device, e.g. a phone number or Messenger ID. Together with the Proxy address, this determines a participant uniquely. This field (with proxy_address) is only null when the participant is interacting from a Chat endpoint (see the 'identity' field).",
+                    "description": "The address of the participant's device, e.g. a phone or WhatsApp number. Together with the Proxy address, this determines a participant uniquely. This field (with proxy_address) is only null when the participant is interacting from an SDK endpoint (see the 'identity' field).",
                     "type": "string"
                   },
                   "MessagingBinding.ProjectedAddress": {
-                    "description": "The address of the Twilio phone number that is used in Group MMS. Communication mask for the Chat participant with Identity.",
+                    "description": "The address of the Twilio phone number that is used in Group MMS. Communication mask for the Conversation participant with Identity.",
                     "type": "string"
                   },
                   "MessagingBinding.ProxyAddress": {
-                    "description": "The address of the Twilio phone number (or WhatsApp number, or Messenger Page ID) that the participant is in contact with. This field, together with participant address, is only null when the participant is interacting from a Chat endpoint (see the 'identity' field).",
+                    "description": "The address of the Twilio phone number (or WhatsApp number) that the participant is in contact with. This field, together with participant address, is only null when the participant is interacting from an SDK endpoint (see the 'identity' field).",
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the participant.",
+                    "description": "The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the participant.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -2251,7 +2251,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2298,12 +2298,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Participant resource represents a member of the conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2349,7 +2349,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2402,7 +2402,7 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "A unique string identifier for the conversation participant as [Chat User](https://www.twilio.com/docs/chat/rest/user-resource). This parameter is non-null if (and only if) the participant is using the Programmable Chat SDK to communicate. Limited to 256 characters.",
+                    "description": "A unique string identifier for the conversation participant as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource). This parameter is non-null if (and only if) the participant is using the Conversations SDK to communicate. Limited to 256 characters.",
                     "type": "string"
                   },
                   "MessagingBinding.ProjectedAddress": {
@@ -2414,7 +2414,7 @@
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the participant.",
+                    "description": "The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the participant.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -2459,12 +2459,12 @@
       "x-path-type": "instance"
     },
     "/v1/Conversations/{ConversationSid}/Webhooks": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Scoped Webhook resource manages a set of callback URLs and their configuration for receiving events specific to one conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2546,7 +2546,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2568,7 +2568,7 @@
                     "type": "array"
                   },
                   "Configuration.FlowSid": {
-                    "description": "The studio flow sid, where the webhook should be sent to.",
+                    "description": "The studio flow SID, where the webhook should be sent to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^FW[0-9a-fA-F]{32}$",
@@ -2652,7 +2652,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2687,12 +2687,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Scoped Webhook resource manages a set of callback URLs and their configuration for receiving events specific to one conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2738,7 +2738,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -2772,7 +2772,7 @@
                     "type": "array"
                   },
                   "Configuration.FlowSid": {
-                    "description": "The studio flow sid, where the webhook should be sent to.",
+                    "description": "The studio flow SID, where the webhook should be sent to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^FW[0-9a-fA-F]{32}$",
@@ -2875,7 +2875,7 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Conversation resource represents an omnichannel group conversation with an ordered list of messages and a participant roster.",
       "get": {
         "description": "",
         "parameters": [
@@ -2959,7 +2959,7 @@
                     "type": "string"
                   },
                   "MessagingServiceSid": {
-                    "description": "The unique id of the [SMS Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
+                    "description": "The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^MG[0-9a-fA-F]{32}$",
@@ -3023,7 +3023,7 @@
       "x-path-type": "instance"
     },
     "/v1/Credentials": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Credential resource represents a push notification credential.",
       "get": {
         "description": "",
         "parameters": [
@@ -3210,7 +3210,7 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Credential resource represents a push notification credential.",
       "get": {
         "description": "",
         "parameters": [
@@ -3435,7 +3435,7 @@
                     "type": "array"
                   },
                   "Type": {
-                    "description": "The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) roles or `service` for [Service](https://www.twilio.com/docs/chat/rest/service-resource) roles.",
+                    "description": "The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) roles or `service` for [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) roles.",
                     "enum": [
                       "conversation",
                       "service"
@@ -3626,7 +3626,7 @@
       "x-path-type": "instance"
     },
     "/v1/Services": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service resource is a top-level conversation resource container that serves as a data silo.",
       "get": {
         "description": "",
         "parameters": [
@@ -3753,12 +3753,12 @@
       "x-path-type": "list"
     },
     "/v1/Services/{ChatServiceSid}/Bindings": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Binding resource represents a push notification binding and its configuration, for delivering conversation events to mobile or web endpoints.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Binding resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Binding resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -3786,7 +3786,7 @@
             }
           },
           {
-            "description": "The [User](https://www.twilio.com/docs/chat/rest/user-resource)'s `identity` value of the resources to read. See [access tokens](https://www.twilio.com/docs/chat/create-tokens) for more details.",
+            "description": "The identity of a [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource) this binding belongs to. See [access tokens](https://www.twilio.com/docs/conversations/create-tokens) for more details.",
             "in": "query",
             "name": "Identity",
             "schema": {
@@ -3921,12 +3921,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Binding resource represents a push notification binding and its configuration, for delivering conversation events to mobile or web endpoints.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Binding resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Binding resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -3984,7 +3984,7 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Configuration": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Configuration resource manages service-level settings applicable to the Conversation API.",
       "get": {
         "description": "",
         "parameters": [
@@ -4044,21 +4044,21 @@
               "schema": {
                 "properties": {
                   "DefaultChatServiceRoleSid": {
-                    "description": "The service role assigned to users when they are added to the service. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource) for more info about roles.",
+                    "description": "The service-level role assigned to users when they are added to the service. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource) for more info about roles.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
                     "type": "string"
                   },
                   "DefaultConversationCreatorRoleSid": {
-                    "description": "The role assigned to a conversation creator when they join a new conversation. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource) for more info about roles.",
+                    "description": "The conversation-level role assigned to a conversation creator when they join a new conversation. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource) for more info about roles.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
                     "type": "string"
                   },
                   "DefaultConversationRoleSid": {
-                    "description": "The role assigned to users when they are added to a conversation. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource) for more info about roles.",
+                    "description": "The conversation-level role assigned to users when they are added to a conversation. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource) for more info about roles.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -4102,12 +4102,12 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Configuration/Notifications": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Notification resource manages a set of settings to determine push notification behavior at service level.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Configuration applies to.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Configuration applies to.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4124,7 +4124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/conversations.v1.service_notification"
+                  "$ref": "#/components/schemas/conversations.v1.service.service_configuration.service_notification"
                 }
               }
             },
@@ -4144,7 +4144,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Configuration applies to.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Configuration applies to.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4216,7 +4216,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/conversations.v1.service_notification"
+                  "$ref": "#/components/schemas/conversations.v1.service.service_configuration.service_notification"
                 }
               }
             },
@@ -4243,7 +4243,7 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Conversations": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Conversation resource represents an omnichannel group conversation with an ordered list of messages and a participant roster.",
       "get": {
         "description": "",
         "parameters": [
@@ -4381,7 +4381,7 @@
                     "type": "string"
                   },
                   "MessagingServiceSid": {
-                    "description": "The unique id of the [SMS Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
+                    "description": "The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^MG[0-9a-fA-F]{32}$",
@@ -4449,12 +4449,12 @@
       "x-path-type": "list"
     },
     "/v1/Services/{ChatServiceSid}/Conversations/{ConversationSid}/Messages": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Message resource represents a message in a conversation within a specific service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4466,7 +4466,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for messages.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for messages.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4548,7 +4548,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4560,7 +4560,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4609,7 +4609,7 @@
                     "type": "string"
                   },
                   "MediaSid": {
-                    "description": "The Media Sid to be attached to the new Message.",
+                    "description": "The Media SID to be attached to the new Message.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^ME[0-9a-fA-F]{32}$",
@@ -4656,12 +4656,12 @@
       "x-path-type": "list"
     },
     "/v1/Services/{ChatServiceSid}/Conversations/{ConversationSid}/Messages/{MessageSid}/Receipts": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Message Receipt resource represents a delivery/read receipt of a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Message resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Message resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4673,7 +4673,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4682,7 +4682,7 @@
             }
           },
           {
-            "description": "The sid of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
+            "description": "The SID of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
             "in": "path",
             "name": "MessageSid",
             "required": true,
@@ -4777,12 +4777,12 @@
       "x-path-type": "list"
     },
     "/v1/Services/{ChatServiceSid}/Conversations/{ConversationSid}/Messages/{MessageSid}/Receipts/{Sid}": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Message Receipt resource represents a delivery/read receipt of a message in a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Message resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Message resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4794,7 +4794,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4803,7 +4803,7 @@
             }
           },
           {
-            "description": "The sid of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
+            "description": "The SID of the message within a [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) the delivery receipt belongs to.",
             "in": "path",
             "name": "MessageSid",
             "required": true,
@@ -4866,7 +4866,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4878,7 +4878,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4925,12 +4925,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Message resource represents a message in a conversation within a specific service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -4942,7 +4942,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -4988,7 +4988,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5000,7 +5000,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this message.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5101,12 +5101,12 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Conversations/{ConversationSid}/Participants": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Participant resource represents a member of the conversation within a specific service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5118,7 +5118,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for participants.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for participants.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5200,7 +5200,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5212,7 +5212,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5253,23 +5253,23 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "A unique string identifier for the conversation participant as [Chat User](https://www.twilio.com/docs/chat/rest/user-resource). This parameter is non-null if (and only if) the participant is using the Programmable Chat SDK to communicate. Limited to 256 characters.",
+                    "description": "A unique string identifier for the conversation participant as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource). This parameter is non-null if (and only if) the participant is using the Conversation SDK to communicate. Limited to 256 characters.",
                     "type": "string"
                   },
                   "MessagingBinding.Address": {
-                    "description": "The address of the participant's device, e.g. a phone number or Messenger ID. Together with the Proxy address, this determines a participant uniquely. This field (with proxy_address) is only null when the participant is interacting from a Chat endpoint (see the 'identity' field).",
+                    "description": "The address of the participant's device, e.g. a phone or WhatsApp number. Together with the Proxy address, this determines a participant uniquely. This field (with proxy_address) is only null when the participant is interacting from an SDK endpoint (see the 'identity' field).",
                     "type": "string"
                   },
                   "MessagingBinding.ProjectedAddress": {
-                    "description": "The address of the Twilio phone number that is used in Group MMS. Communication mask for the Chat participant with Identity.",
+                    "description": "The address of the Twilio phone number that is used in Group MMS. Communication mask for the Conversation participant with Identity.",
                     "type": "string"
                   },
                   "MessagingBinding.ProxyAddress": {
-                    "description": "The address of the Twilio phone number (or WhatsApp number, or Messenger Page ID) that the participant is in contact with. This field, together with participant address, is only null when the participant is interacting from a Chat endpoint (see the 'identity' field).",
+                    "description": "The address of the Twilio phone number (or WhatsApp number) that the participant is in contact with. This field, together with participant address, is only null when the participant is interacting from an SDK endpoint (see the 'identity' field).",
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the participant.",
+                    "description": "The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the participant.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -5318,7 +5318,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5330,7 +5330,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5377,12 +5377,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Participant resource represents a member of the conversation within a specific service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5394,7 +5394,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5440,7 +5440,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5452,7 +5452,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this participant.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5505,7 +5505,7 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "A unique string identifier for the conversation participant as [Chat User](https://www.twilio.com/docs/chat/rest/user-resource). This parameter is non-null if (and only if) the participant is using the Programmable Chat SDK to communicate. Limited to 256 characters.",
+                    "description": "A unique string identifier for the conversation participant as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource). This parameter is non-null if (and only if) the participant is using the Conversation SDK to communicate. Limited to 256 characters.",
                     "type": "string"
                   },
                   "MessagingBinding.ProjectedAddress": {
@@ -5517,7 +5517,7 @@
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the participant.",
+                    "description": "The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the participant.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -5562,12 +5562,12 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Conversations/{ConversationSid}/Webhooks": {
-      "description": "TODO: Resource-level docs",
+      "description": "A Conversation-scoped Webhook resource manages a set of callback URLs and their configuration for receiving events specific to one conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5579,7 +5579,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5661,7 +5661,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5673,7 +5673,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5695,7 +5695,7 @@
                     "type": "array"
                   },
                   "Configuration.FlowSid": {
-                    "description": "The studio flow sid, where the webhook should be sent to.",
+                    "description": "The studio flow SID, where the webhook should be sent to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^FW[0-9a-fA-F]{32}$",
@@ -5779,7 +5779,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5791,7 +5791,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5826,12 +5826,12 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Conversation-scoped Webhook resource manages a set of callback URLs and their configuration for receiving events specific to one conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5843,7 +5843,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5889,7 +5889,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) the Participant resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the Participant resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -5901,7 +5901,7 @@
             }
           },
           {
-            "description": "The unique id of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
+            "description": "The unique ID of the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) for this webhook.",
             "in": "path",
             "name": "ConversationSid",
             "required": true,
@@ -5935,7 +5935,7 @@
                     "type": "array"
                   },
                   "Configuration.FlowSid": {
-                    "description": "The studio flow sid, where the webhook should be sent to.",
+                    "description": "The studio flow SID, where the webhook should be sent to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^FW[0-9a-fA-F]{32}$",
@@ -6050,7 +6050,7 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Service Conversation resource represents an omnichannel group conversation with an ordered list of messages and a participant roster.",
       "get": {
         "description": "",
         "parameters": [
@@ -6158,7 +6158,7 @@
                     "type": "string"
                   },
                   "MessagingServiceSid": {
-                    "description": "The unique id of the [SMS Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
+                    "description": "The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api) this conversation belongs to.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^MG[0-9a-fA-F]{32}$",
@@ -6222,12 +6222,12 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Roles": {
-      "description": "Roles determining user or participant permissions",
+      "description": "A Service Role resource represents a set of permissions granted to a user within a service or a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to read the Role resources from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to read the Role resources from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6312,7 +6312,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to create the Role resource under.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to create the Role resource under.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6341,7 +6341,7 @@
                     "type": "array"
                   },
                   "Type": {
-                    "description": "The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) roles or `service` for [Service](https://www.twilio.com/docs/chat/rest/service-resource) roles.",
+                    "description": "The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource) roles or `service` for [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) roles.",
                     "enum": [
                       "conversation",
                       "service"
@@ -6397,7 +6397,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to delete the Role resource from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to delete the Role resource from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6435,12 +6435,12 @@
           "Beta"
         ]
       },
-      "description": "Roles determining user or participant permissions",
+      "description": "A Service Role resource represents a set of permissions granted to a user within a service or a conversation.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to fetch the Role resource from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to fetch the Role resource from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6489,7 +6489,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Chat Service](https://www.twilio.com/docs/chat/rest/service-resource) to update the Role resource in.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to update the Role resource in.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6568,12 +6568,12 @@
       "x-path-type": "instance"
     },
     "/v1/Services/{ChatServiceSid}/Users": {
-      "description": "Unique users within a service",
+      "description": "A Service User resource represents a conversation user belonging to a specific conversation service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to read the User resources from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to read the User resources from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6658,7 +6658,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) the User resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the User resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6684,11 +6684,11 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "The application-defined string that uniquely identifies the resource's User within the [Service](https://www.twilio.com/docs/chat/rest/service-resource). This value is often a username or an email address, and is case-sensitive.",
+                    "description": "The application-defined string that uniquely identifies the resource's User within the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource). This value is often a username or an email address, and is case-sensitive.",
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the user.",
+                    "description": "The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the user.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -6740,7 +6740,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to delete the User resource from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to delete the User resource from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6775,12 +6775,12 @@
           "Beta"
         ]
       },
-      "description": "Unique users within a service",
+      "description": "A Service User resource represents a conversation user belonging to a specific conversation service.",
       "get": {
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to fetch the User resource from.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) to fetch the User resource from.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6826,7 +6826,7 @@
         "description": "",
         "parameters": [
           {
-            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) the User resource is associated with.",
+            "description": "The SID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) the User resource is associated with.",
             "in": "path",
             "name": "ChatServiceSid",
             "required": true,
@@ -6861,7 +6861,7 @@
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the user.",
+                    "description": "The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the user.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -6936,7 +6936,7 @@
           "Beta"
         ]
       },
-      "description": "TODO: Resource-level docs",
+      "description": "A Service resource is a top-level conversation resource container that serves as a data silo.",
       "get": {
         "description": "",
         "parameters": [
@@ -6986,7 +6986,7 @@
       "x-path-type": "instance"
     },
     "/v1/Users": {
-      "description": "Unique users within a service",
+      "description": "A User resource represents a conversation user belonging to a default conversation service.",
       "get": {
         "description": "",
         "parameters": [
@@ -7076,11 +7076,11 @@
                     "type": "string"
                   },
                   "Identity": {
-                    "description": "The application-defined string that uniquely identifies the resource's User within the [Service](https://www.twilio.com/docs/chat/rest/service-resource). This value is often a username or an email address, and is case-sensitive.",
+                    "description": "The application-defined string that uniquely identifies the resource's User within the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource). This value is often a username or an email address, and is case-sensitive.",
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the user.",
+                    "description": "The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the user.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
@@ -7155,7 +7155,7 @@
           "Beta"
         ]
       },
-      "description": "Unique users within a service",
+      "description": "A User resource represents a conversation user belonging to a default conversation service.",
       "get": {
         "description": "",
         "parameters": [
@@ -7217,7 +7217,7 @@
                     "type": "string"
                   },
                   "RoleSid": {
-                    "description": "The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource) to assign to the user.",
+                    "description": "The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource) to assign to the user.",
                     "maxLength": 34,
                     "minLength": 34,
                     "pattern": "^RL[0-9a-fA-F]{32}$",
