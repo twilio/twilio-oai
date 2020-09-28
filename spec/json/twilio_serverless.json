@@ -168,6 +168,44 @@
             },
             "type": "array"
           },
+          "links": {
+            "type": "object"
+          },
+          "service_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^ZS[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^ZB[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "building",
+              "completed",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "serverless.v1.service.build.build_status": {
+        "properties": {
+          "account_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
           "service_sid": {
             "maxLength": 34,
             "minLength": 34,
@@ -563,7 +601,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Serverless",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1408,7 +1446,7 @@
       },
       "description": "A collection of Function Versions, Asset Versions, and Dependencies that form a deployable unit.",
       "get": {
-        "description": "Retrieve a specific Buildn resource.",
+        "description": "Retrieve a specific Build resource.",
         "parameters": [
           {
             "description": "The SID of the Service to fetch the Build resource from.",
@@ -1462,6 +1500,65 @@
         "sid",
         "status",
         "date_created"
+      ],
+      "x-path-type": "instance"
+    },
+    "/v1/Services/{ServiceSid}/Builds/{Sid}/Status": {
+      "description": "The status of a Build resource.",
+      "get": {
+        "description": "Retrieve a specific Build resource.",
+        "parameters": [
+          {
+            "description": "The SID of the Service to fetch the Build resource from.",
+            "in": "path",
+            "name": "ServiceSid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The SID of the Build resource to fetch.",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^ZB[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/serverless.v1.service.build.build_status"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "tags": [
+          "Preview"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://serverless.twilio.com"
+        }
+      ],
+      "x-default-output-properties": [
+        "sid",
+        "status"
       ],
       "x-path-type": "instance"
     },
