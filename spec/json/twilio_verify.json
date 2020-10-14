@@ -154,7 +154,7 @@
             "type": "string"
           },
           "details": {
-            "type": "string"
+            "type": "object"
           },
           "entity_sid": {
             "maxLength": 34,
@@ -179,7 +179,7 @@
             "type": "string"
           },
           "hidden_details": {
-            "type": "string"
+            "type": "object"
           },
           "identity": {
             "type": "string"
@@ -616,7 +616,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Verify",
-    "version": "1.0.1"
+    "version": "1.1.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -779,9 +779,23 @@
                     "description": "Whether to pass PSD2 transaction parameters when starting a verification.",
                     "type": "boolean"
                   },
-                  "Push": {
-                    "description": "Configurations for the Push factors (channel) created under this Service. If present, it must be a json string with the following format: {\"notify_service_sid\": \"ISXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\", \"include_date\": true}. If `include_date` is set to `true`, which is the default, that means that the push challenge\u2019s response will include the date created value. If `include_date` is set to `false`, then the date created value will not be included. See [Challenge](https://www.twilio.com/docs/verify/api/challenge) resource\u2019s details parameter for more info",
-                    "type": "object"
+                  "Push.ApnCredentialSid": {
+                    "description": "Optional configuration for the Push factors. Set the APN Credential for this service. This will allow to send push notifications to iOS devices. See [Credential Resource](https://www.twilio.com/docs/notify/api/credential-resource)",
+                    "maxLength": 34,
+                    "minLength": 34,
+                    "pattern": "^CR[0-9a-fA-F]{32}$",
+                    "type": "string"
+                  },
+                  "Push.FcmCredentialSid": {
+                    "description": "Optional configuration for the Push factors. Set the FCM Credential for this service. This will allow to send push notifications to Android devices. See [Credential Resource](https://www.twilio.com/docs/notify/api/credential-resource)",
+                    "maxLength": 34,
+                    "minLength": 34,
+                    "pattern": "^CR[0-9a-fA-F]{32}$",
+                    "type": "string"
+                  },
+                  "Push.IncludeDate": {
+                    "description": "Optional configuration for the Push factors. If true, include the date in the Challenge's reponse. Otherwise, the date is omitted from the response. See [Challenge](https://www.twilio.com/docs/verify/api/challenge) resource\u2019s details parameter for more info. Default: true",
+                    "type": "boolean"
                   },
                   "SkipSmsToLandlines": {
                     "description": "Whether to skip sending SMS verifications to landlines. Requires `lookup_enabled`.",
@@ -1360,8 +1374,15 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "properties": {
-                  "Details": {
-                    "description": "Details provided to give context about the Challenge. Shown to the end user. It must be a stringified JSON with the following structure: {\"message\": \"string\", \"fields\": [ { \"label\": \"string\", \"value\": \"string\"}]}. `message` is required. If you send the `fields` property, each field has to include `label` and `value` properties. If you had set `include_date=true` in the `push` configuration of the [service](https://www.twilio.com/docs/verify/api/service), the response will also include the challenge's date created value as an additional field called `date`",
+                  "Details.Fields": {
+                    "description": "A list of objects that describe the Fields included in the Challenge. Each object contains the label and value of the field. Used when `factor_type` is `push`.",
+                    "items": {
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "Details.Message": {
+                    "description": "Shown to the user when the push notification arrives. Required when `factor_type` is `push`",
                     "type": "string"
                   },
                   "ExpirationDate": {
@@ -1378,7 +1399,7 @@
                   },
                   "HiddenDetails": {
                     "description": "Details provided to give context about the Challenge. Not shown to the end user. It must be a stringified JSON with only strings values eg. `{\"ip\": \"172.168.1.234\"}`",
-                    "type": "string"
+                    "type": "object"
                   }
                 },
                 "required": [
@@ -1727,12 +1748,32 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "properties": {
-                  "Binding": {
-                    "description": "A unique binding for this Factor that identifies it. E.g. the algorithm and public key for `push` factors. It must be a json string with the required properties for the given factor type. Required when creating a new Factor. This value is never returned because it can contain customer secrets.",
+                  "Binding.Alg": {
+                    "description": "The algorithm used when `factor_type` is `push`. Algorithm supported: `ES256`",
                     "type": "string"
                   },
-                  "Config": {
-                    "description": "The config required for this Factor. It must be a json string with the required properties for the given factor type",
+                  "Binding.PublicKey": {
+                    "description": "The Ecdsa public key in PKIX, ASN.1 DER format encoded in Base64",
+                    "type": "string"
+                  },
+                  "Config.AppId": {
+                    "description": "The ID that uniquely identifies your app in the Google or Apple store, such as `com.example.myapp`. Required when `factor_type` is `push`",
+                    "type": "string"
+                  },
+                  "Config.NotificationPlatform": {
+                    "description": "The transport technology used to generate the Notification Token. Can be `apn` or `fcm`. Required when `factor_type` is `push`",
+                    "enum": [
+                      "apn",
+                      "fcm"
+                    ],
+                    "type": "string"
+                  },
+                  "Config.NotificationToken": {
+                    "description": "For APN, the device token. For FCM the registration token. It used to send the push notifications. Required when `factor_type` is `push`",
+                    "type": "string"
+                  },
+                  "Config.SdkVersion": {
+                    "description": "The Verify Push SDK version used to configure the factor",
                     "type": "string"
                   },
                   "FactorType": {
@@ -1748,10 +1789,8 @@
                   }
                 },
                 "required": [
-                  "Binding",
                   "FriendlyName",
-                  "FactorType",
-                  "Config"
+                  "FactorType"
                 ],
                 "type": "object"
               }
@@ -1973,8 +2012,12 @@
                     "description": "The optional payload needed to verify the Factor for the first time. E.g. for a TOTP, the numeric code.",
                     "type": "string"
                   },
-                  "Config": {
-                    "description": "The new config for this Factor. It must be a json string with the required properties for the given factor type",
+                  "Config.NotificationToken": {
+                    "description": "For APN, the device token. For FCM the registration token. It used to send the push notifications. Required when `factor_type` is `push`",
+                    "type": "string"
+                  },
+                  "Config.SdkVersion": {
+                    "description": "The Verify Push SDK version used to configure the factor",
                     "type": "string"
                   },
                   "FriendlyName": {
@@ -3922,9 +3965,23 @@
                     "description": "Whether to pass PSD2 transaction parameters when starting a verification.",
                     "type": "boolean"
                   },
-                  "Push": {
-                    "description": "Configurations for the Push factors (channel) created under this Service. If present, it must be a json string with the following format: {\"notify_service_sid\": \"ISXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\", \"include_date\": true}. If `include_date` is set to `true`, which is the default, that means that the push challenge\u2019s response will include the date created value. If `include_date` is set to `false`, then the date created value will not be included. See [Challenge](https://www.twilio.com/docs/verify/api/challenge) resource\u2019s details parameter for more info",
-                    "type": "object"
+                  "Push.ApnCredentialSid": {
+                    "description": "Optional configuration for the Push factors. Set the APN Credential for this service. This will allow to send push notifications to iOS devices. See [Credential Resource](https://www.twilio.com/docs/notify/api/credential-resource)",
+                    "maxLength": 34,
+                    "minLength": 34,
+                    "pattern": "^CR[0-9a-fA-F]{32}$",
+                    "type": "string"
+                  },
+                  "Push.FcmCredentialSid": {
+                    "description": "Optional configuration for the Push factors. Set the FCM Credential for this service. This will allow to send push notifications to Android devices. See [Credential Resource](https://www.twilio.com/docs/notify/api/credential-resource)",
+                    "maxLength": 34,
+                    "minLength": 34,
+                    "pattern": "^CR[0-9a-fA-F]{32}$",
+                    "type": "string"
+                  },
+                  "Push.IncludeDate": {
+                    "description": "Optional configuration for the Push factors. If true, include the date in the Challenge's reponse. Otherwise, the date is omitted from the response. See [Challenge](https://www.twilio.com/docs/verify/api/challenge) resource\u2019s details parameter for more info. Default: true",
+                    "type": "boolean"
                   },
                   "SkipSmsToLandlines": {
                     "description": "Whether to skip sending SMS verifications to landlines. Requires `lookup_enabled`.",
