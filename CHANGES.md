@@ -1,5 +1,22 @@
 twilio-oai changelog
 ====================
+[2020-12-02] Version 1.4.0
+--------------------------
+**Library - Feature**
+- [PR #8](https://github.com/twilio/twilio-oai/pull/8): Splitting up openAPI specs by version. Thanks to [@shwetha-manvinkurke](https://github.com/shwetha-manvinkurke)!
+
+**Api**
+- Remove `RecordingTrack` parameter for create calls, create participants, and create call recordings **(breaking change)**
+- Added `RecordingTrack` parameter for create calls and create call recordings
+- Add optional property `recording_track` in the participant create request
+
+**Lookups**
+- Changed `caller_name` and `carrier` properties type to object **(breaking change)**
+
+**Trunking**
+- Added dual channel recording options for Trunks.
+
+
 [2020-11-18] Version 1.3.0
 --------------------------
 **Api**
