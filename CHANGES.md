@@ -1,5 +1,18 @@
 twilio-oai changelog
 ====================
+[2020-12-08] Version 1.5.0
+--------------------------
+**Library - Chore**
+- [PR #14](https://github.com/twilio/twilio-oai/pull/14): replace tags with vendor extension. Thanks to [@thinkingserious](https://github.com/thinkingserious)!
+
+**Library - Fix**
+- [PR #11](https://github.com/twilio/twilio-oai/pull/11): fixing semantic errors in the specs. Thanks to [@shwetha-manvinkurke](https://github.com/shwetha-manvinkurke)!
+
+**Api**
+- Added optional `RecordingTrack` parameter for create calls, create participants, and create call recordings
+- Removed deprecated Programmable Chat usage record categories **(breaking change)**
+
+
 [2020-12-02] Version 1.4.0
 --------------------------
 **Library - Feature**
