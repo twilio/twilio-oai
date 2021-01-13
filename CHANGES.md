@@ -1,5 +1,29 @@
 twilio-oai changelog
 ====================
+[2021-01-13] Version 1.7.0
+--------------------------
+**Library - Chore**
+- [PR #18](https://github.com/twilio/twilio-oai/pull/18): add ahoy msg. Thanks to [@garethpaul](https://github.com/garethpaul)!
+
+**Library - Fix**
+- [PR #17](https://github.com/twilio/twilio-oai/pull/17): making specs conform with the OpenAPI specification. Thanks to [@shwetha-manvinkurke](https://github.com/shwetha-manvinkurke)!
+
+**Api**
+- Add 'Electric Imp v1 Usage' to usage categories
+
+**Conversations**
+- Changed `last_read_message_index` type in Participant's resource **(breaking change)**
+
+**Insights**
+- Added `created_time` to call summary.
+
+**Sync**
+- Remove HideExpired query parameter for filtering Sync Documents with expired **(breaking change)**
+
+**Video**
+- [Rooms] Expose maxConcurrentPublishedTracks property in Room resource
+
+
 [2020-12-16] Version 1.6.0
 --------------------------
 **Library - Feature**
