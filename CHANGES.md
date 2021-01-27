@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2021-01-27] Version 1.8.0
+--------------------------
+**Library - Feature**
+- [PR #20](https://github.com/twilio/twilio-oai/pull/20): Remove Postman File. Thanks to [@garethpaul](https://github.com/garethpaul)!
+
+**Studio**
+- Studio V2 API is now GA
+
+**Supersim**
+- Allow updating `CommandsUrl` and `CommandsMethod` on a Fleet
+
+
 [2021-01-13] Version 1.7.0
 --------------------------
 **Library - Chore**
