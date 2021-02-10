@@ -1,5 +1,34 @@
 twilio-oai changelog
 ====================
+[2021-02-10] Version 1.9.0
+--------------------------
+**Library - Feature**
+- [PR #19](https://github.com/twilio/twilio-oai/pull/19): add custom types to global schema. Thanks to [@eshanholtz](https://github.com/eshanholtz)!
+- [PR #24](https://github.com/twilio/twilio-oai/pull/24): add inline schema titles. Thanks to [@thinkingserious](https://github.com/thinkingserious)!
+
+**Api**
+- Revert change that conference participant create `from` and `to` param to be endpoint type for supporting client identifier and sip address
+- Update the conference participant create `from` and `to` param to be endpoint type for supporting client identifier and sip address
+
+**Events**
+- Documentation should state that no fields are PII
+
+**Flex**
+- Adding `notifications` and `markdown` to Flex Configuration
+
+**Messaging**
+- Add A2P use cases API
+- Add Brand Registrations API
+- Add Campaigns API
+
+**Serverless**
+- Add runtime field to Build response and as an optional parameter to the Build create endpoint.
+- Add @twilio/runtime-handler dependency to Build response example.
+
+**Sync**
+- Remove If-Match header for Document **(breaking change)**
+
+
 [2021-01-27] Version 1.8.0
 --------------------------
 **Library - Feature**
