@@ -21,12 +21,6 @@ components:
         type: object
       nullable: true
       type: array
-    queue_order:
-      enum:
-      - FIFO
-      - LIFO
-      nullable: true
-      type: string
     sid:
       maxLength: 34
       minLength: 34
@@ -99,7 +93,16 @@ components:
       nullable: true
       pattern: ^WW[0-9a-fA-F]{32}$
       type: string
-    status:
+    string:
+      nullable: true
+      type: string
+    task_queue_task_order:
+      enum:
+      - FIFO
+      - LIFO
+      nullable: true
+      type: string
+    task_reservation_status:
       enum:
       - pending
       - accepted
@@ -111,13 +114,14 @@ components:
       - completed
       nullable: true
       type: string
-    string:
-      nullable: true
-      type: string
-    task_order:
+    task_status:
       enum:
-      - FIFO
-      - LIFO
+      - pending
+      - reserved
+      - assigned
+      - canceled
+      - completed
+      - wrapping
       nullable: true
       type: string
     taskrouter.v1.workspace:
@@ -143,7 +147,7 @@ components:
         multi_task_enabled:
           $ref: '#/components/schemas/boolean'
         prioritize_queue_order:
-          $ref: '#/components/schemas/queue_order'
+          $ref: '#/components/schemas/workspace_queue_order'
         sid:
           $ref: '#/components/schemas/sid_WS'
         timeout_activity_name:
@@ -218,7 +222,7 @@ components:
         age:
           $ref: '#/components/schemas/integer'
         assignment_status:
-          $ref: '#/components/schemas/status'
+          $ref: '#/components/schemas/task_status'
         attributes:
           $ref: '#/components/schemas/string'
         date_created:
@@ -265,7 +269,7 @@ components:
         links:
           $ref: '#/components/schemas/uri_map'
         reservation_status:
-          $ref: '#/components/schemas/status'
+          $ref: '#/components/schemas/task_reservation_status'
         sid:
           $ref: '#/components/schemas/sid_WR'
         task_sid:
@@ -329,7 +333,7 @@ components:
         target_workers:
           $ref: '#/components/schemas/string'
         task_order:
-          $ref: '#/components/schemas/task_order'
+          $ref: '#/components/schemas/task_queue_task_order'
         url:
           $ref: '#/components/schemas/url'
         workspace_sid:
@@ -523,7 +527,7 @@ components:
         links:
           $ref: '#/components/schemas/uri_map'
         reservation_status:
-          $ref: '#/components/schemas/status'
+          $ref: '#/components/schemas/worker_reservation_status'
         sid:
           $ref: '#/components/schemas/sid_WR'
         task_sid:
@@ -788,6 +792,24 @@ components:
       type: object
     url:
       format: uri
+      nullable: true
+      type: string
+    worker_reservation_status:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - timeout
+      - canceled
+      - rescinded
+      - wrapping
+      - completed
+      nullable: true
+      type: string
+    workspace_queue_order:
+      enum:
+      - FIFO
+      - LIFO
       nullable: true
       type: string
   securitySchemes:
