@@ -1,5 +1,26 @@
 twilio-oai changelog
 ====================
+[2021-02-24] Version 1.10.0
+---------------------------
+**Library - Fix**
+- [PR #27](https://github.com/twilio/twilio-oai/pull/27): add support for null response fields. Thanks to [@eshanholtz](https://github.com/eshanholtz)!
+- [PR #26](https://github.com/twilio/twilio-oai/pull/26): remove duplicate enum values. Thanks to [@eshanholtz](https://github.com/eshanholtz)!
+
+**Events**
+- Update description of types in the create sink resource
+
+**Messaging**
+- Add WA template header and footer
+- Remove A2P campaign and use cases API **(breaking change)**
+- Add number_registration_status field to read and fetch campaign responses
+
+**Trusthub**
+- Make all resources public
+
+**Verify**
+- Verify List Attempts API endpoints added.
+
+
 [2021-02-10] Version 1.9.0
 --------------------------
 **Library - Feature**

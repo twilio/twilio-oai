@@ -115,6 +115,13 @@
         "pattern": "^VE[0-9a-fA-F]{32}$",
         "type": "string"
       },
+      "sid_VL": {
+        "maxLength": 34,
+        "minLength": 34,
+        "nullable": true,
+        "pattern": "^VL[0-9a-fA-F]{32}$",
+        "type": "string"
+      },
       "sid_YC": {
         "maxLength": 34,
         "minLength": 34,
@@ -160,6 +167,23 @@
       },
       "url": {
         "format": "uri",
+        "nullable": true,
+        "type": "string"
+      },
+      "verification_attempt_channels": {
+        "enum": [
+          "sms",
+          "call",
+          "email"
+        ],
+        "nullable": true,
+        "type": "string"
+      },
+      "verification_attempt_conversion_status": {
+        "enum": [
+          "converted",
+          "unconverted"
+        ],
         "nullable": true,
         "type": "string"
       },
@@ -595,6 +619,38 @@
         },
         "type": "object"
       },
+      "verify.v2.verification_attempt": {
+        "properties": {
+          "account_sid": {
+            "$ref": "#/components/schemas/sid_AC"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/verification_attempt_channels"
+          },
+          "channel_data": {
+            "$ref": "#/components/schemas/object"
+          },
+          "conversion_status": {
+            "$ref": "#/components/schemas/verification_attempt_conversion_status"
+          },
+          "date_created": {
+            "$ref": "#/components/schemas/date_time_iso8601"
+          },
+          "date_updated": {
+            "$ref": "#/components/schemas/date_time_iso8601"
+          },
+          "service_sid": {
+            "$ref": "#/components/schemas/sid_VA"
+          },
+          "sid": {
+            "$ref": "#/components/schemas/sid_VL"
+          },
+          "url": {
+            "$ref": "#/components/schemas/url"
+          }
+        },
+        "type": "object"
+      },
       "webhook_methods": {
         "enum": [
           "GET",
@@ -632,10 +688,181 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Verify",
-    "version": "1.9.0"
+    "version": "1.10.0"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v2/Attempts": {
+      "description": "TODO: Resource-level docs",
+      "get": {
+        "description": "List all the verification attempts for a given Account.",
+        "operationId": "ListVerificationAttempt",
+        "parameters": [
+          {
+            "description": "Datetime filter used to query Verification Attempts created after this datetime.",
+            "in": "query",
+            "name": "DateCreatedAfter",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Datetime filter used to query Verification Attempts created before this datetime.",
+            "in": "query",
+            "name": "DateCreatedBefore",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Destination of a verification. Depending on the type of channel, it could be a phone number in E.164 format or an email address.",
+            "in": "query",
+            "name": "ChannelData.To",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "in": "query",
+            "name": "PageSize",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "attempts": {
+                      "items": {
+                        "$ref": "#/components/schemas/verify.v2.verification_attempt"
+                      },
+                      "type": "array"
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListVerificationAttemptResponse",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://verify.twilio.com"
+        }
+      ],
+      "x-default-output-properties": [
+        "sid",
+        "date_created",
+        "date_updated",
+        "conversion_status",
+        "channel"
+      ],
+      "x-path-type": "list"
+    },
+    "/v2/Attempts/{Sid}": {
+      "description": "TODO: Resource-level docs",
+      "get": {
+        "description": "Fetch a specific verification attempt.",
+        "operationId": "FetchVerificationAttempt",
+        "parameters": [
+          {
+            "description": "The unique SID identifier of a Verification Attempt",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^VL[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/verify.v2.verification_attempt"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://verify.twilio.com"
+        }
+      ],
+      "x-default-output-properties": [
+        "sid",
+        "date_created",
+        "date_updated",
+        "conversion_status",
+        "channel"
+      ],
+      "x-path-type": "instance"
+    },
     "/v2/Forms/{FormType}": {
       "description": "TODO: Resource-level docs",
       "get": {
