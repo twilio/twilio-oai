@@ -1,0 +1,52 @@
+extends: spectral:oas
+rules:
+  component-name-rule:
+    severity: error
+    recommended: true
+    message: Semantic error - Component names can only contain the characters A-Z a-z 0-9 - . _
+    given: $..components.schemas[*]~
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-zA-Z0-9\\.\\-_]+$"
+
+  pascal-case-name-rule:
+    severity: error
+    recommended: true
+    message: OperationId should be pascalCased.
+    type: style
+    given: "$.paths.[*].operationId"
+    then:
+      function: casing
+      functionOptions:
+        type: pascal
+
+  pascal-case-param-name-rule:
+    severity: error
+    recommended: true
+    message: Path parameter names should be capitalized.
+    type: style
+    given: "$.paths.[*].parameters.[*].name"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z].*"
+
+  require-openapi-rule:
+    severity: error
+    message: openapi field must be present with a non empty value
+    given: $
+    then:
+      field: openapi
+      function: truthy
+
+  operation-id-length-rule:
+    severity: warn
+    message: OperationID length should be between 4 and 50
+    given: "$.paths.[*].operationId"
+    then:
+      function: length
+      functionOptions:
+        max: 50
+        min: 4
+
