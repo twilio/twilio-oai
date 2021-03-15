@@ -1,5 +1,26 @@
 twilio-oai changelog
 ====================
+[2021-03-15] Version 1.11.0
+---------------------------
+**Library - Feature**
+- [PR #30](https://github.com/twilio/twilio-oai/pull/30): add property descriptions to OAI. Thanks to [@JenniferMah](https://github.com/JenniferMah)!
+
+**Library - Chore**
+- [PR #29](https://github.com/twilio/twilio-oai/pull/29): add spectral linting to TravisCI build. Thanks to [@eshanholtz](https://github.com/eshanholtz)!
+
+**Events**
+- Set maturity to beta
+
+**Messaging**
+- Adjust A2P brand registration status enum **(breaking change)**
+
+**Studio**
+- Remove internal safeguards for Studio V2 API usage now that it's GA
+
+**Verify**
+- Add support for creating and verifying totp factors. Support for totp factors is behind the `api.verify.totp` beta feature.
+
+
 [2021-02-24] Version 1.10.0
 ---------------------------
 **Library - Fix**
