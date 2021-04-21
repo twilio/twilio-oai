@@ -1,5 +1,35 @@
 twilio-oai changelog
 ====================
+[2021-04-21] Version 1.14.0
+---------------------------
+**Library - Feature**
+- [PR #32](https://github.com/twilio/twilio-oai/pull/32): add baseUrls to the top-level documents. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Library - Fix**
+- [PR #31](https://github.com/twilio/twilio-oai/pull/31): format for date type should be 'date' and not 'date-time'. Thanks to [@shwetha-manvinkurke](https://github.com/shwetha-manvinkurke)!
+
+**Api**
+- Revert Update the conference participant create `from` and `to` param to be endpoint type for supporting client identifier and sip address
+- Update the conference participant create `from` and `to` param to be endpoint type for supporting client identifier and sip address
+
+**Bulkexports**
+- moving enum to doc root for auto generating documentation
+- adding status enum and default output properties
+
+**Events**
+- Change schema_versions prop and key to versions **(breaking change)**
+
+**Messaging**
+- Add `use_inbound_webhook_on_number` field in Service API for fetch, create, update, read
+
+**Taskrouter**
+- Add `If-Match` Header based on ETag for Task Delete
+
+**Verify**
+- Add `AuthPayload` parameter to support verifying a `Challenge` upon creation. This is only supported for `totp` factors.
+- Add support to resend the notifications of a `Challenge`. This is only supported for `push` factors.
+
+
 [2021-04-07] Version 1.13.0
 ---------------------------
 **Api**

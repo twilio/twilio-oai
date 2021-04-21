@@ -50,16 +50,16 @@
             "nullable": true,
             "type": "string"
           },
-          "last_created": {
-            "description": "The date that the last schema version was created.",
+          "latest_version": {
+            "description": "Latest schema version.",
+            "nullable": true,
+            "type": "integer"
+          },
+          "latest_version_date_created": {
+            "description": "The date that the latest schema version was created.",
             "format": "date-time",
             "nullable": true,
             "type": "string"
-          },
-          "last_version": {
-            "description": "Last schema version.",
-            "nullable": true,
-            "type": "integer"
           },
           "links": {
             "description": "Nested resource URLs.",
@@ -75,7 +75,7 @@
         },
         "type": "object"
       },
-      "events.v1.schema.version": {
+      "events.v1.schema.schema_version": {
         "properties": {
           "date_created": {
             "description": "The date the schema version was created.",
@@ -260,6 +260,11 @@
             "pattern": "^AC[0-9a-fA-F]{32}$",
             "type": "string"
           },
+          "schema_version": {
+            "description": "The schema version that the subscription should use.",
+            "nullable": true,
+            "type": "integer"
+          },
           "subscription_sid": {
             "description": "Subscription SID.",
             "maxLength": 34,
@@ -278,11 +283,6 @@
             "format": "uri",
             "nullable": true,
             "type": "string"
-          },
-          "version": {
-            "description": "The schema version that the subscription should use.",
-            "nullable": true,
-            "type": "integer"
           }
         },
         "type": "object"
@@ -308,7 +308,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Events",
-    "version": "1.13.0"
+    "version": "1.14.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -363,7 +363,7 @@
       "description": "Version of the Schema",
       "get": {
         "description": "Retrieve a paginated list of versions of the schema.",
-        "operationId": "ListVersion",
+        "operationId": "ListSchemaVersion",
         "parameters": [
           {
             "description": "The unique identifier of the schema. Each schema can have multiple versions, that share the same id.",
@@ -423,12 +423,12 @@
                     },
                     "schema_versions": {
                       "items": {
-                        "$ref": "#/components/schemas/events.v1.schema.version"
+                        "$ref": "#/components/schemas/events.v1.schema.schema_version"
                       },
                       "type": "array"
                     }
                   },
-                  "title": "ListVersionResponse",
+                  "title": "ListSchemaVersionResponse",
                   "type": "object"
                 }
               }
@@ -452,7 +452,7 @@
       ],
       "x-default-output-properties": [
         "id",
-        "schema_version",
+        "version",
         "date_created"
       ],
       "x-path-type": "list"
@@ -461,7 +461,7 @@
       "description": "Version of the Schema",
       "get": {
         "description": "Fetch a specific schema and version.",
-        "operationId": "FetchVersion",
+        "operationId": "FetchSchemaVersion",
         "parameters": [
           {
             "description": "The unique identifier of the schema. Each schema can have multiple versions, that share the same id.",
@@ -487,7 +487,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/events.v1.schema.version"
+                  "$ref": "#/components/schemas/events.v1.schema.schema_version"
                 }
               }
             },
@@ -510,7 +510,7 @@
       ],
       "x-default-output-properties": [
         "id",
-        "schema_version",
+        "version",
         "date_created"
       ],
       "x-path-type": "instance"
@@ -1289,13 +1289,13 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "properties": {
+                  "SchemaVersion": {
+                    "description": "The schema version that the subscription should use.",
+                    "type": "integer"
+                  },
                   "Type": {
                     "description": "Type of event being subscribed to.",
                     "type": "string"
-                  },
-                  "Version": {
-                    "description": "The schema version that the subscription should use.",
-                    "type": "integer"
                   }
                 },
                 "required": [
@@ -1335,7 +1335,7 @@
       ],
       "x-default-output-properties": [
         "type",
-        "version",
+        "schema_version",
         "account_sid",
         "subscription_sid"
       ],
@@ -1461,7 +1461,7 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "properties": {
-                  "Version": {
+                  "SchemaVersion": {
                     "description": "The schema version that the subscription should use.",
                     "type": "integer"
                   }
@@ -1500,7 +1500,7 @@
       ],
       "x-default-output-properties": [
         "type",
-        "version",
+        "schema_version",
         "account_sid",
         "subscription_sid"
       ],
