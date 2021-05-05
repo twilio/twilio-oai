@@ -899,7 +899,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
   title: Twilio - Verify
-  version: 1.14.0
+  version: 1.15.0
 openapi: 3.0.1
 paths:
   /v2/Attempts:
@@ -1555,8 +1555,8 @@ paths:
               properties:
                 AuthPayload:
                   description: Optional payload used to verify the Challenge upon
-                    creation. Only used with a Factor of type `totp` to carry an OTP
-                    used in the verification.
+                    creation. Only used with a Factor of type `totp` to carry the
+                    TOTP code that needs to be verified.
                   type: string
                 Details.Fields:
                   description: A list of objects that describe the Fields included
@@ -1877,72 +1877,109 @@ paths:
                     supported: `ES256`'
                   type: string
                 Binding.PublicKey:
-                  description: The Ecdsa public key in PKIX, ASN.1 DER format encoded
-                    in Base64
+                  description: 'The Ecdsa public key in PKIX, ASN.1 DER format encoded
+                    in Base64.
+
+
+                    Required when `factor_type` is `push`'
                   type: string
                 Binding.Secret:
-                  description: The shared secret for TOTP factors encoded in Base32
+                  description: 'The shared secret for TOTP factors encoded in Base32.
+                    This can be provided when creating the Factor, otherwise it will
+                    be generated.
+
+
+                    Used when `factor_type` is `totp`'
                   type: string
                 Config.Alg:
-                  description: The algorithm used to derive the TOTP codes. Can be
-                    `sha1`, `sha256` or `sha512`. Defaults to `sha1`
+                  description: 'The algorithm used to derive the TOTP codes. Can be
+                    `sha1`, `sha256` or `sha512`. Defaults to `sha1`.
+
+
+                    Used when `factor_type` is `totp`'
                   enum:
                   - sha1
                   - sha256
                   - sha512
                   type: string
                 Config.AppId:
-                  description: The ID that uniquely identifies your app in the Google
-                    or Apple store, such as `com.example.myapp`. Required when `factor_type`
-                    is `push`. If specified, it can be up to 100 characters long.
+                  description: 'The ID that uniquely identifies your app in the Google
+                    or Apple store, such as `com.example.myapp`.
+
+
+                    Required when `factor_type` is `push`. If specified, it can be
+                    up to 100 characters long.'
                   type: string
                 Config.CodeLength:
-                  description: Number of digits for generated TOTP codes. Must be
+                  description: 'Number of digits for generated TOTP codes. Must be
                     between 3 and 8, inclusive. The default value is defined at the
-                    service level in the property totp.code_length. If not configured
-                    defaults to 6
+                    service level in the property `totp.code_length`. If not configured
+                    defaults to 6.
+
+
+                    Used when `factor_type` is `totp`'
                   type: integer
                 Config.NotificationPlatform:
-                  description: The transport technology used to generate the Notification
-                    Token. Can be `apn` or `fcm`. Required when `factor_type` is `push`
+                  description: 'The transport technology used to generate the Notification
+                    Token. Can be `apn` or `fcm`.
+
+
+                    Required when `factor_type` is `push`'
                   enum:
                   - apn
                   - fcm
                   type: string
                 Config.NotificationToken:
-                  description: For APN, the device token. For FCM the registration
-                    token. It used to send the push notifications. Required when `factor_type`
-                    is `push`. If specified, this value must be between 32 and 255
-                    characters long.
+                  description: 'For APN, the device token. For FCM the registration
+                    token. It used to send the push notifications.
+
+
+                    Used when `factor_type` is `push`. If specified, must be between
+                    32 and 255 characters long.'
                   type: string
                 Config.SdkVersion:
-                  description: The Verify Push SDK version used to configure the factor
+                  description: 'The Verify Push SDK version used to configure the
+                    factor
+
+
+                    Used when `factor_type` is `push`'
                   type: string
                 Config.Skew:
-                  description: The number of time-steps, past and future, that are
+                  description: 'The number of time-steps, past and future, that are
                     valid for validation of TOTP codes. Must be between 0 and 2, inclusive.
                     The default value is defined at the service level in the property
-                    totp.skew. If not configured defaults to 1
+                    `totp.skew`. If not configured defaults to 1.
+
+
+                    Used when `factor_type` is `totp`'
                   type: integer
                 Config.TimeStep:
-                  description: Defines how often, in seconds, are TOTP codes generated.
+                  description: 'Defines how often, in seconds, are TOTP codes generated.
                     i.e, a new TOTP code is generated every time_step seconds. Must
                     be between 20 and 60 seconds, inclusive. The default value is
-                    defined at the service level in the property totp.time_step. If
-                    not configured defaults to 30 seconds
+                    defined at the service level in the property `totp.time_step`.
+                    Defaults to 30 seconds if not configured.
+
+
+                    Used when `factor_type` is `totp`'
                   type: integer
                 FactorType:
                   description: The Type of this Factor. Currently `push` and `totp`
-                    are supported. For `totp` to work, you need to contact Twilio
-                    sales first to have the Verify TOTP feature enabled for your Twilio
-                    account.
+                    are supported. For `totp` to work, you need to contact [Twilio
+                    sales](https://www.twilio.com/help/sales) first to have the Verify
+                    TOTP feature enabled for your Twilio account.
                   enum:
                   - push
                   - totp
                   type: string
                 FriendlyName:
-                  description: The friendly name of this Factor. It can be up to 64
-                    characters.
+                  description: "The friendly name of this Factor. This can be any\
+                    \ string up to 64 characters, meant for humans to distinguish\
+                    \ between Factors.\nFor `factor_type` `push`, this could be a\
+                    \ device name.\nFor `factor_type` `totp`, this value is used as\
+                    \ the \u201Caccount name\u201D in constructing the `binding.uri`\
+                    \ property.\nAt the same time, we recommend avoiding providing\
+                    \ PII."
                   type: string
               required:
               - FriendlyName
