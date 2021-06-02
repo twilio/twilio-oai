@@ -1,5 +1,15 @@
 twilio-oai changelog
 ====================
+[2021-06-02] Version 1.16.1
+---------------------------
+**Events**
+- join Sinks and Subscriptions service
+
+**Verify**
+- Improved the documentation of `challenge` adding the maximum and minimum expected lengths of some fields.
+- Improve documentation regarding `notification` by updating the documentation of the field `ttl`.
+
+
 [2021-05-19] Version 1.16.0
 ---------------------------
 **Events**
