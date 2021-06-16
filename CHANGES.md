@@ -1,5 +1,21 @@
 twilio-oai changelog
 ====================
+[2021-06-16] Version 1.17.0
+---------------------------
+**Library - Feature**
+- [PR #38](https://github.com/twilio/twilio-oai/pull/38): add sidKey, if present, to the OpenAPI docs. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Library - Chore**
+- [PR #37](https://github.com/twilio/twilio-oai/pull/37): refactor the Twilio vendor extensions into single object. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Api**
+- Update `status` enum for Messages to include 'canceled'
+- Update `update_status` enum for Messages to include 'canceled'
+
+**Trusthub**
+- Corrected the sid for policy sid in customer_profile_evaluation.json and trust_product_evaluation.json **(breaking change)**
+
+
 [2021-06-02] Version 1.16.1
 ---------------------------
 **Events**
