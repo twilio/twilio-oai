@@ -307,6 +307,9 @@ components:
           description: The ICCID associated with the SIM
           nullable: true
           type: string
+        links:
+          nullable: true
+          type: object
         sid:
           description: The unique string that identifies the resource
           maxLength: 34
@@ -332,6 +335,58 @@ components:
         url:
           description: The absolute URL of the Sim Resource
           format: uri
+          nullable: true
+          type: string
+      type: object
+    supersim.v1.sim.billing_period:
+      properties:
+        account_sid:
+          description: The SID of the Account the Super SIM belongs to
+          maxLength: 34
+          minLength: 34
+          nullable: true
+          pattern: ^AC[0-9a-fA-F]{32}$
+          type: string
+        date_created:
+          description: The ISO 8601 date and time in GMT when the resource was created
+          format: date-time
+          nullable: true
+          type: string
+        date_updated:
+          description: The ISO 8601 date and time in GMT when the resource was last
+            updated
+          format: date-time
+          nullable: true
+          type: string
+        end_time:
+          description: The end time of the Billing Period
+          format: date-time
+          nullable: true
+          type: string
+        period_type:
+          description: The type of the Billing Period
+          enum:
+          - ready
+          - active
+          nullable: true
+          type: string
+        sid:
+          description: The SID of the Billing Period
+          maxLength: 34
+          minLength: 34
+          nullable: true
+          pattern: ^HB[0-9a-fA-F]{32}$
+          type: string
+        sim_sid:
+          description: The SID of the Super SIM the Billing Period belongs to
+          maxLength: 34
+          minLength: 34
+          nullable: true
+          pattern: ^HS[0-9a-fA-F]{32}$
+          type: string
+        start_time:
+          description: The start time of the Billing Period
+          format: date-time
           nullable: true
           type: string
       type: object
@@ -463,7 +518,7 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
   title: Twilio - Supersim
-  version: 1.17.0
+  version: 1.18.0
 openapi: 3.0.1
 paths:
   /v1/Commands:
@@ -1565,6 +1620,74 @@ paths:
       - unique_name
       - status
       pathType: instance
+  /v1/Sims/{SimSid}/BillingPeriods:
+    description: Billing Period for an IoT Super SIM
+    get:
+      description: Retrieve a list of Billing Periods for a Super SIM.
+      operationId: ListBillingPeriod
+      parameters:
+      - description: The SID of the Super SIM to list Billing Periods for.
+        in: path
+        name: SimSid
+        required: true
+        schema:
+          type: string
+      - description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        in: query
+        name: PageSize
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  billing_periods:
+                    items:
+                      $ref: '#/components/schemas/supersim.v1.sim.billing_period'
+                    type: array
+                  meta:
+                    properties:
+                      first_page_url:
+                        format: uri
+                        type: string
+                      key:
+                        type: string
+                      next_page_url:
+                        format: uri
+                        type: string
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        format: uri
+                        type: string
+                      url:
+                        format: uri
+                        type: string
+                    type: object
+                title: ListBillingPeriodResponse
+                type: object
+          description: OK
+      security:
+      - accountSid_authToken: []
+      x-maturity:
+      - GA
+    servers:
+    - url: https://supersim.twilio.com
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - sim_sid
+      - start_time
+      - end_time
+      - period_type
+      pathType: list
   /v1/SmsCommands:
     description: Machine-to-machine SMS Commands sent to/from SIMs
     get:
@@ -1868,6 +1991,8 @@ paths:
 servers:
 - url: https://supersim.twilio.com
 x-maturity:
+- description: This product is Generally Available.
+  name: GA
 - description: PLEASE NOTE that this is a Beta product that is subject to change.
     Use it with caution.
   name: Beta
