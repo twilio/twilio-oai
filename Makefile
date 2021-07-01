@@ -3,7 +3,7 @@
 install:
 	npm install
 
-spectral:
+spectral: install
 	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq
 
 test: spectral
