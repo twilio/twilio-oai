@@ -1,5 +1,19 @@
 twilio-oai changelog
 ====================
+[2021-07-14] Version 1.19.0
+---------------------------
+**Library - Chore**
+- [PR #40](https://github.com/twilio/twilio-oai/pull/40): make sure spectral is installed. Thanks to [@thinkingserious](https://github.com/thinkingserious)!
+- [PR #39](https://github.com/twilio/twilio-oai/pull/39): add spectral target alias test. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Conversations**
+- Changed `last_read_message_index` and `unread_messages_count` type in User Conversation's resource **(breaking change)**
+- Expose UserConversations resource
+
+**Messaging**
+- Add brand_score field to brand registration responses
+
+
 [2021-06-30] Version 1.18.0
 ---------------------------
 **Conversations**
