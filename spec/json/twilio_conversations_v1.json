@@ -985,6 +985,61 @@
         },
         "type": "object"
       },
+      "conversations.v1.service.service_configuration.service_webhook_configuration": {
+        "properties": {
+          "account_sid": {
+            "description": "The unique ID of the Account responsible for this service.",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "chat_service_sid": {
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "filters": {
+            "description": "The list of webhook event triggers that are enabled for this Service.",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "method": {
+            "description": "The HTTP method to be used when sending a webhook request",
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "post_webhook_url": {
+            "description": "The absolute url the post-event webhook request should be sent to.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "pre_webhook_url": {
+            "description": "The absolute url the pre-event webhook request should be sent to.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "An absolute URL for this webhook.",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "conversations.v1.service.service_conversation": {
         "properties": {
           "account_sid": {
@@ -2036,7 +2091,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Conversations",
-    "version": "1.23.1"
+    "version": "1.23.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -5397,6 +5452,129 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/conversations.v1.service.service_configuration.service_notification"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://conversations.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "chat_service_sid"
+        ],
+        "pathType": "instance"
+      }
+    },
+    "/v1/Services/{ChatServiceSid}/Configuration/Webhooks": {
+      "description": "A service webhook configuration resource manages a service-level set of callback URLs and their configuration for receiving all the corresponding service events.",
+      "get": {
+        "description": "Fetch a specific service webhook configuration.",
+        "operationId": "FetchServiceWebhookConfiguration",
+        "parameters": [
+          {
+            "description": "The unique ID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) this conversation belongs to.",
+            "in": "path",
+            "name": "ChatServiceSid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^IS[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.service.service_configuration.service_webhook_configuration"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "post": {
+        "description": "Update a specific Webhook.",
+        "operationId": "UpdateServiceWebhookConfiguration",
+        "parameters": [
+          {
+            "description": "The unique ID of the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource) this conversation belongs to.",
+            "in": "path",
+            "name": "ChatServiceSid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^IS[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "Filters": {
+                    "description": "The list of webhook event triggers that are enabled for this Service. Possible values are `onParticipantAdd`, `onParticipantAdded`, `onDeliveryUpdated`, `onConversationUpdated`, `onConversationRemove`, `onParticipantRemove`, `onConversationUpdate`, `onMessageAdd`, `onMessageRemoved`, `onParticipantUpdated`, `onConversationAdded`, `onMessageAdded`, `onConversationAdd`, `onConversationRemoved`, `onParticipantUpdate`, `onMessageRemove`, `onMessageUpdated`, `onParticipantRemoved`, `onMessageUpdate` or `onConversationStateUpdated`.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "Method": {
+                    "description": "The HTTP method to be used when sending a webhook request. One of `GET` or `POST`.",
+                    "type": "string"
+                  },
+                  "PostWebhookUrl": {
+                    "description": "The absolute url the post-event webhook request should be sent to.",
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "PreWebhookUrl": {
+                    "description": "The absolute url the pre-event webhook request should be sent to.",
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "title": "UpdateServiceWebhookConfigurationRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.service.service_configuration.service_webhook_configuration"
                 }
               }
             },

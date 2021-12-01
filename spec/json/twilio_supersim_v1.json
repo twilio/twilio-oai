@@ -192,6 +192,102 @@
         },
         "type": "object"
       },
+      "supersim.v1.ip_command": {
+        "properties": {
+          "account_sid": {
+            "description": "The SID of the Account that created the resource",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "date_created": {
+            "description": "The ISO 8601 date and time in GMT when the resource was created",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "date_updated": {
+            "description": "The ISO 8601 date and time in GMT when the resource was last updated",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "device_ip": {
+            "description": "The IP address of the device that the IP Command was sent to or received from",
+            "nullable": true,
+            "type": "string"
+          },
+          "device_port": {
+            "description": "The port that the IP Command either originated from or was sent to",
+            "nullable": true,
+            "type": "integer"
+          },
+          "direction": {
+            "description": "The direction of the IP Command",
+            "enum": [
+              "to_sim",
+              "from_sim"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "payload": {
+            "description": "The payload of the IP Command sent to or from the Super SIM",
+            "nullable": true,
+            "type": "string"
+          },
+          "payload_type": {
+            "description": "The payload type of the IP Command",
+            "enum": [
+              "text",
+              "binary"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "sid": {
+            "description": "The unique string that identifies the resource",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^HG[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "sim_iccid": {
+            "description": "The ICCID of the Super SIM that this IP Command was sent to or from",
+            "nullable": true,
+            "type": "string"
+          },
+          "sim_sid": {
+            "description": "The SID of the Super SIM that this IP Command was sent to or from",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^HS[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "status": {
+            "description": "The status of the IP Command",
+            "enum": [
+              "queued",
+              "sent",
+              "received",
+              "failed"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The absolute URL of the IP Command resource",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "supersim.v1.network": {
         "properties": {
           "friendly_name": {
@@ -613,7 +709,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Supersim",
-    "version": "1.23.1"
+    "version": "1.23.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1197,6 +1293,271 @@
           "sid",
           "unique_name",
           "data_metering"
+        ],
+        "pathType": "instance"
+      }
+    },
+    "/v1/IpCommands": {
+      "description": "Machine-to-machine IP Commands sent to/from Super SIMs",
+      "get": {
+        "description": "Retrieve a list of IP Commands from your account.",
+        "operationId": "ListIpCommand",
+        "parameters": [
+          {
+            "description": "The SID or unique name of the Sim resource that IP Command was sent to or from.",
+            "in": "query",
+            "name": "Sim",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ICCID of the Sim resource that IP Command was sent to or from.",
+            "in": "query",
+            "name": "SimIccid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The status of the IP Command. Can be: `queued`, `sent`, `received` or `failed`. See the [IP Command Status Values](https://www.twilio.com/docs/wireless/api/ipcommand-resource#status-values) for a description of each.",
+            "in": "query",
+            "name": "Status",
+            "schema": {
+              "enum": [
+                "queued",
+                "sent",
+                "received",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The direction of the IP Command. Can be `to_sim` or `from_sim`. The value of `to_sim` is synonymous with the term `mobile terminated`, and `from_sim` is synonymous with the term `mobile originated`.",
+            "in": "query",
+            "name": "Direction",
+            "schema": {
+              "enum": [
+                "to_sim",
+                "from_sim"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "in": "query",
+            "name": "PageSize",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ip_commands": {
+                      "items": {
+                        "$ref": "#/components/schemas/supersim.v1.ip_command"
+                      },
+                      "type": "array"
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListIpCommandResponse",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "post": {
+        "description": "Send an IP Command to a Super SIM.",
+        "operationId": "CreateIpCommand",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "CallbackMethod": {
+                    "description": "The HTTP method we should use to call `callback_url`. Can be `GET` or `POST`, and the default is `POST`.",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "type": "string"
+                  },
+                  "CallbackUrl": {
+                    "description": "The URL we should call using the `callback_method` after we have sent the IP Command.",
+                    "format": "uri",
+                    "type": "string"
+                  },
+                  "DevicePort": {
+                    "description": "The device port to which the IP Command will be sent.",
+                    "type": "integer"
+                  },
+                  "Payload": {
+                    "description": "The payload to be delivered to the device.",
+                    "type": "string"
+                  },
+                  "PayloadType": {
+                    "description": "Indicates how the payload is encoded. Either `text` or `binary`. Defaults to `text`.",
+                    "enum": [
+                      "text",
+                      "binary"
+                    ],
+                    "type": "string"
+                  },
+                  "Sim": {
+                    "description": "The `sid` or `unique_name` of the [Super SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource) to send the IP Command to.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "Sim",
+                  "Payload",
+                  "DevicePort"
+                ],
+                "title": "CreateIpCommandRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/supersim.v1.ip_command"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://supersim.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status",
+          "date_created"
+        ],
+        "pathType": "list"
+      }
+    },
+    "/v1/IpCommands/{Sid}": {
+      "description": "Machine-to-machine IP Commands sent to/from Super SIMs",
+      "get": {
+        "description": "Fetch IP Command instance from your account.",
+        "operationId": "FetchIpCommand",
+        "parameters": [
+          {
+            "description": "The SID of the IP Command resource to fetch.",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^HG[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/supersim.v1.ip_command"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://supersim.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status",
+          "date_created"
         ],
         "pathType": "instance"
       }
