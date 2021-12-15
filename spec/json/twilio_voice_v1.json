@@ -1,6 +1,31 @@
 {
   "components": {
     "schemas": {
+      "voice.v1.archived_call": {
+        "properties": {
+          "date": {
+            "description": "date",
+            "format": "date",
+            "nullable": true,
+            "type": "string"
+          },
+          "sid": {
+            "description": "sid",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^CA[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "url": {
+            "description": "The absolute URL of the resource",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "voice.v1.byoc_trunk": {
         "properties": {
           "account_sid": {
@@ -520,10 +545,63 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Voice",
-    "version": "1.23.2"
+    "version": "1.24.0"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v1/Archives/{Date}/Calls/{Sid}": {
+      "delete": {
+        "description": "Delete an archived call record from Bulk Export. Note: this does not also delete the record from the Voice API.",
+        "operationId": "DeleteArchivedCall",
+        "parameters": [
+          {
+            "description": "The date of the Call in UTC.",
+            "in": "path",
+            "name": "Date",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The Twilio-provided Call SID that uniquely identifies the Call resource to delete",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^CA[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "description": "TODO: Resource-level docs",
+      "servers": [
+        {
+          "url": "https://voice.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance"
+      }
+    },
     "/v1/ByocTrunks": {
       "description": "BYOC Trunks allow you to bring your own voice carrier to Twilio, enabling your calls to use our Programmable Voice APIs.",
       "get": {
@@ -2578,6 +2656,10 @@
     {
       "description": "This product is Generally Available.",
       "name": "GA"
+    },
+    {
+      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution.",
+      "name": "Beta"
     },
     {
       "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com.",
