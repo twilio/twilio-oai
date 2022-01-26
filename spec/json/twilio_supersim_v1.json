@@ -74,6 +74,92 @@
         },
         "type": "object"
       },
+      "supersim.v1.esim_profile": {
+        "properties": {
+          "account_sid": {
+            "description": "The SID of the Account to which the eSIM Profile resource belongs",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "date_created": {
+            "description": "The ISO 8601 date and time in GMT when the resource was created",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "date_updated": {
+            "description": "The ISO 8601 date and time in GMT when the resource was last updated",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "eid": {
+            "description": "Identifier of the eUICC that can claim the eSIM Profile",
+            "nullable": true,
+            "type": "string"
+          },
+          "error_code": {
+            "description": "Code indicating the failure if the download of the SIM Profile failed and the eSIM Profile is in `failed` state",
+            "nullable": true,
+            "type": "string"
+          },
+          "error_message": {
+            "description": "Error message describing the failure if the download of the SIM Profile failed and the eSIM Profile is in `failed` state",
+            "nullable": true,
+            "type": "string"
+          },
+          "iccid": {
+            "description": "The ICCID associated with the Sim resource",
+            "nullable": true,
+            "type": "string"
+          },
+          "sid": {
+            "description": "The unique string that identifies the resource",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^HP[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "sim_sid": {
+            "description": "The SID of the Sim resource that this eSIM Profile controls",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^HS[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "smdp_plus_address": {
+            "description": "Address of the SM-DP+ server from which the Profile will be downloaded",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "description": "The status of the eSIM Profile",
+            "enum": [
+              "new",
+              "reserving",
+              "available",
+              "downloaded",
+              "installed",
+              "failed"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The absolute URL of the eSIM Profile resource",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "supersim.v1.fleet": {
         "properties": {
           "account_sid": {
@@ -709,7 +795,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Supersim",
-    "version": "1.25.0"
+    "version": "1.25.1"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -957,6 +1043,237 @@
           "sid",
           "status",
           "date_created"
+        ],
+        "pathType": "instance"
+      }
+    },
+    "/v1/ESimProfiles": {
+      "description": "eSIM Profiles that can be loaded onto consumer eUICC SIMs",
+      "get": {
+        "description": "Retrieve a list of eSIM Profiles.",
+        "operationId": "ListEsimProfile",
+        "parameters": [
+          {
+            "description": "List the eSIM Profiles that have been associated with an EId.",
+            "in": "query",
+            "name": "Eid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Find the eSIM Profile resource related to a [Sim](https://www.twilio.com/docs/wireless/api/sim-resource) resource by providing the SIM SID. Will always return an array with either 1 or 0 records.",
+            "in": "query",
+            "name": "SimSid",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "List the eSIM Profiles that are in a given status.",
+            "in": "query",
+            "name": "Status",
+            "schema": {
+              "enum": [
+                "new",
+                "reserving",
+                "available",
+                "downloaded",
+                "installed",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "in": "query",
+            "name": "PageSize",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "esim_profiles": {
+                      "items": {
+                        "$ref": "#/components/schemas/supersim.v1.esim_profile"
+                      },
+                      "type": "array"
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListEsimProfileResponse",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "post": {
+        "description": "Order an eSIM Profile.",
+        "operationId": "CreateEsimProfile",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "CallbackMethod": {
+                    "description": "The HTTP method we should use to call `callback_url`. Can be: `GET` or `POST` and the default is POST.",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "type": "string"
+                  },
+                  "CallbackUrl": {
+                    "description": "The URL we should call using the `callback_method` when the status of the eSIM Profile changes. At this stage of the eSIM Profile pilot, the a request to the URL will only be called when the ESimProfile resource changes from `reserving` to `available`.",
+                    "type": "string"
+                  },
+                  "Eid": {
+                    "description": "Identifier of the eUICC that will claim the eSIM Profile.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "Eid"
+                ],
+                "title": "CreateEsimProfileRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/supersim.v1.esim_profile"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://supersim.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status"
+        ],
+        "pathType": "list"
+      }
+    },
+    "/v1/ESimProfiles/{Sid}": {
+      "description": "eSIM Profiles that can be loaded onto consumer eUICC SIMs",
+      "get": {
+        "description": "Fetch an eSIM Profile.",
+        "operationId": "FetchEsimProfile",
+        "parameters": [
+          {
+            "description": "The SID of the eSIM Profile resource to fetch.",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/supersim.v1.esim_profile"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://supersim.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status"
         ],
         "pathType": "instance"
       }
