@@ -1,5 +1,29 @@
 twilio-oai changelog
 ====================
+[2022-02-17] Version 1.27.0
+---------------------------
+**Api**
+- Detected a bug and removed optional boolean include_soft_deleted parameter to retrieve soft deleted recordings. **(breaking change)**
+- Add optional boolean include_soft_deleted parameter to retrieve soft deleted recordings.
+
+**Numbers**
+- Unrevert valid_until and sort filter params added to List Bundles resource
+- Revert valid_until and sort filter params added to List Bundles resource
+- Update sorting params added to List Bundles resource in the previous release
+
+**Preview**
+- Moved `web_channels` from preview to beta under `flex-api` **(breaking change)**
+
+**Taskrouter**
+- Add `ETag` as Response Header to List of Task, Reservation & Worker
+
+**Verify**
+- Add optional `metadata` to factors.
+
+**Twiml**
+- Add new Polly Neural voices
+
+
 [2022-02-09] Version 1.26.0
 ---------------------------
 **Api**
