@@ -89,6 +89,125 @@
         },
         "type": "object"
       },
+      "media.v1.media_recording": {
+        "properties": {
+          "account_sid": {
+            "description": "The SID of the Account that created the resource",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "bitrate": {
+            "description": "The bitrate of the media",
+            "nullable": true,
+            "type": "integer"
+          },
+          "date_created": {
+            "description": "The ISO 8601 date and time in GMT when the resource was created",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "date_updated": {
+            "description": "The ISO 8601 date and time in GMT when the resource was last updated",
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "duration": {
+            "description": "The duration of the MediaRecording",
+            "nullable": true,
+            "type": "integer"
+          },
+          "format": {
+            "description": "The format of the MediaRecording",
+            "enum": [
+              "mp4",
+              "webm"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "links": {
+            "description": "The URLs of related resources",
+            "nullable": true,
+            "type": "object"
+          },
+          "processor_sid": {
+            "description": "The SID of the MediaProcessor",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^ZX[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "resolution": {
+            "description": "The dimensions of the video image in pixels",
+            "nullable": true,
+            "type": "string"
+          },
+          "sid": {
+            "description": "The unique string that identifies the resource",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^KV[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "size": {
+            "description": "The size of the recording",
+            "nullable": true,
+            "type": "integer"
+          },
+          "source_sid": {
+            "description": "The SID of the resource that generated the original media",
+            "maxLength": 34,
+            "minLength": 34,
+            "nullable": true,
+            "pattern": "^[a-zA-Z]{2}[0-9a-fA-F]{32}$",
+            "type": "string"
+          },
+          "status": {
+            "description": "The status of the MediaRecording",
+            "enum": [
+              "processing",
+              "completed",
+              "deleted",
+              "failed"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "status_callback": {
+            "description": "The URL to which Twilio will send MediaRecording event updates",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "status_callback_method": {
+            "description": "The HTTP method Twilio should use to call the `status_callback` URL",
+            "enum": [
+              "HEAD",
+              "GET",
+              "POST",
+              "PATCH",
+              "PUT",
+              "DELETE"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The absolute URL of the resource",
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "media.v1.player_streamer": {
         "properties": {
           "account_sid": {
@@ -238,7 +357,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Media",
-    "version": "1.27.1"
+    "version": "1.27.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -543,6 +662,206 @@
           "status",
           "extension",
           "extension_context"
+        ],
+        "pathType": "instance"
+      }
+    },
+    "/v1/MediaRecordings": {
+      "description": "A MediaRecording resource exposes recording metadata and allows the deletion of a particular recording.",
+      "get": {
+        "description": "Returns a list of MediaRecordings.",
+        "operationId": "ListMediaRecording",
+        "parameters": [
+          {
+            "description": "The sort order of the list by `date_created`. Can be: `asc` (ascending) or `desc` (descending) with `desc` as the default.",
+            "in": "query",
+            "name": "Order",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Status to filter by, with possible values `processing`, `completed`, `deleted`, or `failed`.",
+            "in": "query",
+            "name": "Status",
+            "schema": {
+              "enum": [
+                "processing",
+                "completed",
+                "deleted",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "in": "query",
+            "name": "PageSize",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "media_recordings": {
+                      "items": {
+                        "$ref": "#/components/schemas/media.v1.media_recording"
+                      },
+                      "type": "array"
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListMediaRecordingResponse",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://media.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status"
+        ],
+        "pathType": "list"
+      }
+    },
+    "/v1/MediaRecordings/{Sid}": {
+      "delete": {
+        "description": "Deletes a MediaRecording resource identified by a SID.",
+        "operationId": "DeleteMediaRecording",
+        "parameters": [
+          {
+            "description": "The SID of the MediaRecording resource to delete.",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^KV[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "description": "A MediaRecording resource exposes recording metadata and allows the deletion of a particular recording.",
+      "get": {
+        "description": "Returns a single MediaRecording resource identified by a SID.",
+        "operationId": "FetchMediaRecording",
+        "parameters": [
+          {
+            "description": "The SID of the MediaRecording resource to fetch.",
+            "in": "path",
+            "name": "Sid",
+            "required": true,
+            "schema": {
+              "maxLength": 34,
+              "minLength": 34,
+              "pattern": "^KV[0-9a-fA-F]{32}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/media.v1.media_recording"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://media.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "status"
         ],
         "pathType": "instance"
       }
@@ -951,6 +1270,10 @@
     {
       "description": "This product is Generally Available.",
       "name": "GA"
+    },
+    {
+      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com.",
+      "name": "Preview"
     }
   ]
 }
