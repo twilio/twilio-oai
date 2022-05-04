@@ -1,5 +1,21 @@
 twilio-oai changelog
 ====================
+[2022-05-04] Version 1.29.0
+---------------------------
+**Library - Fix**
+- [PR #56](https://github.com/twilio/twilio-oai/pull/56): add class_name property to twilio vendor extension. Thanks to [@charan678](https://github.com/charan678)!
+
+**Conversations**
+- Expose query parameter `type` in list operation on Address Configurations resource
+
+**Supersim**
+- Add `data_total_billed` and `billed_units` fields to Super SIM UsageRecords API response.
+- Change ESimProfiles `Eid` parameter to optional to enable Activation Code download method support **(breaking change)**
+
+**Verify**
+- Deprecate `push.include_date` parameter in create and update service.
+
+
 [2022-04-20] Version 1.28.2
 ---------------------------
 **Library - Fix**
