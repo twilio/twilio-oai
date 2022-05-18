@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2022-05-18] Version 1.29.1
+---------------------------
+**Library - Fix**
+- [PR #57](https://github.com/twilio/twilio-oai/pull/57): add parent field to twilio vendor extensions. Thanks to [@charan678](https://github.com/charan678)!
+
+**Api**
+- Add property `media_url` to the recording resources
+
+**Verify**
+- Include `silent` as a channel type in the verifications API.
+
+
 [2022-05-04] Version 1.29.0
 ---------------------------
 **Library - Fix**
