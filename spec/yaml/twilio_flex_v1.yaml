@@ -360,7 +360,8 @@ components:
           nullable: true
           type: object
         routing:
-          description: The Interaction's routing logic
+          description: A JSON Object representing the routing rules for the Interaction
+            Channel
           nullable: true
         sid:
           description: The unique string that identifies the resource
@@ -377,7 +378,7 @@ components:
     flex.v1.interaction.interaction_channel:
       properties:
         interaction_sid:
-          description: The Interaction Sid for this channel.
+          description: The unique string that identifies the resource
           maxLength: 34
           minLength: 34
           nullable: true
@@ -413,20 +414,25 @@ components:
     flex.v1.interaction.interaction_channel.interaction_channel_invite:
       properties:
         channel_sid:
+          description: The Channel SID for this Invite
           maxLength: 34
           minLength: 34
           nullable: true
           pattern: ^UO[0-9a-fA-F]{32}$
           type: string
         interaction_sid:
+          description: The Interaction SID for this Channel
           maxLength: 34
           minLength: 34
           nullable: true
           pattern: ^KD[0-9a-fA-F]{32}$
           type: string
         routing:
+          description: A JSON object representing the routing rules for the Interaction
+            Channel
           nullable: true
         sid:
+          description: The unique string that identifies the resource
           maxLength: 34
           minLength: 34
           nullable: true
@@ -1182,7 +1188,8 @@ paths:
       description: List all Channels for an Interaction.
       operationId: ListInteractionChannel
       parameters:
-      - description: The Interaction Sid for this channel.
+      - description: The unique string created by Twilio to identify an Interaction
+          resource, prefixed with KD.
         in: path
         name: InteractionSid
         required: true
@@ -1243,14 +1250,15 @@ paths:
       className: interaction_channel
       defaultOutputProperties:
       - sid
+      parent: /Interactions
       pathType: list
   /v1/Interactions/{InteractionSid}/Channels/{ChannelSid}/Invites:
     description: 'TODO: Resource-level docs'
     get:
-      description: ''
+      description: List all Invites for a Channel.
       operationId: ListInteractionChannelInvite
       parameters:
-      - description: ''
+      - description: The Interaction SID for this Channel.
         in: path
         name: InteractionSid
         required: true
@@ -1259,7 +1267,7 @@ paths:
           minLength: 34
           pattern: ^KD[0-9a-fA-F]{32}$
           type: string
-      - description: ''
+      - description: The Channel SID for this Participant.
         in: path
         name: ChannelSid
         required: true
@@ -1315,10 +1323,10 @@ paths:
       x-maturity:
       - GA
     post:
-      description: ''
+      description: Invite an Agent or a TaskQueue to a Channel.
       operationId: CreateInteractionChannelInvite
       parameters:
-      - description: ''
+      - description: The Interaction SID for this Channel.
         in: path
         name: InteractionSid
         required: true
@@ -1327,7 +1335,7 @@ paths:
           minLength: 34
           pattern: ^KD[0-9a-fA-F]{32}$
           type: string
-      - description: ''
+      - description: The Channel SID for this Invite.
         in: path
         name: ChannelSid
         required: true
@@ -1342,7 +1350,7 @@ paths:
             schema:
               properties:
                 Routing:
-                  description: ''
+                  description: The Interaction's routing logic.
               required:
               - Routing
               title: CreateInteractionChannelInviteRequest
@@ -1364,6 +1372,7 @@ paths:
       className: interaction_channel_invite
       defaultOutputProperties:
       - sid
+      parent: /Interactions/{InteractionSid}/Channels
       pathType: list
   /v1/Interactions/{InteractionSid}/Channels/{ChannelSid}/Participants:
     description: 'TODO: Resource-level docs'
@@ -1497,6 +1506,7 @@ paths:
       className: interaction_channel_participant
       defaultOutputProperties:
       - sid
+      parent: /Interactions/{InteractionSid}/Channels
       pathType: list
   /v1/Interactions/{InteractionSid}/Channels/{ChannelSid}/Participants/{Sid}:
     description: 'TODO: Resource-level docs'
@@ -1566,6 +1576,7 @@ paths:
       className: interaction_channel_participant
       defaultOutputProperties:
       - sid
+      parent: /Interactions/{InteractionSid}/Channels
       pathType: instance
   /v1/Interactions/{InteractionSid}/Channels/{Sid}:
     description: 'TODO: Resource-level docs'
@@ -1573,7 +1584,8 @@ paths:
       description: Fetch a Channel for an Interaction.
       operationId: FetchInteractionChannel
       parameters:
-      - description: The Interaction Sid for this channel.
+      - description: The unique string created by Twilio to identify an Interaction
+          resource, prefixed with KD.
         in: path
         name: InteractionSid
         required: true
@@ -1582,7 +1594,8 @@ paths:
           minLength: 34
           pattern: ^KD[0-9a-fA-F]{32}$
           type: string
-      - description: The Channel Sid for this Participant.
+      - description: The unique string created by Twilio to identify an Interaction
+          Channel resource, prefixed with UO.
         in: path
         name: Sid
         required: true
@@ -1606,7 +1619,8 @@ paths:
       description: Update an existing Interaction.
       operationId: UpdateInteractionChannel
       parameters:
-      - description: The Interaction Sid for this channel.
+      - description: The unique string created by Twilio to identify an Interaction
+          resource, prefixed with KD.
         in: path
         name: InteractionSid
         required: true
@@ -1616,7 +1630,7 @@ paths:
           pattern: ^KD[0-9a-fA-F]{32}$
           type: string
       - description: The unique string created by Twilio to identify an Interaction
-          Channel resource.
+          Channel resource, prefixed with UO.
         in: path
         name: Sid
         required: true
@@ -1631,12 +1645,13 @@ paths:
             schema:
               properties:
                 Routing:
-                  description: The Interaction Channel's routing parameters.  Optional,
-                    may contain `status` to set the agent's Reservation state to either
-                    `closed` or `wrapup`.  Default is `wrapup` if unspecified.
+                  description: Optional. The state of associated tasks. If not specified,
+                    all tasks will be set to `wrapping`.
                 Status:
-                  description: 'The Interaction Channel''s status. Can be: `closed`
-                    or `wrapup`.'
+                  description: 'Required. Indicates the Interaction channel''s status.
+                    When a channel is set to `closed`, all tasks are put in the `wrapping`
+                    state by default unless the Routing status is set to `closed`
+                    in which case the tasks will be `completed`. Value: `closed`.'
                   enum:
                   - close
                   - closed
@@ -1663,6 +1678,7 @@ paths:
       className: interaction_channel
       defaultOutputProperties:
       - sid
+      parent: /Interactions
       pathType: instance
   /v1/Interactions/{Sid}:
     description: 'TODO: Resource-level docs'
