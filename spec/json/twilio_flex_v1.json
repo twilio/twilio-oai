@@ -429,7 +429,7 @@
             "type": "object"
           },
           "routing": {
-            "description": "The Interaction's routing logic",
+            "description": "A JSON Object representing the routing rules for the Interaction Channel",
             "nullable": true
           },
           "sid": {
@@ -451,7 +451,7 @@
       "flex.v1.interaction.interaction_channel": {
         "properties": {
           "interaction_sid": {
-            "description": "The Interaction Sid for this channel.",
+            "description": "The unique string that identifies the resource",
             "maxLength": 34,
             "minLength": 34,
             "nullable": true,
@@ -495,6 +495,7 @@
       "flex.v1.interaction.interaction_channel.interaction_channel_invite": {
         "properties": {
           "channel_sid": {
+            "description": "The Channel SID for this Invite",
             "maxLength": 34,
             "minLength": 34,
             "nullable": true,
@@ -502,6 +503,7 @@
             "type": "string"
           },
           "interaction_sid": {
+            "description": "The Interaction SID for this Channel",
             "maxLength": 34,
             "minLength": 34,
             "nullable": true,
@@ -509,9 +511,11 @@
             "type": "string"
           },
           "routing": {
+            "description": "A JSON object representing the routing rules for the Interaction Channel",
             "nullable": true
           },
           "sid": {
+            "description": "The unique string that identifies the resource",
             "maxLength": 34,
             "minLength": 34,
             "nullable": true,
@@ -640,7 +644,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Flex",
-    "version": "1.29.1"
+    "version": "1.29.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1493,7 +1497,7 @@
         "operationId": "ListInteractionChannel",
         "parameters": [
           {
-            "description": "The Interaction Sid for this channel.",
+            "description": "The unique string created by Twilio to identify an Interaction resource, prefixed with KD.",
             "in": "path",
             "name": "InteractionSid",
             "required": true,
@@ -1585,17 +1589,18 @@
         "defaultOutputProperties": [
           "sid"
         ],
+        "parent": "/Interactions",
         "pathType": "list"
       }
     },
     "/v1/Interactions/{InteractionSid}/Channels/{ChannelSid}/Invites": {
       "description": "TODO: Resource-level docs",
       "get": {
-        "description": "",
+        "description": "List all Invites for a Channel.",
         "operationId": "ListInteractionChannelInvite",
         "parameters": [
           {
-            "description": "",
+            "description": "The Interaction SID for this Channel.",
             "in": "path",
             "name": "InteractionSid",
             "required": true,
@@ -1607,7 +1612,7 @@
             }
           },
           {
-            "description": "",
+            "description": "The Channel SID for this Participant.",
             "in": "path",
             "name": "ChannelSid",
             "required": true,
@@ -1690,11 +1695,11 @@
         ]
       },
       "post": {
-        "description": "",
+        "description": "Invite an Agent or a TaskQueue to a Channel.",
         "operationId": "CreateInteractionChannelInvite",
         "parameters": [
           {
-            "description": "",
+            "description": "The Interaction SID for this Channel.",
             "in": "path",
             "name": "InteractionSid",
             "required": true,
@@ -1706,7 +1711,7 @@
             }
           },
           {
-            "description": "",
+            "description": "The Channel SID for this Invite.",
             "in": "path",
             "name": "ChannelSid",
             "required": true,
@@ -1724,7 +1729,7 @@
               "schema": {
                 "properties": {
                   "Routing": {
-                    "description": ""
+                    "description": "The Interaction's routing logic."
                   }
                 },
                 "required": [
@@ -1767,6 +1772,7 @@
         "defaultOutputProperties": [
           "sid"
         ],
+        "parent": "/Interactions/{InteractionSid}/Channels",
         "pathType": "list"
       }
     },
@@ -1961,6 +1967,7 @@
         "defaultOutputProperties": [
           "sid"
         ],
+        "parent": "/Interactions/{InteractionSid}/Channels",
         "pathType": "list"
       }
     },
@@ -2062,6 +2069,7 @@
         "defaultOutputProperties": [
           "sid"
         ],
+        "parent": "/Interactions/{InteractionSid}/Channels",
         "pathType": "instance"
       }
     },
@@ -2072,7 +2080,7 @@
         "operationId": "FetchInteractionChannel",
         "parameters": [
           {
-            "description": "The Interaction Sid for this channel.",
+            "description": "The unique string created by Twilio to identify an Interaction resource, prefixed with KD.",
             "in": "path",
             "name": "InteractionSid",
             "required": true,
@@ -2084,7 +2092,7 @@
             }
           },
           {
-            "description": "The Channel Sid for this Participant.",
+            "description": "The unique string created by Twilio to identify an Interaction Channel resource, prefixed with UO.",
             "in": "path",
             "name": "Sid",
             "required": true,
@@ -2122,7 +2130,7 @@
         "operationId": "UpdateInteractionChannel",
         "parameters": [
           {
-            "description": "The Interaction Sid for this channel.",
+            "description": "The unique string created by Twilio to identify an Interaction resource, prefixed with KD.",
             "in": "path",
             "name": "InteractionSid",
             "required": true,
@@ -2134,7 +2142,7 @@
             }
           },
           {
-            "description": "The unique string created by Twilio to identify an Interaction Channel resource.",
+            "description": "The unique string created by Twilio to identify an Interaction Channel resource, prefixed with UO.",
             "in": "path",
             "name": "Sid",
             "required": true,
@@ -2152,10 +2160,10 @@
               "schema": {
                 "properties": {
                   "Routing": {
-                    "description": "The Interaction Channel's routing parameters.  Optional, may contain `status` to set the agent's Reservation state to either `closed` or `wrapup`.  Default is `wrapup` if unspecified."
+                    "description": "Optional. The state of associated tasks. If not specified, all tasks will be set to `wrapping`."
                   },
                   "Status": {
-                    "description": "The Interaction Channel's status. Can be: `closed` or `wrapup`.",
+                    "description": "Required. Indicates the Interaction channel's status. When a channel is set to `closed`, all tasks are put in the `wrapping` state by default unless the Routing status is set to `closed` in which case the tasks will be `completed`. Value: `closed`.",
                     "enum": [
                       "close",
                       "closed",
@@ -2204,6 +2212,7 @@
         "defaultOutputProperties": [
           "sid"
         ],
+        "parent": "/Interactions",
         "pathType": "instance"
       }
     },
