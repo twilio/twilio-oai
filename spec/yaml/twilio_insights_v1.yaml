@@ -19,59 +19,6 @@ components:
           nullable: true
           type: boolean
       type: object
-    insights.v1.annotation:
-      properties:
-        account_sid:
-          maxLength: 34
-          minLength: 34
-          nullable: true
-          pattern: ^AC[0-9a-fA-F]{32}$
-          type: string
-        answered_by:
-          enum:
-          - unknown_answered_by
-          - human
-          - machine
-          nullable: true
-          type: string
-        call_score:
-          nullable: true
-          type: integer
-        call_sid:
-          maxLength: 34
-          minLength: 34
-          nullable: true
-          pattern: ^CA[0-9a-fA-F]{32}$
-          type: string
-        comment:
-          nullable: true
-          type: string
-        connectivity_issue:
-          enum:
-          - unknown_connectivity_issue
-          - no_connectivity_issue
-          - invalid_number
-          - caller_id
-          - dropped_call
-          - number_reachability
-          nullable: true
-          type: string
-        incident:
-          nullable: true
-          type: string
-        quality_issues:
-          items:
-            type: string
-          nullable: true
-          type: array
-        spam:
-          nullable: true
-          type: boolean
-        url:
-          format: uri
-          nullable: true
-          type: string
-      type: object
     insights.v1.call:
       properties:
         links:
@@ -85,6 +32,70 @@ components:
           pattern: ^CA[0-9a-fA-F]{32}$
           type: string
         url:
+          format: uri
+          nullable: true
+          type: string
+      type: object
+    insights.v1.call.annotation:
+      properties:
+        account_sid:
+          description: Account SID.
+          maxLength: 34
+          minLength: 34
+          nullable: true
+          pattern: ^AC[0-9a-fA-F]{32}$
+          type: string
+        answered_by:
+          description: Indicates the answering entity as determined by Answering Machine
+            Detection.
+          enum:
+          - unknown_answered_by
+          - human
+          - machine
+          nullable: true
+          type: string
+        call_score:
+          description: Call Score
+          nullable: true
+          type: integer
+        call_sid:
+          description: Call SID.
+          maxLength: 34
+          minLength: 34
+          nullable: true
+          pattern: ^CA[0-9a-fA-F]{32}$
+          type: string
+        comment:
+          description: User comments
+          nullable: true
+          type: string
+        connectivity_issue:
+          description: Indicates if the call had any connectivity issue
+          enum:
+          - unknown_connectivity_issue
+          - no_connectivity_issue
+          - invalid_number
+          - caller_id
+          - dropped_call
+          - number_reachability
+          nullable: true
+          type: string
+        incident:
+          description: Call tag for incidents or support ticket
+          nullable: true
+          type: string
+        quality_issues:
+          description: Indicates if the call had audio quality issues.
+          items:
+            type: string
+          nullable: true
+          type: array
+        spam:
+          description: Call spam indicator
+          nullable: true
+          type: boolean
+        url:
+          description: The URL of this resource.
           format: uri
           nullable: true
           type: string
@@ -190,6 +201,8 @@ components:
           nullable: true
           pattern: ^AC[0-9a-fA-F]{32}$
           type: string
+        annotation:
+          nullable: true
         attributes:
           nullable: true
         call_sid:
@@ -1098,6 +1111,12 @@ paths:
       defaultOutputProperties:
       - conference_sid
       - account_sid
+      enumAliases:
+        end_reason: conference_end_reason
+        mixer_region: region
+        mixer_region_requested: region
+        status: conference_status
+        tags: tag
       pathType: list
   /v1/Conferences/{ConferenceSid}:
     description: 'TODO: Resource-level docs'
@@ -1131,6 +1150,12 @@ paths:
       defaultOutputProperties:
       - conference_sid
       - account_sid
+      enumAliases:
+        end_reason: conference_end_reason
+        mixer_region: region
+        mixer_region_requested: region
+        status: conference_status
+        tags: tag
       pathType: instance
   /v1/Conferences/{ConferenceSid}/Participants:
     description: 'TODO: Resource-level docs'
@@ -1218,6 +1243,9 @@ paths:
       - conference_sid
       - call_sid
       - account_sid
+      enumAliases:
+        conference_region: region
+        participant_region: region
       parent: /Conferences
       pathType: list
   /v1/Conferences/{ConferenceSid}/Participants/{ParticipantSid}:
@@ -1275,6 +1303,9 @@ paths:
       - conference_sid
       - call_sid
       - account_sid
+      enumAliases:
+        conference_region: region
+        participant_region: region
       parent: /Conferences
       pathType: instance
   /v1/Video/Rooms:
@@ -1376,6 +1407,9 @@ paths:
       defaultOutputProperties:
       - room_sid
       - create_time
+      enumAliases:
+        codecs: codec
+        media_region: twilio_realm
       pathType: list
   /v1/Video/Rooms/{RoomSid}:
     description: 'TODO: Resource-level docs'
@@ -1406,6 +1440,9 @@ paths:
       defaultOutputProperties:
       - room_sid
       - create_time
+      enumAliases:
+        codecs: codec
+        media_region: twilio_realm
       pathType: instance
   /v1/Video/Rooms/{RoomSid}/Participants:
     description: 'TODO: Resource-level docs'
@@ -1470,6 +1507,10 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - participant_sid
+      enumAliases:
+        codecs: codec
+        media_region: twilio_realm
+        status: room_status
       parent: /Video/Rooms
       pathType: list
   /v1/Video/Rooms/{RoomSid}/Participants/{ParticipantSid}:
@@ -1506,6 +1547,10 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - participant_sid
+      enumAliases:
+        codecs: codec
+        media_region: twilio_realm
+        status: room_status
       parent: /Video/Rooms
       pathType: instance
   /v1/Voice/Settings:
@@ -1744,10 +1789,10 @@ paths:
   /v1/Voice/{CallSid}/Annotation:
     description: 'TODO: Resource-level docs'
     get:
-      description: ''
+      description: Fetch a specific Annotation.
       operationId: FetchAnnotation
       parameters:
-      - description: ''
+      - description: The unique SID identifier of the Call.
         in: path
         name: CallSid
         required: true
@@ -1761,17 +1806,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/insights.v1.annotation'
+                $ref: '#/components/schemas/insights.v1.call.annotation'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
-      - GA
+      - Beta
     post:
-      description: ''
+      description: Create/Update the annotation for the call
       operationId: UpdateAnnotation
       parameters:
-      - description: ''
+      - description: The unique string that Twilio created to identify this Call resource.
+          It always starts with a CA.
         in: path
         name: CallSid
         required: true
@@ -1786,21 +1832,32 @@ paths:
             schema:
               properties:
                 AnsweredBy:
-                  description: ''
+                  description: 'Which entity answered the call as determined by Answering
+                    Machine Detection. Use this to provide feedback on Answering Machine
+                    Detection accuracy. Possible enumerated values, one of: human,
+                    machine. human indicates the call was answered by a person. machine
+                    indicates the call was answered by an answering machine.'
                   enum:
                   - unknown_answered_by
                   - human
                   - machine
                   type: string
                 CallScore:
-                  description: ''
+                  description: 'Specify the call score. This is of type integer. Use
+                    a range of 1-5 to indicate the call experience score, with the
+                    following mapping as a reference for rating the call [5: Excellent,
+                    4: Good, 3 : Fair, 2 : Poor, 1: Bad].'
                   nullable: true
                   type: integer
                 Comment:
-                  description: ''
+                  description: "Specify any comments pertaining to the call. This\
+                    \ of type string with a max limit of 100 characters. Twilio does\
+                    \ not treat this field as PII, so don\u2019t put any PII in here."
                   type: string
                 ConnectivityIssue:
-                  description: ''
+                  description: 'Specify if the call had any connectivity issues. Possible
+                    enumerated values, one : no_connectivity_issue, invalid_number,
+                    caller_id, dropped_call, number_reachability.'
                   enum:
                   - unknown_connectivity_issue
                   - no_connectivity_issue
@@ -1810,13 +1867,24 @@ paths:
                   - number_reachability
                   type: string
                 Incident:
-                  description: ''
+                  description: "Associate this call with an incident or support ticket.\
+                    \ This is of type string with a max limit of 100 characters. Twilio\
+                    \ does not treat this field as PII, so don\u2019t put any PII\
+                    \ in here."
                   type: string
                 QualityIssues:
-                  description: ''
+                  description: 'Specify if the call had any subjective quality issues.
+                    Possible values, one or more of:  no_quality_issue, low_volume,
+                    choppy_robotic, echo, dtmf, latency, owa, static_noise. Use comma
+                    separated values to indicate multiple quality issues for the same
+                    call'
                   type: string
                 Spam:
-                  description: ''
+                  description: 'Specify if the call was a spam call. Use this to provide
+                    feedback on whether calls placed from your account were marked
+                    as spam, or if inbound calls received by your account were unwanted
+                    spam. Is of type Boolean: true, false. Use true if the call was
+                    a spam call.'
                   type: boolean
               title: UpdateAnnotationRequest
               type: object
@@ -1825,18 +1893,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/insights.v1.annotation'
+                $ref: '#/components/schemas/insights.v1.call.annotation'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
-      - GA
+      - Beta
     servers:
     - url: https://insights.twilio.com
     x-twilio:
       defaultOutputProperties:
       - call_sid
       - account_sid
+      parent: /Voice/{Sid}
       pathType: instance
   /v1/Voice/{CallSid}/Events:
     description: 'TODO: Resource-level docs'
@@ -1919,6 +1988,8 @@ paths:
       - account_sid
       - edge
       - name
+      enumAliases:
+        edge: twilio_edge
       parent: /Voice/{Sid}
       pathType: list
   /v1/Voice/{CallSid}/Metrics:
@@ -2012,6 +2083,9 @@ paths:
       - account_sid
       - edge
       - direction
+      enumAliases:
+        direction: stream_direction
+        edge: twilio_edge
       parent: /Voice/{Sid}
       pathType: list
   /v1/Voice/{CallSid}/Summary:
@@ -2084,7 +2158,7 @@ paths:
       security:
       - accountSid_authToken: []
       x-maturity:
-      - Preview
+      - GA
     servers:
     - url: https://insights.twilio.com
     x-twilio:
