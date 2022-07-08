@@ -1,5 +1,20 @@
 components:
   schemas:
+    engagement_enum_status:
+      enum:
+      - active
+      - ended
+      type: string
+    execution_enum_status:
+      enum:
+      - active
+      - ended
+      type: string
+    flow_enum_status:
+      enum:
+      - draft
+      - published
+      type: string
     studio.v1.flow:
       properties:
         account_sid:
@@ -37,10 +52,8 @@ components:
           pattern: ^FW[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/flow_enum_status'
           description: The status of the Flow
-          enum:
-          - draft
-          - published
           nullable: true
           type: string
         url:
@@ -108,10 +121,8 @@ components:
           pattern: ^FN[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/engagement_enum_status'
           description: The status of the Engagement
-          enum:
-          - active
-          - ended
           nullable: true
           type: string
         url:
@@ -313,10 +324,8 @@ components:
           pattern: ^FN[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/execution_enum_status'
           description: The status of the Execution
-          enum:
-          - active
-          - ended
           nullable: true
           type: string
         url:
@@ -621,6 +630,11 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                To:
+                  description: The Contact phone number to start a Studio Flow Engagement,
+                    available as variable `{{contact.channel.address}}`.
+                  format: phone-number
+                  type: string
                 From:
                   description: The Twilio phone number to send messages or initiate
                     calls from during the Flow Engagement. Available as variable `{{flow.channel.address}}`
@@ -635,11 +649,6 @@ paths:
                     be passed as a string, not as a hash object. Depending on your
                     particular HTTP library, you may need to add quotes or URL encode
                     your JSON string.'
-                To:
-                  description: The Contact phone number to start a Studio Flow Engagement,
-                    available as variable `{{contact.channel.address}}`.
-                  format: phone-number
-                  type: string
               required:
               - To
               - From
@@ -1062,6 +1071,11 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                To:
+                  description: The Contact phone number to start a Studio Flow Execution,
+                    available as variable `{{contact.channel.address}}`.
+                  format: phone-number
+                  type: string
                 From:
                   description: The Twilio phone number to send messages or initiate
                     calls from during the Flow's Execution. Available as variable
@@ -1077,11 +1091,6 @@ paths:
                     "Zeke". Note: the JSON value must explicitly be passed as a string,
                     not as a hash object. Depending on your particular HTTP library,
                     you may need to add quotes or URL encode the JSON string.'
-                To:
-                  description: The Contact phone number to start a Studio Flow Execution,
-                    available as variable `{{contact.channel.address}}`.
-                  format: phone-number
-                  type: string
               required:
               - To
               - From
@@ -1429,10 +1438,8 @@ paths:
             schema:
               properties:
                 Status:
+                  $ref: '#/components/schemas/execution_enum_status'
                   description: The status of the Execution. Can only be `ended`.
-                  enum:
-                  - active
-                  - ended
                   type: string
               required:
               - Status

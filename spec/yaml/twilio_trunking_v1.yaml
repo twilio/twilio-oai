@@ -1,5 +1,36 @@
 components:
   schemas:
+    phone_number_enum_address_requirement:
+      enum:
+      - none
+      - any
+      - local
+      - foreign
+      type: string
+    recording_enum_recording_mode:
+      enum:
+      - do-not-record
+      - record-from-ringing
+      - record-from-answer
+      - record-from-ringing-dual
+      - record-from-answer-dual
+      type: string
+    recording_enum_recording_trim:
+      enum:
+      - trim-silence
+      - do-not-trim
+      type: string
+    trunk_enum_transfer_caller_id:
+      enum:
+      - from-transferee
+      - from-transferor
+      type: string
+    trunk_enum_transfer_setting:
+      enum:
+      - disable-all
+      - enable-all
+      - sip-only
+      type: string
     trunking.v1.trunk:
       properties:
         account_sid:
@@ -81,18 +112,13 @@ components:
           pattern: ^TK[0-9a-fA-F]{32}$
           type: string
         transfer_caller_id:
+          $ref: '#/components/schemas/trunk_enum_transfer_caller_id'
           description: Caller Id for transfer target
-          enum:
-          - from-transferee
-          - from-transferor
           nullable: true
           type: string
         transfer_mode:
+          $ref: '#/components/schemas/trunk_enum_transfer_setting'
           description: The call transfer settings for the trunk
-          enum:
-          - disable-all
-          - enable-all
-          - sip-only
           nullable: true
           type: string
         url:
@@ -262,13 +288,9 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           type: string
         address_requirements:
+          $ref: '#/components/schemas/phone_number_enum_address_requirement'
           description: Whether the phone number requires an Address registered with
             Twilio
-          enum:
-          - none
-          - any
-          - local
-          - foreign
           nullable: true
           type: string
         api_version:
@@ -439,20 +461,13 @@ components:
     trunking.v1.trunk.recording:
       properties:
         mode:
+          $ref: '#/components/schemas/recording_enum_recording_mode'
           description: The recording mode for the trunk.
-          enum:
-          - do-not-record
-          - record-from-ringing
-          - record-from-answer
-          - record-from-ringing-dual
-          - record-from-answer-dual
           nullable: true
           type: string
         trim:
+          $ref: '#/components/schemas/recording_enum_recording_trim'
           description: The recording trim setting for the trunk.
-          enum:
-          - trim-silence
-          - do-not-trim
           nullable: true
           type: string
       type: object
@@ -534,13 +549,25 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                CnamLookupEnabled:
-                  description: Whether Caller ID Name (CNAM) lookup should be enabled
-                    for the trunk. If enabled, all inbound calls to the SIP Trunk
-                    from the United States and Canada automatically perform a CNAM
-                    Lookup and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                  type: string
+                DomainName:
+                  description: The unique address you reserve on Twilio to which you
+                    route your SIP traffic. Domain names can contain letters, digits,
+                    and `-` and must end with `pstn.twilio.com`. See [Termination
+                    Settings](https://www.twilio.com/docs/sip-trunking#termination)
                     for more information.
-                  type: boolean
+                  type: string
+                DisasterRecoveryUrl:
+                  description: The URL we should call using the `disaster_recovery_method`
+                    if an error occurs while sending SIP traffic towards the configured
+                    Origination URL. We retrieve TwiML from the URL and execute the
+                    instructions like any other normal TwiML call. See [Disaster Recovery](https://www.twilio.com/docs/sip-trunking#disaster-recovery)
+                    for more information.
+                  format: uri
+                  type: string
                 DisasterRecoveryMethod:
                   description: 'The HTTP method we should use to call the `disaster_recovery_url`.
                     Can be: `GET` or `POST`.'
@@ -553,24 +580,11 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                DisasterRecoveryUrl:
-                  description: The URL we should call using the `disaster_recovery_method`
-                    if an error occurs while sending SIP traffic towards the configured
-                    Origination URL. We retrieve TwiML from the URL and execute the
-                    instructions like any other normal TwiML call. See [Disaster Recovery](https://www.twilio.com/docs/sip-trunking#disaster-recovery)
-                    for more information.
-                  format: uri
-                  type: string
-                DomainName:
-                  description: The unique address you reserve on Twilio to which you
-                    route your SIP traffic. Domain names can contain letters, digits,
-                    and `-` and must end with `pstn.twilio.com`. See [Termination
-                    Settings](https://www.twilio.com/docs/sip-trunking#termination)
-                    for more information.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
+                TransferMode:
+                  $ref: '#/components/schemas/trunk_enum_transfer_setting'
+                  description: 'The call transfer settings for the trunk. Can be:
+                    `enable-all`, `sip-only` and `disable-all`. See [Transfer](https://www.twilio.com/docs/sip-trunking/call-transfer)
+                    for more information.'
                   type: string
                 Secure:
                   description: Whether Secure Trunking is enabled for the trunk. If
@@ -579,21 +593,17 @@ paths:
                     be used for media. See [Secure Trunking](https://www.twilio.com/docs/sip-trunking#securetrunking)
                     for more information.
                   type: boolean
+                CnamLookupEnabled:
+                  description: Whether Caller ID Name (CNAM) lookup should be enabled
+                    for the trunk. If enabled, all inbound calls to the SIP Trunk
+                    from the United States and Canada automatically perform a CNAM
+                    Lookup and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
+                    for more information.
+                  type: boolean
                 TransferCallerId:
+                  $ref: '#/components/schemas/trunk_enum_transfer_caller_id'
                   description: 'Caller Id for transfer target. Can be: `from-transferee`
                     (default) or `from-transferor`.'
-                  enum:
-                  - from-transferee
-                  - from-transferor
-                  type: string
-                TransferMode:
-                  description: 'The call transfer settings for the trunk. Can be:
-                    `enable-all`, `sip-only` and `disable-all`. See [Transfer](https://www.twilio.com/docs/sip-trunking/call-transfer)
-                    for more information.'
-                  enum:
-                  - disable-all
-                  - enable-all
-                  - sip-only
                   type: string
               title: CreateTrunkRequest
               type: object
@@ -683,13 +693,25 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                CnamLookupEnabled:
-                  description: Whether Caller ID Name (CNAM) lookup should be enabled
-                    for the trunk. If enabled, all inbound calls to the SIP Trunk
-                    from the United States and Canada automatically perform a CNAM
-                    Lookup and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                  type: string
+                DomainName:
+                  description: The unique address you reserve on Twilio to which you
+                    route your SIP traffic. Domain names can contain letters, digits,
+                    and `-` and must end with `pstn.twilio.com`. See [Termination
+                    Settings](https://www.twilio.com/docs/sip-trunking#termination)
                     for more information.
-                  type: boolean
+                  type: string
+                DisasterRecoveryUrl:
+                  description: The URL we should call using the `disaster_recovery_method`
+                    if an error occurs while sending SIP traffic towards the configured
+                    Origination URL. We retrieve TwiML from the URL and execute the
+                    instructions like any other normal TwiML call. See [Disaster Recovery](https://www.twilio.com/docs/sip-trunking#disaster-recovery)
+                    for more information.
+                  format: uri
+                  type: string
                 DisasterRecoveryMethod:
                   description: 'The HTTP method we should use to call the `disaster_recovery_url`.
                     Can be: `GET` or `POST`.'
@@ -702,24 +724,11 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                DisasterRecoveryUrl:
-                  description: The URL we should call using the `disaster_recovery_method`
-                    if an error occurs while sending SIP traffic towards the configured
-                    Origination URL. We retrieve TwiML from the URL and execute the
-                    instructions like any other normal TwiML call. See [Disaster Recovery](https://www.twilio.com/docs/sip-trunking#disaster-recovery)
-                    for more information.
-                  format: uri
-                  type: string
-                DomainName:
-                  description: The unique address you reserve on Twilio to which you
-                    route your SIP traffic. Domain names can contain letters, digits,
-                    and `-` and must end with `pstn.twilio.com`. See [Termination
-                    Settings](https://www.twilio.com/docs/sip-trunking#termination)
-                    for more information.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
+                TransferMode:
+                  $ref: '#/components/schemas/trunk_enum_transfer_setting'
+                  description: 'The call transfer settings for the trunk. Can be:
+                    `enable-all`, `sip-only` and `disable-all`. See [Transfer](https://www.twilio.com/docs/sip-trunking/call-transfer)
+                    for more information.'
                   type: string
                 Secure:
                   description: Whether Secure Trunking is enabled for the trunk. If
@@ -728,21 +737,17 @@ paths:
                     be used for media. See [Secure Trunking](https://www.twilio.com/docs/sip-trunking#securetrunking)
                     for more information.
                   type: boolean
+                CnamLookupEnabled:
+                  description: Whether Caller ID Name (CNAM) lookup should be enabled
+                    for the trunk. If enabled, all inbound calls to the SIP Trunk
+                    from the United States and Canada automatically perform a CNAM
+                    Lookup and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
+                    for more information.
+                  type: boolean
                 TransferCallerId:
+                  $ref: '#/components/schemas/trunk_enum_transfer_caller_id'
                   description: 'Caller Id for transfer target. Can be: `from-transferee`
                     (default) or `from-transferor`.'
-                  enum:
-                  - from-transferee
-                  - from-transferor
-                  type: string
-                TransferMode:
-                  description: 'The call transfer settings for the trunk. Can be:
-                    `enable-all`, `sip-only` and `disable-all`. See [Transfer](https://www.twilio.com/docs/sip-trunking/call-transfer)
-                    for more information.'
-                  enum:
-                  - disable-all
-                  - enable-all
-                  - sip-only
                   type: string
               title: UpdateTrunkRequest
               type: object
@@ -1219,23 +1224,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Enabled:
-                  description: Whether the URL is enabled. The default is `true`.
-                  type: boolean
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
-                  type: string
-                Priority:
-                  description: The relative importance of the URI. Can be an integer
-                    from 0 to 65535, inclusive, and the default is 10. The lowest
-                    number represents the most important URI.
-                  type: integer
-                SipUrl:
-                  description: The SIP address you want Twilio to route your Origination
-                    calls to. This must be a `sip:` schema.
-                  format: uri
-                  type: string
                 Weight:
                   description: The value that determines the relative share of the
                     load the URI should receive compared to other URIs with the same
@@ -1243,6 +1231,23 @@ paths:
                     default is 10. URLs with higher values receive more load than
                     those with lower ones with the same priority.
                   type: integer
+                Priority:
+                  description: The relative importance of the URI. Can be an integer
+                    from 0 to 65535, inclusive, and the default is 10. The lowest
+                    number represents the most important URI.
+                  type: integer
+                Enabled:
+                  description: Whether the URL is enabled. The default is `true`.
+                  type: boolean
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                  type: string
+                SipUrl:
+                  description: The SIP address you want Twilio to route your Origination
+                    calls to. This must be a `sip:` schema.
+                  format: uri
+                  type: string
               required:
               - Weight
               - Priority
@@ -1367,23 +1372,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Enabled:
-                  description: Whether the URL is enabled. The default is `true`.
-                  type: boolean
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
-                  type: string
-                Priority:
-                  description: The relative importance of the URI. Can be an integer
-                    from 0 to 65535, inclusive, and the default is 10. The lowest
-                    number represents the most important URI.
-                  type: integer
-                SipUrl:
-                  description: The SIP address you want Twilio to route your Origination
-                    calls to. This must be a `sip:` schema. `sips` is NOT supported.
-                  format: uri
-                  type: string
                 Weight:
                   description: The value that determines the relative share of the
                     load the URI should receive compared to other URIs with the same
@@ -1391,6 +1379,23 @@ paths:
                     default is 10. URLs with higher values receive more load than
                     those with lower ones with the same priority.
                   type: integer
+                Priority:
+                  description: The relative importance of the URI. Can be an integer
+                    from 0 to 65535, inclusive, and the default is 10. The lowest
+                    number represents the most important URI.
+                  type: integer
+                Enabled:
+                  description: Whether the URL is enabled. The default is `true`.
+                  type: boolean
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                  type: string
+                SipUrl:
+                  description: The SIP address you want Twilio to route your Origination
+                    calls to. This must be a `sip:` schema. `sips` is NOT supported.
+                  format: uri
+                  type: string
               title: UpdateOriginationUrlRequest
               type: object
       responses:
@@ -1645,22 +1650,15 @@ paths:
             schema:
               properties:
                 Mode:
+                  $ref: '#/components/schemas/recording_enum_recording_mode'
                   description: The recording mode for the trunk. Can be do-not-record
                     (default), record-from-ringing, record-from-answer, record-from-ringing-dual,
                     or record-from-answer-dual.
-                  enum:
-                  - do-not-record
-                  - record-from-ringing
-                  - record-from-answer
-                  - record-from-ringing-dual
-                  - record-from-answer-dual
                   type: string
                 Trim:
+                  $ref: '#/components/schemas/recording_enum_recording_trim'
                   description: The recording trim setting for the trunk. Can be do-not-trim
                     (default) or trim-silence.
-                  enum:
-                  - trim-silence
-                  - do-not-trim
                   type: string
               title: UpdateRecordingRequest
               type: object

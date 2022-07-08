@@ -1,5 +1,53 @@
 components:
   schemas:
+    bundle_copy_enum_end_user_type:
+      enum:
+      - individual
+      - business
+      type: string
+    bundle_copy_enum_status:
+      enum:
+      - draft
+      - pending-review
+      - in-review
+      - twilio-rejected
+      - twilio-approved
+      - provisionally-approved
+      type: string
+    bundle_enum_end_user_type:
+      enum:
+      - individual
+      - business
+      type: string
+    bundle_enum_sort_by:
+      enum:
+      - valid-until
+      - date-updated
+      type: string
+    bundle_enum_sort_direction:
+      enum:
+      - ASC
+      - DESC
+      type: string
+    bundle_enum_status:
+      enum:
+      - draft
+      - pending-review
+      - in-review
+      - twilio-rejected
+      - twilio-approved
+      - provisionally-approved
+      type: string
+    end_user_enum_type:
+      enum:
+      - individual
+      - business
+      type: string
+    evaluation_enum_status:
+      enum:
+      - compliant
+      - noncompliant
+      type: string
     numbers.v2.regulatory_compliance:
       properties: {}
       type: object
@@ -51,14 +99,8 @@ components:
           pattern: ^BU[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/bundle_enum_status'
           description: The verification status of the Bundle resource
-          enum:
-          - draft
-          - pending-review
-          - in-review
-          - twilio-rejected
-          - twilio-approved
-          - provisionally-approved
           nullable: true
           type: string
         status_callback:
@@ -121,14 +163,8 @@ components:
           pattern: ^BU[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/bundle_copy_enum_status'
           description: The verification status of the Bundle resource
-          enum:
-          - draft
-          - pending-review
-          - in-review
-          - twilio-rejected
-          - twilio-approved
-          - provisionally-approved
           nullable: true
           type: string
         status_callback:
@@ -183,10 +219,8 @@ components:
           pattern: ^EL[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/evaluation_enum_status'
           description: The compliance status of the Evaluation resource
-          enum:
-          - compliant
-          - noncompliant
           nullable: true
           type: string
         url:
@@ -278,14 +312,8 @@ components:
           pattern: ^BU[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/replace_items_enum_status'
           description: The verification status of the Bundle resource
-          enum:
-          - draft
-          - pending-review
-          - in-review
-          - twilio-rejected
-          - twilio-approved
-          - provisionally-approved
           nullable: true
           type: string
         status_callback:
@@ -335,10 +363,8 @@ components:
           pattern: ^IT[0-9a-fA-F]{32}$
           type: string
         type:
+          $ref: '#/components/schemas/end_user_enum_type'
           description: The type of end user of the Bundle resource
-          enum:
-          - individual
-          - business
           nullable: true
           type: string
         url:
@@ -378,10 +404,8 @@ components:
     numbers.v2.regulatory_compliance.regulation:
       properties:
         end_user_type:
+          $ref: '#/components/schemas/regulation_enum_end_user_type'
           description: The type of End User of the Regulation resource
-          enum:
-          - individual
-          - business
           nullable: true
           type: string
         friendly_name:
@@ -456,14 +480,8 @@ components:
           pattern: ^RD[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/supporting_document_enum_status'
           description: The verification status of the Supporting Document resource
-          enum:
-          - draft
-          - pending-review
-          - rejected
-          - approved
-          - expired
-          - provisionally-approved
           nullable: true
           type: string
         type:
@@ -507,6 +525,34 @@ components:
           nullable: true
           type: string
       type: object
+    regulation_enum_end_user_type:
+      enum:
+      - individual
+      - business
+      type: string
+    replace_items_enum_end_user_type:
+      enum:
+      - individual
+      - business
+      type: string
+    replace_items_enum_status:
+      enum:
+      - draft
+      - pending-review
+      - in-review
+      - twilio-rejected
+      - twilio-approved
+      - provisionally-approved
+      type: string
+    supporting_document_enum_status:
+      enum:
+      - draft
+      - pending-review
+      - rejected
+      - approved
+      - expired
+      - provisionally-approved
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -544,13 +590,7 @@ paths:
         in: query
         name: Status
         schema:
-          enum:
-          - draft
-          - pending-review
-          - in-review
-          - twilio-rejected
-          - twilio-approved
-          - provisionally-approved
+          $ref: '#/components/schemas/bundle_enum_status'
           type: string
       - description: The string that you assigned to describe the resource. The column
           can contain 255 variable characters.
@@ -589,17 +629,13 @@ paths:
         in: query
         name: SortBy
         schema:
-          enum:
-          - valid-until
-          - date-updated
+          $ref: '#/components/schemas/bundle_enum_sort_by'
           type: string
       - description: Default is `DESC`. Can be `ASC` or `DESC`.
         in: query
         name: SortDirection
         schema:
-          enum:
-          - ASC
-          - DESC
+          $ref: '#/components/schemas/bundle_enum_sort_direction'
           type: string
       - description: Date to filter Bundles having their `valid_until_date` before
           or after the specified date. Can be `ValidUntilDate>=` or `ValidUntilDate<=`.
@@ -682,27 +718,17 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
                 Email:
                   description: The email address that will receive updates when the
                     Bundle resource changes status.
                   type: string
-                EndUserType:
-                  description: The [type of End User](https://www.twilio.com/docs/phone-numbers/regulatory/api/end-user-types)
-                    of the Bundle resource.
-                  enum:
-                  - individual
-                  - business
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
-                  type: string
-                IsoCountry:
-                  description: The [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-                    of the Bundle's phone number country ownership request.
-                  type: string
-                NumberType:
-                  description: The type of phone number of the Bundle's ownership
-                    request. Can be `local`, `mobile`, `national`, or `toll free`.
+                StatusCallback:
+                  description: The URL we call to inform your application of status
+                    changes.
+                  format: uri
                   type: string
                 RegulationSid:
                   description: The unique string of a regulation that is associated
@@ -711,10 +737,18 @@ paths:
                   minLength: 34
                   pattern: ^RN[0-9a-fA-F]{32}$
                   type: string
-                StatusCallback:
-                  description: The URL we call to inform your application of status
-                    changes.
-                  format: uri
+                IsoCountry:
+                  description: The [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+                    of the Bundle's phone number country ownership request.
+                  type: string
+                EndUserType:
+                  $ref: '#/components/schemas/bundle_enum_end_user_type'
+                  description: The [type of End User](https://www.twilio.com/docs/phone-numbers/regulatory/api/end-user-types)
+                    of the Bundle resource.
+                  type: string
+                NumberType:
+                  description: The type of phone number of the Bundle's ownership
+                    request. Can be `local`, `mobile`, `national`, or `toll free`.
                   type: string
               required:
               - FriendlyName
@@ -1274,27 +1308,21 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Email:
-                  description: The email address that will receive updates when the
-                    Bundle resource changes status.
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
-                  type: string
                 Status:
+                  $ref: '#/components/schemas/bundle_enum_status'
                   description: The verification status of the Bundle resource.
-                  enum:
-                  - draft
-                  - pending-review
-                  - in-review
-                  - twilio-rejected
-                  - twilio-approved
-                  - provisionally-approved
                   type: string
                 StatusCallback:
                   description: The URL we call to inform your application of status
                     changes.
                   format: uri
+                  type: string
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
+                Email:
+                  description: The email address that will receive updates when the
+                    Bundle resource changes status.
                   type: string
               title: UpdateBundleRequest
               type: object
@@ -1469,19 +1497,17 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: The set of parameters that are the attributes of the
-                    End User resource which are derived End User Types.
                 FriendlyName:
                   description: The string that you assigned to describe the resource.
                   type: string
                 Type:
+                  $ref: '#/components/schemas/end_user_enum_type'
                   description: The type of end user of the Bundle resource - can be
                     `individual` or `business`.
-                  enum:
-                  - individual
-                  - business
                   type: string
+                Attributes:
+                  description: The set of parameters that are the attributes of the
+                    End User resource which are derived End User Types.
               required:
               - FriendlyName
               - Type
@@ -1573,12 +1599,12 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: The set of parameters that are the attributes of the
-                    End User resource which are derived End User Types.
                 FriendlyName:
                   description: The string that you assigned to describe the resource.
                   type: string
+                Attributes:
+                  description: The set of parameters that are the attributes of the
+                    End User resource which are derived End User Types.
               title: UpdateEndUserRequest
               type: object
       responses:
@@ -1611,9 +1637,7 @@ paths:
         in: query
         name: EndUserType
         schema:
-          enum:
-          - individual
-          - business
+          $ref: '#/components/schemas/regulation_enum_end_user_type'
           type: string
       - description: The ISO country code of the phone number's country.
         in: query
@@ -1865,16 +1889,16 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: The set of parameters that are the attributes of the
-                    Supporting Documents resource which are derived Supporting Document
-                    Types.
                 FriendlyName:
                   description: The string that you assigned to describe the resource.
                   type: string
                 Type:
                   description: The type of the Supporting Document.
                   type: string
+                Attributes:
+                  description: The set of parameters that are the attributes of the
+                    Supporting Documents resource which are derived Supporting Document
+                    Types.
               required:
               - FriendlyName
               - Type
@@ -1966,13 +1990,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
                 Attributes:
                   description: The set of parameters that are the attributes of the
                     Supporting Document resource which are derived Supporting Document
                     Types.
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
-                  type: string
               title: UpdateSupportingDocumentRequest
               type: object
       responses:

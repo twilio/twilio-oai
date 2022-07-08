@@ -1,5 +1,32 @@
 components:
   schemas:
+    binding_enum_binding_type:
+      enum:
+      - gcm
+      - apn
+      - fcm
+      type: string
+    channel_enum_channel_type:
+      enum:
+      - public
+      - private
+      type: string
+    channel_enum_webhook_enabled_type:
+      enum:
+      - 'true'
+      - 'false'
+      type: string
+    channel_webhook_enum_method:
+      enum:
+      - GET
+      - POST
+      type: string
+    channel_webhook_enum_type:
+      enum:
+      - webhook
+      - trigger
+      - studio
+      type: string
     chat.v2.credential:
       properties:
         account_sid:
@@ -36,11 +63,8 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           type: string
         type:
+          $ref: '#/components/schemas/credential_enum_push_service'
           description: The type of push-notification service the credential is for
-          enum:
-          - gcm
-          - apn
-          - fcm
           nullable: true
           type: string
         url:
@@ -181,11 +205,8 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           type: string
         binding_type:
+          $ref: '#/components/schemas/binding_enum_binding_type'
           description: The push technology to use for the binding
-          enum:
-          - gcm
-          - apn
-          - fcm
           nullable: true
           type: string
         credential_sid:
@@ -308,10 +329,8 @@ components:
           pattern: ^CH[0-9a-fA-F]{32}$
           type: string
         type:
+          $ref: '#/components/schemas/channel_enum_channel_type'
           description: 'The visibility of the channel. Can be: `public` or `private`'
-          enum:
-          - public
-          - private
           nullable: true
           type: string
         unique_name:
@@ -648,10 +667,8 @@ components:
           pattern: ^RL[0-9a-fA-F]{32}$
           type: string
         type:
+          $ref: '#/components/schemas/role_enum_role_type'
           description: The type of role
-          enum:
-          - channel
-          - deployment
           nullable: true
           type: string
         url:
@@ -749,11 +766,8 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           type: string
         binding_type:
+          $ref: '#/components/schemas/user_binding_enum_binding_type'
           description: The push technology to use for the binding
-          enum:
-          - gcm
-          - apn
-          - fcm
           nullable: true
           type: string
         credential_sid:
@@ -851,10 +865,8 @@ components:
           pattern: ^MB[0-9a-fA-F]{32}$
           type: string
         notification_level:
+          $ref: '#/components/schemas/user_channel_enum_notification_level'
           description: The push notification level of the User for the Channel
-          enum:
-          - default
-          - muted
           nullable: true
           type: string
         service_sid:
@@ -865,11 +877,8 @@ components:
           pattern: ^IS[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/user_channel_enum_channel_status'
           description: The status of the User on the Channel
-          enum:
-          - joined
-          - invited
-          - not_participating
           nullable: true
           type: string
         unread_messages_count:
@@ -889,6 +898,59 @@ components:
           pattern: ^US[0-9a-fA-F]{32}$
           type: string
       type: object
+    credential_enum_push_service:
+      enum:
+      - gcm
+      - apn
+      - fcm
+      type: string
+    member_enum_webhook_enabled_type:
+      enum:
+      - 'true'
+      - 'false'
+      type: string
+    message_enum_order_type:
+      enum:
+      - asc
+      - desc
+      type: string
+    message_enum_webhook_enabled_type:
+      enum:
+      - 'true'
+      - 'false'
+      type: string
+    role_enum_role_type:
+      enum:
+      - channel
+      - deployment
+      type: string
+    user_binding_enum_binding_type:
+      enum:
+      - gcm
+      - apn
+      - fcm
+      type: string
+    user_channel_enum_channel_status:
+      enum:
+      - joined
+      - invited
+      - not_participating
+      type: string
+    user_channel_enum_notification_level:
+      enum:
+      - default
+      - muted
+      type: string
+    user_channel_enum_webhook_enabled_type:
+      enum:
+      - 'true'
+      - 'false'
+      type: string
+    user_enum_webhook_enabled_type:
+      enum:
+      - 'true'
+      - 'false'
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -967,19 +1029,19 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                Type:
+                  $ref: '#/components/schemas/credential_enum_push_service'
+                  description: 'The type of push-notification service the credential
+                    is for. Can be: `gcm`, `fcm`, or `apn`.'
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEF.....A==\n\
                     -----END CERTIFICATE-----`"
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -996,17 +1058,14 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
-                  type: string
-                Type:
-                  description: 'The type of push-notification service the credential
-                    is for. Can be: `gcm`, `fcm`, or `apn`.'
-                  enum:
-                  - gcm
-                  - apn
-                  - fcm
                   type: string
               required:
               - Type
@@ -1095,19 +1154,14 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEF.....A==\n\
                     -----END CERTIFICATE-----`"
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -1124,6 +1178,11 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
@@ -1259,10 +1318,7 @@ paths:
         name: BindingType
         schema:
           items:
-            enum:
-            - gcm
-            - apn
-            - fcm
+            $ref: '#/components/schemas/binding_enum_binding_type'
             type: string
           type: array
       - description: The [User](https://www.twilio.com/docs/chat/rest/user-resource)'s
@@ -1426,9 +1482,7 @@ paths:
         name: Type
         schema:
           items:
-            enum:
-            - public
-            - private
+            $ref: '#/components/schemas/channel_enum_channel_type'
             type: string
           type: array
       - description: How many resources to return in each list page. The default is
@@ -1495,22 +1549,31 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/channel_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. It can be up to 64 characters long.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used to address the resource in place
+                    of the Channel resource's `sid` in the URL. This value must be
+                    64 characters or less in length and be unique within the Service.
+                  type: string
                 Attributes:
                   description: A valid JSON string that contains application-specific
                     data.
                   type: string
-                CreatedBy:
-                  description: 'The `identity` of the User that created the channel.
-                    Default is: `system`.'
+                Type:
+                  $ref: '#/components/schemas/channel_enum_channel_type'
+                  description: 'The visibility of the channel. Can be: `public` or
+                    `private` and defaults to `public`.'
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -1528,22 +1591,9 @@ paths:
                     source  and where a Message was previously updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It can be up to 64 characters long.
-                  type: string
-                Type:
-                  description: 'The visibility of the channel. Can be: `public` or
-                    `private` and defaults to `public`.'
-                  enum:
-                  - public
-                  - private
-                  type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used to address the resource in place
-                    of the Channel resource's `sid` in the URL. This value must be
-                    64 characters or less in length and be unique within the Service.
+                CreatedBy:
+                  description: 'The `identity` of the User that created the channel.
+                    Default is: `system`.'
                   type: string
               title: CreateChannelRequest
               type: object
@@ -1907,18 +1957,40 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/member_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
+                Identity:
+                  description: The `identity` value that uniquely identifies the new
+                    resource's [User](https://www.twilio.com/docs/chat/rest/user-resource)
+                    within the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
+                    See [access tokens](https://www.twilio.com/docs/chat/create-tokens)
+                    for more info.
+                  type: string
+                RoleSid:
+                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
+                    to assign to the member. The default roles are those specified
+                    on the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                LastConsumedMessageIndex:
+                  description: The index of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
+                    in the [Channel](https://www.twilio.com/docs/chat/channels) that
+                    the Member has read. This parameter should only be used when recreating
+                    a Member from a backup/separate source.
+                  nullable: true
+                  type: integer
+                LastConsumptionTimestamp:
+                  description: The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+                    timestamp of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
+                    read event for the Member within the [Channel](https://www.twilio.com/docs/chat/channels).
+                  format: date-time
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -1936,33 +2008,9 @@ paths:
                     source and where a Member was previously updated.
                   format: date-time
                   type: string
-                Identity:
-                  description: The `identity` value that uniquely identifies the new
-                    resource's [User](https://www.twilio.com/docs/chat/rest/user-resource)
-                    within the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
-                    See [access tokens](https://www.twilio.com/docs/chat/create-tokens)
-                    for more info.
-                  type: string
-                LastConsumedMessageIndex:
-                  description: The index of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
-                    in the [Channel](https://www.twilio.com/docs/chat/channels) that
-                    the Member has read. This parameter should only be used when recreating
-                    a Member from a backup/separate source.
-                  nullable: true
-                  type: integer
-                LastConsumptionTimestamp:
-                  description: The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-                    timestamp of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
-                    read event for the Member within the [Channel](https://www.twilio.com/docs/chat/channels).
-                  format: date-time
-                  type: string
-                RoleSid:
-                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
-                    to assign to the member. The default roles are those specified
-                    on the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
               required:
               - Identity
@@ -2022,9 +2070,7 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/member_enum_webhook_enabled_type'
           type: string
       responses:
         '204':
@@ -2107,18 +2153,31 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/member_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
+                RoleSid:
+                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
+                    to assign to the member. The default roles are those specified
+                    on the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                LastConsumedMessageIndex:
+                  description: The index of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
+                    that the Member has read within the [Channel](https://www.twilio.com/docs/chat/channels).
+                  nullable: true
+                  type: integer
+                LastConsumptionTimestamp:
+                  description: The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+                    timestamp of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
+                    read event for the Member within the [Channel](https://www.twilio.com/docs/chat/channels).
+                  format: date-time
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -2133,24 +2192,9 @@ paths:
                     format, to assign to the resource as the date it was last updated.
                   format: date-time
                   type: string
-                LastConsumedMessageIndex:
-                  description: The index of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
-                    that the Member has read within the [Channel](https://www.twilio.com/docs/chat/channels).
-                  nullable: true
-                  type: integer
-                LastConsumptionTimestamp:
-                  description: The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-                    timestamp of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
-                    read event for the Member within the [Channel](https://www.twilio.com/docs/chat/channels).
-                  format: date-time
-                  type: string
-                RoleSid:
-                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
-                    to assign to the member. The default roles are those specified
-                    on the [Service](https://www.twilio.com/docs/chat/rest/service-resource).
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
               title: UpdateMemberRequest
               type: object
@@ -2203,9 +2247,7 @@ paths:
         in: query
         name: Order
         schema:
-          enum:
-          - asc
-          - desc
+          $ref: '#/components/schemas/message_enum_order_type'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -2279,23 +2321,20 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/message_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                From:
+                  description: The [Identity](https://www.twilio.com/docs/chat/identity)
+                    of the new message's author. The default value is `system`.
+                  type: string
                 Attributes:
                   description: A valid JSON string that contains application-specific
                     data.
-                  type: string
-                Body:
-                  description: The message to send to the channel. Can be an empty
-                    string or `null`, which sets the value as an empty string. You
-                    can send structured data in the body by serializing it as a string.
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -2310,13 +2349,14 @@ paths:
                     format, to assign to the resource as the date it was last updated.
                   format: date-time
                   type: string
-                From:
-                  description: The [Identity](https://www.twilio.com/docs/chat/identity)
-                    of the new message's author. The default value is `system`.
-                  type: string
                 LastUpdatedBy:
                   description: The [Identity](https://www.twilio.com/docs/chat/identity)
                     of the User who last updated the Message, if applicable.
+                  type: string
+                Body:
+                  description: The message to send to the channel. Can be an empty
+                    string or `null`, which sets the value as an empty string. You
+                    can send structured data in the body by serializing it as a string.
                   type: string
                 MediaSid:
                   description: The SID of the [Media](https://www.twilio.com/docs/chat/rest/media)
@@ -2384,9 +2424,7 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/message_enum_webhook_enabled_type'
           type: string
       responses:
         '204':
@@ -2473,23 +2511,21 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/message_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
                 Body:
                   description: The message to send to the channel. Can be an empty
                     string or `null`, which sets the value as an empty string. You
                     can send structured data in the body by serializing it as a string.
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -2504,13 +2540,13 @@ paths:
                     format, to assign to the resource as the date it was last updated.
                   format: date-time
                   type: string
-                From:
-                  description: The [Identity](https://www.twilio.com/docs/chat/identity)
-                    of the message's author.
-                  type: string
                 LastUpdatedBy:
                   description: The [Identity](https://www.twilio.com/docs/chat/identity)
                     of the User who last updated the Message, if applicable.
+                  type: string
+                From:
+                  description: The [Identity](https://www.twilio.com/docs/chat/identity)
+                    of the message's author.
                   type: string
               title: UpdateMessageRequest
               type: object
@@ -2632,11 +2668,33 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Type:
+                  $ref: '#/components/schemas/channel_webhook_enum_type'
+                  description: 'The type of webhook. Can be: `webhook`, `studio`,
+                    or `trigger`.'
+                  type: string
+                Configuration.Url:
+                  description: The URL of the webhook to call using the `configuration.method`.
+                  type: string
+                Configuration.Method:
+                  $ref: '#/components/schemas/channel_webhook_enum_method'
+                  description: 'The HTTP method used to call `configuration.url`.
+                    Can be: `GET` or `POST` and the default is `POST`.'
+                  type: string
                 Configuration.Filters:
                   description: The events that cause us to call the Channel Webhook.
                     Used when `type` is `webhook`. This parameter takes only one event.
                     To specify more than one event, repeat this parameter for each
                     event. For the list of possible events, see [Webhook Event Triggers](https://www.twilio.com/docs/chat/webhook-events#webhook-event-trigger).
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: A string that will cause us to call the webhook when
+                    it is present in a message body. This parameter takes only one
+                    trigger string. To specify more than one, repeat this parameter
+                    for each trigger string up to a total of 5 trigger strings. Used
+                    only when `type` = `trigger`.
                   items:
                     type: string
                   type: array
@@ -2648,38 +2706,11 @@ paths:
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
                   type: string
-                Configuration.Method:
-                  description: 'The HTTP method used to call `configuration.url`.
-                    Can be: `GET` or `POST` and the default is `POST`.'
-                  enum:
-                  - GET
-                  - POST
-                  type: string
                 Configuration.RetryCount:
                   description: The number of times to retry the webhook if the first
                     attempt fails. Can be an integer between 0 and 3, inclusive, and
                     the default is 0.
                   type: integer
-                Configuration.Triggers:
-                  description: A string that will cause us to call the webhook when
-                    it is present in a message body. This parameter takes only one
-                    trigger string. To specify more than one, repeat this parameter
-                    for each trigger string up to a total of 5 trigger strings. Used
-                    only when `type` = `trigger`.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The URL of the webhook to call using the `configuration.method`.
-                  type: string
-                Type:
-                  description: 'The type of webhook. Can be: `webhook`, `studio`,
-                    or `trigger`.'
-                  enum:
-                  - webhook
-                  - trigger
-                  - studio
-                  type: string
               required:
               - Type
               title: CreateChannelWebhookRequest
@@ -2821,11 +2852,28 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Configuration.Url:
+                  description: The URL of the webhook to call using the `configuration.method`.
+                  type: string
+                Configuration.Method:
+                  $ref: '#/components/schemas/channel_webhook_enum_method'
+                  description: 'The HTTP method used to call `configuration.url`.
+                    Can be: `GET` or `POST` and the default is `POST`.'
+                  type: string
                 Configuration.Filters:
                   description: The events that cause us to call the Channel Webhook.
                     Used when `type` is `webhook`. This parameter takes only one event.
                     To specify more than one event, repeat this parameter for each
                     event. For the list of possible events, see [Webhook Event Triggers](https://www.twilio.com/docs/chat/webhook-events#webhook-event-trigger).
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: A string that will cause us to call the webhook when
+                    it is present in a message body. This parameter takes only one
+                    trigger string. To specify more than one, repeat this parameter
+                    for each trigger string up to a total of 5 trigger strings. Used
+                    only when `type` = `trigger`.
                   items:
                     type: string
                   type: array
@@ -2837,30 +2885,11 @@ paths:
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
                   type: string
-                Configuration.Method:
-                  description: 'The HTTP method used to call `configuration.url`.
-                    Can be: `GET` or `POST` and the default is `POST`.'
-                  enum:
-                  - GET
-                  - POST
-                  type: string
                 Configuration.RetryCount:
                   description: The number of times to retry the webhook if the first
                     attempt fails. Can be an integer between 0 and 3, inclusive, and
                     the default is 0.
                   type: integer
-                Configuration.Triggers:
-                  description: A string that will cause us to call the webhook when
-                    it is present in a message body. This parameter takes only one
-                    trigger string. To specify more than one, repeat this parameter
-                    for each trigger string up to a total of 5 trigger strings. Used
-                    only when `type` = `trigger`.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The URL of the webhook to call using the `configuration.method`.
-                  type: string
               title: UpdateChannelWebhookRequest
               type: object
       responses:
@@ -2908,9 +2937,7 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/channel_enum_webhook_enabled_type'
           type: string
       responses:
         '204':
@@ -2977,22 +3004,26 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/channel_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 256 characters long.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used to address the resource in place
+                    of the resource's `sid` in the URL. This value must be 256 characters
+                    or less in length and unique within the Service.
+                  type: string
                 Attributes:
                   description: A valid JSON string that contains application-specific
                     data.
-                  type: string
-                CreatedBy:
-                  description: 'The `identity` of the User that created the channel.
-                    Default is: `system`.'
                   type: string
                 DateCreated:
                   description: The date, specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -3007,15 +3038,9 @@ paths:
                     format, to assign to the resource as the date it was last updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 256 characters long.
-                  type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used to address the resource in place
-                    of the resource's `sid` in the URL. This value must be 256 characters
-                    or less in length and unique within the Service.
+                CreatedBy:
+                  description: 'The `identity` of the User that created the channel.
+                    Default is: `system`.'
                   type: string
               title: UpdateChannelRequest
               type: object
@@ -3124,6 +3149,12 @@ paths:
                   description: A descriptive string that you create to describe the
                     new resource. It can be up to 64 characters long.
                   type: string
+                Type:
+                  $ref: '#/components/schemas/role_enum_role_type'
+                  description: 'The type of role. Can be: `channel` for [Channel](https://www.twilio.com/docs/chat/channels)
+                    roles or `deployment` for [Service](https://www.twilio.com/docs/chat/rest/service-resource)
+                    roles.'
+                  type: string
                 Permission:
                   description: A permission that you grant to the new role. Only one
                     permission can be granted per parameter. To assign more than one
@@ -3132,14 +3163,6 @@ paths:
                   items:
                     type: string
                   type: array
-                Type:
-                  description: 'The type of role. Can be: `channel` for [Channel](https://www.twilio.com/docs/chat/channels)
-                    roles or `deployment` for [Service](https://www.twilio.com/docs/chat/rest/service-resource)
-                    roles.'
-                  enum:
-                  - channel
-                  - deployment
-                  type: string
               required:
               - FriendlyName
               - Type
@@ -3375,23 +3398,13 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/user_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. This value is often used for display purposes.
-                  type: string
                 Identity:
                   description: The `identity` value that uniquely identifies the new
                     resource's [User](https://www.twilio.com/docs/chat/rest/user-resource)
@@ -3405,6 +3418,14 @@ paths:
                   maxLength: 34
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. This value is often used for display purposes.
                   type: string
               required:
               - Identity
@@ -3518,15 +3539,20 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/user_enum_webhook_enabled_type'
           type: string
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                RoleSid:
+                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
+                    to assign to the User.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
                 Attributes:
                   description: A valid JSON string that contains application-specific
                     data.
@@ -3534,13 +3560,6 @@ paths:
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     resource. It is often used for display purposes.
-                  type: string
-                RoleSid:
-                  description: The SID of the [Role](https://www.twilio.com/docs/chat/rest/role-resource)
-                    to assign to the User.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
               title: UpdateUserRequest
               type: object
@@ -3596,10 +3615,7 @@ paths:
         name: BindingType
         schema:
           items:
-            enum:
-            - gcm
-            - apn
-            - fcm
+            $ref: '#/components/schemas/user_binding_enum_binding_type'
             type: string
           type: array
       - description: How many resources to return in each list page. The default is
@@ -3864,9 +3880,7 @@ paths:
         in: header
         name: X-Twilio-Webhook-Enabled
         schema:
-          enum:
-          - 'true'
-          - 'false'
+          $ref: '#/components/schemas/user_channel_enum_webhook_enabled_type'
           type: string
       responses:
         '204':
@@ -3952,6 +3966,11 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                NotificationLevel:
+                  $ref: '#/components/schemas/user_channel_enum_notification_level'
+                  description: 'The push notification level to assign to the User
+                    Channel. Can be: `default` or `muted`.'
+                  type: string
                 LastConsumedMessageIndex:
                   description: The index of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
                     in the [Channel](https://www.twilio.com/docs/chat/channels) that
@@ -3963,13 +3982,6 @@ paths:
                     timestamp of the last [Message](https://www.twilio.com/docs/chat/rest/message-resource)
                     read event for the Member within the [Channel](https://www.twilio.com/docs/chat/channels).
                   format: date-time
-                  type: string
-                NotificationLevel:
-                  description: 'The push notification level to assign to the User
-                    Channel. Can be: `default` or `muted`.'
-                  enum:
-                  - default
-                  - muted
                   type: string
               title: UpdateUserChannelRequest
               type: object
@@ -4057,13 +4069,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ConsumptionReportInterval:
-                  description: DEPRECATED. The interval in seconds between consumption
-                    reports submission batches from client endpoints.
-                  type: integer
-                DefaultChannelCreatorRoleSid:
-                  description: The channel role assigned to a channel creator when
-                    they join a new channel. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource)
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource.
+                  type: string
+                DefaultServiceRoleSid:
+                  description: The service role assigned to users when they are added
+                    to the service. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource)
                     for more info about roles.
                   maxLength: 34
                   minLength: 34
@@ -4077,136 +4089,102 @@ paths:
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
-                DefaultServiceRoleSid:
-                  description: The service role assigned to users when they are added
-                    to the service. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource)
+                DefaultChannelCreatorRoleSid:
+                  description: The channel role assigned to a channel creator when
+                    they join a new channel. See the [Role resource](https://www.twilio.com/docs/chat/rest/role-resource)
                     for more info about roles.
                   maxLength: 34
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource.
-                  type: string
-                Limits.ChannelMembers:
-                  description: The maximum number of Members that can be added to
-                    Channels within this Service. Can be up to 1,000.
-                  type: integer
-                Limits.UserChannels:
-                  description: The maximum number of Channels Users can be a Member
-                    of within this Service. Can be up to 1,000.
-                  type: integer
-                Media.CompatibilityMessage:
-                  description: The message to send when a media message has no text.
-                    Can be used as placeholder message.
-                  type: string
-                Notifications.AddedToChannel.Enabled:
-                  description: Whether to send a notification when a member is added
-                    to a channel. The default is `false`.
-                  type: boolean
-                Notifications.AddedToChannel.Sound:
-                  description: The name of the sound to play when a member is added
-                    to a channel and `notifications.added_to_channel.enabled` is `true`.
-                  type: string
-                Notifications.AddedToChannel.Template:
-                  description: The template to use to create the notification text
-                    displayed when a member is added to a channel and `notifications.added_to_channel.enabled`
-                    is `true`.
-                  type: string
-                Notifications.InvitedToChannel.Enabled:
-                  description: Whether to send a notification when a user is invited
-                    to a channel. The default is `false`.
-                  type: boolean
-                Notifications.InvitedToChannel.Sound:
-                  description: The name of the sound to play when a user is invited
-                    to a channel and `notifications.invited_to_channel.enabled` is
-                    `true`.
-                  type: string
-                Notifications.InvitedToChannel.Template:
-                  description: The template to use to create the notification text
-                    displayed when a user is invited to a channel and `notifications.invited_to_channel.enabled`
-                    is `true`.
-                  type: string
-                Notifications.LogEnabled:
-                  description: Whether to log notifications. The default is `false`.
-                  type: boolean
-                Notifications.NewMessage.BadgeCountEnabled:
-                  description: Whether the new message badge is enabled. The default
-                    is `false`.
-                  type: boolean
-                Notifications.NewMessage.Enabled:
-                  description: Whether to send a notification when a new message is
-                    added to a channel. The default is `false`.
-                  type: boolean
-                Notifications.NewMessage.Sound:
-                  description: The name of the sound to play when a new message is
-                    added to a channel and `notifications.new_message.enabled` is
-                    `true`.
-                  type: string
-                Notifications.NewMessage.Template:
-                  description: The template to use to create the notification text
-                    displayed when a new message is added to a channel and `notifications.new_message.enabled`
-                    is `true`.
-                  type: string
-                Notifications.RemovedFromChannel.Enabled:
-                  description: Whether to send a notification to a user when they
-                    are removed from a channel. The default is `false`.
-                  type: boolean
-                Notifications.RemovedFromChannel.Sound:
-                  description: The name of the sound to play to a user when they are
-                    removed from a channel and `notifications.removed_from_channel.enabled`
-                    is `true`.
-                  type: string
-                Notifications.RemovedFromChannel.Template:
-                  description: The template to use to create the notification text
-                    displayed to a user when they are removed from a channel and `notifications.removed_from_channel.enabled`
-                    is `true`.
-                  type: string
-                PostWebhookRetryCount:
-                  description: The number of times to retry a call to the `post_webhook_url`
-                    if the request times out (after 5 seconds) or it receives a 429,
-                    503, or 504 HTTP response. The default is 0, which means the call
-                    won't be retried.
-                  type: integer
-                PostWebhookUrl:
-                  description: The URL for post-event webhooks, which are called by
-                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
-                    for more details.
-                  format: uri
-                  type: string
-                PreWebhookRetryCount:
-                  description: The number of times to retry a call to the `pre_webhook_url`
-                    if the request times out (after 5 seconds) or it receives a 429,
-                    503, or 504 HTTP response. Default retry count is 0 times, which
-                    means the call won't be retried.
-                  type: integer
-                PreWebhookUrl:
-                  description: The URL for pre-event webhooks, which are called by
-                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
-                    for more details.
-                  format: uri
-                  type: string
-                ReachabilityEnabled:
-                  description: Whether to enable the [Reachability Indicator](https://www.twilio.com/docs/chat/reachability-indicator)
-                    for this Service instance. The default is `false`.
-                  type: boolean
                 ReadStatusEnabled:
                   description: Whether to enable the [Message Consumption Horizon](https://www.twilio.com/docs/chat/consumption-horizon)
                     feature. The default is `true`.
+                  type: boolean
+                ReachabilityEnabled:
+                  description: Whether to enable the [Reachability Indicator](https://www.twilio.com/docs/chat/reachability-indicator)
+                    for this Service instance. The default is `false`.
                   type: boolean
                 TypingIndicatorTimeout:
                   description: How long in seconds after a `started typing` event
                     until clients should assume that user is no longer typing, even
                     if no `ended typing` message was received.  The default is 5 seconds.
                   type: integer
-                WebhookFilters:
-                  description: The list of webhook events that are enabled for this
-                    Service instance. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
+                ConsumptionReportInterval:
+                  description: DEPRECATED. The interval in seconds between consumption
+                    reports submission batches from client endpoints.
+                  type: integer
+                Notifications.NewMessage.Enabled:
+                  description: Whether to send a notification when a new message is
+                    added to a channel. The default is `false`.
+                  type: boolean
+                Notifications.NewMessage.Template:
+                  description: The template to use to create the notification text
+                    displayed when a new message is added to a channel and `notifications.new_message.enabled`
+                    is `true`.
+                  type: string
+                Notifications.NewMessage.Sound:
+                  description: The name of the sound to play when a new message is
+                    added to a channel and `notifications.new_message.enabled` is
+                    `true`.
+                  type: string
+                Notifications.NewMessage.BadgeCountEnabled:
+                  description: Whether the new message badge is enabled. The default
+                    is `false`.
+                  type: boolean
+                Notifications.AddedToChannel.Enabled:
+                  description: Whether to send a notification when a member is added
+                    to a channel. The default is `false`.
+                  type: boolean
+                Notifications.AddedToChannel.Template:
+                  description: The template to use to create the notification text
+                    displayed when a member is added to a channel and `notifications.added_to_channel.enabled`
+                    is `true`.
+                  type: string
+                Notifications.AddedToChannel.Sound:
+                  description: The name of the sound to play when a member is added
+                    to a channel and `notifications.added_to_channel.enabled` is `true`.
+                  type: string
+                Notifications.RemovedFromChannel.Enabled:
+                  description: Whether to send a notification to a user when they
+                    are removed from a channel. The default is `false`.
+                  type: boolean
+                Notifications.RemovedFromChannel.Template:
+                  description: The template to use to create the notification text
+                    displayed to a user when they are removed from a channel and `notifications.removed_from_channel.enabled`
+                    is `true`.
+                  type: string
+                Notifications.RemovedFromChannel.Sound:
+                  description: The name of the sound to play to a user when they are
+                    removed from a channel and `notifications.removed_from_channel.enabled`
+                    is `true`.
+                  type: string
+                Notifications.InvitedToChannel.Enabled:
+                  description: Whether to send a notification when a user is invited
+                    to a channel. The default is `false`.
+                  type: boolean
+                Notifications.InvitedToChannel.Template:
+                  description: The template to use to create the notification text
+                    displayed when a user is invited to a channel and `notifications.invited_to_channel.enabled`
+                    is `true`.
+                  type: string
+                Notifications.InvitedToChannel.Sound:
+                  description: The name of the sound to play when a user is invited
+                    to a channel and `notifications.invited_to_channel.enabled` is
+                    `true`.
+                  type: string
+                PreWebhookUrl:
+                  description: The URL for pre-event webhooks, which are called by
+                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
                     for more details.
-                  items:
-                    type: string
-                  type: array
+                  format: uri
+                  type: string
+                PostWebhookUrl:
+                  description: The URL for post-event webhooks, which are called by
+                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
+                    for more details.
+                  format: uri
+                  type: string
                 WebhookMethod:
                   description: 'The HTTP method to use for calls to the `pre_webhook_url`
                     and `post_webhook_url` webhooks.  Can be: `POST` or `GET` and
@@ -4221,6 +4199,40 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
+                WebhookFilters:
+                  description: The list of webhook events that are enabled for this
+                    Service instance. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
+                    for more details.
+                  items:
+                    type: string
+                  type: array
+                Limits.ChannelMembers:
+                  description: The maximum number of Members that can be added to
+                    Channels within this Service. Can be up to 1,000.
+                  type: integer
+                Limits.UserChannels:
+                  description: The maximum number of Channels Users can be a Member
+                    of within this Service. Can be up to 1,000.
+                  type: integer
+                Media.CompatibilityMessage:
+                  description: The message to send when a media message has no text.
+                    Can be used as placeholder message.
+                  type: string
+                PreWebhookRetryCount:
+                  description: The number of times to retry a call to the `pre_webhook_url`
+                    if the request times out (after 5 seconds) or it receives a 429,
+                    503, or 504 HTTP response. Default retry count is 0 times, which
+                    means the call won't be retried.
+                  type: integer
+                PostWebhookRetryCount:
+                  description: The number of times to retry a call to the `post_webhook_url`
+                    if the request times out (after 5 seconds) or it receives a 429,
+                    503, or 504 HTTP response. The default is 0, which means the call
+                    won't be retried.
+                  type: integer
+                Notifications.LogEnabled:
+                  description: Whether to log notifications. The default is `false`.
+                  type: boolean
               title: UpdateServiceRequest
               type: object
       responses:

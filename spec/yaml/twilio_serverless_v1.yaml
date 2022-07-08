@@ -1,5 +1,42 @@
 components:
   schemas:
+    asset_version_enum_visibility:
+      enum:
+      - public
+      - private
+      - protected
+      type: string
+    build_enum_runtime:
+      enum:
+      - node8
+      - node10
+      - node12
+      - node14
+      type: string
+    build_enum_status:
+      enum:
+      - building
+      - completed
+      - failed
+      type: string
+    build_status_enum_status:
+      enum:
+      - building
+      - completed
+      - failed
+      type: string
+    function_version_enum_visibility:
+      enum:
+      - public
+      - private
+      - protected
+      type: string
+    log_enum_level:
+      enum:
+      - info
+      - warn
+      - error
+      type: string
     serverless.v1.service:
       properties:
         account_sid:
@@ -162,12 +199,9 @@ components:
           nullable: true
           type: string
         visibility:
+          $ref: '#/components/schemas/asset_version_enum_visibility'
           description: The access control that determines how the Asset Version can
             be accessed
-          enum:
-          - public
-          - private
-          - protected
           nullable: true
           type: string
       type: object
@@ -215,12 +249,8 @@ components:
           nullable: true
           type: object
         runtime:
+          $ref: '#/components/schemas/build_enum_runtime'
           description: The Runtime version that will be used to run the Build.
-          enum:
-          - node8
-          - node10
-          - node12
-          - node14
           nullable: true
           type: string
         service_sid:
@@ -239,11 +269,8 @@ components:
           pattern: ^ZB[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/build_enum_status'
           description: The status of the Build
-          enum:
-          - building
-          - completed
-          - failed
           nullable: true
           type: string
         url:
@@ -277,11 +304,8 @@ components:
           pattern: ^ZB[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/build_status_enum_status'
           description: The status of the Build
-          enum:
-          - building
-          - completed
-          - failed
           nullable: true
           type: string
         url:
@@ -458,11 +482,8 @@ components:
           pattern: ^ZH[0-9a-fA-F]{32}$
           type: string
         level:
+          $ref: '#/components/schemas/log_enum_level'
           description: The log level
-          enum:
-          - info
-          - warn
-          - error
           nullable: true
           type: string
         message:
@@ -658,12 +679,9 @@ components:
           nullable: true
           type: string
         visibility:
+          $ref: '#/components/schemas/function_version_enum_visibility'
           description: The access control that determines how the Function Version
             resource can be accessed
-          enum:
-          - public
-          - private
-          - protected
           nullable: true
           type: string
       type: object
@@ -787,6 +805,12 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                UniqueName:
+                  description: A user-defined string that uniquely identifies the
+                    Service resource. It can be used as an alternative to the `sid`
+                    in the URL path to address the Service resource. This value must
+                    be 50 characters or less in length and be unique.
+                  type: string
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     Service resource. It can be a maximum of 255 characters.
@@ -799,12 +823,6 @@ paths:
                   description: Whether the Service's properties and subresources can
                     be edited via the UI. The default value is `false`.
                   type: boolean
-                UniqueName:
-                  description: A user-defined string that uniquely identifies the
-                    Service resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the Service resource. This value must
-                    be 50 characters or less in length and be unique.
-                  type: string
               required:
               - UniqueName
               - FriendlyName
@@ -1258,11 +1276,6 @@ paths:
                     pattern: ^ZN[0-9a-fA-F]{32}$
                     type: string
                   type: array
-                Dependencies:
-                  description: A list of objects that describe the Dependencies included
-                    in the Build. Each object contains the `name` and `version` of
-                    the dependency.
-                  type: string
                 FunctionVersions:
                   description: The list of the Function Version resource SIDs to include
                     in the Build.
@@ -1272,6 +1285,11 @@ paths:
                     pattern: ^ZN[0-9a-fA-F]{32}$
                     type: string
                   type: array
+                Dependencies:
+                  description: A list of objects that describe the Dependencies included
+                    in the Build. Each object contains the `name` and `version` of
+                    the dependency.
+                  type: string
                 Runtime:
                   description: The Runtime version that will be used to run the Build
                     resource when it is deployed.
@@ -1481,13 +1499,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                DomainSuffix:
-                  description: A URL-friendly name that represents the environment
-                    and forms part of the domain name. It can be a maximum of 16 characters.
-                  type: string
                 UniqueName:
                   description: A user-defined string that uniquely identifies the
                     Environment resource. It can be a maximum of 100 characters.
+                  type: string
+                DomainSuffix:
+                  description: A URL-friendly name that represents the environment
+                    and forms part of the domain name. It can be a maximum of 16 characters.
                   type: string
               required:
               - UniqueName
@@ -2616,14 +2634,14 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    Service resource. It can be a maximum of 255 characters.
-                  type: string
                 IncludeCredentials:
                   description: Whether to inject Account credentials into a function
                     invocation context.
                   type: boolean
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    Service resource. It can be a maximum of 255 characters.
+                  type: string
                 UiEditable:
                   description: Whether the Service resource's properties and subresources
                     can be edited via the UI. The default value is `false`.
