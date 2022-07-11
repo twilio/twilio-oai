@@ -44,11 +44,8 @@ components:
           pattern: ^ZX[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/media_processor_enum_status'
           description: The status of the MediaProcessor
-          enum:
-          - failed
-          - started
-          - ended
           nullable: true
           type: string
         status_callback:
@@ -100,10 +97,8 @@ components:
           nullable: true
           type: integer
         format:
+          $ref: '#/components/schemas/media_recording_enum_format'
           description: The format of the MediaRecording
-          enum:
-          - mp4
-          - webm
           nullable: true
           type: string
         links:
@@ -113,6 +108,7 @@ components:
           type: object
         media_size:
           description: The size of the recording media
+          format: int64
           nullable: true
           type: integer
         processor_sid:
@@ -141,12 +137,8 @@ components:
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/media_recording_enum_status'
           description: The status of the MediaRecording
-          enum:
-          - processing
-          - completed
-          - deleted
-          - failed
           nullable: true
           type: string
         status_callback:
@@ -194,12 +186,8 @@ components:
           nullable: true
           type: string
         ended_reason:
+          $ref: '#/components/schemas/player_streamer_enum_ended_reason'
           description: The reason why a PlayerStreamer ended
-          enum:
-          - ended-via-api
-          - max-duration-exceeded
-          - stream-disconnected-by-source
-          - unexpected-failure
           nullable: true
           type: string
         links:
@@ -219,12 +207,8 @@ components:
           pattern: ^VJ[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/player_streamer_enum_status'
           description: The status of the PlayerStreamer
-          enum:
-          - created
-          - started
-          - ended
-          - failed
           nullable: true
           type: string
         status_callback:
@@ -287,6 +271,61 @@ components:
           nullable: true
           type: string
       type: object
+    media_processor_enum_order:
+      enum:
+      - asc
+      - desc
+      type: string
+    media_processor_enum_status:
+      enum:
+      - failed
+      - started
+      - ended
+      type: string
+    media_processor_enum_update_status:
+      enum:
+      - ended
+      type: string
+    media_recording_enum_format:
+      enum:
+      - mp4
+      - webm
+      type: string
+    media_recording_enum_order:
+      enum:
+      - asc
+      - desc
+      type: string
+    media_recording_enum_status:
+      enum:
+      - processing
+      - completed
+      - deleted
+      - failed
+      type: string
+    player_streamer_enum_ended_reason:
+      enum:
+      - ended-via-api
+      - max-duration-exceeded
+      - stream-disconnected-by-source
+      - unexpected-failure
+      type: string
+    player_streamer_enum_order:
+      enum:
+      - asc
+      - desc
+      type: string
+    player_streamer_enum_status:
+      enum:
+      - created
+      - started
+      - ended
+      - failed
+      type: string
+    player_streamer_enum_update_status:
+      enum:
+      - ended
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -317,19 +356,14 @@ paths:
         in: query
         name: Order
         schema:
-          enum:
-          - asc
-          - desc
+          $ref: '#/components/schemas/media_processor_enum_order'
           type: string
       - description: Status to filter by, with possible values `started`, `ended`
           or `failed`.
         in: query
         name: Status
         schema:
-          enum:
-          - failed
-          - started
-          - ended
+          $ref: '#/components/schemas/media_processor_enum_status'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -497,9 +531,8 @@ paths:
             schema:
               properties:
                 Status:
+                  $ref: '#/components/schemas/media_processor_enum_update_status'
                   description: The status of the MediaProcessor. Can be `ended`.
-                  enum:
-                  - ended
                   type: string
               required:
               - Status
@@ -537,20 +570,14 @@ paths:
         in: query
         name: Order
         schema:
-          enum:
-          - asc
-          - desc
+          $ref: '#/components/schemas/media_recording_enum_order'
           type: string
       - description: Status to filter by, with possible values `processing`, `completed`,
           `deleted`, or `failed`.
         in: query
         name: Status
         schema:
-          enum:
-          - processing
-          - completed
-          - deleted
-          - failed
+          $ref: '#/components/schemas/media_recording_enum_status'
           type: string
       - description: SID of a MediaProcessor to filter by.
         in: query
@@ -687,20 +714,14 @@ paths:
         in: query
         name: Order
         schema:
-          enum:
-          - asc
-          - desc
+          $ref: '#/components/schemas/player_streamer_enum_order'
           type: string
       - description: Status to filter by, with possible values `created`, `started`,
           `ended`, or `failed`.
         in: query
         name: Status
         schema:
-          enum:
-          - created
-          - started
-          - ended
-          - failed
+          $ref: '#/components/schemas/player_streamer_enum_status'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -851,10 +872,9 @@ paths:
             schema:
               properties:
                 Status:
+                  $ref: '#/components/schemas/player_streamer_enum_update_status'
                   description: 'The status the PlayerStreamer should be transitioned
                     to. Can be: `ended`.'
-                  enum:
-                  - ended
                   type: string
               required:
               - Status
