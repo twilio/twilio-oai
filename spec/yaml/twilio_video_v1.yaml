@@ -1047,6 +1047,21 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to  100 characters long and it must be
+                    unique within the account.
+                  type: string
+                Enabled:
+                  description: Whether the composition hook is active. When `true`,
+                    the composition hook will be triggered for every completed Group
+                    Room in the account. When `false`, the composition hook will never
+                    be triggered.
+                  type: boolean
+                VideoLayout:
+                  description: An object that describes the video layout of the composition
+                    hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
+                    for more info.
                 AudioSources:
                   description: An array of track names from the same group room to
                     merge into the compositions created by the composition hook. Can
@@ -1071,27 +1086,6 @@ paths:
                   items:
                     type: string
                   type: array
-                Enabled:
-                  description: Whether the composition hook is active. When `true`,
-                    the composition hook will be triggered for every completed Group
-                    Room in the account. When `false`, the composition hook will never
-                    be triggered.
-                  type: boolean
-                Format:
-                  description: 'The container format of the media files used by the
-                    compositions created by the composition hook. Can be: `mp4` or
-                    `webm` and the default is `webm`. If `mp4` or `webm`, `audio_sources`
-                    must have one or more tracks and/or a `video_layout` element must
-                    contain a valid `video_sources` list, otherwise an error occurs.'
-                  enum:
-                  - mp4
-                  - webm
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to  100 characters long and it must be
-                    unique within the account.
-                  type: string
                 Resolution:
                   description: "A string that describes the columns (width) and rows\
                     \ (height) of the generated composed video in pixels. Defaults\
@@ -1104,6 +1098,16 @@ paths:
                     \ tracks are constrained by the aspect ratio, they are scaled\
                     \ to fit. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)\
                     \ for more info."
+                  type: string
+                Format:
+                  description: 'The container format of the media files used by the
+                    compositions created by the composition hook. Can be: `mp4` or
+                    `webm` and the default is `webm`. If `mp4` or `webm`, `audio_sources`
+                    must have one or more tracks and/or a `video_layout` element must
+                    contain a valid `video_sources` list, otherwise an error occurs.'
+                  enum:
+                  - mp4
+                  - webm
                   type: string
                 StatusCallback:
                   description: The URL we should call using the `status_callback_method`
@@ -1132,10 +1136,6 @@ paths:
                     because those gaps will be removed. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
                     for more info.
                   type: boolean
-                VideoLayout:
-                  description: An object that describes the video layout of the composition
-                    hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
-                    for more info.
               required:
               - FriendlyName
               title: CreateCompositionHookRequest
@@ -1225,6 +1225,21 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to  100 characters long and it must be
+                    unique within the account.
+                  type: string
+                Enabled:
+                  description: Whether the composition hook is active. When `true`,
+                    the composition hook will be triggered for every completed Group
+                    Room in the account. When `false`, the composition hook never
+                    triggers.
+                  type: boolean
+                VideoLayout:
+                  description: A JSON object that describes the video layout of the
+                    composition hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
+                    for more info.
                 AudioSources:
                   description: An array of track names from the same group room to
                     merge into the compositions created by the composition hook. Can
@@ -1249,11 +1264,14 @@ paths:
                   items:
                     type: string
                   type: array
-                Enabled:
-                  description: Whether the composition hook is active. When `true`,
-                    the composition hook will be triggered for every completed Group
-                    Room in the account. When `false`, the composition hook never
-                    triggers.
+                Trim:
+                  description: Whether to clip the intervals where there is no active
+                    media in the compositions triggered by the composition hook. The
+                    default is `true`. Compositions with `trim` enabled are shorter
+                    when the Room is created and no Participant joins for a while
+                    as well as if all the Participants leave the room and join later,
+                    because those gaps will be removed. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
+                    for more info.
                   type: boolean
                 Format:
                   description: 'The container format of the media files used by the
@@ -1264,11 +1282,6 @@ paths:
                   enum:
                   - mp4
                   - webm
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to  100 characters long and it must be
-                    unique within the account.
                   type: string
                 Resolution:
                   description: "A string that describes the columns (width) and rows\
@@ -1301,19 +1314,6 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                Trim:
-                  description: Whether to clip the intervals where there is no active
-                    media in the compositions triggered by the composition hook. The
-                    default is `true`. Compositions with `trim` enabled are shorter
-                    when the Room is created and no Participant joins for a while
-                    as well as if all the Participants leave the room and join later,
-                    because those gaps will be removed. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
-                    for more info.
-                  type: boolean
-                VideoLayout:
-                  description: A JSON object that describes the video layout of the
-                    composition hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
-                    for more info.
               required:
               - FriendlyName
               title: UpdateCompositionHookRequest
@@ -1361,8 +1361,18 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource and show to the user in the console
+                  type: string
                 AwsCredentialsSid:
                   description: The SID of the stored Credential resource.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^CR[0-9a-fA-F]{32}$
+                  type: string
+                EncryptionKeySid:
+                  description: The SID of the Public Key resource to use for encryption.
                   maxLength: 34
                   minLength: 34
                   pattern: ^CR[0-9a-fA-F]{32}$
@@ -1384,16 +1394,6 @@ paths:
                   description: Whether all compositions should be stored in an encrypted
                     form. The default is `false`.
                   type: boolean
-                EncryptionKeySid:
-                  description: The SID of the Public Key resource to use for encryption.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^CR[0-9a-fA-F]{32}$
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource and show to the user in the console
-                  type: string
               required:
               - FriendlyName
               title: CreateCompositionSettingsRequest
@@ -1512,6 +1512,18 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                RoomSid:
+                  description: The SID of the Group Room with the media tracks to
+                    be used as composition sources.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RM[0-9a-fA-F]{32}$
+                  type: string
+                VideoLayout:
+                  description: An object that describes the video layout of the composition
+                    in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
+                    for more info. Please, be aware that either video_layout or audio_sources
+                    have to be provided to get a valid creation request
                 AudioSources:
                   description: An array of track names from the same group room to
                     merge into the new composition. Can include zero or more track
@@ -1536,16 +1548,6 @@ paths:
                   items:
                     type: string
                   type: array
-                Format:
-                  description: 'The container format of the composition''s media files.
-                    Can be: `mp4` or `webm` and the default is `webm`. If you specify
-                    `mp4` or `webm`, you must also specify one or more `audio_sources`
-                    and/or a `video_layout` element that contains a valid `video_sources`
-                    list, otherwise an error occurs.'
-                  enum:
-                  - mp4
-                  - webm
-                  type: string
                 Resolution:
                   description: "A string that describes the columns (width) and rows\
                     \ (height) of the generated composed video in pixels. Defaults\
@@ -1559,12 +1561,15 @@ paths:
                     \ to fit. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)\
                     \ for more info."
                   type: string
-                RoomSid:
-                  description: The SID of the Group Room with the media tracks to
-                    be used as composition sources.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RM[0-9a-fA-F]{32}$
+                Format:
+                  description: 'The container format of the composition''s media files.
+                    Can be: `mp4` or `webm` and the default is `webm`. If you specify
+                    `mp4` or `webm`, you must also specify one or more `audio_sources`
+                    and/or a `video_layout` element that contains a valid `video_sources`
+                    list, otherwise an error occurs.'
+                  enum:
+                  - mp4
+                  - webm
                   type: string
                 StatusCallback:
                   description: The URL we should call using the `status_callback_method`
@@ -1593,11 +1598,6 @@ paths:
                     See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
                     for more info.
                   type: boolean
-                VideoLayout:
-                  description: An object that describes the video layout of the composition
-                    in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
-                    for more info. Please, be aware that either video_layout or audio_sources
-                    have to be provided to get a valid creation request
               required:
               - RoomSid
               title: CreateCompositionRequest
@@ -1703,8 +1703,18 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource and be shown to users in the console
+                  type: string
                 AwsCredentialsSid:
                   description: The SID of the stored Credential resource.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^CR[0-9a-fA-F]{32}$
+                  type: string
+                EncryptionKeySid:
+                  description: The SID of the Public Key resource to use for encryption.
                   maxLength: 34
                   minLength: 34
                   pattern: ^CR[0-9a-fA-F]{32}$
@@ -1726,16 +1736,6 @@ paths:
                   description: Whether all recordings should be stored in an encrypted
                     form. The default is `false`.
                   type: boolean
-                EncryptionKeySid:
-                  description: The SID of the Public Key resource to use for encryption.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^CR[0-9a-fA-F]{32}$
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource and be shown to users in the console
-                  type: string
               required:
               - FriendlyName
               title: CreateRecordingSettingsRequest
@@ -2022,65 +2022,9 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                AudioOnly:
-                  description: When set to true, indicates that the participants in
-                    the room will only publish audio. No video tracks will be allowed.
-                    Group rooms only.
-                  type: boolean
-                EmptyRoomTimeout:
-                  description: Configures how long (in minutes) a room will remain
-                    active after last participant leaves. Valid values range from
-                    1 to 60 minutes (no fractions).
-                  type: integer
                 EnableTurn:
                   description: Deprecated, now always considered to be true.
                   type: boolean
-                LargeRoom:
-                  description: When set to true, indicated that this is the large
-                    room.
-                  type: boolean
-                MaxParticipantDuration:
-                  description: The maximum number of seconds a Participant can be
-                    connected to the room. The maximum possible value is 86400 seconds
-                    (24 hours). The default is 14400 seconds (4 hours).
-                  type: integer
-                MaxParticipants:
-                  description: The maximum number of concurrent Participants allowed
-                    in the room. Peer-to-peer rooms can have up to 10 Participants.
-                    Small Group rooms can have up to 4 Participants. Group rooms can
-                    have up to 50 Participants.
-                  type: integer
-                MediaRegion:
-                  description: 'The region for the media server in Group Rooms.  Can
-                    be: one of the [available Media Regions](https://www.twilio.com/docs/video/ip-address-whitelisting#group-rooms-media-servers).
-                    ***This feature is not available in `peer-to-peer` rooms.***'
-                  type: string
-                RecordParticipantsOnConnect:
-                  description: Whether to start recording when Participants connect.
-                    ***This feature is not available in `peer-to-peer` rooms.***
-                  type: boolean
-                RecordingRules:
-                  description: A collection of Recording Rules that describe how to
-                    include or exclude matching tracks for recording
-                StatusCallback:
-                  description: The URL we should call using the `status_callback_method`
-                    to send status information to your application on every room event.
-                    See [Status Callbacks](https://www.twilio.com/docs/video/api/status-callbacks)
-                    for more info.
-                  format: uri
-                  type: string
-                StatusCallbackMethod:
-                  description: The HTTP method we should use to call `status_callback`.
-                    Can be `POST` or `GET`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
                 Type:
                   description: 'The type of room. Can be: `go`, `peer-to-peer`, `group-small`,
                     or `group`. The default value is `group`.'
@@ -2100,11 +2044,35 @@ paths:
                     API clients can use this name in place of the Room SID to interact
                     with the room as long as the room is `in-progress`.
                   type: string
-                UnusedRoomTimeout:
-                  description: Configures how long (in minutes) a room will remain
-                    active if no one joins. Valid values range from 1 to 60 minutes
-                    (no fractions).
+                StatusCallback:
+                  description: The URL we should call using the `status_callback_method`
+                    to send status information to your application on every room event.
+                    See [Status Callbacks](https://www.twilio.com/docs/video/api/status-callbacks)
+                    for more info.
+                  format: uri
+                  type: string
+                StatusCallbackMethod:
+                  description: The HTTP method we should use to call `status_callback`.
+                    Can be `POST` or `GET`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                MaxParticipants:
+                  description: The maximum number of concurrent Participants allowed
+                    in the room. Peer-to-peer rooms can have up to 10 Participants.
+                    Small Group rooms can have up to 4 Participants. Group rooms can
+                    have up to 50 Participants.
                   type: integer
+                RecordParticipantsOnConnect:
+                  description: Whether to start recording when Participants connect.
+                    ***This feature is not available in `peer-to-peer` rooms.***
+                  type: boolean
                 VideoCodecs:
                   description: 'An array of the video codecs that are supported when
                     publishing a track in the room.  Can be: `VP8` and `H264`.  ***This
@@ -2115,6 +2083,38 @@ paths:
                     - H264
                     type: string
                   type: array
+                MediaRegion:
+                  description: 'The region for the media server in Group Rooms.  Can
+                    be: one of the [available Media Regions](https://www.twilio.com/docs/video/ip-address-whitelisting#group-rooms-media-servers).
+                    ***This feature is not available in `peer-to-peer` rooms.***'
+                  type: string
+                RecordingRules:
+                  description: A collection of Recording Rules that describe how to
+                    include or exclude matching tracks for recording
+                AudioOnly:
+                  description: When set to true, indicates that the participants in
+                    the room will only publish audio. No video tracks will be allowed.
+                    Group rooms only.
+                  type: boolean
+                MaxParticipantDuration:
+                  description: The maximum number of seconds a Participant can be
+                    connected to the room. The maximum possible value is 86400 seconds
+                    (24 hours). The default is 14400 seconds (4 hours).
+                  type: integer
+                EmptyRoomTimeout:
+                  description: Configures how long (in minutes) a room will remain
+                    active after last participant leaves. Valid values range from
+                    1 to 60 minutes (no fractions).
+                  type: integer
+                UnusedRoomTimeout:
+                  description: Configures how long (in minutes) a room will remain
+                    active if no one joins. Valid values range from 1 to 60 minutes
+                    (no fractions).
+                  type: integer
+                LargeRoom:
+                  description: When set to true, indicated that this is the large
+                    room.
+                  type: boolean
               title: CreateRoomRequest
               type: object
       responses:

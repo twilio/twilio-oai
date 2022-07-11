@@ -600,15 +600,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ChatFriendlyName:
-                  description: The chat channel's friendly name.
-                  type: string
-                ChatUniqueName:
-                  description: The chat channel's unique name.
-                  type: string
-                ChatUserFriendlyName:
-                  description: The chat participant's friendly name.
-                  type: string
                 FlexFlowSid:
                   description: The SID of the Flex Flow.
                   maxLength: 34
@@ -619,19 +610,21 @@ paths:
                   description: The `identity` value that uniquely identifies the new
                     resource's chat User.
                   type: string
-                LongLived:
-                  description: Whether to create the channel as long-lived.
-                  type: boolean
-                PreEngagementData:
-                  description: The pre-engagement data.
+                ChatUserFriendlyName:
+                  description: The chat participant's friendly name.
+                  type: string
+                ChatFriendlyName:
+                  description: The chat channel's friendly name.
                   type: string
                 Target:
                   description: The Target Contact Identity, for example the phone
                     number of an SMS.
                   type: string
-                TaskAttributes:
-                  description: The Task attributes to be added for the TaskRouter
-                    Task.
+                ChatUniqueName:
+                  description: The chat channel's unique name.
+                  type: string
+                PreEngagementData:
+                  description: The pre-engagement data.
                   type: string
                 TaskSid:
                   description: The SID of the TaskRouter Task. Only valid when integration
@@ -640,6 +633,13 @@ paths:
                   minLength: 34
                   pattern: ^WT[0-9a-fA-F]{32}$
                   type: string
+                TaskAttributes:
+                  description: The Task attributes to be added for the TaskRouter
+                    Task.
+                  type: string
+                LongLived:
+                  description: Whether to create the channel as long-lived.
+                  type: boolean
               required:
               - FlexFlowSid
               - Identity
@@ -818,6 +818,16 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    Flex Flow resource.
+                  type: string
+                ChatServiceSid:
+                  description: The SID of the chat service.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^IS[0-9a-fA-F]{32}$
+                  type: string
                 ChannelType:
                   description: "The channel type. One of `web`, `facebook`, `sms`,\
                     \ `whatsapp`, `line` or `custom`. By default, Studio\u2019s Send\
@@ -835,78 +845,12 @@ paths:
                   - line
                   - custom
                   type: string
-                ChatServiceSid:
-                  description: The SID of the chat service.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^IS[0-9a-fA-F]{32}$
-                  type: string
                 ContactIdentity:
                   description: The channel contact's Identity.
                   type: string
                 Enabled:
                   description: Whether the new Flex Flow is enabled.
                   type: boolean
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    Flex Flow resource.
-                  type: string
-                Integration.Channel:
-                  description: The Task Channel SID (TCXXXX) or unique name (e.g.,
-                    `sms`) to use for the Task that will be created. Applicable and
-                    required when `integrationType` is `task`. The default value is
-                    `default`.
-                  type: string
-                Integration.CreationOnMessage:
-                  description: In the context of outbound messaging, defines whether
-                    to create a Task immediately (and therefore reserve the conversation
-                    to current agent), or delay Task creation until the customer sends
-                    the first response. Set to false to create immediately, true to
-                    delay Task creation. This setting is only applicable for outbound
-                    messaging.
-                  type: boolean
-                Integration.FlowSid:
-                  description: The SID of the Studio Flow. Required when `integrationType`
-                    is `studio`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^FW[0-9a-fA-F]{32}$
-                  type: string
-                Integration.Priority:
-                  description: The Task priority of a new Task. The default priority
-                    is 0. Optional when `integrationType` is `task`, not applicable
-                    otherwise.
-                  type: integer
-                Integration.RetryCount:
-                  description: The number of times to retry the Studio Flow or webhook
-                    in case of failure. Takes integer values from 0 to 3 with the
-                    default being 3. Optional when `integrationType` is `studio` or
-                    `external`, not applicable otherwise.
-                  type: integer
-                Integration.Timeout:
-                  description: The Task timeout in seconds for a new Task. Default
-                    is 86,400 seconds (24 hours). Optional when `integrationType`
-                    is `task`, not applicable otherwise.
-                  type: integer
-                Integration.Url:
-                  description: The URL of the external webhook. Required when `integrationType`
-                    is `external`.
-                  format: uri
-                  type: string
-                Integration.WorkflowSid:
-                  description: The Workflow SID for a new Task. Required when `integrationType`
-                    is `task`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^WW[0-9a-fA-F]{32}$
-                  type: string
-                Integration.WorkspaceSid:
-                  description: The Workspace SID for a new Task. Required when `integrationType`
-                    is `task`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^WS[0-9a-fA-F]{32}$
-                  type: string
                 IntegrationType:
                   description: 'The software that will handle inbound messages. [Integration
                     Type](https://www.twilio.com/docs/flex/developer/messaging/manage-flows#integration-types)
@@ -916,16 +860,72 @@ paths:
                   - external
                   - task
                   type: string
-                JanitorEnabled:
-                  description: When enabled, the Messaging Channel Janitor will remove
-                    active Proxy sessions if the associated Task is deleted outside
-                    of the Flex UI. Defaults to `false`.
+                Integration.FlowSid:
+                  description: The SID of the Studio Flow. Required when `integrationType`
+                    is `studio`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^FW[0-9a-fA-F]{32}$
+                  type: string
+                Integration.Url:
+                  description: The URL of the external webhook. Required when `integrationType`
+                    is `external`.
+                  format: uri
+                  type: string
+                Integration.WorkspaceSid:
+                  description: The Workspace SID for a new Task. Required when `integrationType`
+                    is `task`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^WS[0-9a-fA-F]{32}$
+                  type: string
+                Integration.WorkflowSid:
+                  description: The Workflow SID for a new Task. Required when `integrationType`
+                    is `task`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^WW[0-9a-fA-F]{32}$
+                  type: string
+                Integration.Channel:
+                  description: The Task Channel SID (TCXXXX) or unique name (e.g.,
+                    `sms`) to use for the Task that will be created. Applicable and
+                    required when `integrationType` is `task`. The default value is
+                    `default`.
+                  type: string
+                Integration.Timeout:
+                  description: The Task timeout in seconds for a new Task. Default
+                    is 86,400 seconds (24 hours). Optional when `integrationType`
+                    is `task`, not applicable otherwise.
+                  type: integer
+                Integration.Priority:
+                  description: The Task priority of a new Task. The default priority
+                    is 0. Optional when `integrationType` is `task`, not applicable
+                    otherwise.
+                  type: integer
+                Integration.CreationOnMessage:
+                  description: In the context of outbound messaging, defines whether
+                    to create a Task immediately (and therefore reserve the conversation
+                    to current agent), or delay Task creation until the customer sends
+                    the first response. Set to false to create immediately, true to
+                    delay Task creation. This setting is only applicable for outbound
+                    messaging.
                   type: boolean
                 LongLived:
                   description: When enabled, Flex will keep the chat channel active
                     so that it may be used for subsequent interactions with a contact
                     identity. Defaults to `false`.
                   type: boolean
+                JanitorEnabled:
+                  description: When enabled, the Messaging Channel Janitor will remove
+                    active Proxy sessions if the associated Task is deleted outside
+                    of the Flex UI. Defaults to `false`.
+                  type: boolean
+                Integration.RetryCount:
+                  description: The number of times to retry the Studio Flow or webhook
+                    in case of failure. Takes integer values from 0 to 3 with the
+                    default being 3. Optional when `integrationType` is `studio` or
+                    `external`, not applicable otherwise.
+                  type: integer
               required:
               - FriendlyName
               - ChatServiceSid
@@ -1016,6 +1016,16 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    Flex Flow resource.
+                  type: string
+                ChatServiceSid:
+                  description: The SID of the chat service.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^IS[0-9a-fA-F]{32}$
+                  type: string
                 ChannelType:
                   description: "The channel type. One of `web`, `facebook`, `sms`,\
                     \ `whatsapp`, `line` or `custom`. By default, Studio\u2019s Send\
@@ -1033,78 +1043,12 @@ paths:
                   - line
                   - custom
                   type: string
-                ChatServiceSid:
-                  description: The SID of the chat service.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^IS[0-9a-fA-F]{32}$
-                  type: string
                 ContactIdentity:
                   description: The channel contact's Identity.
                   type: string
                 Enabled:
                   description: Whether the new Flex Flow is enabled.
                   type: boolean
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    Flex Flow resource.
-                  type: string
-                Integration.Channel:
-                  description: The Task Channel SID (TCXXXX) or unique name (e.g.,
-                    `sms`) to use for the Task that will be created. Applicable and
-                    required when `integrationType` is `task`. The default value is
-                    `default`.
-                  type: string
-                Integration.CreationOnMessage:
-                  description: In the context of outbound messaging, defines whether
-                    to create a Task immediately (and therefore reserve the conversation
-                    to current agent), or delay Task creation until the customer sends
-                    the first response. Set to false to create immediately, true to
-                    delay Task creation. This setting is only applicable for outbound
-                    messaging.
-                  type: boolean
-                Integration.FlowSid:
-                  description: The SID of the Studio Flow. Required when `integrationType`
-                    is `studio`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^FW[0-9a-fA-F]{32}$
-                  type: string
-                Integration.Priority:
-                  description: The Task priority of a new Task. The default priority
-                    is 0. Optional when `integrationType` is `task`, not applicable
-                    otherwise.
-                  type: integer
-                Integration.RetryCount:
-                  description: The number of times to retry the Studio Flow or webhook
-                    in case of failure. Takes integer values from 0 to 3 with the
-                    default being 3. Optional when `integrationType` is `studio` or
-                    `external`, not applicable otherwise.
-                  type: integer
-                Integration.Timeout:
-                  description: The Task timeout in seconds for a new Task. Default
-                    is 86,400 seconds (24 hours). Optional when `integrationType`
-                    is `task`, not applicable otherwise.
-                  type: integer
-                Integration.Url:
-                  description: The URL of the external webhook. Required when `integrationType`
-                    is `external`.
-                  format: uri
-                  type: string
-                Integration.WorkflowSid:
-                  description: The Workflow SID for a new Task. Required when `integrationType`
-                    is `task`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^WW[0-9a-fA-F]{32}$
-                  type: string
-                Integration.WorkspaceSid:
-                  description: The Workspace SID for a new Task. Required when `integrationType`
-                    is `task`.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^WS[0-9a-fA-F]{32}$
-                  type: string
                 IntegrationType:
                   description: 'The software that will handle inbound messages. [Integration
                     Type](https://www.twilio.com/docs/flex/developer/messaging/manage-flows#integration-types)
@@ -1114,16 +1058,72 @@ paths:
                   - external
                   - task
                   type: string
-                JanitorEnabled:
-                  description: When enabled, the Messaging Channel Janitor will remove
-                    active Proxy sessions if the associated Task is deleted outside
-                    of the Flex UI. Defaults to `false`.
+                Integration.FlowSid:
+                  description: The SID of the Studio Flow. Required when `integrationType`
+                    is `studio`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^FW[0-9a-fA-F]{32}$
+                  type: string
+                Integration.Url:
+                  description: The URL of the external webhook. Required when `integrationType`
+                    is `external`.
+                  format: uri
+                  type: string
+                Integration.WorkspaceSid:
+                  description: The Workspace SID for a new Task. Required when `integrationType`
+                    is `task`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^WS[0-9a-fA-F]{32}$
+                  type: string
+                Integration.WorkflowSid:
+                  description: The Workflow SID for a new Task. Required when `integrationType`
+                    is `task`.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^WW[0-9a-fA-F]{32}$
+                  type: string
+                Integration.Channel:
+                  description: The Task Channel SID (TCXXXX) or unique name (e.g.,
+                    `sms`) to use for the Task that will be created. Applicable and
+                    required when `integrationType` is `task`. The default value is
+                    `default`.
+                  type: string
+                Integration.Timeout:
+                  description: The Task timeout in seconds for a new Task. Default
+                    is 86,400 seconds (24 hours). Optional when `integrationType`
+                    is `task`, not applicable otherwise.
+                  type: integer
+                Integration.Priority:
+                  description: The Task priority of a new Task. The default priority
+                    is 0. Optional when `integrationType` is `task`, not applicable
+                    otherwise.
+                  type: integer
+                Integration.CreationOnMessage:
+                  description: In the context of outbound messaging, defines whether
+                    to create a Task immediately (and therefore reserve the conversation
+                    to current agent), or delay Task creation until the customer sends
+                    the first response. Set to false to create immediately, true to
+                    delay Task creation. This setting is only applicable for outbound
+                    messaging.
                   type: boolean
                 LongLived:
                   description: When enabled, Flex will keep the chat channel active
                     so that it may be used for subsequent interactions with a contact
                     identity. Defaults to `false`.
                   type: boolean
+                JanitorEnabled:
+                  description: When enabled, the Messaging Channel Janitor will remove
+                    active Proxy sessions if the associated Task is deleted outside
+                    of the Flex UI. Defaults to `false`.
+                  type: boolean
+                Integration.RetryCount:
+                  description: The number of times to retry the Studio Flow or webhook
+                    in case of failure. Takes integer values from 0 to 3 with the
+                    default being 3. Optional when `integrationType` is `studio` or
+                    `external`, not applicable otherwise.
+                  type: integer
               title: UpdateFlexFlowRequest
               type: object
       responses:
@@ -1471,9 +1471,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                MediaProperties:
-                  description: JSON representing the Media Properties for the new
-                    Participant.
                 Type:
                   description: 'Participant type.  Can be: `agent`, `customer`, `supervisor`,
                     `external` or `unknown`.'
@@ -1484,6 +1481,9 @@ paths:
                   - agent
                   - unknown
                   type: string
+                MediaProperties:
+                  description: JSON representing the Media Properties for the new
+                    Participant.
               required:
               - Type
               - MediaProperties
@@ -1644,9 +1644,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Routing:
-                  description: Optional. The state of associated tasks. If not specified,
-                    all tasks will be set to `wrapping`.
                 Status:
                   description: 'Required. Indicates the Interaction channel''s status.
                     When a channel is set to `closed`, all tasks are put in the `wrapping`
@@ -1657,6 +1654,9 @@ paths:
                   - closed
                   - wrapup
                   type: string
+                Routing:
+                  description: Optional. The state of associated tasks. If not specified,
+                    all tasks will be set to `wrapping`.
               required:
               - Status
               title: UpdateInteractionChannelRequest
@@ -1772,15 +1772,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ChatFriendlyName:
-                  description: The chat channel's friendly name.
-                  type: string
-                ChatUniqueName:
-                  description: The chat channel's unique name.
-                  type: string
-                CustomerFriendlyName:
-                  description: The chat participant's friendly name.
-                  type: string
                 FlexFlowSid:
                   description: The SID of the Flex Flow.
                   maxLength: 34
@@ -1789,6 +1780,15 @@ paths:
                   type: string
                 Identity:
                   description: The chat identity.
+                  type: string
+                CustomerFriendlyName:
+                  description: The chat participant's friendly name.
+                  type: string
+                ChatFriendlyName:
+                  description: The chat channel's friendly name.
+                  type: string
+                ChatUniqueName:
+                  description: The chat channel's unique name.
                   type: string
                 PreEngagementData:
                   description: The pre-engagement data.

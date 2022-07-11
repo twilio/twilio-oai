@@ -713,19 +713,22 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                Type:
+                  description: 'The type of push-notification service the credential
+                    is for. Can be: `gcm`, `fcm`, or `apn`.'
+                  enum:
+                  - gcm
+                  - apn
+                  - fcm
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEFBQAwgZYxCzAJBgNV.....A==\n\
                     -----END CERTIFICATE-----`"
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -742,17 +745,14 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
-                  type: string
-                Type:
-                  description: 'The type of push-notification service the credential
-                    is for. Can be: `gcm`, `fcm`, or `apn`.'
-                  enum:
-                  - gcm
-                  - apn
-                  - fcm
                   type: string
               required:
               - Type
@@ -844,19 +844,14 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEFBQAwgZYxCzAJBgNV.....A==\n\
                     -----END CERTIFICATE-----`"
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -873,6 +868,11 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
@@ -1077,13 +1077,19 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     new resource. It can be up to 64 characters long.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used to address the resource in place
+                    of the resource's `sid` in the URL. This value must be 64 characters
+                    or less in length and be unique within the Service.
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
                 Type:
                   description: 'The visibility of the channel. Can be: `public` or
@@ -1091,12 +1097,6 @@ paths:
                   enum:
                   - public
                   - private
-                  type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used to address the resource in place
-                    of the resource's `sid` in the URL. This value must be 64 characters
-                    or less in length and be unique within the Service.
                   type: string
               title: CreateChannelRequest
               type: object
@@ -1617,11 +1617,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                LastConsumedMessageIndex:
-                  description: The index of the last [Message](https://www.twilio.com/docs/api/chat/rest/messages)
-                    that the Member has read within the [Channel](https://www.twilio.com/docs/api/chat/rest/channels).
-                  nullable: true
-                  type: integer
                 RoleSid:
                   description: The SID of the [Role](https://www.twilio.com/docs/api/chat/rest/roles)
                     to assign to the member. The default roles are those specified
@@ -1630,6 +1625,11 @@ paths:
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
+                LastConsumedMessageIndex:
+                  description: The index of the last [Message](https://www.twilio.com/docs/api/chat/rest/messages)
+                    that the Member has read within the [Channel](https://www.twilio.com/docs/api/chat/rest/channels).
+                  nullable: true
+                  type: integer
               title: UpdateMemberRequest
               type: object
       responses:
@@ -1762,10 +1762,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
                 Body:
                   description: The message to send to the channel. Can also be an
                     empty string or `null`, which sets the value as an empty string.
@@ -1775,6 +1771,10 @@ paths:
                 From:
                   description: The [identity](https://www.twilio.com/docs/api/chat/guides/identity)
                     of the new message's author. The default value is `system`.
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
               required:
               - Body
@@ -1929,15 +1929,15 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
                 Body:
                   description: The message to send to the channel. Can also be an
                     empty string or `null`, which sets the value as an empty string.
                     You can send structured data in the body by serializing it as
                     a string.
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
               title: UpdateMessageRequest
               type: object
@@ -2050,10 +2050,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     resource. It can be up to 64 characters long.
@@ -2063,6 +2059,10 @@ paths:
                     the resource. It can be used to address the resource in place
                     of the resource's `sid` in the URL. This value must be 64 characters
                     or less in length and be unique within the Service.
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
                   type: string
               title: UpdateChannelRequest
               type: object
@@ -2171,6 +2171,14 @@ paths:
                   description: A descriptive string that you create to describe the
                     new resource. It can be up to 64 characters long.
                   type: string
+                Type:
+                  description: 'The type of role. Can be: `channel` for [Channel](https://www.twilio.com/docs/chat/api/channels)
+                    roles or `deployment` for [Service](https://www.twilio.com/docs/chat/api/services)
+                    roles.'
+                  enum:
+                  - channel
+                  - deployment
+                  type: string
                 Permission:
                   description: A permission that you grant to the new role. Only one
                     permission can be granted per parameter. To assign more than one
@@ -2180,14 +2188,6 @@ paths:
                   items:
                     type: string
                   type: array
-                Type:
-                  description: 'The type of role. Can be: `channel` for [Channel](https://www.twilio.com/docs/chat/api/channels)
-                    roles or `deployment` for [Service](https://www.twilio.com/docs/chat/api/services)
-                    roles.'
-                  enum:
-                  - channel
-                  - deployment
-                  type: string
               required:
               - FriendlyName
               - Type
@@ -2425,14 +2425,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A valid JSON string that contains application-specific
-                    data.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. This value is often used for display purposes.
-                  type: string
                 Identity:
                   description: The `identity` value that uniquely identifies the new
                     resource's [User](https://www.twilio.com/docs/api/chat/rest/v1/user)
@@ -2446,6 +2438,14 @@ paths:
                   maxLength: 34
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                Attributes:
+                  description: A valid JSON string that contains application-specific
+                    data.
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. This value is often used for display purposes.
                   type: string
               required:
               - Identity
@@ -2559,6 +2559,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                RoleSid:
+                  description: The SID of the [Role](https://www.twilio.com/docs/api/chat/rest/roles)
+                    assigned to this user.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
                 Attributes:
                   description: A valid JSON string that contains application-specific
                     data.
@@ -2566,13 +2573,6 @@ paths:
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     resource. It is often used for display purposes.
-                  type: string
-                RoleSid:
-                  description: The SID of the [Role](https://www.twilio.com/docs/api/chat/rest/roles)
-                    assigned to this user.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
               title: UpdateUserRequest
               type: object
@@ -2741,13 +2741,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ConsumptionReportInterval:
-                  description: DEPRECATED. The interval in seconds between consumption
-                    reports submission batches from client endpoints.
-                  type: integer
-                DefaultChannelCreatorRoleSid:
-                  description: The channel role assigned to a channel creator when
-                    they join a new channel. See the [Roles endpoint](https://www.twilio.com/docs/chat/api/roles)
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                  type: string
+                DefaultServiceRoleSid:
+                  description: The service role assigned to users when they are added
+                    to the service. See the [Roles endpoint](https://www.twilio.com/docs/chat/api/roles)
                     for more details.
                   maxLength: 34
                   minLength: 34
@@ -2761,44 +2761,31 @@ paths:
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
-                DefaultServiceRoleSid:
-                  description: The service role assigned to users when they are added
-                    to the service. See the [Roles endpoint](https://www.twilio.com/docs/chat/api/roles)
+                DefaultChannelCreatorRoleSid:
+                  description: The channel role assigned to a channel creator when
+                    they join a new channel. See the [Roles endpoint](https://www.twilio.com/docs/chat/api/roles)
                     for more details.
                   maxLength: 34
                   minLength: 34
                   pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
-                  type: string
-                Limits.ChannelMembers:
-                  description: The maximum number of Members that can be added to
-                    Channels within this Service. Can be up to 1,000.
-                  type: integer
-                Limits.UserChannels:
-                  description: The maximum number of Channels Users can be a Member
-                    of within this Service. Can be up to 1,000.
-                  type: integer
-                Notifications.AddedToChannel.Enabled:
-                  description: 'Whether to send a notification when a member is added
-                    to a channel. Can be: `true` or `false` and the default is `false`.'
+                ReadStatusEnabled:
+                  description: Whether to enable the [Message Consumption Horizon](https://www.twilio.com/docs/chat/consumption-horizon)
+                    feature. The default is `true`.
                   type: boolean
-                Notifications.AddedToChannel.Template:
-                  description: The template to use to create the notification text
-                    displayed when a member is added to a channel and `notifications.added_to_channel.enabled`
-                    is `true`.
-                  type: string
-                Notifications.InvitedToChannel.Enabled:
-                  description: 'Whether to send a notification when a user is invited
-                    to a channel. Can be: `true` or `false` and the default is `false`.'
+                ReachabilityEnabled:
+                  description: Whether to enable the [Reachability Indicator](https://www.twilio.com/docs/chat/reachability-indicator)
+                    for this Service instance. The default is `false`.
                   type: boolean
-                Notifications.InvitedToChannel.Template:
-                  description: The template to use to create the notification text
-                    displayed when a user is invited to a channel and `notifications.invited_to_channel.enabled`
-                    is `true`.
-                  type: string
+                TypingIndicatorTimeout:
+                  description: How long in seconds after a `started typing` event
+                    until clients should assume that user is no longer typing, even
+                    if no `ended typing` message was received.  The default is 5 seconds.
+                  type: integer
+                ConsumptionReportInterval:
+                  description: DEPRECATED. The interval in seconds between consumption
+                    reports submission batches from client endpoints.
+                  type: integer
                 Notifications.NewMessage.Enabled:
                   description: 'Whether to send a notification when a new message
                     is added to a channel. Can be: `true` or `false` and the default
@@ -2807,6 +2794,15 @@ paths:
                 Notifications.NewMessage.Template:
                   description: The template to use to create the notification text
                     displayed when a new message is added to a channel and `notifications.new_message.enabled`
+                    is `true`.
+                  type: string
+                Notifications.AddedToChannel.Enabled:
+                  description: 'Whether to send a notification when a member is added
+                    to a channel. Can be: `true` or `false` and the default is `false`.'
+                  type: boolean
+                Notifications.AddedToChannel.Template:
+                  description: The template to use to create the notification text
+                    displayed when a member is added to a channel and `notifications.added_to_channel.enabled`
                     is `true`.
                   type: string
                 Notifications.RemovedFromChannel.Enabled:
@@ -2819,11 +2815,14 @@ paths:
                     displayed to a user when they are removed from a channel and `notifications.removed_from_channel.enabled`
                     is `true`.
                   type: string
-                PostWebhookUrl:
-                  description: The URL for post-event webhooks, which are called by
-                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/api/chat/webhooks)
-                    for more details.
-                  format: uri
+                Notifications.InvitedToChannel.Enabled:
+                  description: 'Whether to send a notification when a user is invited
+                    to a channel. Can be: `true` or `false` and the default is `false`.'
+                  type: boolean
+                Notifications.InvitedToChannel.Template:
+                  description: The template to use to create the notification text
+                    displayed when a user is invited to a channel and `notifications.invited_to_channel.enabled`
+                    is `true`.
                   type: string
                 PreWebhookUrl:
                   description: The URL for pre-event webhooks, which are called by
@@ -2831,26 +2830,12 @@ paths:
                     for more details.
                   format: uri
                   type: string
-                ReachabilityEnabled:
-                  description: Whether to enable the [Reachability Indicator](https://www.twilio.com/docs/chat/reachability-indicator)
-                    for this Service instance. The default is `false`.
-                  type: boolean
-                ReadStatusEnabled:
-                  description: Whether to enable the [Message Consumption Horizon](https://www.twilio.com/docs/chat/consumption-horizon)
-                    feature. The default is `true`.
-                  type: boolean
-                TypingIndicatorTimeout:
-                  description: How long in seconds after a `started typing` event
-                    until clients should assume that user is no longer typing, even
-                    if no `ended typing` message was received.  The default is 5 seconds.
-                  type: integer
-                WebhookFilters:
-                  description: The list of WebHook events that are enabled for this
-                    Service instance. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
+                PostWebhookUrl:
+                  description: The URL for post-event webhooks, which are called by
+                    using the `webhook_method`. See [Webhook Events](https://www.twilio.com/docs/api/chat/webhooks)
                     for more details.
-                  items:
-                    type: string
-                  type: array
+                  format: uri
+                  type: string
                 WebhookMethod:
                   description: 'The HTTP method to use for calls to the `pre_webhook_url`
                     and `post_webhook_url` webhooks.  Can be: `POST` or `GET` and
@@ -2865,8 +2850,52 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                Webhooks.OnChannelAdd.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_channel_add.url`.
+                WebhookFilters:
+                  description: The list of WebHook events that are enabled for this
+                    Service instance. See [Webhook Events](https://www.twilio.com/docs/chat/webhook-events)
+                    for more details.
+                  items:
+                    type: string
+                  type: array
+                Webhooks.OnMessageSend.Url:
+                  description: The URL of the webhook to call in response to the `on_message_send`
+                    event using the `webhooks.on_message_send.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageSend.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_message_send.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMessageUpdate.Url:
+                  description: The URL of the webhook to call in response to the `on_message_update`
+                    event using the `webhooks.on_message_update.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageUpdate.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_message_update.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMessageRemove.Url:
+                  description: The URL of the webhook to call in response to the `on_message_remove`
+                    event using the `webhooks.on_message_remove.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageRemove.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_message_remove.url`.
                   enum:
                   - HEAD
                   - GET
@@ -2881,25 +2910,8 @@ paths:
                     event using the `webhooks.on_channel_add.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnChannelAdded.Method:
-                  description: The URL of the webhook to call in response to the `on_channel_added`
-                    event`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnChannelAdded.Url:
-                  description: The URL of the webhook to call in response to the `on_channel_added`
-                    event using the `webhooks.on_channel_added.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnChannelDestroy.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_channel_destroy.url`.
+                Webhooks.OnChannelAdd.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_channel_add.url`.
                   enum:
                   - HEAD
                   - GET
@@ -2914,24 +2926,8 @@ paths:
                     event using the `webhooks.on_channel_destroy.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnChannelDestroyed.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_channel_destroyed.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnChannelDestroyed.Url:
-                  description: The URL of the webhook to call in response to the `on_channel_added`
-                    event using the `webhooks.on_channel_destroyed.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnChannelUpdate.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_channel_update.url`.
+                Webhooks.OnChannelDestroy.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_channel_destroy.url`.
                   enum:
                   - HEAD
                   - GET
@@ -2946,24 +2942,8 @@ paths:
                     event using the `webhooks.on_channel_update.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnChannelUpdated.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_channel_updated.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnChannelUpdated.Url:
-                  description: The URL of the webhook to call in response to the `on_channel_updated`
-                    event using the `webhooks.on_channel_updated.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMemberAdd.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_member_add.url`.
+                Webhooks.OnChannelUpdate.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_channel_update.url`.
                   enum:
                   - HEAD
                   - GET
@@ -2978,7 +2958,121 @@ paths:
                     event using the `webhooks.on_member_add.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnMemberAdded.Method:
+                Webhooks.OnMemberAdd.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_member_add.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMemberRemove.Url:
+                  description: The URL of the webhook to call in response to the `on_member_remove`
+                    event using the `webhooks.on_member_remove.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMemberRemove.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_member_remove.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMessageSent.Url:
+                  description: The URL of the webhook to call in response to the `on_message_sent`
+                    event using the `webhooks.on_message_sent.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageSent.Method:
+                  description: The URL of the webhook to call in response to the `on_message_sent`
+                    event`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMessageUpdated.Url:
+                  description: The URL of the webhook to call in response to the `on_message_updated`
+                    event using the `webhooks.on_message_updated.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageUpdated.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_message_updated.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnMessageRemoved.Url:
+                  description: The URL of the webhook to call in response to the `on_message_removed`
+                    event using the `webhooks.on_message_removed.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnMessageRemoved.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_message_removed.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnChannelAdded.Url:
+                  description: The URL of the webhook to call in response to the `on_channel_added`
+                    event using the `webhooks.on_channel_added.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnChannelAdded.Method:
+                  description: The URL of the webhook to call in response to the `on_channel_added`
+                    event`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnChannelDestroyed.Url:
+                  description: The URL of the webhook to call in response to the `on_channel_added`
+                    event using the `webhooks.on_channel_destroyed.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnChannelDestroyed.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_channel_destroyed.url`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
+                  type: string
+                Webhooks.OnChannelUpdated.Url:
+                  description: The URL of the webhook to call in response to the `on_channel_updated`
+                    event using the `webhooks.on_channel_updated.method` HTTP method.
+                  format: uri
+                  type: string
+                Webhooks.OnChannelUpdated.Method:
                   description: The HTTP method to use when calling the `webhooks.on_channel_updated.url`.
                   enum:
                   - HEAD
@@ -2994,24 +3088,8 @@ paths:
                     event using the `webhooks.on_channel_updated.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnMemberRemove.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_member_remove.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMemberRemove.Url:
-                  description: The URL of the webhook to call in response to the `on_member_remove`
-                    event using the `webhooks.on_member_remove.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMemberRemoved.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_member_removed.url`.
+                Webhooks.OnMemberAdded.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_channel_updated.url`.
                   enum:
                   - HEAD
                   - GET
@@ -3026,8 +3104,8 @@ paths:
                     event using the `webhooks.on_member_removed.method` HTTP method.
                   format: uri
                   type: string
-                Webhooks.OnMessageRemove.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_message_remove.url`.
+                Webhooks.OnMemberRemoved.Method:
+                  description: The HTTP method to use when calling the `webhooks.on_member_removed.url`.
                   enum:
                   - HEAD
                   - GET
@@ -3037,92 +3115,14 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                Webhooks.OnMessageRemove.Url:
-                  description: The URL of the webhook to call in response to the `on_message_remove`
-                    event using the `webhooks.on_message_remove.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMessageRemoved.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_message_removed.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMessageRemoved.Url:
-                  description: The URL of the webhook to call in response to the `on_message_removed`
-                    event using the `webhooks.on_message_removed.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMessageSend.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_message_send.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMessageSend.Url:
-                  description: The URL of the webhook to call in response to the `on_message_send`
-                    event using the `webhooks.on_message_send.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMessageSent.Method:
-                  description: The URL of the webhook to call in response to the `on_message_sent`
-                    event`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMessageSent.Url:
-                  description: The URL of the webhook to call in response to the `on_message_sent`
-                    event using the `webhooks.on_message_sent.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMessageUpdate.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_message_update.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMessageUpdate.Url:
-                  description: The URL of the webhook to call in response to the `on_message_update`
-                    event using the `webhooks.on_message_update.method` HTTP method.
-                  format: uri
-                  type: string
-                Webhooks.OnMessageUpdated.Method:
-                  description: The HTTP method to use when calling the `webhooks.on_message_updated.url`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                Webhooks.OnMessageUpdated.Url:
-                  description: The URL of the webhook to call in response to the `on_message_updated`
-                    event using the `webhooks.on_message_updated.method` HTTP method.
-                  format: uri
-                  type: string
+                Limits.ChannelMembers:
+                  description: The maximum number of Members that can be added to
+                    Channels within this Service. Can be up to 1,000.
+                  type: integer
+                Limits.UserChannels:
+                  description: The maximum number of Channels Users can be a Member
+                    of within this Service. Can be up to 1,000.
+                  type: integer
               title: UpdateServiceRequest
               type: object
       responses:

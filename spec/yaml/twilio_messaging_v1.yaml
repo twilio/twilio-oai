@@ -743,37 +743,20 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                AreaCodeGeomatch:
-                  description: Whether to enable [Area Code Geomatch](https://www.twilio.com/docs/sms/services#area-code-geomatch)
-                    on the Service Instance.
-                  type: boolean
-                FallbackMethod:
-                  description: 'The HTTP method we should use to call `fallback_url`.
-                    Can be: `GET` or `POST`.'
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                FallbackToLongCode:
-                  description: Whether to enable [Fallback to Long Code](https://www.twilio.com/docs/sms/services#fallback-to-long-code)
-                    for messages sent through the Service instance.
-                  type: boolean
-                FallbackUrl:
-                  description: The URL that we call using `fallback_method` if an
-                    error occurs while retrieving or executing the TwiML from the
-                    Inbound Request URL. If the `use_inbound_webhook_on_number` field
-                    is enabled then the webhook url defined on the phone number will
-                    override the `fallback_url` defined for the Messaging Service.
-                  format: uri
-                  type: string
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     resource. It can be up to 64 characters long.
+                  type: string
+                InboundRequestUrl:
+                  description: The URL we call using `inbound_method` when a message
+                    is received by any phone number or short code in the Service.
+                    When this property is `null`, receiving inbound messages is disabled.
+                    All messages sent to the Twilio phone number or short code will
+                    not be logged and received on the Account. If the `use_inbound_webhook_on_number`
+                    field is enabled then the webhook url defined on the phone number
+                    will override the `inbound_request_url` defined for the Messaging
+                    Service.
+                  format: uri
                   type: string
                 InboundMethod:
                   description: The HTTP method we should use to call `inbound_request_url`.
@@ -787,32 +770,26 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                InboundRequestUrl:
-                  description: The URL we call using `inbound_method` when a message
-                    is received by any phone number or short code in the Service.
-                    When this property is `null`, receiving inbound messages is disabled.
-                    All messages sent to the Twilio phone number or short code will
-                    not be logged and received on the Account. If the `use_inbound_webhook_on_number`
-                    field is enabled then the webhook url defined on the phone number
-                    will override the `inbound_request_url` defined for the Messaging
-                    Service.
+                FallbackUrl:
+                  description: The URL that we call using `fallback_method` if an
+                    error occurs while retrieving or executing the TwiML from the
+                    Inbound Request URL. If the `use_inbound_webhook_on_number` field
+                    is enabled then the webhook url defined on the phone number will
+                    override the `fallback_url` defined for the Messaging Service.
                   format: uri
                   type: string
-                MmsConverter:
-                  description: Whether to enable the [MMS Converter](https://www.twilio.com/docs/sms/services#mms-converter)
-                    for messages sent through the Service instance.
-                  type: boolean
-                ScanMessageContent:
-                  description: Reserved.
+                FallbackMethod:
+                  description: 'The HTTP method we should use to call `fallback_url`.
+                    Can be: `GET` or `POST`.'
                   enum:
-                  - inherit
-                  - enable
-                  - disable
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
                   type: string
-                SmartEncoding:
-                  description: Whether to enable [Smart Encoding](https://www.twilio.com/docs/sms/services#smart-encoding)
-                    for messages sent through the Service instance.
-                  type: boolean
                 StatusCallback:
                   description: The URL we should call to [pass status updates](https://www.twilio.com/docs/sms/api/message-resource#message-status-values)
                     about message delivery.
@@ -822,9 +799,41 @@ paths:
                   description: Whether to enable [Sticky Sender](https://www.twilio.com/docs/sms/services#sticky-sender)
                     on the Service instance.
                   type: boolean
+                MmsConverter:
+                  description: Whether to enable the [MMS Converter](https://www.twilio.com/docs/sms/services#mms-converter)
+                    for messages sent through the Service instance.
+                  type: boolean
+                SmartEncoding:
+                  description: Whether to enable [Smart Encoding](https://www.twilio.com/docs/sms/services#smart-encoding)
+                    for messages sent through the Service instance.
+                  type: boolean
+                ScanMessageContent:
+                  description: Reserved.
+                  enum:
+                  - inherit
+                  - enable
+                  - disable
+                  type: string
+                FallbackToLongCode:
+                  description: Whether to enable [Fallback to Long Code](https://www.twilio.com/docs/sms/services#fallback-to-long-code)
+                    for messages sent through the Service instance.
+                  type: boolean
+                AreaCodeGeomatch:
+                  description: Whether to enable [Area Code Geomatch](https://www.twilio.com/docs/sms/services#area-code-geomatch)
+                    on the Service Instance.
+                  type: boolean
+                ValidityPeriod:
+                  description: How long, in seconds, messages sent from the Service
+                    are valid. Can be an integer from `1` to `14,400`.
+                  type: integer
                 SynchronousValidation:
                   description: Reserved.
                   type: boolean
+                Usecase:
+                  description: 'A string that describes the scenario in which the
+                    Messaging Service will be used. Examples: [notification, marketing,
+                    verification, poll ..].'
+                  type: string
                 UseInboundWebhookOnNumber:
                   description: A boolean value that indicates either the webhook url
                     configured on the phone number will be used or `inbound_request_url`/`fallback_url`
@@ -833,15 +842,6 @@ paths:
                     number will override the `inbound_request_url`/`fallback_url`
                     defined for the Messaging Service.
                   type: boolean
-                Usecase:
-                  description: 'A string that describes the scenario in which the
-                    Messaging Service will be used. Examples: [notification, marketing,
-                    verification, poll ..].'
-                  type: string
-                ValidityPeriod:
-                  description: How long, in seconds, messages sent from the Service
-                    are valid. Can be an integer from `1` to `14,400`.
-                  type: integer
               required:
               - FriendlyName
               title: CreateServiceRequest
@@ -1022,14 +1022,6 @@ paths:
                 Description:
                   description: A short description of what this SMS campaign does.
                   type: string
-                HasEmbeddedLinks:
-                  description: Indicates that this SMS campaign will send messages
-                    that contain links.
-                  type: boolean
-                HasEmbeddedPhone:
-                  description: Indicates that this SMS campaign will send messages
-                    that contain phone numbers.
-                  type: boolean
                 MessageSamples:
                   description: Message samples, at least 2 and up to 5 sample messages,
                     <=1024 chars each.
@@ -1040,6 +1032,14 @@ paths:
                   description: 'A2P Campaign Use Case. Examples: [ 2FA, EMERGENCY,
                     MARKETING..]'
                   type: string
+                HasEmbeddedLinks:
+                  description: Indicates that this SMS campaign will send messages
+                    that contain links.
+                  type: boolean
+                HasEmbeddedPhone:
+                  description: Indicates that this SMS campaign will send messages
+                    that contain phone numbers.
+                  type: boolean
               required:
               - BrandRegistrationSid
               - Description
@@ -1802,37 +1802,20 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                AreaCodeGeomatch:
-                  description: Whether to enable [Area Code Geomatch](https://www.twilio.com/docs/sms/services#area-code-geomatch)
-                    on the Service Instance.
-                  type: boolean
-                FallbackMethod:
-                  description: 'The HTTP method we should use to call `fallback_url`.
-                    Can be: `GET` or `POST`.'
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                FallbackToLongCode:
-                  description: Whether to enable [Fallback to Long Code](https://www.twilio.com/docs/sms/services#fallback-to-long-code)
-                    for messages sent through the Service instance.
-                  type: boolean
-                FallbackUrl:
-                  description: The URL that we call using `fallback_method` if an
-                    error occurs while retrieving or executing the TwiML from the
-                    Inbound Request URL. If the `use_inbound_webhook_on_number` field
-                    is enabled then the webhook url defined on the phone number will
-                    override the `fallback_url` defined for the Messaging Service.
-                  format: uri
-                  type: string
                 FriendlyName:
                   description: A descriptive string that you create to describe the
                     resource. It can be up to 64 characters long.
+                  type: string
+                InboundRequestUrl:
+                  description: The URL we call using `inbound_method` when a message
+                    is received by any phone number or short code in the Service.
+                    When this property is `null`, receiving inbound messages is disabled.
+                    All messages sent to the Twilio phone number or short code will
+                    not be logged and received on the Account. If the `use_inbound_webhook_on_number`
+                    field is enabled then the webhook url defined on the phone number
+                    will override the `inbound_request_url` defined for the Messaging
+                    Service.
+                  format: uri
                   type: string
                 InboundMethod:
                   description: The HTTP method we should use to call `inbound_request_url`.
@@ -1846,32 +1829,26 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                InboundRequestUrl:
-                  description: The URL we call using `inbound_method` when a message
-                    is received by any phone number or short code in the Service.
-                    When this property is `null`, receiving inbound messages is disabled.
-                    All messages sent to the Twilio phone number or short code will
-                    not be logged and received on the Account. If the `use_inbound_webhook_on_number`
-                    field is enabled then the webhook url defined on the phone number
-                    will override the `inbound_request_url` defined for the Messaging
-                    Service.
+                FallbackUrl:
+                  description: The URL that we call using `fallback_method` if an
+                    error occurs while retrieving or executing the TwiML from the
+                    Inbound Request URL. If the `use_inbound_webhook_on_number` field
+                    is enabled then the webhook url defined on the phone number will
+                    override the `fallback_url` defined for the Messaging Service.
                   format: uri
                   type: string
-                MmsConverter:
-                  description: Whether to enable the [MMS Converter](https://www.twilio.com/docs/sms/services#mms-converter)
-                    for messages sent through the Service instance.
-                  type: boolean
-                ScanMessageContent:
-                  description: Reserved.
+                FallbackMethod:
+                  description: 'The HTTP method we should use to call `fallback_url`.
+                    Can be: `GET` or `POST`.'
                   enum:
-                  - inherit
-                  - enable
-                  - disable
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
                   type: string
-                SmartEncoding:
-                  description: Whether to enable [Smart Encoding](https://www.twilio.com/docs/sms/services#smart-encoding)
-                    for messages sent through the Service instance.
-                  type: boolean
                 StatusCallback:
                   description: The URL we should call to [pass status updates](https://www.twilio.com/docs/sms/api/message-resource#message-status-values)
                     about message delivery.
@@ -1881,9 +1858,41 @@ paths:
                   description: Whether to enable [Sticky Sender](https://www.twilio.com/docs/sms/services#sticky-sender)
                     on the Service instance.
                   type: boolean
+                MmsConverter:
+                  description: Whether to enable the [MMS Converter](https://www.twilio.com/docs/sms/services#mms-converter)
+                    for messages sent through the Service instance.
+                  type: boolean
+                SmartEncoding:
+                  description: Whether to enable [Smart Encoding](https://www.twilio.com/docs/sms/services#smart-encoding)
+                    for messages sent through the Service instance.
+                  type: boolean
+                ScanMessageContent:
+                  description: Reserved.
+                  enum:
+                  - inherit
+                  - enable
+                  - disable
+                  type: string
+                FallbackToLongCode:
+                  description: Whether to enable [Fallback to Long Code](https://www.twilio.com/docs/sms/services#fallback-to-long-code)
+                    for messages sent through the Service instance.
+                  type: boolean
+                AreaCodeGeomatch:
+                  description: Whether to enable [Area Code Geomatch](https://www.twilio.com/docs/sms/services#area-code-geomatch)
+                    on the Service Instance.
+                  type: boolean
+                ValidityPeriod:
+                  description: How long, in seconds, messages sent from the Service
+                    are valid. Can be an integer from `1` to `14,400`.
+                  type: integer
                 SynchronousValidation:
                   description: Reserved.
                   type: boolean
+                Usecase:
+                  description: 'A string that describes the scenario in which the
+                    Messaging Service will be used. Examples: [notification, marketing,
+                    verification, poll ..]'
+                  type: string
                 UseInboundWebhookOnNumber:
                   description: A boolean value that indicates either the webhook url
                     configured on the phone number will be used or `inbound_request_url`/`fallback_url`
@@ -1892,15 +1901,6 @@ paths:
                     number will override the `inbound_request_url`/`fallback_url`
                     defined for the Messaging Service.
                   type: boolean
-                Usecase:
-                  description: 'A string that describes the scenario in which the
-                    Messaging Service will be used. Examples: [notification, marketing,
-                    verification, poll ..]'
-                  type: string
-                ValidityPeriod:
-                  description: How long, in seconds, messages sent from the Service
-                    are valid. Can be an integer from `1` to `14,400`.
-                  type: integer
               title: UpdateServiceRequest
               type: object
       responses:
@@ -1982,6 +1982,12 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                CustomerProfileBundleSid:
+                  description: Customer Profile Bundle Sid.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^BU[0-9a-fA-F]{32}$
+                  type: string
                 A2PProfileBundleSid:
                   description: A2P Messaging Profile Bundle Sid.
                   maxLength: 34
@@ -1992,12 +1998,6 @@ paths:
                   description: 'Type of brand being created. One of: "STANDARD", "STARTER".
                     STARTER is for low volume, starter use cases. STANDARD is for
                     all other use cases.'
-                  type: string
-                CustomerProfileBundleSid:
-                  description: Customer Profile Bundle Sid.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^BU[0-9a-fA-F]{32}$
                   type: string
                 Mock:
                   description: A boolean that specifies whether brand should be a
@@ -2119,14 +2119,14 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                VettingId:
-                  description: The unique ID of the vetting
-                  type: string
                 VettingProvider:
                   description: The third-party provider of the vettings to create
                     .
                   enum:
                   - campaign-verify
+                  type: string
+                VettingId:
+                  description: The unique ID of the vetting
                   type: string
               required:
               - VettingProvider

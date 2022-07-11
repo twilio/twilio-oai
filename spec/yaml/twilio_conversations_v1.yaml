@@ -1877,22 +1877,22 @@ paths:
                   minLength: 34
                   pattern: ^IS[0-9a-fA-F]{32}$
                   type: string
-                DefaultClosedTimer:
-                  description: Default ISO8601 duration when conversation will be
-                    switched to `closed` state. Minimum value for this timer is 10
-                    minutes.
-                  type: string
-                DefaultInactiveTimer:
-                  description: Default ISO8601 duration when conversation will be
-                    switched to `inactive` state. Minimum value for this timer is
-                    1 minute.
-                  type: string
                 DefaultMessagingServiceSid:
                   description: The SID of the default [Messaging Service](https://www.twilio.com/docs/sms/services/api)
                     to use when creating a conversation.
                   maxLength: 34
                   minLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
+                  type: string
+                DefaultInactiveTimer:
+                  description: Default ISO8601 duration when conversation will be
+                    switched to `inactive` state. Minimum value for this timer is
+                    1 minute.
+                  type: string
+                DefaultClosedTimer:
+                  description: Default ISO8601 duration when conversation will be
+                    switched to `closed` state. Minimum value for this timer is 10
+                    minutes.
                   type: string
               title: UpdateConfigurationRequest
               type: object
@@ -1982,9 +1982,33 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Type:
+                  description: Type of Address. Value can be `whatsapp` or `sms`.
+                  enum:
+                  - sms
+                  - whatsapp
+                  - messenger
+                  - gbm
+                  type: string
                 Address:
                   description: The unique address to be configured. The address can
                     be a whatsapp address or phone number
+                  type: string
+                FriendlyName:
+                  description: The human-readable name of this configuration, limited
+                    to 256 characters. Optional.
+                  type: string
+                AutoCreation.Enabled:
+                  description: Enable/Disable auto-creating conversations for messages
+                    to this address
+                  type: boolean
+                AutoCreation.Type:
+                  description: Type of Auto Creation. Value can be one of `webhook`,
+                    `studio` or `default`.
+                  enum:
+                  - webhook
+                  - studio
+                  - default
                   type: string
                 AutoCreation.ConversationServiceSid:
                   description: Conversation Service for the auto-created conversation.
@@ -1993,10 +2017,25 @@ paths:
                   minLength: 34
                   pattern: ^IS[0-9a-fA-F]{32}$
                   type: string
-                AutoCreation.Enabled:
-                  description: Enable/Disable auto-creating conversations for messages
-                    to this address
-                  type: boolean
+                AutoCreation.WebhookUrl:
+                  description: For type `webhook`, the url for the webhook request.
+                  type: string
+                AutoCreation.WebhookMethod:
+                  description: For type `webhook`, the HTTP method to be used when
+                    sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
+                AutoCreation.WebhookFilters:
+                  description: 'The list of events, firing webhook event for this
+                    Conversation. Values can be any of the following: `onMessageAdded`,
+                    `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`,
+                    `onConversationStateUpdated`, `onConversationRemoved`, `onParticipantAdded`,
+                    `onParticipantUpdated`, `onParticipantRemoved`, `onDeliveryUpdated`'
+                  items:
+                    type: string
+                  type: array
                 AutoCreation.StudioFlowSid:
                   description: For type `studio`, the studio flow SID where the webhook
                     should be sent to.
@@ -2008,45 +2047,6 @@ paths:
                   description: For type `studio`, number of times to retry the webhook
                     request
                   type: integer
-                AutoCreation.Type:
-                  description: Type of Auto Creation. Value can be one of `webhook`,
-                    `studio` or `default`.
-                  enum:
-                  - webhook
-                  - studio
-                  - default
-                  type: string
-                AutoCreation.WebhookFilters:
-                  description: 'The list of events, firing webhook event for this
-                    Conversation. Values can be any of the following: `onMessageAdded`,
-                    `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`,
-                    `onConversationStateUpdated`, `onConversationRemoved`, `onParticipantAdded`,
-                    `onParticipantUpdated`, `onParticipantRemoved`, `onDeliveryUpdated`'
-                  items:
-                    type: string
-                  type: array
-                AutoCreation.WebhookMethod:
-                  description: For type `webhook`, the HTTP method to be used when
-                    sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
-                AutoCreation.WebhookUrl:
-                  description: For type `webhook`, the url for the webhook request.
-                  type: string
-                FriendlyName:
-                  description: The human-readable name of this configuration, limited
-                    to 256 characters. Optional.
-                  type: string
-                Type:
-                  description: Type of Address. Value can be `whatsapp` or `sms`.
-                  enum:
-                  - sms
-                  - whatsapp
-                  - messenger
-                  - gbm
-                  type: string
               required:
               - Type
               - Address
@@ -2132,6 +2132,22 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The human-readable name of this configuration, limited
+                    to 256 characters. Optional.
+                  type: string
+                AutoCreation.Enabled:
+                  description: Enable/Disable auto-creating conversations for messages
+                    to this address
+                  type: boolean
+                AutoCreation.Type:
+                  description: Type of Auto Creation. Value can be one of `webhook`,
+                    `studio` or `default`.
+                  enum:
+                  - webhook
+                  - studio
+                  - default
+                  type: string
                 AutoCreation.ConversationServiceSid:
                   description: Conversation Service for the auto-created conversation.
                     If not set, the conversation is created in the default service.
@@ -2139,10 +2155,25 @@ paths:
                   minLength: 34
                   pattern: ^IS[0-9a-fA-F]{32}$
                   type: string
-                AutoCreation.Enabled:
-                  description: Enable/Disable auto-creating conversations for messages
-                    to this address
-                  type: boolean
+                AutoCreation.WebhookUrl:
+                  description: For type `webhook`, the url for the webhook request.
+                  type: string
+                AutoCreation.WebhookMethod:
+                  description: For type `webhook`, the HTTP method to be used when
+                    sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
+                AutoCreation.WebhookFilters:
+                  description: 'The list of events, firing webhook event for this
+                    Conversation. Values can be any of the following: `onMessageAdded`,
+                    `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`,
+                    `onConversationStateUpdated`, `onConversationRemoved`, `onParticipantAdded`,
+                    `onParticipantUpdated`, `onParticipantRemoved`, `onDeliveryUpdated`'
+                  items:
+                    type: string
+                  type: array
                 AutoCreation.StudioFlowSid:
                   description: For type `studio`, the studio flow SID where the webhook
                     should be sent to.
@@ -2154,37 +2185,6 @@ paths:
                   description: For type `studio`, number of times to retry the webhook
                     request
                   type: integer
-                AutoCreation.Type:
-                  description: Type of Auto Creation. Value can be one of `webhook`,
-                    `studio` or `default`.
-                  enum:
-                  - webhook
-                  - studio
-                  - default
-                  type: string
-                AutoCreation.WebhookFilters:
-                  description: 'The list of events, firing webhook event for this
-                    Conversation. Values can be any of the following: `onMessageAdded`,
-                    `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`,
-                    `onConversationStateUpdated`, `onConversationRemoved`, `onParticipantAdded`,
-                    `onParticipantUpdated`, `onParticipantRemoved`, `onDeliveryUpdated`'
-                  items:
-                    type: string
-                  type: array
-                AutoCreation.WebhookMethod:
-                  description: For type `webhook`, the HTTP method to be used when
-                    sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
-                AutoCreation.WebhookUrl:
-                  description: For type `webhook`, the url for the webhook request.
-                  type: string
-                FriendlyName:
-                  description: The human-readable name of this configuration, limited
-                    to 256 characters. Optional.
-                  type: string
               title: UpdateConfigurationAddressRequest
               type: object
       responses:
@@ -2233,6 +2233,9 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Method:
+                  description: The HTTP method to be used when sending a webhook request.
+                  type: string
                 Filters:
                   description: 'The list of webhook event triggers that are enabled
                     for this Service: `onMessageAdded`, `onMessageUpdated`, `onMessageRemoved`,
@@ -2241,15 +2244,12 @@ paths:
                   items:
                     type: string
                   type: array
-                Method:
-                  description: The HTTP method to be used when sending a webhook request.
+                PreWebhookUrl:
+                  description: The absolute url the pre-event webhook request should
+                    be sent to.
                   type: string
                 PostWebhookUrl:
                   description: The absolute url the post-event webhook request should
-                    be sent to.
-                  type: string
-                PreWebhookUrl:
-                  description: The absolute url the pre-event webhook request should
                     be sent to.
                   type: string
                 Target:
@@ -2351,11 +2351,14 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
+                FriendlyName:
+                  description: The human-readable name of this conversation, limited
+                    to 256 characters. Optional.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used to address the resource in place
+                    of the resource's `sid` in the URL.
                   type: string
                 DateCreated:
                   description: The date that this resource was created.
@@ -2365,16 +2368,18 @@ paths:
                   description: The date that this resource was last updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: The human-readable name of this conversation, limited
-                    to 256 characters. Optional.
-                  type: string
                 MessagingServiceSid:
                   description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
                     this conversation belongs to.
                   maxLength: 34
                   minLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
+                  type: string
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
                   type: string
                 State:
                   description: Current state of this conversation. Can be either `active`,
@@ -2384,18 +2389,13 @@ paths:
                   - active
                   - closed
                   type: string
-                Timers.Closed:
-                  description: ISO8601 duration when conversation will be switched
-                    to `closed` state. Minimum value for this timer is 10 minutes.
-                  type: string
                 Timers.Inactive:
                   description: ISO8601 duration when conversation will be switched
                     to `inactive` state. Minimum value for this timer is 1 minute.
                   type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used to address the resource in place
-                    of the resource's `sid` in the URL.
+                Timers.Closed:
+                  description: ISO8601 duration when conversation will be switched
+                    to `closed` state. Minimum value for this timer is 10 minutes.
                   type: string
               title: CreateConversationRequest
               type: object
@@ -2511,12 +2511,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A string metadata field you can use to store any data
-                    you wish. The string value must contain structurally valid JSON
-                    if specified.  **Note** that if the attributes are not set "{}"
-                    will be returned.
-                  type: string
                 Author:
                   description: The channel specific identifier of the message's author.
                     Defaults to `system`.
@@ -2533,6 +2527,12 @@ paths:
                   description: The date that this resource was last updated. `null`
                     if the message has not been edited.
                   format: date-time
+                  type: string
+                Attributes:
+                  description: A string metadata field you can use to store any data
+                    you wish. The string value must contain structurally valid JSON
+                    if specified.  **Note** that if the attributes are not set "{}"
+                    will be returned.
                   type: string
                 MediaSid:
                   description: The Media SID to be attached to the new Message.
@@ -2801,12 +2801,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A string metadata field you can use to store any data
-                    you wish. The string value must contain structurally valid JSON
-                    if specified.  **Note** that if the attributes are not set "{}"
-                    will be returned.
-                  type: string
                 Author:
                   description: The channel specific identifier of the message's author.
                     Defaults to `system`.
@@ -2823,6 +2817,12 @@ paths:
                   description: The date that this resource was last updated. `null`
                     if the message has not been edited.
                   format: date-time
+                  type: string
+                Attributes:
+                  description: A string metadata field you can use to store any data
+                    you wish. The string value must contain structurally valid JSON
+                    if specified.  **Note** that if the attributes are not set "{}"
+                    will be returned.
                   type: string
               title: UpdateConversationMessageRequest
               type: object
@@ -2930,20 +2930,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
-                  type: string
-                DateCreated:
-                  description: The date that this resource was created.
-                  format: date-time
-                  type: string
-                DateUpdated:
-                  description: The date that this resource was last updated.
-                  format: date-time
-                  type: string
                 Identity:
                   description: A unique string identifier for the conversation participant
                     as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource).
@@ -2957,16 +2943,30 @@ paths:
                     null when the participant is interacting from an SDK endpoint
                     (see the 'identity' field).
                   type: string
-                MessagingBinding.ProjectedAddress:
-                  description: The address of the Twilio phone number that is used
-                    in Group MMS. Communication mask for the Conversation participant
-                    with Identity.
-                  type: string
                 MessagingBinding.ProxyAddress:
                   description: The address of the Twilio phone number (or WhatsApp
                     number) that the participant is in contact with. This field, together
                     with participant address, is only null when the participant is
                     interacting from an SDK endpoint (see the 'identity' field).
+                  type: string
+                DateCreated:
+                  description: The date that this resource was created.
+                  format: date-time
+                  type: string
+                DateUpdated:
+                  description: The date that this resource was last updated.
+                  format: date-time
+                  type: string
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
+                  type: string
+                MessagingBinding.ProjectedAddress:
+                  description: The address of the Twilio phone number that is used
+                    in Group MMS. Communication mask for the Conversation participant
+                    with Identity.
                   type: string
                 RoleSid:
                   description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -3097,12 +3097,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
-                  type: string
                 DateCreated:
                   description: The date that this resource was created.
                   format: date-time
@@ -3110,6 +3104,27 @@ paths:
                 DateUpdated:
                   description: The date that this resource was last updated.
                   format: date-time
+                  type: string
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
+                  type: string
+                RoleSid:
+                  description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
+                    to assign to the participant.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                MessagingBinding.ProxyAddress:
+                  description: The address of the Twilio phone number that the participant
+                    is in contact with. 'null' value will remove it.
+                  type: string
+                MessagingBinding.ProjectedAddress:
+                  description: The address of the Twilio phone number that is used
+                    in Group MMS. 'null' value will remove it.
                   type: string
                 Identity:
                   description: A unique string identifier for the conversation participant
@@ -3126,21 +3141,6 @@ paths:
                   description: "Timestamp of last \u201Cread\u201D message in the\
                     \ [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource)\
                     \ for the Participant."
-                  type: string
-                MessagingBinding.ProjectedAddress:
-                  description: The address of the Twilio phone number that is used
-                    in Group MMS. 'null' value will remove it.
-                  type: string
-                MessagingBinding.ProxyAddress:
-                  description: The address of the Twilio phone number that the participant
-                    is in contact with. 'null' value will remove it.
-                  type: string
-                RoleSid:
-                  description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
-                    to assign to the participant.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
               title: UpdateConversationParticipantRequest
               type: object
@@ -3239,8 +3239,31 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Target:
+                  description: 'The target of this webhook: `webhook`, `studio`, `trigger`'
+                  enum:
+                  - webhook
+                  - trigger
+                  - studio
+                  type: string
+                Configuration.Url:
+                  description: The absolute url the webhook request should be sent
+                    to.
+                  type: string
+                Configuration.Method:
+                  description: The HTTP method to be used when sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
                 Configuration.Filters:
                   description: The list of events, firing webhook event for this Conversation.
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: The list of keywords, firing webhook event for this
+                    Conversation.
                   items:
                     type: string
                   type: array
@@ -3251,33 +3274,10 @@ paths:
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
                   type: string
-                Configuration.Method:
-                  description: The HTTP method to be used when sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
                 Configuration.ReplayAfter:
                   description: The message index for which and it's successors the
                     webhook will be replayed. Not set by default
                   type: integer
-                Configuration.Triggers:
-                  description: The list of keywords, firing webhook event for this
-                    Conversation.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The absolute url the webhook request should be sent
-                    to.
-                  type: string
-                Target:
-                  description: 'The target of this webhook: `webhook`, `studio`, `trigger`'
-                  enum:
-                  - webhook
-                  - trigger
-                  - studio
-                  type: string
               required:
               - Target
               title: CreateConversationScopedWebhookRequest
@@ -3387,8 +3387,24 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Configuration.Url:
+                  description: The absolute url the webhook request should be sent
+                    to.
+                  type: string
+                Configuration.Method:
+                  description: The HTTP method to be used when sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
                 Configuration.Filters:
                   description: The list of events, firing webhook event for this Conversation.
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: The list of keywords, firing webhook event for this
+                    Conversation.
                   items:
                     type: string
                   type: array
@@ -3398,22 +3414,6 @@ paths:
                   maxLength: 34
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
-                  type: string
-                Configuration.Method:
-                  description: The HTTP method to be used when sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
-                Configuration.Triggers:
-                  description: The list of keywords, firing webhook event for this
-                    Conversation.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The absolute url the webhook request should be sent
-                    to.
                   type: string
               title: UpdateConversationScopedWebhookRequest
               type: object
@@ -3511,11 +3511,9 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
+                FriendlyName:
+                  description: The human-readable name of this conversation, limited
+                    to 256 characters. Optional.
                   type: string
                 DateCreated:
                   description: The date that this resource was created.
@@ -3525,9 +3523,11 @@ paths:
                   description: The date that this resource was last updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: The human-readable name of this conversation, limited
-                    to 256 characters. Optional.
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
                   type: string
                 MessagingServiceSid:
                   description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
@@ -3544,13 +3544,13 @@ paths:
                   - active
                   - closed
                   type: string
-                Timers.Closed:
-                  description: ISO8601 duration when conversation will be switched
-                    to `closed` state. Minimum value for this timer is 10 minutes.
-                  type: string
                 Timers.Inactive:
                   description: ISO8601 duration when conversation will be switched
                     to `inactive` state. Minimum value for this timer is 1 minute.
+                  type: string
+                Timers.Closed:
+                  description: ISO8601 duration when conversation will be switched
+                    to `closed` state. Minimum value for this timer is 10 minutes.
                   type: string
                 UniqueName:
                   description: An application-defined string that uniquely identifies
@@ -3639,19 +3639,22 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                Type:
+                  description: 'The type of push-notification service the credential
+                    is for. Can be: `fcm`, `gcm`, or `apn`.'
+                  enum:
+                  - apn
+                  - gcm
+                  - fcm
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEF.....A==\n\
                     -----END CERTIFICATE-----`."
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -3668,17 +3671,14 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
-                  type: string
-                Type:
-                  description: 'The type of push-notification service the credential
-                    is for. Can be: `fcm`, `gcm`, or `apn`.'
-                  enum:
-                  - apn
-                  - gcm
-                  - fcm
                   type: string
               required:
               - Type
@@ -3767,19 +3767,22 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                ApiKey:
-                  description: '[GCM only] The API key for the project that was obtained
-                    from the Google Developer console for your GCM Service application
-                    credential.'
+                Type:
+                  description: 'The type of push-notification service the credential
+                    is for. Can be: `fcm`, `gcm`, or `apn`.'
+                  enum:
+                  - apn
+                  - gcm
+                  - fcm
+                  type: string
+                FriendlyName:
+                  description: A descriptive string that you create to describe the
+                    new resource. It can be up to 64 characters long.
                   type: string
                 Certificate:
                   description: "[APN only] The URL encoded representation of the certificate.\
                     \ For example, \n`-----BEGIN CERTIFICATE-----\nMIIFnTCCBIWgAwIBAgIIAjy9H849+E8wDQYJKoZIhvcNAQEF.....A==\n\
                     -----END CERTIFICATE-----`."
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It can be up to 64 characters long.
                   type: string
                 PrivateKey:
                   description: '[APN only] The URL encoded representation of the private
@@ -3796,17 +3799,14 @@ paths:
                     APNs. Can be `true` to send to sandbox APNs or `false` to send
                     to production.'
                   type: boolean
+                ApiKey:
+                  description: '[GCM only] The API key for the project that was obtained
+                    from the Google Developer console for your GCM Service application
+                    credential.'
+                  type: string
                 Secret:
                   description: '[FCM only] The **Server key** of your project from
                     the Firebase console, found under Settings / Cloud messaging.'
-                  type: string
-                Type:
-                  description: 'The type of push-notification service the credential
-                    is for. Can be: `fcm`, `gcm`, or `apn`.'
-                  enum:
-                  - apn
-                  - gcm
-                  - fcm
                   type: string
               title: UpdateCredentialRequest
               type: object
@@ -3971,14 +3971,6 @@ paths:
                   description: A descriptive string that you create to describe the
                     new resource. It can be up to 64 characters long.
                   type: string
-                Permission:
-                  description: A permission that you grant to the new role. Only one
-                    permission can be granted per parameter. To assign more than one
-                    permission, repeat this parameter for each permission value. The
-                    values for this parameter depend on the role's `type`.
-                  items:
-                    type: string
-                  type: array
                 Type:
                   description: 'The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource)
                     roles or `service` for [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource)
@@ -3987,6 +3979,14 @@ paths:
                   - conversation
                   - service
                   type: string
+                Permission:
+                  description: A permission that you grant to the new role. Only one
+                    permission can be granted per parameter. To assign more than one
+                    permission, repeat this parameter for each permission value. The
+                    values for this parameter depend on the role's `type`.
+                  items:
+                    type: string
+                  type: array
               required:
               - FriendlyName
               - Type
@@ -4414,14 +4414,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                DefaultChatServiceRoleSid:
-                  description: The service-level role assigned to users when they
-                    are added to the service. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource)
-                    for more info about roles.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
-                  type: string
                 DefaultConversationCreatorRoleSid:
                   description: The conversation-level role assigned to a conversation
                     creator when they join a new conversation. See the [Conversation
@@ -4434,6 +4426,14 @@ paths:
                 DefaultConversationRoleSid:
                   description: The conversation-level role assigned to users when
                     they are added to a conversation. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource)
+                    for more info about roles.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                DefaultChatServiceRoleSid:
+                  description: The service-level role assigned to users when they
+                    are added to the service. See the [Conversation Role](https://www.twilio.com/docs/conversations/api/role-resource)
                     for more info about roles.
                   maxLength: 34
                   minLength: 34
@@ -4510,38 +4510,52 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                AddedToConversation.Enabled:
-                  description: Whether to send a notification when a participant is
-                    added to a conversation. The default is `false`.
-                  type: boolean
-                AddedToConversation.Sound:
-                  description: The name of the sound to play when a participant is
-                    added to a conversation and `added_to_conversation.enabled` is
-                    `true`.
-                  type: string
-                AddedToConversation.Template:
-                  description: The template to use to create the notification text
-                    displayed when a participant is added to a conversation and `added_to_conversation.enabled`
-                    is `true`.
-                  type: string
                 LogEnabled:
                   description: Weather the notification logging is enabled.
-                  type: boolean
-                NewMessage.BadgeCountEnabled:
-                  description: Whether the new message badge is enabled. The default
-                    is `false`.
                   type: boolean
                 NewMessage.Enabled:
                   description: Whether to send a notification when a new message is
                     added to a conversation. The default is `false`.
                   type: boolean
+                NewMessage.Template:
+                  description: The template to use to create the notification text
+                    displayed when a new message is added to a conversation and `new_message.enabled`
+                    is `true`.
+                  type: string
                 NewMessage.Sound:
                   description: The name of the sound to play when a new message is
                     added to a conversation and `new_message.enabled` is `true`.
                   type: string
-                NewMessage.Template:
+                NewMessage.BadgeCountEnabled:
+                  description: Whether the new message badge is enabled. The default
+                    is `false`.
+                  type: boolean
+                AddedToConversation.Enabled:
+                  description: Whether to send a notification when a participant is
+                    added to a conversation. The default is `false`.
+                  type: boolean
+                AddedToConversation.Template:
                   description: The template to use to create the notification text
-                    displayed when a new message is added to a conversation and `new_message.enabled`
+                    displayed when a participant is added to a conversation and `added_to_conversation.enabled`
+                    is `true`.
+                  type: string
+                AddedToConversation.Sound:
+                  description: The name of the sound to play when a participant is
+                    added to a conversation and `added_to_conversation.enabled` is
+                    `true`.
+                  type: string
+                RemovedFromConversation.Enabled:
+                  description: Whether to send a notification to a user when they
+                    are removed from a conversation. The default is `false`.
+                  type: boolean
+                RemovedFromConversation.Template:
+                  description: The template to use to create the notification text
+                    displayed to a user when they are removed from a conversation
+                    and `removed_from_conversation.enabled` is `true`.
+                  type: string
+                RemovedFromConversation.Sound:
+                  description: The name of the sound to play to a user when they are
+                    removed from a conversation and `removed_from_conversation.enabled`
                     is `true`.
                   type: string
                 NewMessage.WithMedia.Enabled:
@@ -4553,20 +4567,6 @@ paths:
                   description: The template to use to create the notification text
                     displayed when a new message with media/file attachments is added
                     to a conversation and `new_message.attachments.enabled` is `true`.
-                  type: string
-                RemovedFromConversation.Enabled:
-                  description: Whether to send a notification to a user when they
-                    are removed from a conversation. The default is `false`.
-                  type: boolean
-                RemovedFromConversation.Sound:
-                  description: The name of the sound to play to a user when they are
-                    removed from a conversation and `removed_from_conversation.enabled`
-                    is `true`.
-                  type: string
-                RemovedFromConversation.Template:
-                  description: The template to use to create the notification text
-                    displayed to a user when they are removed from a conversation
-                    and `removed_from_conversation.enabled` is `true`.
                   type: string
               title: UpdateServiceNotificationRequest
               type: object
@@ -4636,6 +4636,16 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                PreWebhookUrl:
+                  description: The absolute url the pre-event webhook request should
+                    be sent to.
+                  format: uri
+                  type: string
+                PostWebhookUrl:
+                  description: The absolute url the post-event webhook request should
+                    be sent to.
+                  format: uri
+                  type: string
                 Filters:
                   description: The list of events that your configured webhook targets
                     will receive. Events not configured here will not fire. Possible
@@ -4652,16 +4662,6 @@ paths:
                 Method:
                   description: The HTTP method to be used when sending a webhook request.
                     One of `GET` or `POST`.
-                  type: string
-                PostWebhookUrl:
-                  description: The absolute url the post-event webhook request should
-                    be sent to.
-                  format: uri
-                  type: string
-                PreWebhookUrl:
-                  description: The absolute url the pre-event webhook request should
-                    be sent to.
-                  format: uri
                   type: string
               title: UpdateServiceWebhookConfigurationRequest
               type: object
@@ -4773,11 +4773,27 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The human-readable name of this conversation, limited
+                    to 256 characters. Optional.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used to address the resource in place
+                    of the resource's `sid` in the URL.
+                  type: string
                 Attributes:
                   description: An optional string metadata field you can use to store
                     any data you wish. The string value must contain structurally
                     valid JSON if specified.  **Note** that if the attributes are
                     not set "{}" will be returned.
+                  type: string
+                MessagingServiceSid:
+                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+                    this conversation belongs to.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^MG[0-9a-fA-F]{32}$
                   type: string
                 DateCreated:
                   description: The date that this resource was created.
@@ -4787,17 +4803,6 @@ paths:
                   description: The date that this resource was last updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: The human-readable name of this conversation, limited
-                    to 256 characters. Optional.
-                  type: string
-                MessagingServiceSid:
-                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
-                    this conversation belongs to.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^MG[0-9a-fA-F]{32}$
-                  type: string
                 State:
                   description: Current state of this conversation. Can be either `active`,
                     `inactive` or `closed` and defaults to `active`
@@ -4806,18 +4811,13 @@ paths:
                   - active
                   - closed
                   type: string
-                Timers.Closed:
-                  description: ISO8601 duration when conversation will be switched
-                    to `closed` state. Minimum value for this timer is 10 minutes.
-                  type: string
                 Timers.Inactive:
                   description: ISO8601 duration when conversation will be switched
                     to `inactive` state. Minimum value for this timer is 1 minute.
                   type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used to address the resource in place
-                    of the resource's `sid` in the URL.
+                Timers.Closed:
+                  description: ISO8601 duration when conversation will be switched
+                    to `closed` state. Minimum value for this timer is 10 minutes.
                   type: string
               title: CreateServiceConversationRequest
               type: object
@@ -4955,12 +4955,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A string metadata field you can use to store any data
-                    you wish. The string value must contain structurally valid JSON
-                    if specified.  **Note** that if the attributes are not set "{}"
-                    will be returned.
-                  type: string
                 Author:
                   description: The channel specific identifier of the message's author.
                     Defaults to `system`.
@@ -4977,6 +4971,12 @@ paths:
                   description: The date that this resource was last updated. `null`
                     if the message has not been edited.
                   format: date-time
+                  type: string
+                Attributes:
+                  description: A string metadata field you can use to store any data
+                    you wish. The string value must contain structurally valid JSON
+                    if specified.  **Note** that if the attributes are not set "{}"
+                    will be returned.
                   type: string
                 MediaSid:
                   description: The Media SID to be attached to the new Message.
@@ -5296,12 +5296,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: A string metadata field you can use to store any data
-                    you wish. The string value must contain structurally valid JSON
-                    if specified.  **Note** that if the attributes are not set "{}"
-                    will be returned.
-                  type: string
                 Author:
                   description: The channel specific identifier of the message's author.
                     Defaults to `system`.
@@ -5318,6 +5312,12 @@ paths:
                   description: The date that this resource was last updated. `null`
                     if the message has not been edited.
                   format: date-time
+                  type: string
+                Attributes:
+                  description: A string metadata field you can use to store any data
+                    you wish. The string value must contain structurally valid JSON
+                    if specified.  **Note** that if the attributes are not set "{}"
+                    will be returned.
                   type: string
               title: UpdateServiceConversationMessageRequest
               type: object
@@ -5446,20 +5446,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
-                  type: string
-                DateCreated:
-                  description: The date that this resource was created.
-                  format: date-time
-                  type: string
-                DateUpdated:
-                  description: The date that this resource was last updated.
-                  format: date-time
-                  type: string
                 Identity:
                   description: A unique string identifier for the conversation participant
                     as [Conversation User](https://www.twilio.com/docs/conversations/api/user-resource).
@@ -5473,16 +5459,30 @@ paths:
                     null when the participant is interacting from an SDK endpoint
                     (see the 'identity' field).
                   type: string
-                MessagingBinding.ProjectedAddress:
-                  description: The address of the Twilio phone number that is used
-                    in Group MMS. Communication mask for the Conversation participant
-                    with Identity.
-                  type: string
                 MessagingBinding.ProxyAddress:
                   description: The address of the Twilio phone number (or WhatsApp
                     number) that the participant is in contact with. This field, together
                     with participant address, is only null when the participant is
                     interacting from an SDK endpoint (see the 'identity' field).
+                  type: string
+                DateCreated:
+                  description: The date that this resource was created.
+                  format: date-time
+                  type: string
+                DateUpdated:
+                  description: The date that this resource was last updated.
+                  format: date-time
+                  type: string
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
+                  type: string
+                MessagingBinding.ProjectedAddress:
+                  description: The address of the Twilio phone number that is used
+                    in Group MMS. Communication mask for the Conversation participant
+                    with Identity.
                   type: string
                 RoleSid:
                   description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -5644,12 +5644,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
-                  type: string
                 DateCreated:
                   description: The date that this resource was created.
                   format: date-time
@@ -5664,6 +5658,27 @@ paths:
                     This parameter is non-null if (and only if) the participant is
                     using the Conversation SDK to communicate. Limited to 256 characters.
                   type: string
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
+                  type: string
+                RoleSid:
+                  description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
+                    to assign to the participant.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^RL[0-9a-fA-F]{32}$
+                  type: string
+                MessagingBinding.ProxyAddress:
+                  description: The address of the Twilio phone number that the participant
+                    is in contact with. 'null' value will remove it.
+                  type: string
+                MessagingBinding.ProjectedAddress:
+                  description: The address of the Twilio phone number that is used
+                    in Group MMS. 'null' value will remove it.
+                  type: string
                 LastReadMessageIndex:
                   description: "Index of last \u201Cread\u201D message in the [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource)\
                     \ for the Participant."
@@ -5673,21 +5688,6 @@ paths:
                   description: "Timestamp of last \u201Cread\u201D message in the\
                     \ [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource)\
                     \ for the Participant."
-                  type: string
-                MessagingBinding.ProjectedAddress:
-                  description: The address of the Twilio phone number that is used
-                    in Group MMS. 'null' value will remove it.
-                  type: string
-                MessagingBinding.ProxyAddress:
-                  description: The address of the Twilio phone number that the participant
-                    is in contact with. 'null' value will remove it.
-                  type: string
-                RoleSid:
-                  description: The SID of a conversation-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
-                    to assign to the participant.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^RL[0-9a-fA-F]{32}$
                   type: string
               title: UpdateServiceConversationParticipantRequest
               type: object
@@ -5806,8 +5806,31 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Target:
+                  description: 'The target of this webhook: `webhook`, `studio`, `trigger`'
+                  enum:
+                  - webhook
+                  - trigger
+                  - studio
+                  type: string
+                Configuration.Url:
+                  description: The absolute url the webhook request should be sent
+                    to.
+                  type: string
+                Configuration.Method:
+                  description: The HTTP method to be used when sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
                 Configuration.Filters:
                   description: The list of events, firing webhook event for this Conversation.
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: The list of keywords, firing webhook event for this
+                    Conversation.
                   items:
                     type: string
                   type: array
@@ -5818,33 +5841,10 @@ paths:
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
                   type: string
-                Configuration.Method:
-                  description: The HTTP method to be used when sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
                 Configuration.ReplayAfter:
                   description: The message index for which and it's successors the
                     webhook will be replayed. Not set by default
                   type: integer
-                Configuration.Triggers:
-                  description: The list of keywords, firing webhook event for this
-                    Conversation.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The absolute url the webhook request should be sent
-                    to.
-                  type: string
-                Target:
-                  description: 'The target of this webhook: `webhook`, `studio`, `trigger`'
-                  enum:
-                  - webhook
-                  - trigger
-                  - studio
-                  type: string
               required:
               - Target
               title: CreateServiceConversationScopedWebhookRequest
@@ -5984,8 +5984,24 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Configuration.Url:
+                  description: The absolute url the webhook request should be sent
+                    to.
+                  type: string
+                Configuration.Method:
+                  description: The HTTP method to be used when sending a webhook request.
+                  enum:
+                  - GET
+                  - POST
+                  type: string
                 Configuration.Filters:
                   description: The list of events, firing webhook event for this Conversation.
+                  items:
+                    type: string
+                  type: array
+                Configuration.Triggers:
+                  description: The list of keywords, firing webhook event for this
+                    Conversation.
                   items:
                     type: string
                   type: array
@@ -5995,22 +6011,6 @@ paths:
                   maxLength: 34
                   minLength: 34
                   pattern: ^FW[0-9a-fA-F]{32}$
-                  type: string
-                Configuration.Method:
-                  description: The HTTP method to be used when sending a webhook request.
-                  enum:
-                  - GET
-                  - POST
-                  type: string
-                Configuration.Triggers:
-                  description: The list of keywords, firing webhook event for this
-                    Conversation.
-                  items:
-                    type: string
-                  type: array
-                Configuration.Url:
-                  description: The absolute url the webhook request should be sent
-                    to.
                   type: string
               title: UpdateServiceConversationScopedWebhookRequest
               type: object
@@ -6138,11 +6138,9 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: An optional string metadata field you can use to store
-                    any data you wish. The string value must contain structurally
-                    valid JSON if specified.  **Note** that if the attributes are
-                    not set "{}" will be returned.
+                FriendlyName:
+                  description: The human-readable name of this conversation, limited
+                    to 256 characters. Optional.
                   type: string
                 DateCreated:
                   description: The date that this resource was created.
@@ -6152,9 +6150,11 @@ paths:
                   description: The date that this resource was last updated.
                   format: date-time
                   type: string
-                FriendlyName:
-                  description: The human-readable name of this conversation, limited
-                    to 256 characters. Optional.
+                Attributes:
+                  description: An optional string metadata field you can use to store
+                    any data you wish. The string value must contain structurally
+                    valid JSON if specified.  **Note** that if the attributes are
+                    not set "{}" will be returned.
                   type: string
                 MessagingServiceSid:
                   description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
@@ -6171,13 +6171,13 @@ paths:
                   - active
                   - closed
                   type: string
-                Timers.Closed:
-                  description: ISO8601 duration when conversation will be switched
-                    to `closed` state. Minimum value for this timer is 10 minutes.
-                  type: string
                 Timers.Inactive:
                   description: ISO8601 duration when conversation will be switched
                     to `inactive` state. Minimum value for this timer is 1 minute.
+                  type: string
+                Timers.Closed:
+                  description: ISO8601 duration when conversation will be switched
+                    to `closed` state. Minimum value for this timer is 10 minutes.
                   type: string
                 UniqueName:
                   description: An application-defined string that uniquely identifies
@@ -6381,14 +6381,6 @@ paths:
                   description: A descriptive string that you create to describe the
                     new resource. It can be up to 64 characters long.
                   type: string
-                Permission:
-                  description: A permission that you grant to the new role. Only one
-                    permission can be granted per parameter. To assign more than one
-                    permission, repeat this parameter for each permission value. The
-                    values for this parameter depend on the role's `type`.
-                  items:
-                    type: string
-                  type: array
                 Type:
                   description: 'The type of role. Can be: `conversation` for [Conversation](https://www.twilio.com/docs/conversations/api/conversation-resource)
                     roles or `service` for [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource)
@@ -6397,6 +6389,14 @@ paths:
                   - conversation
                   - service
                   type: string
+                Permission:
+                  description: A permission that you grant to the new role. Only one
+                    permission can be granted per parameter. To assign more than one
+                    permission, repeat this parameter for each permission value. The
+                    values for this parameter depend on the role's `type`.
+                  items:
+                    type: string
+                  type: array
               required:
               - FriendlyName
               - Type
@@ -6643,17 +6643,17 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: The JSON Object string that stores application-specific
-                    data. If attributes have not been set, `{}` is returned.
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
-                  type: string
                 Identity:
                   description: The application-defined string that uniquely identifies
                     the resource's User within the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource).
                     This value is often a username or an email address, and is case-sensitive.
+                  type: string
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
+                Attributes:
+                  description: The JSON Object string that stores application-specific
+                    data. If attributes have not been set, `{}` is returned.
                   type: string
                 RoleSid:
                   description: The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -6790,12 +6790,12 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
                 Attributes:
                   description: The JSON Object string that stores application-specific
                     data. If attributes have not been set, `{}` is returned.
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
                   type: string
                 RoleSid:
                   description: The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -7017,16 +7017,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                LastReadMessageIndex:
-                  description: The index of the last Message in the Conversation that
-                    the Participant has read.
-                  nullable: true
-                  type: integer
-                LastReadTimestamp:
-                  description: The date of the last message read in conversation by
-                    the user, given in ISO 8601 format.
-                  format: date-time
-                  type: string
                 NotificationLevel:
                   description: The Notification Level of this User Conversation. One
                     of `default` or `muted`.
@@ -7034,6 +7024,16 @@ paths:
                   - default
                   - muted
                   type: string
+                LastReadTimestamp:
+                  description: The date of the last message read in conversation by
+                    the user, given in ISO 8601 format.
+                  format: date-time
+                  type: string
+                LastReadMessageIndex:
+                  description: The index of the last Message in the Conversation that
+                    the Participant has read.
+                  nullable: true
+                  type: integer
               title: UpdateServiceUserConversationRequest
               type: object
       responses:
@@ -7185,17 +7185,17 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Attributes:
-                  description: The JSON Object string that stores application-specific
-                    data. If attributes have not been set, `{}` is returned.
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
-                  type: string
                 Identity:
                   description: The application-defined string that uniquely identifies
                     the resource's User within the [Conversation Service](https://www.twilio.com/docs/conversations/api/service-resource).
                     This value is often a username or an email address, and is case-sensitive.
+                  type: string
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
+                Attributes:
+                  description: The JSON Object string that stores application-specific
+                    data. If attributes have not been set, `{}` is returned.
                   type: string
                 RoleSid:
                   description: The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -7302,12 +7302,12 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                FriendlyName:
+                  description: The string that you assigned to describe the resource.
+                  type: string
                 Attributes:
                   description: The JSON Object string that stores application-specific
                     data. If attributes have not been set, `{}` is returned.
-                  type: string
-                FriendlyName:
-                  description: The string that you assigned to describe the resource.
                   type: string
                 RoleSid:
                   description: The SID of a service-level [Role](https://www.twilio.com/docs/conversations/api/role-resource)
@@ -7488,16 +7488,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                LastReadMessageIndex:
-                  description: The index of the last Message in the Conversation that
-                    the Participant has read.
-                  nullable: true
-                  type: integer
-                LastReadTimestamp:
-                  description: The date of the last message read in conversation by
-                    the user, given in ISO 8601 format.
-                  format: date-time
-                  type: string
                 NotificationLevel:
                   description: The Notification Level of this User Conversation. One
                     of `default` or `muted`.
@@ -7505,6 +7495,16 @@ paths:
                   - default
                   - muted
                   type: string
+                LastReadTimestamp:
+                  description: The date of the last message read in conversation by
+                    the user, given in ISO 8601 format.
+                  format: date-time
+                  type: string
+                LastReadMessageIndex:
+                  description: The index of the last Message in the Conversation that
+                    the Participant has read.
+                  nullable: true
+                  type: integer
               title: UpdateUserConversationRequest
               type: object
       responses:
