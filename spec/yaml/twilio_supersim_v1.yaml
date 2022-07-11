@@ -710,6 +710,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                CallbackUrl:
+                  description: The URL we should call using the `callback_method`
+                    when the status of the eSIM Profile changes. At this stage of
+                    the eSIM Profile pilot, the a request to the URL will only be
+                    called when the ESimProfile resource changes from `reserving`
+                    to `available`.
+                  type: string
                 CallbackMethod:
                   description: 'The HTTP method we should use to call `callback_url`.
                     Can be: `GET` or `POST` and the default is POST.'
@@ -721,13 +728,6 @@ paths:
                   - PUT
                   - DELETE
                   format: http-method
-                  type: string
-                CallbackUrl:
-                  description: The URL we should call using the `callback_method`
-                    when the status of the eSIM Profile changes. At this stage of
-                    the eSIM Profile pilot, the a request to the URL will only be
-                    called when the ESimProfile resource changes from `reserving`
-                    to `available`.
                   type: string
                 Eid:
                   description: Identifier of the eUICC that will claim the eSIM Profile.
@@ -849,6 +849,16 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                NetworkAccessProfile:
+                  description: The SID or unique name of the Network Access Profile
+                    that will control which cellular networks the Fleet's SIMs can
+                    connect to.
+                  type: string
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used in place of the resource's `sid`
+                    in the URL to address the resource.
+                  type: string
                 DataEnabled:
                   description: Defines whether SIMs in the Fleet are capable of using
                     2G/3G/4G/LTE/CAT-M data connectivity. Defaults to `true`.
@@ -859,6 +869,13 @@ paths:
                     can consume during a billing period (normally one month). Value
                     must be between 1MB (1) and 2TB (2,000,000). Defaults to 1GB (1,000).
                   type: integer
+                IpCommandsUrl:
+                  description: The URL that will receive a webhook when a Super SIM
+                    in the Fleet is used to send an IP Command from your device to
+                    a special IP address. Your server should respond with an HTTP
+                    status code in the 200 range; any response body will be ignored.
+                  format: uri
+                  type: string
                 IpCommandsMethod:
                   description: A string representing the HTTP method to use when making
                     a request to `ip_commands_url`. Can be one of `POST` or `GET`.
@@ -872,23 +889,18 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                IpCommandsUrl:
-                  description: The URL that will receive a webhook when a Super SIM
-                    in the Fleet is used to send an IP Command from your device to
-                    a special IP address. Your server should respond with an HTTP
-                    status code in the 200 range; any response body will be ignored.
-                  format: uri
-                  type: string
-                NetworkAccessProfile:
-                  description: The SID or unique name of the Network Access Profile
-                    that will control which cellular networks the Fleet's SIMs can
-                    connect to.
-                  type: string
                 SmsCommandsEnabled:
                   description: Defines whether SIMs in the Fleet are capable of sending
                     and receiving machine-to-machine SMS via Commands. Defaults to
                     `true`.
                   type: boolean
+                SmsCommandsUrl:
+                  description: The URL that will receive a webhook when a Super SIM
+                    in the Fleet is used to send an SMS from your device to the SMS
+                    Commands number. Your server should respond with an HTTP status
+                    code in the 200 range; any response body will be ignored.
+                  format: uri
+                  type: string
                 SmsCommandsMethod:
                   description: A string representing the HTTP method to use when making
                     a request to `sms_commands_url`. Can be one of `POST` or `GET`.
@@ -901,18 +913,6 @@ paths:
                   - PUT
                   - DELETE
                   format: http-method
-                  type: string
-                SmsCommandsUrl:
-                  description: The URL that will receive a webhook when a Super SIM
-                    in the Fleet is used to send an SMS from your device to the SMS
-                    Commands number. Your server should respond with an HTTP status
-                    code in the 200 range; any response body will be ignored.
-                  format: uri
-                  type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used in place of the resource's `sid`
-                    in the URL to address the resource.
                   type: string
               required:
               - NetworkAccessProfile
@@ -977,18 +977,15 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                IpCommandsMethod:
-                  description: A string representing the HTTP method to use when making
-                    a request to `ip_commands_url`. Can be one of `POST` or `GET`.
-                    Defaults to `POST`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used in place of the resource's `sid`
+                    in the URL to address the resource.
+                  type: string
+                NetworkAccessProfile:
+                  description: The SID or unique name of the Network Access Profile
+                    that will control which cellular networks the Fleet's SIMs can
+                    connect to.
                   type: string
                 IpCommandsUrl:
                   description: The URL that will receive a webhook when a Super SIM
@@ -997,14 +994,9 @@ paths:
                     status code in the 200 range; any response body will be ignored.
                   format: uri
                   type: string
-                NetworkAccessProfile:
-                  description: The SID or unique name of the Network Access Profile
-                    that will control which cellular networks the Fleet's SIMs can
-                    connect to.
-                  type: string
-                SmsCommandsMethod:
+                IpCommandsMethod:
                   description: A string representing the HTTP method to use when making
-                    a request to `sms_commands_url`. Can be one of `POST` or `GET`.
+                    a request to `ip_commands_url`. Can be one of `POST` or `GET`.
                     Defaults to `POST`.
                   enum:
                   - HEAD
@@ -1022,10 +1014,18 @@ paths:
                     code in the 200 range; any response body will be ignored.
                   format: uri
                   type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used in place of the resource's `sid`
-                    in the URL to address the resource.
+                SmsCommandsMethod:
+                  description: A string representing the HTTP method to use when making
+                    a request to `sms_commands_url`. Can be one of `POST` or `GET`.
+                    Defaults to `POST`.
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  format: http-method
                   type: string
               title: UpdateFleetRequest
               type: object
@@ -1142,6 +1142,28 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Sim:
+                  description: The `sid` or `unique_name` of the [Super SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource)
+                    to send the IP Command to.
+                  type: string
+                Payload:
+                  description: The payload to be delivered to the device.
+                  type: string
+                DevicePort:
+                  description: The device port to which the IP Command will be sent.
+                  type: integer
+                PayloadType:
+                  description: Indicates how the payload is encoded. Either `text`
+                    or `binary`. Defaults to `text`.
+                  enum:
+                  - text
+                  - binary
+                  type: string
+                CallbackUrl:
+                  description: The URL we should call using the `callback_method`
+                    after we have sent the IP Command.
+                  format: uri
+                  type: string
                 CallbackMethod:
                   description: The HTTP method we should use to call `callback_url`.
                     Can be `GET` or `POST`, and the default is `POST`.
@@ -1153,28 +1175,6 @@ paths:
                   - PUT
                   - DELETE
                   format: http-method
-                  type: string
-                CallbackUrl:
-                  description: The URL we should call using the `callback_method`
-                    after we have sent the IP Command.
-                  format: uri
-                  type: string
-                DevicePort:
-                  description: The device port to which the IP Command will be sent.
-                  type: integer
-                Payload:
-                  description: The payload to be delivered to the device.
-                  type: string
-                PayloadType:
-                  description: Indicates how the payload is encoded. Either `text`
-                    or `binary`. Defaults to `text`.
-                  enum:
-                  - text
-                  - binary
-                  type: string
-                Sim:
-                  description: The `sid` or `unique_name` of the [Super SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource)
-                    to send the IP Command to.
                   type: string
               required:
               - Sim
@@ -1295,17 +1295,17 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used in place of the resource's `sid`
+                    in the URL to address the resource.
+                  type: string
                 Networks:
                   description: List of Network SIDs that this Network Access Profile
                     will allow connections to.
                   items:
                     type: string
                   type: array
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used in place of the resource's `sid`
-                    in the URL to address the resource.
-                  type: string
               title: CreateNetworkAccessProfileRequest
               type: object
       responses:
@@ -1833,11 +1833,28 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                AccountSid:
-                  description: The SID of the Account to which the Sim resource should
-                    belong. The Account SID can only be that of the requesting Account
-                    or that of a Subaccount of the requesting Account. Only valid
-                    when the Sim resource's status is new.
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used in place of the resource's `sid`
+                    in the URL to address the resource.
+                  type: string
+                Status:
+                  description: 'The new status of the resource. Can be: `ready`, `active`,
+                    or `inactive`. See the [Super SIM Status Values](https://www.twilio.com/docs/iot/supersim/api/sim-resource#status-values)
+                    for more info.'
+                  enum:
+                  - ready
+                  - active
+                  - inactive
+                  type: string
+                Fleet:
+                  description: The SID or unique name of the Fleet to which the SIM
+                    resource should be assigned.
+                  type: string
+                CallbackUrl:
+                  description: The URL we should call using the `callback_method`
+                    after an asynchronous update has finished.
+                  format: uri
                   type: string
                 CallbackMethod:
                   description: 'The HTTP method we should use to call `callback_url`.
@@ -1851,28 +1868,11 @@ paths:
                   - DELETE
                   format: http-method
                   type: string
-                CallbackUrl:
-                  description: The URL we should call using the `callback_method`
-                    after an asynchronous update has finished.
-                  format: uri
-                  type: string
-                Fleet:
-                  description: The SID or unique name of the Fleet to which the SIM
-                    resource should be assigned.
-                  type: string
-                Status:
-                  description: 'The new status of the resource. Can be: `ready`, `active`,
-                    or `inactive`. See the [Super SIM Status Values](https://www.twilio.com/docs/iot/supersim/api/sim-resource#status-values)
-                    for more info.'
-                  enum:
-                  - ready
-                  - active
-                  - inactive
-                  type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used in place of the resource's `sid`
-                    in the URL to address the resource.
+                AccountSid:
+                  description: The SID of the Account to which the Sim resource should
+                    belong. The Account SID can only be that of the requesting Account
+                    or that of a Subaccount of the requesting Account. Only valid
+                    when the Sim resource's status is new.
                   type: string
               title: UpdateSimRequest
               type: object
@@ -2059,6 +2059,13 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Sim:
+                  description: The `sid` or `unique_name` of the [SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource)
+                    to send the SMS Command to.
+                  type: string
+                Payload:
+                  description: The message body of the SMS Command.
+                  type: string
                 CallbackMethod:
                   description: 'The HTTP method we should use to call `callback_url`.
                     Can be: `GET` or `POST` and the default is POST.'
@@ -2075,13 +2082,6 @@ paths:
                   description: The URL we should call using the `callback_method`
                     after we have sent the command.
                   format: uri
-                  type: string
-                Payload:
-                  description: The message body of the SMS Command.
-                  type: string
-                Sim:
-                  description: The `sid` or `unique_name` of the [SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource)
-                    to send the SMS Command to.
                   type: string
               required:
               - Sim

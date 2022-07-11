@@ -803,18 +803,10 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                CallbackUrl:
-                  description: The URL we should call when the interaction status
-                    changes.
-                  format: uri
-                  type: string
-                ChatInstanceSid:
-                  description: The SID of the Chat Service Instance managed by Proxy
-                    Service. The Chat Service enables Proxy to forward SMS and channel
-                    messages to this chat instance. This is a one-to-one relationship.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^IS[0-9a-fA-F]{32}$
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. This value must be 191 characters or fewer in length
+                    and be unique. **This value should not have PII.**
                   type: string
                 DefaultTtl:
                   description: The default `ttl` value to set for Sessions created
@@ -823,6 +815,11 @@ paths:
                     value of `0` indicates an unlimited Session length. You can override
                     a Session's default TTL value by setting its `ttl` value.
                   type: integer
+                CallbackUrl:
+                  description: The URL we should call when the interaction status
+                    changes.
+                  format: uri
+                  type: string
                 GeoMatchLevel:
                   description: 'Where a proxy number must be located relative to the
                     participant identifier. Can be: `country`, `area-code`, or `extended-area-code`.
@@ -833,12 +830,6 @@ paths:
                   - overlay
                   - radius
                   - country
-                  type: string
-                InterceptCallbackUrl:
-                  description: The URL we call on each interaction. If we receive
-                    a 403 status, we block the interaction; otherwise the interaction
-                    continues.
-                  format: uri
                   type: string
                 NumberSelectionBehavior:
                   description: 'The preference for Proxy Number selection in the Service
@@ -854,6 +845,12 @@ paths:
                   - avoid-sticky
                   - prefer-sticky
                   type: string
+                InterceptCallbackUrl:
+                  description: The URL we call on each interaction. If we receive
+                    a 403 status, we block the interaction; otherwise the interaction
+                    continues.
+                  format: uri
+                  type: string
                 OutOfSessionCallbackUrl:
                   description: The URL we should call when an inbound call or SMS
                     action occurs on a closed or non-existent Session. If your server
@@ -866,10 +863,13 @@ paths:
                     for more information.
                   format: uri
                   type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. This value must be 191 characters or fewer in length
-                    and be unique. **This value should not have PII.**
+                ChatInstanceSid:
+                  description: The SID of the Chat Service Instance managed by Proxy
+                    Service. The Chat Service enables Proxy to forward SMS and channel
+                    messages to this chat instance. This is a one-to-one relationship.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^IS[0-9a-fA-F]{32}$
                   type: string
               required:
               - UniqueName
@@ -976,19 +976,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                IsReserved:
-                  description: Whether the new phone number should be reserved and
-                    not be assigned to a participant using proxy pool logic. See [Reserved
-                    Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
-                    for more information.
-                  type: boolean
-                PhoneNumber:
-                  description: The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
-                    format.  E.164 phone numbers consist of a + followed by the country
-                    code and subscriber number without punctuation characters. For
-                    example, +14155551234.
-                  format: phone-number
-                  type: string
                 Sid:
                   description: The SID of a Twilio [IncomingPhoneNumber](https://www.twilio.com/docs/phone-numbers/api/incomingphonenumber-resource)
                     resource that represents the Twilio Number you would like to assign
@@ -997,6 +984,19 @@ paths:
                   minLength: 34
                   pattern: ^PN[0-9a-fA-F]{32}$
                   type: string
+                PhoneNumber:
+                  description: The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+                    format.  E.164 phone numbers consist of a + followed by the country
+                    code and subscriber number without punctuation characters. For
+                    example, +14155551234.
+                  format: phone-number
+                  type: string
+                IsReserved:
+                  description: Whether the new phone number should be reserved and
+                    not be assigned to a participant using proxy pool logic. See [Reserved
+                    Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
+                    for more information.
+                  type: boolean
               title: CreatePhoneNumberRequest
               type: object
       responses:
@@ -1226,12 +1226,45 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. This value must be 191 characters or fewer in length
+                    and be unique. **This value should not have PII.**
+                  type: string
                 DateExpiry:
                   description: The [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
                     date when the Session should expire. If this is value is present,
                     it overrides the `ttl` value.
                   format: date-time
                   type: string
+                Ttl:
+                  description: The time, in seconds, when the session will expire.
+                    The time is measured from the last Session create or the Session's
+                    last Interaction.
+                  type: integer
+                Mode:
+                  description: 'The Mode of the Session. Can be: `message-only`, `voice-only`,
+                    or `voice-and-message` and the default value is `voice-and-message`.'
+                  enum:
+                  - message-only
+                  - voice-only
+                  - voice-and-message
+                  type: string
+                Status:
+                  description: 'The initial status of the Session. Can be: `open`,
+                    `in-progress`, `closed`, `failed`, or `unknown`. The default is
+                    `open` on create.'
+                  enum:
+                  - open
+                  - in-progress
+                  - closed
+                  - failed
+                  - unknown
+                  type: string
+                Participants:
+                  description: The Participant objects to include in the new session.
+                  items: {}
+                  type: array
                 FailOnParticipantConflict:
                   description: '[Experimental] For accounts with the ProxyAllowParticipantConflict
                     account flag, setting to true enables per-request opt-in to allowing
@@ -1247,39 +1280,6 @@ paths:
                     the ProxyAllowParticipantConflict flag is to reject the request
                     as described.  This will eventually be the default for all accounts.'
                   type: boolean
-                Mode:
-                  description: 'The Mode of the Session. Can be: `message-only`, `voice-only`,
-                    or `voice-and-message` and the default value is `voice-and-message`.'
-                  enum:
-                  - message-only
-                  - voice-only
-                  - voice-and-message
-                  type: string
-                Participants:
-                  description: The Participant objects to include in the new session.
-                  items: {}
-                  type: array
-                Status:
-                  description: 'The initial status of the Session. Can be: `open`,
-                    `in-progress`, `closed`, `failed`, or `unknown`. The default is
-                    `open` on create.'
-                  enum:
-                  - open
-                  - in-progress
-                  - closed
-                  - failed
-                  - unknown
-                  type: string
-                Ttl:
-                  description: The time, in seconds, when the session will expire.
-                    The time is measured from the last Session create or the Session's
-                    last Interaction.
-                  type: integer
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. This value must be 191 characters or fewer in length
-                    and be unique. **This value should not have PII.**
-                  type: string
               title: CreateSessionRequest
               type: object
       responses:
@@ -1583,6 +1583,24 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
+                Identifier:
+                  description: The phone number of the Participant.
+                  type: string
+                FriendlyName:
+                  description: The string that you assigned to describe the participant.
+                    This value must be 255 characters or fewer. **This value should
+                    not have PII.**
+                  type: string
+                ProxyIdentifier:
+                  description: The proxy phone number to use for the Participant.
+                    If not specified, Proxy will select a number from the pool.
+                  type: string
+                ProxyIdentifierSid:
+                  description: The SID of the Proxy Identifier to assign to the Participant.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^PN[0-9a-fA-F]{32}$
+                  type: string
                 FailOnParticipantConflict:
                   description: '[Experimental] For accounts with the ProxyAllowParticipantConflict
                     account flag, setting to true enables per-request opt-in to allowing
@@ -1598,24 +1616,6 @@ paths:
                     flag is to reject the request as described.  This will eventually
                     be the default for all accounts.'
                   type: boolean
-                FriendlyName:
-                  description: The string that you assigned to describe the participant.
-                    This value must be 255 characters or fewer. **This value should
-                    not have PII.**
-                  type: string
-                Identifier:
-                  description: The phone number of the Participant.
-                  type: string
-                ProxyIdentifier:
-                  description: The proxy phone number to use for the Participant.
-                    If not specified, Proxy will select a number from the pool.
-                  type: string
-                ProxyIdentifierSid:
-                  description: The SID of the Proxy Identifier to assign to the Participant.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^PN[0-9a-fA-F]{32}$
-                  type: string
               required:
               - Identifier
               title: CreateParticipantRequest
@@ -2066,6 +2066,21 @@ paths:
                     it overrides the `ttl` value.
                   format: date-time
                   type: string
+                Ttl:
+                  description: The time, in seconds, when the session will expire.
+                    The time is measured from the last Session create or the Session's
+                    last Interaction.
+                  type: integer
+                Status:
+                  description: 'The new status of the resource. Can be: `in-progress`
+                    to re-open a session or `closed` to close a session.'
+                  enum:
+                  - open
+                  - in-progress
+                  - closed
+                  - failed
+                  - unknown
+                  type: string
                 FailOnParticipantConflict:
                   description: '[Experimental] For accounts with the ProxyAllowParticipantConflict
                     account flag, setting to true enables per-request opt-in to allowing
@@ -2080,21 +2095,6 @@ paths:
                     the ProxyAllowParticipantConflict flag is to reject the request
                     as described.  This will eventually be the default for all accounts.'
                   type: boolean
-                Status:
-                  description: 'The new status of the resource. Can be: `in-progress`
-                    to re-open a session or `closed` to close a session.'
-                  enum:
-                  - open
-                  - in-progress
-                  - closed
-                  - failed
-                  - unknown
-                  type: string
-                Ttl:
-                  description: The time, in seconds, when the session will expire.
-                    The time is measured from the last Session create or the Session's
-                    last Interaction.
-                  type: integer
               title: UpdateSessionRequest
               type: object
       responses:
@@ -2421,18 +2421,10 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                CallbackUrl:
-                  description: The URL we should call when the interaction status
-                    changes.
-                  format: uri
-                  type: string
-                ChatInstanceSid:
-                  description: The SID of the Chat Service Instance managed by Proxy
-                    Service. The Chat Service enables Proxy to forward SMS and channel
-                    messages to this chat instance. This is a one-to-one relationship.
-                  maxLength: 34
-                  minLength: 34
-                  pattern: ^IS[0-9a-fA-F]{32}$
+                UniqueName:
+                  description: An application-defined string that uniquely identifies
+                    the resource. This value must be 191 characters or fewer in length
+                    and be unique. **This value should not have PII.**
                   type: string
                 DefaultTtl:
                   description: The default `ttl` value to set for Sessions created
@@ -2441,6 +2433,11 @@ paths:
                     value of `0` indicates an unlimited Session length. You can override
                     a Session's default TTL value by setting its `ttl` value.
                   type: integer
+                CallbackUrl:
+                  description: The URL we should call when the interaction status
+                    changes.
+                  format: uri
+                  type: string
                 GeoMatchLevel:
                   description: 'Where a proxy number must be located relative to the
                     participant identifier. Can be: `country`, `area-code`, or `extended-area-code`.
@@ -2451,12 +2448,6 @@ paths:
                   - overlay
                   - radius
                   - country
-                  type: string
-                InterceptCallbackUrl:
-                  description: The URL we call on each interaction. If we receive
-                    a 403 status, we block the interaction; otherwise the interaction
-                    continues.
-                  format: uri
                   type: string
                 NumberSelectionBehavior:
                   description: 'The preference for Proxy Number selection in the Service
@@ -2472,6 +2463,12 @@ paths:
                   - avoid-sticky
                   - prefer-sticky
                   type: string
+                InterceptCallbackUrl:
+                  description: The URL we call on each interaction. If we receive
+                    a 403 status, we block the interaction; otherwise the interaction
+                    continues.
+                  format: uri
+                  type: string
                 OutOfSessionCallbackUrl:
                   description: The URL we should call when an inbound call or SMS
                     action occurs on a closed or non-existent Session. If your server
@@ -2484,10 +2481,13 @@ paths:
                     for more information.
                   format: uri
                   type: string
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. This value must be 191 characters or fewer in length
-                    and be unique. **This value should not have PII.**
+                ChatInstanceSid:
+                  description: The SID of the Chat Service Instance managed by Proxy
+                    Service. The Chat Service enables Proxy to forward SMS and channel
+                    messages to this chat instance. This is a one-to-one relationship.
+                  maxLength: 34
+                  minLength: 34
+                  pattern: ^IS[0-9a-fA-F]{32}$
                   type: string
               title: UpdateServiceRequest
               type: object
