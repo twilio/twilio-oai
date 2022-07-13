@@ -561,6 +561,25 @@
         },
         "type": "object"
       },
+      "supersim.v1.sim.sim_ip_address": {
+        "properties": {
+          "ip_address": {
+            "description": "IP address assigned to the given Super SIM",
+            "nullable": true,
+            "type": "string"
+          },
+          "ip_address_version": {
+            "description": "IP address version",
+            "enum": [
+              "IPv4",
+              "IPv6"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "supersim.v1.sms_command": {
         "properties": {
           "account_sid": {
@@ -728,7 +747,7 @@
     },
     "termsOfService": "https://www.twilio.com/legal/tos",
     "title": "Twilio - Supersim",
-    "version": "1.30.0"
+    "version": "1.31.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -2646,6 +2665,107 @@
           "start_time",
           "end_time",
           "period_type"
+        ],
+        "parent": "/Sims",
+        "pathType": "list"
+      }
+    },
+    "/v1/Sims/{SimSid}/IpAddresses": {
+      "description": "IP Addresses for a Super SIM configured to use a VPN connection",
+      "get": {
+        "description": "Retrieve a list of IP Addresses for the given Super SIM.",
+        "operationId": "ListSimIpAddress",
+        "parameters": [
+          {
+            "description": "The SID of the Super SIM to list IP Addresses for.",
+            "in": "path",
+            "name": "SimSid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "in": "query",
+            "name": "PageSize",
+            "schema": {
+              "maximum": 1000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "ip_addresses": {
+                      "items": {
+                        "$ref": "#/components/schemas/supersim.v1.sim.sim_ip_address"
+                      },
+                      "type": "array"
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListSimIpAddressResponse",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://supersim.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "className": "sim_ip_address",
+        "defaultOutputProperties": [
+          "ip_address",
+          "ip_address_version"
         ],
         "parent": "/Sims",
         "pathType": "list"
