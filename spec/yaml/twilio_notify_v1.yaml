@@ -1,5 +1,25 @@
 components:
   schemas:
+    binding_enum_binding_type:
+      enum:
+      - apn
+      - gcm
+      - sms
+      - fcm
+      - facebook-messenger
+      - alexa
+      type: string
+    credential_enum_push_service:
+      enum:
+      - gcm
+      - apn
+      - fcm
+      type: string
+    notification_enum_priority:
+      enum:
+      - high
+      - low
+      type: string
     notify.v1.credential:
       properties:
         account_sid:
@@ -36,11 +56,8 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           type: string
         type:
+          $ref: '#/components/schemas/credential_enum_push_service'
           description: The Credential type, one of `gcm`, `fcm`, or `apn`
-          enum:
-          - gcm
-          - apn
-          - fcm
           nullable: true
           type: string
         url:
@@ -284,10 +301,8 @@ components:
           nullable: true
           type: array
         priority:
+          $ref: '#/components/schemas/notification_enum_priority'
           description: The priority of the notification
-          enum:
-          - high
-          - low
           nullable: true
           type: string
         segments:
@@ -440,11 +455,8 @@ paths:
                     console under Settings / Cloud messaging.'
                   type: string
                 Type:
+                  $ref: '#/components/schemas/credential_enum_push_service'
                   description: 'The Credential type. Can be: `gcm`, `fcm`, or `apn`.'
-                  enum:
-                  - gcm
-                  - apn
-                  - fcm
                   type: string
               required:
               - Type
@@ -861,15 +873,9 @@ paths:
                     ID of the user or a phone number in E.164 format.
                   type: string
                 BindingType:
+                  $ref: '#/components/schemas/binding_enum_binding_type'
                   description: 'The transport technology to use for the Binding. Can
                     be: `apn`, `fcm`, `gcm`, `sms`, or `facebook-messenger`.'
-                  enum:
-                  - apn
-                  - gcm
-                  - sms
-                  - fcm
-                  - facebook-messenger
-                  - alexa
                   type: string
                 CredentialSid:
                   description: The SID of the [Credential](https://www.twilio.com/docs/notify/api/credential-resource)
@@ -1100,6 +1106,7 @@ paths:
                     type: string
                   type: array
                 Priority:
+                  $ref: '#/components/schemas/notification_enum_priority'
                   description: 'The priority of the notification. Can be: `low` or
                     `high` and the default is `high`. A value of `low` optimizes the
                     client app''s battery consumption; however, notifications may
@@ -1109,9 +1116,6 @@ paths:
                     and can wake up a sleeping device. For FCM and GCM, `high` is
                     the same as `High` priority. For APNS, `high` is a priority `10`.
                     SMS does not support this property.'
-                  enum:
-                  - high
-                  - low
                   type: string
                 Segment:
                   description: The Segment resource is deprecated. Use the `tag` parameter,

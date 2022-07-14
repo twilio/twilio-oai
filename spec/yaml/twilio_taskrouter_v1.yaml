@@ -1,5 +1,53 @@
 components:
   schemas:
+    task_enum_status:
+      enum:
+      - pending
+      - reserved
+      - assigned
+      - canceled
+      - completed
+      - wrapping
+      type: string
+    task_queue_enum_task_order:
+      enum:
+      - FIFO
+      - LIFO
+      type: string
+    task_reservation_enum_call_status:
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      type: string
+    task_reservation_enum_conference_event:
+      enum:
+      - start
+      - end
+      - join
+      - leave
+      - mute
+      - hold
+      - speaker
+      type: string
+    task_reservation_enum_status:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - timeout
+      - canceled
+      - rescinded
+      - wrapping
+      - completed
+      type: string
+    task_reservation_enum_supervisor_mode:
+      enum:
+      - monitor
+      - whisper
+      - barge
+      type: string
     taskrouter.v1.workspace:
       properties:
         account_sid:
@@ -55,11 +103,9 @@ components:
           nullable: true
           type: boolean
         prioritize_queue_order:
+          $ref: '#/components/schemas/workspace_enum_queue_order'
           description: The type of TaskQueue to prioritize when Workers are receiving
             Tasks from both types of TaskQueues
-          enum:
-          - FIFO
-          - LIFO
           nullable: true
           type: string
         sid:
@@ -179,6 +225,7 @@ components:
           type: string
         event_date_ms:
           description: The time the event was sent in milliseconds
+          format: int64
           nullable: true
           type: integer
         event_type:
@@ -247,14 +294,8 @@ components:
           nullable: true
           type: integer
         assignment_status:
+          $ref: '#/components/schemas/task_enum_status'
           description: The current status of the Task's assignment
-          enum:
-          - pending
-          - reserved
-          - assigned
-          - canceled
-          - completed
-          - wrapping
           nullable: true
           type: string
         attributes:
@@ -376,16 +417,8 @@ components:
           nullable: true
           type: object
         reservation_status:
+          $ref: '#/components/schemas/task_reservation_enum_status'
           description: The current status of the reservation
-          enum:
-          - pending
-          - accepted
-          - rejected
-          - timeout
-          - canceled
-          - rescinded
-          - wrapping
-          - completed
           nullable: true
           type: string
         sid:
@@ -557,10 +590,8 @@ components:
           nullable: true
           type: string
         task_order:
+          $ref: '#/components/schemas/task_queue_enum_task_order'
           description: How Tasks will be assigned to Workers
-          enum:
-          - FIFO
-          - LIFO
           nullable: true
           type: string
         url:
@@ -1034,16 +1065,8 @@ components:
           nullable: true
           type: object
         reservation_status:
+          $ref: '#/components/schemas/worker_reservation_enum_status'
           description: The current status of the reservation
-          enum:
-          - pending
-          - accepted
-          - rejected
-          - timeout
-          - canceled
-          - rescinded
-          - wrapping
-          - completed
           nullable: true
           type: string
         sid:
@@ -1650,6 +1673,39 @@ components:
           pattern: ^WS[0-9a-fA-F]{32}$
           type: string
       type: object
+    worker_reservation_enum_call_status:
+      enum:
+      - initiated
+      - ringing
+      - answered
+      - completed
+      type: string
+    worker_reservation_enum_conference_event:
+      enum:
+      - start
+      - end
+      - join
+      - leave
+      - mute
+      - hold
+      - speaker
+      type: string
+    worker_reservation_enum_status:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - timeout
+      - canceled
+      - rescinded
+      - wrapping
+      - completed
+      type: string
+    workspace_enum_queue_order:
+      enum:
+      - FIFO
+      - LIFO
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -1764,13 +1820,11 @@ paths:
                     when the previous task is completed. Learn more at [Multitasking](https://www.twilio.com/docs/taskrouter/multitasking).'
                   type: boolean
                 PrioritizeQueueOrder:
+                  $ref: '#/components/schemas/workspace_enum_queue_order'
                   description: 'The type of TaskQueue to prioritize when Workers are
                     receiving Tasks from both types of TaskQueues. Can be: `LIFO`
                     or `FIFO` and the default is `FIFO`. For more information, see
                     [Queue Ordering](https://www.twilio.com/docs/taskrouter/queue-ordering-last-first-out-lifo).'
-                  enum:
-                  - FIFO
-                  - LIFO
                   type: string
                 Template:
                   description: 'An available template name. Can be: `NONE` or `FIFO`
@@ -1907,12 +1961,10 @@ paths:
                     when the previous task is completed. Learn more at [Multitasking](https://www.twilio.com/docs/taskrouter/multitasking).'
                   type: boolean
                 PrioritizeQueueOrder:
+                  $ref: '#/components/schemas/workspace_enum_queue_order'
                   description: 'The type of TaskQueue to prioritize when Workers are
                     receiving Tasks from both types of TaskQueues. Can be: `LIFO`
                     or `FIFO`. For more information, see [Queue Ordering](https://www.twilio.com/docs/taskrouter/queue-ordering-last-first-out-lifo).'
-                  enum:
-                  - FIFO
-                  - LIFO
                   type: string
                 TimeoutActivitySid:
                   description: The SID of the Activity that will be assigned to a
@@ -2948,13 +3000,11 @@ paths:
                     selection, see [Describing Worker selection criteria](https://www.twilio.com/docs/taskrouter/api/taskqueues#target-workers).
                   type: string
                 TaskOrder:
+                  $ref: '#/components/schemas/task_queue_enum_task_order'
                   description: How Tasks will be assigned to Workers. Set this parameter
                     to `LIFO` to assign most recently created Task first or FIFO to
                     assign the oldest Task first. Default is `FIFO`. [Click here](https://www.twilio.com/docs/taskrouter/queue-ordering-last-first-out-lifo)
                     to learn more.
-                  enum:
-                  - FIFO
-                  - LIFO
                   type: string
               required:
               - FriendlyName
@@ -3211,13 +3261,11 @@ paths:
                     criteria below.
                   type: string
                 TaskOrder:
+                  $ref: '#/components/schemas/task_queue_enum_task_order'
                   description: 'How Tasks will be assigned to Workers. Can be: `FIFO`
                     or `LIFO` and the default is `FIFO`. Use `FIFO` to assign the
                     oldest task first and `LIFO` to assign the most recent task first.
                     For more information, see [Queue Ordering](https://www.twilio.com/docs/taskrouter/queue-ordering-last-first-out-lifo).'
-                  enum:
-                  - FIFO
-                  - LIFO
                   type: string
               title: UpdateTaskQueueRequest
               type: object
@@ -3767,17 +3815,11 @@ paths:
             schema:
               properties:
                 AssignmentStatus:
+                  $ref: '#/components/schemas/task_enum_status'
                   description: 'The new status of the task. Can be: `canceled`, to
                     cancel a Task that is currently `pending` or `reserved`; `wrapping`,
                     to move the Task to wrapup state; or `completed`, to move a Task
                     to the completed state.'
-                  enum:
-                  - pending
-                  - reserved
-                  - assigned
-                  - canceled
-                  - completed
-                  - wrapping
                   type: string
                 Attributes:
                   description: The JSON string that describes the custom attributes
@@ -3853,15 +3895,7 @@ paths:
         in: query
         name: ReservationStatus
         schema:
-          enum:
-          - pending
-          - accepted
-          - rejected
-          - timeout
-          - canceled
-          - rescinded
-          - wrapping
-          - completed
+          $ref: '#/components/schemas/task_reservation_enum_status'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -4084,14 +4118,7 @@ paths:
                     `conference_status_callback`. Can be: `start`, `end`, `join`,
                     `leave`, `mute`, `hold`, `speaker`.'
                   items:
-                    enum:
-                    - start
-                    - end
-                    - join
-                    - leave
-                    - mute
-                    - hold
-                    - speaker
+                    $ref: '#/components/schemas/task_reservation_enum_conference_event'
                     type: string
                   type: array
                 ConferenceStatusCallbackMethod:
@@ -4227,17 +4254,9 @@ paths:
                     `sg1`, `br1`, `au1`, or `jp1`.
                   type: string
                 ReservationStatus:
+                  $ref: '#/components/schemas/task_reservation_enum_status'
                   description: 'The new status of the reservation. Can be: `pending`,
                     `accepted`, `rejected`, or `timeout`.'
-                  enum:
-                  - pending
-                  - accepted
-                  - rejected
-                  - timeout
-                  - canceled
-                  - rescinded
-                  - wrapping
-                  - completed
                   type: string
                 SipAuthPassword:
                   description: The SIP password for authentication.
@@ -4261,11 +4280,7 @@ paths:
                   description: 'The call progress events that we will send to `status_callback`.
                     Can be: `initiated`, `ringing`, `answered`, or `completed`.'
                   items:
-                    enum:
-                    - initiated
-                    - ringing
-                    - answered
-                    - completed
+                    $ref: '#/components/schemas/task_reservation_enum_call_status'
                     type: string
                   type: array
                 StatusCallbackMethod:
@@ -4285,11 +4300,8 @@ paths:
                     instruction.
                   type: string
                 SupervisorMode:
+                  $ref: '#/components/schemas/task_reservation_enum_supervisor_mode'
                   description: The Supervisor mode when executing the Supervise instruction.
-                  enum:
-                  - monitor
-                  - whisper
-                  - barge
                   type: string
                 Timeout:
                   description: Timeout for call when executing a Conference instruction.
@@ -5076,15 +5088,7 @@ paths:
         in: query
         name: ReservationStatus
         schema:
-          enum:
-          - pending
-          - accepted
-          - rejected
-          - timeout
-          - canceled
-          - rescinded
-          - wrapping
-          - completed
+          $ref: '#/components/schemas/worker_reservation_enum_status'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -5306,14 +5310,7 @@ paths:
                     `conference_status_callback`. Can be: `start`, `end`, `join`,
                     `leave`, `mute`, `hold`, `speaker`.'
                   items:
-                    enum:
-                    - start
-                    - end
-                    - join
-                    - leave
-                    - mute
-                    - hold
-                    - speaker
+                    $ref: '#/components/schemas/worker_reservation_enum_conference_event'
                     type: string
                   type: array
                 ConferenceStatusCallbackMethod:
@@ -5450,17 +5447,9 @@ paths:
                     `sg1`, `br1`, `au1`, or `jp1`.
                   type: string
                 ReservationStatus:
+                  $ref: '#/components/schemas/worker_reservation_enum_status'
                   description: 'The new status of the reservation. Can be: `pending`,
                     `accepted`, `rejected`, `timeout`, `canceled`, or `rescinded`.'
-                  enum:
-                  - pending
-                  - accepted
-                  - rejected
-                  - timeout
-                  - canceled
-                  - rescinded
-                  - wrapping
-                  - completed
                   type: string
                 SipAuthPassword:
                   description: The SIP password for authentication.
@@ -5484,11 +5473,7 @@ paths:
                   description: 'The call progress events that we will send to `status_callback`.
                     Can be: `initiated`, `ringing`, `answered`, or `completed`.'
                   items:
-                    enum:
-                    - initiated
-                    - ringing
-                    - answered
-                    - completed
+                    $ref: '#/components/schemas/worker_reservation_enum_call_status'
                     type: string
                   type: array
                 StatusCallbackMethod:

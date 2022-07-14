@@ -1,5 +1,67 @@
 components:
   schemas:
+    billing_period_enum_bp_type:
+      enum:
+      - ready
+      - active
+      type: string
+    esim_profile_enum_status:
+      enum:
+      - new
+      - reserving
+      - available
+      - downloaded
+      - installed
+      - failed
+      type: string
+    fleet_enum_data_metering:
+      enum:
+      - payg
+      type: string
+    ip_command_enum_direction:
+      enum:
+      - to_sim
+      - from_sim
+      type: string
+    ip_command_enum_payload_type:
+      enum:
+      - text
+      - binary
+      type: string
+    ip_command_enum_status:
+      enum:
+      - queued
+      - sent
+      - received
+      - failed
+      type: string
+    sim_enum_status:
+      enum:
+      - new
+      - ready
+      - active
+      - inactive
+      - scheduled
+      type: string
+    sim_enum_status_update:
+      enum:
+      - ready
+      - active
+      - inactive
+      type: string
+    sms_command_enum_direction:
+      enum:
+      - to_sim
+      - from_sim
+      type: string
+    sms_command_enum_status:
+      enum:
+      - queued
+      - sent
+      - delivered
+      - received
+      - failed
+      type: string
     supersim.v1.esim_profile:
       properties:
         account_sid:
@@ -59,14 +121,8 @@ components:
           nullable: true
           type: string
         status:
+          $ref: '#/components/schemas/esim_profile_enum_status'
           description: The status of the eSIM Profile
-          enum:
-          - new
-          - reserving
-          - available
-          - downloaded
-          - installed
-          - failed
           nullable: true
           type: string
         url:
@@ -95,9 +151,8 @@ components:
           nullable: true
           type: integer
         data_metering:
+          $ref: '#/components/schemas/fleet_enum_data_metering'
           description: The model by which a SIM is metered and billed
-          enum:
-          - payg
           nullable: true
           type: string
         date_created:
@@ -210,10 +265,8 @@ components:
           nullable: true
           type: integer
         direction:
+          $ref: '#/components/schemas/ip_command_enum_direction'
           description: The direction of the IP Command
-          enum:
-          - to_sim
-          - from_sim
           nullable: true
           type: string
         payload:
@@ -221,10 +274,8 @@ components:
           nullable: true
           type: string
         payload_type:
+          $ref: '#/components/schemas/ip_command_enum_payload_type'
           description: The payload type of the IP Command
-          enum:
-          - text
-          - binary
           nullable: true
           type: string
         sid:
@@ -248,12 +299,8 @@ components:
           pattern: ^HS[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/ip_command_enum_status'
           description: The status of the IP Command
-          enum:
-          - queued
-          - sent
-          - received
-          - failed
           nullable: true
           type: string
         url:
@@ -412,13 +459,8 @@ components:
           pattern: ^HS[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/sim_enum_status'
           description: The status of the Super SIM
-          enum:
-          - new
-          - ready
-          - active
-          - inactive
-          - scheduled
           nullable: true
           type: string
         unique_name:
@@ -458,10 +500,8 @@ components:
           nullable: true
           type: string
         period_type:
+          $ref: '#/components/schemas/billing_period_enum_bp_type'
           description: The type of the Billing Period
-          enum:
-          - ready
-          - active
           nullable: true
           type: string
         sid:
@@ -519,10 +559,8 @@ components:
           nullable: true
           type: string
         direction:
+          $ref: '#/components/schemas/sms_command_enum_direction'
           description: The direction of the SMS Command
-          enum:
-          - to_sim
-          - from_sim
           nullable: true
           type: string
         payload:
@@ -544,13 +582,8 @@ components:
           pattern: ^HS[0-9a-fA-F]{32}$
           type: string
         status:
+          $ref: '#/components/schemas/sms_command_enum_status'
           description: The status of the SMS Command
-          enum:
-          - queued
-          - sent
-          - delivered
-          - received
-          - failed
           nullable: true
           type: string
         url:
@@ -576,10 +609,12 @@ components:
           type: string
         data_download:
           description: Total data downloaded in bytes, aggregated by the query parameters.
+          format: int64
           nullable: true
           type: integer
         data_total:
           description: Total of data_upload and data_download.
+          format: int64
           nullable: true
           type: integer
         data_total_billed:
@@ -589,6 +624,7 @@ components:
           type: number
         data_upload:
           description: Total data uploaded in bytes, aggregated by the query parameters.
+          format: int64
           nullable: true
           type: integer
         fleet_sid:
@@ -622,6 +658,23 @@ components:
           pattern: ^HS[0-9a-fA-F]{32}$
           type: string
       type: object
+    usage_record_enum_granularity:
+      enum:
+      - hour
+      - day
+      - all
+      type: string
+    usage_record_enum_group:
+      enum:
+      - sim
+      - fleet
+      - network
+      - isoCountry
+      type: string
+    usage_record_enum_sort_by:
+      enum:
+      - time
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -662,13 +715,7 @@ paths:
         in: query
         name: Status
         schema:
-          enum:
-          - new
-          - reserving
-          - available
-          - downloaded
-          - installed
-          - failed
+          $ref: '#/components/schemas/esim_profile_enum_status'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -1086,11 +1133,7 @@ paths:
         in: query
         name: Status
         schema:
-          enum:
-          - queued
-          - sent
-          - received
-          - failed
+          $ref: '#/components/schemas/ip_command_enum_status'
           type: string
       - description: The direction of the IP Command. Can be `to_sim` or `from_sim`.
           The value of `to_sim` is synonymous with the term `mobile terminated`, and
@@ -1098,9 +1141,7 @@ paths:
         in: query
         name: Direction
         schema:
-          enum:
-          - to_sim
-          - from_sim
+          $ref: '#/components/schemas/ip_command_enum_direction'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -1180,11 +1221,9 @@ paths:
                   description: The payload to be delivered to the device.
                   type: string
                 PayloadType:
+                  $ref: '#/components/schemas/ip_command_enum_payload_type'
                   description: Indicates how the payload is encoded. Either `text`
                     or `binary`. Defaults to `text`.
-                  enum:
-                  - text
-                  - binary
                   type: string
                 Sim:
                   description: The `sid` or `unique_name` of the [Super SIM](https://www.twilio.com/docs/iot/supersim/api/sim-resource)
@@ -1702,12 +1741,7 @@ paths:
         in: query
         name: Status
         schema:
-          enum:
-          - new
-          - ready
-          - active
-          - inactive
-          - scheduled
+          $ref: '#/components/schemas/sim_enum_status'
           type: string
       - description: The SID or unique name of the Fleet to which a list of Sims are
           assigned.
@@ -1875,13 +1909,10 @@ paths:
                     resource should be assigned.
                   type: string
                 Status:
+                  $ref: '#/components/schemas/sim_enum_status_update'
                   description: 'The new status of the resource. Can be: `ready`, `active`,
                     or `inactive`. See the [Super SIM Status Values](https://www.twilio.com/docs/iot/supersim/api/sim-resource#status-values)
                     for more info.'
-                  enum:
-                  - ready
-                  - active
-                  - inactive
                   type: string
                 UniqueName:
                   description: An application-defined string that uniquely identifies
@@ -2069,12 +2100,7 @@ paths:
         in: query
         name: Status
         schema:
-          enum:
-          - queued
-          - sent
-          - delivered
-          - received
-          - failed
+          $ref: '#/components/schemas/sms_command_enum_status'
           type: string
       - description: The direction of the SMS Command. Can be `to_sim` or `from_sim`.
           The value of `to_sim` is synonymous with the term `mobile terminated`, and
@@ -2082,9 +2108,7 @@ paths:
         in: query
         name: Direction
         schema:
-          enum:
-          - to_sim
-          - from_sim
+          $ref: '#/components/schemas/sms_command_enum_direction'
           type: string
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -2264,11 +2288,7 @@ paths:
         in: query
         name: Group
         schema:
-          enum:
-          - sim
-          - fleet
-          - network
-          - isoCountry
+          $ref: '#/components/schemas/usage_record_enum_group'
           type: string
       - description: 'Time-based grouping that UsageRecords should be aggregated by.
           Can be: `hour`, `day`, or `all`. Default is `all`. `all` returns one UsageRecord
@@ -2276,10 +2296,7 @@ paths:
         in: query
         name: Granularity
         schema:
-          enum:
-          - hour
-          - day
-          - all
+          $ref: '#/components/schemas/usage_record_enum_granularity'
           type: string
       - description: Only include usage that occurred at or after this time, specified
           in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format. Default is
