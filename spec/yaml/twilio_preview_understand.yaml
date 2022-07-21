@@ -1,6 +1,6 @@
 components:
   schemas:
-    autopilot.v1.assistant:
+    preview.understand.assistant:
       type: object
       properties:
         account_sid:
@@ -9,13 +9,13 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Assistant.
         callback_events:
-          description: Reserved
+          description: Space-separated list of callback events that will trigger callbacks.
           nullable: true
           type: string
         callback_url:
-          description: Reserved
+          description: A user-provided URL to send event callbacks to.
           format: uri
           nullable: true
           type: string
@@ -23,19 +23,15 @@ components:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
-        development_stage:
-          description: A string describing the state of the assistant.
-          nullable: true
-          type: string
+          description: The date that this resource was last updated
         friendly_name:
-          description: The string that you assigned to describe the resource
+          description: A text description for the Assistant. It is non-unique and
+            can up to 255 characters long.
           nullable: true
           type: string
         latest_model_build_sid:
@@ -44,18 +40,16 @@ components:
           maxLength: 34
           pattern: ^UG[0-9a-fA-F]{32}$
           nullable: true
-          description: Reserved
+          description: The unique ID (Sid) of the latest model build. Null if no model
+            has been built.
         links:
-          description: A list of the URLs of the Assistant's related resources
           format: uri-map
           nullable: true
           type: object
         log_queries:
-          description: Whether queries should be logged and kept after training
-          nullable: true
-          type: boolean
-        needs_model_build:
-          description: Whether model needs to be rebuilt
+          description: A boolean that specifies whether queries should be logged for
+            30 days further training. If false, no queries will be stored, if true,
+            queries will be stored for 30 days and deleted thereafter.
           nullable: true
           type: boolean
         sid:
@@ -64,18 +58,18 @@ components:
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
+          description: A user-provided string that uniquely identifies this resource
+            as an alternative to the sid. You can use the unique name in the URL path.
+            Unique up to 64 characters long.
           nullable: true
           type: string
         url:
-          description: The absolute URL of the Assistant resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.defaults:
+    preview.understand.assistant.assistant_fallback_actions:
       type: object
       properties:
         account_sid:
@@ -84,23 +78,19 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
         data:
           nullable: true
-          description: The JSON string that describes the default task links
         url:
-          description: The absolute URL of the Defaults resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.dialogue:
+    preview.understand.assistant.assistant_initiation_actions:
       type: object
       properties:
         account_sid:
@@ -109,30 +99,50 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
         data:
           nullable: true
-          description: The JSON string that describes the dialogue session object
+        url:
+          format: uri
+          nullable: true
+          type: string
+    preview.understand.assistant.dialogue:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique ID of the Account that created this Field.
+        assistant_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^UA[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique ID of the parent Assistant.
+        data:
+          nullable: true
+          description: The dialogue memory object as json
         sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UK[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: The unique ID of the Dialogue
         url:
-          description: The absolute URL of the Dialogue resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.task.field:
+    preview.understand.assistant.task.field:
       type: object
       properties:
         account_sid:
@@ -141,28 +151,27 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Field.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the Task associated
-            with the resource
+          description: The unique ID of the parent Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         field_type:
-          description: The Field Type of the field
+          description: The Field Type of this field. It can be any Built-in Field
+            Type or unique_name or the Field Type sid of a custom Field Type.
           nullable: true
           type: string
         sid:
@@ -171,26 +180,24 @@ components:
           maxLength: 34
           pattern: ^UE[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         task_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UD[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-            resource associated with this Field
+          description: The unique ID of the Task associated with this Field.
         unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
+          description: A user-provided string that uniquely identifies this resource
+            as an alternative to the sid. Unique up to 64 characters long.
           nullable: true
           type: string
         url:
-          description: The absolute URL of the Field resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.field_type:
+    preview.understand.assistant.field_type:
       type: object
       properties:
         account_sid:
@@ -199,31 +206,30 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Field Type.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
+          description: The unique ID of the Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         friendly_name:
-          description: The string that you assigned to describe the resource
+          description: A user-provided string that identifies this resource. It is
+            non-unique and can up to 255 characters long.
           nullable: true
           type: string
         links:
-          description: A list of the URLs of related resources
           format: uri-map
           nullable: true
           type: object
@@ -233,18 +239,17 @@ components:
           maxLength: 34
           pattern: ^UB[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
+          description: A user-provided string that uniquely identifies this resource
+            as an alternative to the sid. Unique up to 64 characters long.
           nullable: true
           type: string
         url:
-          description: The absolute URL of the FieldType resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.field_type.field_value:
+    preview.understand.assistant.field_type.field_value:
       type: object
       properties:
         account_sid:
@@ -253,36 +258,34 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Field Value.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the FieldType
-            associated with the resource
+          description: The unique ID of the Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         field_type_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UB[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Field Type associated with the Field Value
+          description: The unique ID of the Field Type associated with this Field
+            Value.
         language:
-          description: The ISO language-country tag that identifies the language of
-            the value
+          description: An ISO language-country string of the value.
           nullable: true
           type: string
         sid:
@@ -291,24 +294,24 @@ components:
           maxLength: 34
           pattern: ^UC[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         synonym_of:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UC[0-9a-fA-F]{32}$
           nullable: true
-          description: The word for which the field value is a synonym of
+          description: A value that indicates this field value is a synonym of. Empty
+            if the value is not a synonym.
         url:
-          description: The absolute URL of the FieldValue resource
           format: uri
           nullable: true
           type: string
         value:
-          description: The Field Value data
+          description: The Field Value itself.
           nullable: true
           type: string
-    autopilot.v1.assistant.model_build:
+    preview.understand.assistant.model_build:
       type: object
       properties:
         account_sid:
@@ -317,32 +320,29 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Model Build.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
+          description: The unique ID of the parent Assistant.
         build_duration:
-          description: The time in seconds it took to build the model
+          description: The time in seconds it took to build the model.
           nullable: true
           type: integer
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         error_code:
-          description: More information about why the model build failed, if `status`
-            is `failed`
           nullable: true
           type: integer
         sid:
@@ -351,19 +351,19 @@ components:
           maxLength: 34
           pattern: ^UG[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         status:
           type: string
           $ref: '#/components/schemas/model_build_enum_status'
           nullable: true
-          description: The status of the model build process
+          description: 'A string that described the model build status. The values
+            can be: enqueued, building, completed, failed'
         unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
+          description: A user-provided string that uniquely identifies this resource
+            as an alternative to the sid. Unique up to 64 characters long.
           nullable: true
           type: string
         url:
-          description: The absolute URL of the ModelBuild resource
           format: uri
           nullable: true
           type: string
@@ -375,7 +375,7 @@ components:
       - failed
       - canceled
       type: string
-    autopilot.v1.assistant.query:
+    preview.understand.assistant.query:
       type: object
       properties:
         account_sid:
@@ -384,35 +384,26 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Query.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
+          description: The unique ID of the parent Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
-        dialogue_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UK[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the [Dialogue](https://www.twilio.com/docs/autopilot/api/dialogue).
+          description: The date that this resource was last updated
         language:
-          description: The ISO language-country string that specifies the language
-            used by the Query
+          description: An ISO language-country string of the sample.
           nullable: true
           type: string
         model_build_sid:
@@ -421,45 +412,43 @@ components:
           maxLength: 34
           pattern: ^UG[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the [Model Build](https://www.twilio.com/docs/autopilot/api/model-build)
-            queried
+          description: The unique ID of the Model Build queried.
         query:
-          description: The end-user's natural language input
+          description: The end-user's natural language input.
           nullable: true
           type: string
         results:
           nullable: true
-          description: The natural language analysis results that include the Task
-            recognized and a list of identified Fields
+          description: The natural language analysis results which include the Task
+            recognized, the confidence score and a list of identified Fields.
         sample_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UF[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of an optional reference to the Sample created from
-            the query
+          description: An optional reference to the Sample created from this query.
         sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UH[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         source_channel:
-          description: The communication channel from where the end-user input came
+          description: The communication channel where this end-user input came from
           nullable: true
           type: string
         status:
-          description: The status of the Query
+          description: 'A string that described the query status. The values can be:
+            pending_review, reviewed, discarded'
           nullable: true
           type: string
         url:
-          description: The absolute URL of the Query resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.restore_assistant:
+    preview.understand.assistant.task.sample:
       type: object
       properties:
         account_sid:
@@ -468,94 +457,26 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
-        callback_events:
-          description: Reserved
-          nullable: true
-          type: string
-        callback_url:
-          description: Reserved
-          format: uri
-          nullable: true
-          type: string
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
-        development_stage:
-          description: A string describing the state of the assistant.
-          nullable: true
-          type: string
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        latest_model_build_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UG[0-9a-fA-F]{32}$
-          nullable: true
-          description: Reserved
-        log_queries:
-          description: Whether queries should be logged and kept after training
-          nullable: true
-          type: boolean
-        needs_model_build:
-          description: Whether model needs to be rebuilt
-          nullable: true
-          type: boolean
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UA[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
-          nullable: true
-          type: string
-    autopilot.v1.assistant.task.sample:
-      type: object
-      properties:
-        account_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Sample.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the Task associated
-            with the resource
+          description: The unique ID of the Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         language:
-          description: An ISO language-country string that specifies the language
-            used for the sample
+          description: An ISO language-country string of the sample.
           nullable: true
           type: string
         sid:
@@ -564,13 +485,16 @@ components:
           maxLength: 34
           pattern: ^UF[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         source_channel:
-          description: The communication channel from which the sample was captured
+          description: 'The communication channel the sample was captured. It can
+            be: voice, sms, chat, alexa, google-assistant, or slack. If not included
+            the value will be null'
           nullable: true
           type: string
         tagged_text:
-          description: The text example of how end users might express the task
+          description: The text example of how end-users may express this task. The
+            sample may contain Field tag blocks.
           nullable: true
           type: string
         task_sid:
@@ -579,13 +503,12 @@ components:
           maxLength: 34
           pattern: ^UD[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Task associated with the resource
+          description: The unique ID of the Task associated with this Sample.
         url:
-          description: The absolute URL of the Sample resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.style_sheet:
+    preview.understand.assistant.style_sheet:
       type: object
       properties:
         account_sid:
@@ -594,23 +517,22 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Assistant
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
+          description: The unique ID of the Assistant
         data:
           nullable: true
-          description: The JSON string that describes the style sheet object
+          description: The JSON style sheet object
         url:
-          description: The absolute URL of the StyleSheet resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.task:
+    preview.understand.assistant.task:
       type: object
       properties:
         account_sid:
@@ -619,9 +541,10 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Task.
         actions_url:
-          description: The URL from which the Assistant can fetch actions
+          description: User-provided HTTP endpoint where from the assistant fetches
+            actions
           format: uri
           nullable: true
           type: string
@@ -631,24 +554,23 @@ components:
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the resource
+          description: The unique ID of the Assistant.
         date_created:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
+          description: The date that this resource was created
         date_updated:
           type: string
           format: date-time
           nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
+          description: The date that this resource was last updated
         friendly_name:
-          description: The string that you assigned to describe the resource
+          description: A user-provided string that identifies this resource. It is
+            non-unique and can up to 255 characters long.
           nullable: true
           type: string
         links:
-          description: A list of the URLs of related resources
           format: uri-map
           nullable: true
           type: object
@@ -658,18 +580,17 @@ components:
           maxLength: 34
           pattern: ^UD[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
+          description: A 34 character string that uniquely identifies this resource.
         unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
+          description: A user-provided string that uniquely identifies this resource
+            as an alternative to the sid. Unique up to 64 characters long.
           nullable: true
           type: string
         url:
-          description: The absolute URL of the Task resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.task.task_actions:
+    preview.understand.assistant.task.task_actions:
       type: object
       properties:
         account_sid:
@@ -678,32 +599,28 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Field.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the Task associated
-            with the resource
+          description: The unique ID of the parent Assistant.
         data:
           nullable: true
-          description: The JSON string that specifies the actions that instruct the
-            Assistant on how to perform the task
         task_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UD[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Task associated with the resource
+          description: The unique ID of the Task.
         url:
-          description: The absolute URL of the TaskActions resource
           format: uri
           nullable: true
           type: string
-    autopilot.v1.assistant.task.task_statistics:
+    preview.understand.assistant.task.task_statistics:
       type: object
       properties:
         account_sid:
@@ -712,21 +629,20 @@ components:
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Account that created the resource
+          description: The unique ID of the Account that created this Field.
         assistant_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^UA[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Assistant that is the parent of the Task associated
-            with the resource
+          description: The unique ID of the parent Assistant.
         fields_count:
-          description: The total number of Fields associated with the Task
+          description: The total number of Fields associated with this Task.
           nullable: true
           type: integer
         samples_count:
-          description: The total number of Samples associated with the Task
+          description: The total number of Samples associated with this Task.
           nullable: true
           type: integer
         task_sid:
@@ -735,68 +651,8 @@ components:
           maxLength: 34
           pattern: ^UD[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the Task for which the statistics were collected
+          description: The unique ID of the Task associated with this Field.
         url:
-          description: The absolute URL of the TaskStatistics resource
-          format: uri
-          nullable: true
-          type: string
-    autopilot.v1.assistant.webhook:
-      type: object
-      properties:
-        account_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Account that created the resource
-        assistant_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UA[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Assistant that is the parent of the resource
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT when the resource was last
-            updated
-        events:
-          description: The list of space-separated events that this Webhook is subscribed
-            to.
-          nullable: true
-          type: string
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UM[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
-          nullable: true
-          type: string
-        url:
-          description: The absolute URL of the Webhook resource
-          format: uri
-          nullable: true
-          type: string
-        webhook_method:
-          description: The method used when calling the webhook's URL.
-          nullable: true
-          type: string
-        webhook_url:
-          description: The URL associated with this Webhook.
           format: uri
           nullable: true
           type: string
@@ -814,26 +670,22 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
-  title: Twilio - Autopilot
+  title: Twilio - Preview
   version: 1.29.2
 openapi: 3.0.1
 paths:
-  /v1/Assistants/{Sid}:
+  /understand/Assistants/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: instance
     get:
       description: ''
       operationId: FetchAssistant
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the Assistant
-          resource to fetch.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -844,7 +696,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant'
+                $ref: '#/components/schemas/preview.understand.assistant'
           description: OK
       security:
       - accountSid_authToken: []
@@ -854,8 +706,7 @@ paths:
       description: ''
       operationId: UpdateAssistant
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the Assistant
-          resource to update.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -867,39 +718,37 @@ paths:
             schema:
               properties:
                 FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
+                  description: A text description for the Assistant. It is non-unique
+                    and can up to 255 characters long.
                   type: string
                 LogQueries:
-                  description: 'Whether queries should be logged and kept after training.
-                    Can be: `true` or `false` and defaults to `true`. If `true`, queries
-                    are stored for 30 days, and then deleted. If `false`, no queries
-                    are stored.'
+                  description: A boolean that specifies whether queries should be
+                    logged for 30 days further training. If false, no queries will
+                    be stored, if true, queries will be stored for 30 days and deleted
+                    thereafter. Defaults to true if no value is provided.
                   type: boolean
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used as an alternative to the `sid` in
-                    the URL path to address the resource. The first 64 characters
-                    must be unique.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
                 CallbackUrl:
-                  description: Reserved.
+                  description: A user-provided URL to send event callbacks to.
                   format: uri
                   type: string
                 CallbackEvents:
-                  description: Reserved.
+                  description: Space-separated list of callback events that will trigger
+                    callbacks.
                   type: string
+                FallbackActions:
+                  description: The JSON actions to be executed when the user's input
+                    is not recognized as matching any Task.
+                InitiationActions:
+                  description: The JSON actions to be executed on inbound phone calls
+                    when the Assistant has to say something first.
                 StyleSheet:
-                  description: The JSON string that defines the Assistant's [style
-                    sheet](https://www.twilio.com/docs/autopilot/api/assistant/stylesheet)
-                Defaults:
-                  description: A JSON object that defines the Assistant's [default
-                    tasks](https://www.twilio.com/docs/autopilot/api/assistant/defaults)
-                    for various scenarios, including initiation actions and fallback
-                    tasks.
-                DevelopmentStage:
-                  description: A string describing the state of the assistant.
-                  type: string
+                  description: The JSON object that holds the style sheet for the
+                    assistant
               title: UpdateAssistantRequest
               type: object
       responses:
@@ -907,7 +756,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant'
+                $ref: '#/components/schemas/preview.understand.assistant'
           description: OK
       security:
       - accountSid_authToken: []
@@ -917,8 +766,7 @@ paths:
       description: ''
       operationId: DeleteAssistant
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the Assistant
-          resource to delete.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -931,15 +779,12 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants:
+  /understand/Assistants:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: list
     get:
       description: ''
@@ -964,7 +809,7 @@ paths:
                   assistants:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant'
+                      $ref: '#/components/schemas/preview.understand.assistant'
                   meta:
                     type: object
                     properties:
@@ -1000,37 +845,37 @@ paths:
             schema:
               properties:
                 FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It is not unique and can be up to 255 characters
-                    long.
+                  description: A text description for the Assistant. It is non-unique
+                    and can up to 255 characters long.
                   type: string
                 LogQueries:
-                  description: 'Whether queries should be logged and kept after training.
-                    Can be: `true` or `false` and defaults to `true`. If `true`, queries
-                    are stored for 30 days, and then deleted. If `false`, no queries
-                    are stored.'
+                  description: A boolean that specifies whether queries should be
+                    logged for 30 days further training. If false, no queries will
+                    be stored, if true, queries will be stored for 30 days and deleted
+                    thereafter. Defaults to true if no value is provided.
                   type: boolean
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource. The first 64 characters
-                    must be unique.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
                 CallbackUrl:
-                  description: Reserved.
+                  description: A user-provided URL to send event callbacks to.
                   format: uri
                   type: string
                 CallbackEvents:
-                  description: Reserved.
+                  description: Space-separated list of callback events that will trigger
+                    callbacks.
                   type: string
+                FallbackActions:
+                  description: The JSON actions to be executed when the user's input
+                    is not recognized as matching any Task.
+                InitiationActions:
+                  description: The JSON actions to be executed on inbound phone calls
+                    when the Assistant has to say something first.
                 StyleSheet:
-                  description: The JSON string that defines the Assistant's [style
-                    sheet](https://www.twilio.com/docs/autopilot/api/assistant/stylesheet)
-                Defaults:
-                  description: A JSON object that defines the Assistant's [default
-                    tasks](https://www.twilio.com/docs/autopilot/api/assistant/defaults)
-                    for various scenarios, including initiation actions and fallback
-                    tasks.
+                  description: The JSON object that holds the style sheet for the
+                    assistant
               title: CreateAssistantRequest
               type: object
       responses:
@@ -1038,28 +883,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant'
+                $ref: '#/components/schemas/preview.understand.assistant'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Defaults:
+  /understand/Assistants/{AssistantSid}/FallbackActions:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - data
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
-      className: defaults
+      className: assistant_fallback_actions
     get:
       description: ''
-      operationId: FetchDefaults
+      operationId: FetchAssistantFallbackActions
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1070,7 +913,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.defaults'
+                $ref: '#/components/schemas/preview.understand.assistant.assistant_fallback_actions'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1078,10 +921,9 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateDefaults
+      operationId: UpdateAssistantFallbackActions
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1092,45 +934,100 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Defaults:
-                  description: A JSON string that describes the default task links
-                    for the `assistant_initiation`, `collect`, and `fallback` situations.
-              title: UpdateDefaultsRequest
+                FallbackActions:
+                  description: ''
+              title: UpdateAssistantFallbackActionsRequest
               type: object
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.defaults'
+                $ref: '#/components/schemas/preview.understand.assistant.assistant_fallback_actions'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Dialogues/{Sid}:
+  /understand/Assistants/{AssistantSid}/InitiationActions:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - data
+      defaultOutputProperties: []
+      pathType: instance
+      parent: /Assistants
+      className: assistant_initiation_actions
+    get:
+      description: ''
+      operationId: FetchAssistantInitiationActions
+      parameters:
+      - description: ''
+        in: path
+        name: AssistantSid
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.understand.assistant.assistant_initiation_actions'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      x-maturity:
+      - Preview
+    post:
+      description: ''
+      operationId: UpdateAssistantInitiationActions
+      parameters:
+      - description: ''
+        in: path
+        name: AssistantSid
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                InitiationActions:
+                  description: ''
+              title: UpdateAssistantInitiationActionsRequest
+              type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.understand.assistant.assistant_initiation_actions'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      x-maturity:
+      - Preview
+  /understand/Assistants/{AssistantSid}/Dialogues/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
       description: ''
       operationId: FetchDialogue
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Dialogue
-          resource to fetch.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1141,53 +1038,45 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.dialogue'
+                $ref: '#/components/schemas/preview.understand.assistant.dialogue'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Dialogues:
+  /understand/Assistants/{AssistantSid}/Dialogues:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - data
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields/{Sid}:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - field_type
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
       operationId: FetchField
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resource to fetch.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          resource associated with the Field resource to fetch.
+      - description: The unique ID of the Task associated with this Field.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Field
-          resource to fetch.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -1198,7 +1087,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
+                $ref: '#/components/schemas/preview.understand.assistant.task.field'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1208,22 +1097,19 @@ paths:
       description: ''
       operationId: DeleteField
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resources to delete.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          resource associated with the Field resource to delete.
+      - description: The unique ID of the Task associated with this Field.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Field
-          resource to delete.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -1236,30 +1122,25 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - field_type
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
       operationId: ListField
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resources to read.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          resource associated with the Field resources to read.
+      - description: The unique ID of the Task associated with this Field.
         in: path
         name: TaskSid
         required: true
@@ -1284,7 +1165,7 @@ paths:
                   fields:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
+                      $ref: '#/components/schemas/preview.understand.assistant.task.field'
                   meta:
                     type: object
                     properties:
@@ -1315,15 +1196,13 @@ paths:
       description: ''
       operationId: CreateField
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the new resource.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          resource associated with the new Field resource.
+      - description: The unique ID of the Task associated with this Field.
         in: path
         name: TaskSid
         required: true
@@ -1335,15 +1214,14 @@ paths:
             schema:
               properties:
                 FieldType:
-                  description: 'The Field Type of the new field. Can be: a [Built-in
-                    Field Type](https://www.twilio.com/docs/autopilot/built-in-field-types),
-                    the `unique_name`, or the `sid` of a custom Field Type.'
+                  description: The unique name or sid of the FieldType. It can be
+                    any [Built-in Field Type](https://www.twilio.com/docs/assistant/api/built-in-field-types)
+                    or the unique_name or the Field Type sid of a custom Field Type.
                   type: string
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. This value must be a unique string of no more
-                    than 64 characters. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
               required:
               - FieldType
@@ -1355,36 +1233,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
+                $ref: '#/components/schemas/preview.understand.assistant.task.field'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/FieldTypes/{Sid}:
+  /understand/Assistants/{AssistantSid}/FieldTypes/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
       description: ''
       operationId: FetchFieldType
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the FieldType
-          resource to fetch.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1395,7 +1268,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+                $ref: '#/components/schemas/preview.understand.assistant.field_type'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1405,15 +1278,13 @@ paths:
       description: ''
       operationId: UpdateFieldType
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the to update.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the FieldType
-          resource to update.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1425,14 +1296,13 @@ paths:
             schema:
               properties:
                 FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
+                  description: A user-provided string that identifies this resource.
+                    It is non-unique and can up to 255 characters long.
                   type: string
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used as an alternative to the `sid` in
-                    the URL path to address the resource. The first 64 characters
-                    must be unique.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
               title: UpdateFieldTypeRequest
               type: object
@@ -1441,7 +1311,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+                $ref: '#/components/schemas/preview.understand.assistant.field_type'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1451,15 +1321,13 @@ paths:
       description: ''
       operationId: DeleteFieldType
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to delete.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the FieldType
-          resource to delete.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1472,23 +1340,19 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/FieldTypes:
+  /understand/Assistants/{AssistantSid}/FieldTypes:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants
     get:
       description: ''
       operationId: ListFieldType
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to read.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1513,7 +1377,7 @@ paths:
                   field_types:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+                      $ref: '#/components/schemas/preview.understand.assistant.field_type'
                   meta:
                     type: object
                     properties:
@@ -1544,8 +1408,7 @@ paths:
       description: ''
       operationId: CreateFieldType
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the new resource.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1557,15 +1420,13 @@ paths:
             schema:
               properties:
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource. The first 64 characters
-                    must be unique.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
                 FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It is not unique and can be up to 255 characters
-                    long.
+                  description: A user-provided string that identifies this resource.
+                    It is non-unique and can up to 255 characters long.
                   type: string
               required:
               - UniqueName
@@ -1576,43 +1437,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+                $ref: '#/components/schemas/preview.understand.assistant.field_type'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues/{Sid}:
+  /understand/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - value
-      - language
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants/{AssistantSid}/FieldTypes
     get:
       description: ''
       operationId: FetchFieldValue
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the FieldType associated with the resource to fetch.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the Field Type associated with the Field Value to
-          fetch.
+      - description: ''
         in: path
         name: FieldTypeSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the FieldValue
-          resource to fetch.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1623,7 +1478,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
+                $ref: '#/components/schemas/preview.understand.assistant.field_type.field_value'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1633,22 +1488,19 @@ paths:
       description: ''
       operationId: DeleteFieldValue
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the FieldType associated with the resources to delete.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the Field Type associated with the Field Value to
-          delete.
+      - description: ''
         in: path
         name: FieldTypeSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the FieldValue
-          resource to delete.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1661,38 +1513,31 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues:
+  /understand/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - value
-      - language
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants/{AssistantSid}/FieldTypes
     get:
       description: ''
       operationId: ListFieldValue
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the FieldType associated with the resources to read.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the Field Type associated with the Field Value to
-          read.
+      - description: ''
         in: path
         name: FieldTypeSid
         required: true
         schema:
           type: string
-      - description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-          tag that specifies the language of the value. Currently supported tags:
-          `en-US`'
+      - description: 'An ISO language-country string of the value. For example: *en-US*'
         in: query
         name: Language
         schema:
@@ -1716,7 +1561,7 @@ paths:
                   field_values:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
+                      $ref: '#/components/schemas/preview.understand.assistant.field_type.field_value'
                   meta:
                     type: object
                     properties:
@@ -1747,14 +1592,13 @@ paths:
       description: ''
       operationId: CreateFieldValue
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the FieldType associated with the new resource.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the Field Type associated with the Field Value.
+      - description: ''
         in: path
         name: FieldTypeSid
         required: true
@@ -1766,16 +1610,16 @@ paths:
             schema:
               properties:
                 Language:
-                  description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-                    tag that specifies the language of the value. Currently supported
-                    tags: `en-US`'
+                  description: An ISO language-country string of the value.
                   type: string
                 Value:
-                  description: The Field Value data.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
                 SynonymOf:
-                  description: The string value that indicates which word the field
-                    value is a synonym of.
+                  description: A value that indicates this field value is a synonym
+                    of. Empty if the value is not a synonym.
                   type: string
               required:
               - Language
@@ -1787,37 +1631,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
+                $ref: '#/components/schemas/preview.understand.assistant.field_type.field_value'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/ModelBuilds/{Sid}:
+  /understand/Assistants/{AssistantSid}/ModelBuilds/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - status
-      - date_created
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
       description: ''
       operationId: FetchModelBuild
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the ModelBuild
-          resource to fetch.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1828,7 +1666,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+                $ref: '#/components/schemas/preview.understand.assistant.model_build'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1838,15 +1676,13 @@ paths:
       description: ''
       operationId: UpdateModelBuild
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the ModelBuild
-          resource to update.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1858,10 +1694,9 @@ paths:
             schema:
               properties:
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. This value must be a unique string of no more than
-                    64 characters. It can be used as an alternative to the `sid` in
-                    the URL path to address the resource.
+                  description: 'A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long. For example: v0.1'
                   type: string
               title: UpdateModelBuildRequest
               type: object
@@ -1870,7 +1705,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+                $ref: '#/components/schemas/preview.understand.assistant.model_build'
           description: OK
       security:
       - accountSid_authToken: []
@@ -1880,15 +1715,13 @@ paths:
       description: ''
       operationId: DeleteModelBuild
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to delete.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the ModelBuild
-          resource to delete.
+      - description: ''
         in: path
         name: Sid
         required: true
@@ -1901,24 +1734,19 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/ModelBuilds:
+  /understand/Assistants/{AssistantSid}/ModelBuilds:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - status
-      - date_created
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants
     get:
       description: ''
       operationId: ListModelBuild
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to read.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1943,7 +1771,7 @@ paths:
                   model_builds:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+                      $ref: '#/components/schemas/preview.understand.assistant.model_build'
                   meta:
                     type: object
                     properties:
@@ -1974,8 +1802,7 @@ paths:
       description: ''
       operationId: CreateModelBuild
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the new resource.
+      - description: ''
         in: path
         name: AssistantSid
         required: true
@@ -1987,15 +1814,13 @@ paths:
             schema:
               properties:
                 StatusCallback:
-                  description: The URL we should call using a POST method to send
-                    status information to your application.
+                  description: ''
                   format: uri
                   type: string
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. This value must be a unique string of no more
-                    than 64 characters. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource.
+                  description: 'A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long. For example: v0.1'
                   type: string
               title: CreateModelBuildRequest
               type: object
@@ -2004,37 +1829,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+                $ref: '#/components/schemas/preview.understand.assistant.model_build'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Queries/{Sid}:
+  /understand/Assistants/{AssistantSid}/Queries/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - query
-      - status
-      - language
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
       description: ''
       operationId: FetchQuery
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Query
-          resource to fetch.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2045,7 +1864,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.query'
+                $ref: '#/components/schemas/preview.understand.assistant.query'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2055,15 +1874,13 @@ paths:
       description: ''
       operationId: UpdateQuery
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Query
-          resource to update.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2079,11 +1896,11 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^UF[0-9a-fA-F]{32}$
-                  description: The SID of an optional reference to the [Sample](https://www.twilio.com/docs/autopilot/api/task-sample)
-                    created from the query.
+                  description: An optional reference to the Sample created from this
+                    query.
                 Status:
-                  description: 'The new status of the resource. Can be: `pending-review`,
-                    `reviewed`, or `discarded`'
+                  description: 'A string that described the query status. The values
+                    can be: pending_review, reviewed, discarded'
                   type: string
               title: UpdateQueryRequest
               type: object
@@ -2092,7 +1909,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.query'
+                $ref: '#/components/schemas/preview.understand.assistant.query'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2102,15 +1919,13 @@ paths:
       description: ''
       operationId: DeleteQuery
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to delete.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Query
-          resource to delete.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2123,56 +1938,40 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Queries:
+  /understand/Assistants/{AssistantSid}/Queries:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - query
-      - status
-      - language
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants
     get:
       description: ''
       operationId: ListQuery
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to read.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-          string that specifies the language used by the Query resources to read.
-          For example: `en-US`.'
+      - description: An ISO language-country string of the sample.
         in: query
         name: Language
         schema:
           type: string
-      - description: The SID or unique name of the [Model Build](https://www.twilio.com/docs/autopilot/api/model-build)
-          to be queried.
+      - description: The Model Build Sid or unique name of the Model Build to be queried.
         in: query
         name: ModelBuild
         schema:
           type: string
-      - description: 'The status of the resources to read. Can be: `pending-review`,
-          `reviewed`, or `discarded`'
+      - description: 'A string that described the query status. The values can be:
+          pending_review, reviewed, discarded'
         in: query
         name: Status
         schema:
           type: string
-      - description: The SID of the [Dialogue](https://www.twilio.com/docs/autopilot/api/dialogue).
-        in: query
-        name: DialogueSid
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^UK[0-9a-fA-F]{32}$
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
         in: query
@@ -2192,7 +1991,7 @@ paths:
                   queries:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.query'
+                      $ref: '#/components/schemas/preview.understand.assistant.query'
                   meta:
                     type: object
                     properties:
@@ -2223,8 +2022,7 @@ paths:
       description: ''
       operationId: CreateQuery
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the new resource.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
@@ -2236,24 +2034,26 @@ paths:
             schema:
               properties:
                 Language:
-                  description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-                    string that specifies the language used for the new query. For
-                    example: `en-US`.'
+                  description: An ISO language-country string of the sample.
                   type: string
                 Query:
-                  description: The end-user's natural language input. It can be up
-                    to 2048 characters long.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. It can be up to 2048 characters
+                    long.
                   type: string
                 Tasks:
-                  description: The list of tasks to limit the new query to. Tasks
-                    are expressed as a comma-separated list of task `unique_name`
-                    values. For example, `task-unique_name-1, task-unique_name-2`.
-                    Listing specific tasks is useful to constrain the paths that a
-                    user can take.
+                  description: Constraints the query to a set of tasks. Useful when
+                    you need to constrain the paths the user can take. Tasks should
+                    be comma separated *task-unique-name-1*, *task-unique-name-2*
                   type: string
                 ModelBuild:
-                  description: The SID or unique name of the [Model Build](https://www.twilio.com/docs/autopilot/api/model-build)
+                  description: The Model Build Sid or unique name of the Model Build
                     to be queried.
+                  type: string
+                Field:
+                  description: Constraints the query to a given Field with an task.
+                    Useful when you know the Field you are expecting. It accepts one
+                    field in the format *task-unique-name-1*:*field-unique-name*
                   type: string
               required:
               - Language
@@ -2265,83 +2065,37 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.query'
+                $ref: '#/components/schemas/preview.understand.assistant.query'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/Restore:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - account_sid
-      - sid
-      - unique_name
-      - friendly_name
-      pathType: list
-      className: restore_assistant
-    post:
-      description: ''
-      operationId: UpdateRestoreAssistant
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                Assistant:
-                  description: The Twilio-provided string that uniquely identifies
-                    the Assistant resource to restore.
-                  type: string
-              required:
-              - Assistant
-              title: UpdateRestoreAssistantRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/autopilot.v1.restore_assistant'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples/{Sid}:
-    servers:
-    - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties:
-      - sid
-      - tagged_text
-      - language
-      - source_channel
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
       operationId: FetchSample
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resource to fetch.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          associated with the Sample resource to create.
+      - description: The unique ID of the Task associated with this Sample.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Sample
-          resource to fetch.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2355,7 +2109,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+                $ref: '#/components/schemas/preview.understand.assistant.task.sample'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2365,22 +2119,19 @@ paths:
       description: ''
       operationId: UpdateSample
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resource to update.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          associated with the Sample resource to update.
+      - description: The unique ID of the Task associated with this Sample.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Sample
-          resource to update.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2395,18 +2146,16 @@ paths:
             schema:
               properties:
                 Language:
-                  description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-                    string that specifies the language used for the sample. For example:
-                    `en-US`.'
+                  description: An ISO language-country string of the sample.
                   type: string
                 TaggedText:
-                  description: The text example of how end users might express the
-                    task. The sample can contain [Field tag blocks](https://www.twilio.com/docs/autopilot/api/task-sample#field-tagging).
+                  description: The text example of how end-users may express this
+                    task. The sample may contain Field tag blocks.
                   type: string
                 SourceChannel:
-                  description: 'The communication channel from which the sample was
-                    captured. Can be: `voice`, `sms`, `chat`, `alexa`, `google-assistant`,
-                    `slack`, or null if not included.'
+                  description: 'The communication channel the sample was captured.
+                    It can be: *voice*, *sms*, *chat*, *alexa*, *google-assistant*,
+                    or *slack*. If not included the value will be null'
                   type: string
               title: UpdateSampleRequest
               type: object
@@ -2415,7 +2164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+                $ref: '#/components/schemas/preview.understand.assistant.task.sample'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2425,22 +2174,19 @@ paths:
       description: ''
       operationId: DeleteSample
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resources to delete.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          associated with the Sample resource to delete.
+      - description: The unique ID of the Task associated with this Sample.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Sample
-          resource to delete.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2456,38 +2202,31 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - tagged_text
-      - language
-      - source_channel
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
       operationId: ListSample
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the resources to read.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          associated with the Sample resources to read.
+      - description: The unique ID of the Task associated with this Sample.
         in: path
         name: TaskSid
         required: true
         schema:
           type: string
-      - description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-          string that specifies the language used for the sample. For example: `en-US`.'
+      - description: An ISO language-country string of the sample.
         in: query
         name: Language
         schema:
@@ -2511,7 +2250,7 @@ paths:
                   samples:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+                      $ref: '#/components/schemas/preview.understand.assistant.task.sample'
                   meta:
                     type: object
                     properties:
@@ -2542,15 +2281,13 @@ paths:
       description: ''
       operationId: CreateSample
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task associated with the new resource.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          associated with the Sample resource to create.
+      - description: The unique ID of the Task associated with this Sample.
         in: path
         name: TaskSid
         required: true
@@ -2562,18 +2299,16 @@ paths:
             schema:
               properties:
                 Language:
-                  description: 'The [ISO language-country](https://docs.oracle.com/cd/E13214_01/wli/docs92/xref/xqisocodes.html)
-                    string that specifies the language used for the new sample. For
-                    example: `en-US`.'
+                  description: An ISO language-country string of the sample.
                   type: string
                 TaggedText:
-                  description: The text example of how end users might express the
-                    task. The sample can contain [Field tag blocks](https://www.twilio.com/docs/autopilot/api/task-sample#field-tagging).
+                  description: The text example of how end-users may express this
+                    task. The sample may contain Field tag blocks.
                   type: string
                 SourceChannel:
-                  description: 'The communication channel from which the new sample
-                    was captured. Can be: `voice`, `sms`, `chat`, `alexa`, `google-assistant`,
-                    `slack`, or null if not included.'
+                  description: 'The communication channel the sample was captured.
+                    It can be: *voice*, *sms*, *chat*, *alexa*, *google-assistant*,
+                    or *slack*. If not included the value will be null'
                   type: string
               required:
               - Language
@@ -2585,27 +2320,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+                $ref: '#/components/schemas/preview.understand.assistant.task.sample'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/StyleSheet:
+  /understand/Assistants/{AssistantSid}/StyleSheet:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - data
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
-      description: Returns Style sheet JSON object for the Assistant
+      description: Returns Style sheet JSON object for this Assistant
       operationId: FetchStyleSheet
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: The unique ID of the Assistant
         in: path
         name: AssistantSid
         required: true
@@ -2616,18 +2349,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.style_sheet'
+                $ref: '#/components/schemas/preview.understand.assistant.style_sheet'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
     post:
-      description: Updates the style sheet for an Assistant identified by `assistant_sid`.
+      description: Updates the style sheet for an assistant identified by {AssistantSid}
+        or {AssistantUniqueName}.
       operationId: UpdateStyleSheet
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
+      - description: The unique ID of the Assistant
         in: path
         name: AssistantSid
         required: true
@@ -2639,7 +2372,7 @@ paths:
             schema:
               properties:
                 StyleSheet:
-                  description: The JSON string that describes the style sheet object.
+                  description: The JSON Style sheet string
               title: UpdateStyleSheetRequest
               type: object
       responses:
@@ -2647,36 +2380,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.style_sheet'
+                $ref: '#/components/schemas/preview.understand.assistant.style_sheet'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{Sid}:
+  /understand/Assistants/{AssistantSid}/Tasks/{Sid}:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants
     get:
       description: ''
       operationId: FetchTask
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Task
-          resource to fetch.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2687,7 +2415,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task'
+                $ref: '#/components/schemas/preview.understand.assistant.task'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2697,15 +2425,13 @@ paths:
       description: ''
       operationId: UpdateTask
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Task
-          resource to update.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2717,20 +2443,20 @@ paths:
             schema:
               properties:
                 FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
+                  description: A user-provided string that identifies this resource.
+                    It is non-unique and can up to 255 characters long.
                   type: string
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. This value must be 64 characters or less in length
-                    and be unique. It can be used as an alternative to the `sid` in
-                    the URL path to address the resource.
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
+                    long.
                   type: string
                 Actions:
-                  description: The JSON string that specifies the [actions](https://www.twilio.com/docs/autopilot/actions)
-                    that instruct the Assistant on how to perform the task.
+                  description: A user-provided JSON object encoded as a string to
+                    specify the actions for this task. It is optional and non-unique.
                 ActionsUrl:
-                  description: The URL from which the Assistant can fetch actions.
+                  description: User-provided HTTP endpoint where from the assistant
+                    fetches actions
                   format: uri
                   type: string
               title: UpdateTaskRequest
@@ -2740,7 +2466,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task'
+                $ref: '#/components/schemas/preview.understand.assistant.task'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2750,15 +2476,13 @@ paths:
       description: ''
       operationId: DeleteTask
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to delete.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The Twilio-provided string that uniquely identifies the Task
-          resource to delete.
+      - description: A 34 character string that uniquely identifies this resource.
         in: path
         name: Sid
         required: true
@@ -2771,23 +2495,19 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks:
+  /understand/Assistants/{AssistantSid}/Tasks:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - friendly_name
+      defaultOutputProperties: []
       pathType: list
       parent: /Assistants
     get:
       description: ''
       operationId: ListTask
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to read.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
@@ -2812,7 +2532,7 @@ paths:
                   tasks:
                     type: array
                     items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.task'
+                      $ref: '#/components/schemas/preview.understand.assistant.task'
                   meta:
                     type: object
                     properties:
@@ -2843,8 +2563,7 @@ paths:
       description: ''
       operationId: CreateTask
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the new resource.
+      - description: The unique ID of the Assistant.
         in: path
         name: AssistantSid
         required: true
@@ -2856,22 +2575,20 @@ paths:
             schema:
               properties:
                 UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource. This value must be unique
-                    and 64 characters or less in length.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    new resource. It is not unique and can be up to 255 characters
+                  description: A user-provided string that uniquely identifies this
+                    resource as an alternative to the sid. Unique up to 64 characters
                     long.
                   type: string
+                FriendlyName:
+                  description: A user-provided string that identifies this resource.
+                    It is non-unique and can up to 255 characters long.
+                  type: string
                 Actions:
-                  description: The JSON string that specifies the [actions](https://www.twilio.com/docs/autopilot/actions)
-                    that instruct the Assistant on how to perform the task. It is
-                    optional and not unique.
+                  description: A user-provided JSON object encoded as a string to
+                    specify the actions for this task. It is optional and non-unique.
                 ActionsUrl:
-                  description: The URL from which the Assistant can fetch actions.
+                  description: User-provided HTTP endpoint where from the assistant
+                    fetches actions
                   format: uri
                   type: string
               required:
@@ -2883,36 +2600,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task'
+                $ref: '#/components/schemas/preview.understand.assistant.task'
           description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Actions:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Actions:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - data
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks
       className: task_actions
     get:
-      description: Returns JSON actions for the Task.
+      description: Returns JSON actions for this Task.
       operationId: FetchTaskActions
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task for which the task actions to fetch were
-          defined.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          for which the task actions to fetch were defined.
+      - description: The unique ID of the Task.
         in: path
         name: TaskSid
         required: true
@@ -2923,7 +2636,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.task_actions'
+                $ref: '#/components/schemas/preview.understand.assistant.task.task_actions'
           description: OK
       security:
       - accountSid_authToken: []
@@ -2933,16 +2646,13 @@ paths:
       description: Updates the actions of an Task identified by {TaskSid} or {TaskUniqueName}.
       operationId: UpdateTaskActions
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the Task for which the task actions to update were
-          defined.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          for which the task actions to update were defined.
+      - description: The unique ID of the Task.
         in: path
         name: TaskSid
         required: true
@@ -2954,8 +2664,8 @@ paths:
             schema:
               properties:
                 Actions:
-                  description: The JSON string that specifies the [actions](https://www.twilio.com/docs/autopilot/actions)
-                    that instruct the Assistant on how to perform the task.
+                  description: The JSON actions that instruct the Assistant how to
+                    perform this task.
               title: UpdateTaskActionsRequest
               type: object
       responses:
@@ -2963,20 +2673,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.task_actions'
+                $ref: '#/components/schemas/preview.understand.assistant.task.task_actions'
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
-  /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Statistics:
+  /understand/Assistants/{AssistantSid}/Tasks/{TaskSid}/Statistics:
     servers:
-    - url: https://autopilot.twilio.com
+    - url: https://preview.twilio.com
     description: 'TODO: Resource-level docs'
     x-twilio:
-      defaultOutputProperties:
-      - samples_count
-      - fields_count
+      defaultOutputProperties: []
       pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks
       className: task_statistics
@@ -2984,15 +2692,13 @@ paths:
       description: ''
       operationId: FetchTaskStatistics
       parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
+      - description: The unique ID of the parent Assistant.
         in: path
         name: AssistantSid
         required: true
         schema:
           type: string
-      - description: The SID of the [Task](https://www.twilio.com/docs/autopilot/api/task)
-          that is associated with the resource to fetch.
+      - description: The unique ID of the Task associated with this Field.
         in: path
         name: TaskSid
         required: true
@@ -3003,254 +2709,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.task.task_statistics'
+                $ref: '#/components/schemas/preview.understand.assistant.task.task_statistics'
           description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /v1/Assistants/{AssistantSid}/Webhooks/{Sid}:
-    servers:
-    - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - events
-      - wehbook_url
-      - webhook_method
-      pathType: instance
-      parent: /Assistants
-    get:
-      description: ''
-      operationId: FetchWebhook
-      parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to fetch.
-        in: path
-        name: AssistantSid
-        required: true
-        schema:
-          type: string
-      - description: The Twilio-provided string that uniquely identifies the Webhook
-          resource to fetch.
-        in: path
-        name: Sid
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    post:
-      description: ''
-      operationId: UpdateWebhook
-      parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resource to update.
-        in: path
-        name: AssistantSid
-        required: true
-        schema:
-          type: string
-      - description: The Twilio-provided string that uniquely identifies the Webhook
-          resource to update.
-        in: path
-        name: Sid
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource. This value must be unique
-                    and 64 characters or less in length.
-                  type: string
-                Events:
-                  description: The list of space-separated events that this Webhook
-                    will subscribe to.
-                  type: string
-                WebhookUrl:
-                  description: The URL associated with this Webhook.
-                  format: uri
-                  type: string
-                WebhookMethod:
-                  description: The method to be used when calling the webhook's URL.
-                  type: string
-              title: UpdateWebhookRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    delete:
-      description: ''
-      operationId: DeleteWebhook
-      parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to delete.
-        in: path
-        name: AssistantSid
-        required: true
-        schema:
-          type: string
-      - description: The Twilio-provided string that uniquely identifies the Webhook
-          resource to delete.
-        in: path
-        name: Sid
-        required: true
-        schema:
-          type: string
-      responses:
-        '204':
-          description: The resource was deleted successfully.
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /v1/Assistants/{AssistantSid}/Webhooks:
-    servers:
-    - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties:
-      - sid
-      - unique_name
-      - events
-      - wehbook_url
-      - webhook_method
-      pathType: list
-      parent: /Assistants
-    get:
-      description: ''
-      operationId: ListWebhook
-      parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the resources to read.
-        in: path
-        name: AssistantSid
-        required: true
-        schema:
-          type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
-        in: query
-        name: PageSize
-        schema:
-          maximum: 1000
-          minimum: 1
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                title: ListWebhookResponse
-                properties:
-                  webhooks:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
-                  meta:
-                    type: object
-                    properties:
-                      first_page_url:
-                        format: uri
-                        type: string
-                      next_page_url:
-                        format: uri
-                        type: string
-                      page:
-                        type: integer
-                      page_size:
-                        type: integer
-                      previous_page_url:
-                        format: uri
-                        type: string
-                      url:
-                        format: uri
-                        type: string
-                      key:
-                        type: string
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    post:
-      description: ''
-      operationId: CreateWebhook
-      parameters:
-      - description: The SID of the [Assistant](https://www.twilio.com/docs/autopilot/api/assistant)
-          that is the parent of the new resource.
-        in: path
-        name: AssistantSid
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the new resource. It can be used as an alternative to the `sid`
-                    in the URL path to address the resource. This value must be unique
-                    and 64 characters or less in length.
-                  type: string
-                Events:
-                  description: The list of space-separated events that this Webhook
-                    will subscribe to.
-                  type: string
-                WebhookUrl:
-                  description: The URL associated with this Webhook.
-                  format: uri
-                  type: string
-                WebhookMethod:
-                  description: The method to be used when calling the webhook's URL.
-                  type: string
-              required:
-              - UniqueName
-              - Events
-              - WebhookUrl
-              title: CreateWebhookRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
-          description: Created
       security:
       - accountSid_authToken: []
       x-maturity:
       - Preview
 servers:
-- url: https://autopilot.twilio.com
+- url: https://preview.twilio.com
 x-maturity:
 - name: Preview
   description: PLEASE NOTE that this is a Preview product that is subject to change.

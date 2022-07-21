@@ -1,6 +1,7 @@
 components:
   schemas:
     pricing.v2.trunking_country:
+      type: object
       properties:
         country:
           description: The name of the country
@@ -16,8 +17,8 @@ components:
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.trunking_country-instance:
+      type: object
       properties:
         country:
           description: The name of the country
@@ -29,7 +30,7 @@ components:
           nullable: true
           type: string
         originating_call_prices:
-          description: The list of OriginatingCallPrice records
+          type: array
           items:
             format: inbound-call-price
             properties:
@@ -41,7 +42,7 @@ components:
                 type: string
             type: object
           nullable: true
-          type: array
+          description: The list of OriginatingCallPrice records
         price_unit:
           description: The currency in which prices are measured, in ISO 4127 format
             (e.g. usd, eur, jpy)
@@ -49,7 +50,7 @@ components:
           nullable: true
           type: string
         terminating_prefix_prices:
-          description: The list of TerminatingPrefixPrice records
+          type: array
           items:
             format: outbound-prefix-price-with-origin
             properties:
@@ -69,14 +70,14 @@ components:
                 type: array
             type: object
           nullable: true
-          type: array
+          description: The list of TerminatingPrefixPrice records
         url:
           description: The absolute URL of the resource
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.trunking_number:
+      type: object
       properties:
         country:
           description: The name of the country
@@ -116,6 +117,7 @@ components:
           nullable: true
           type: string
         terminating_prefix_prices:
+          type: array
           items:
             format: outbound-prefix-price-with-origin
             properties:
@@ -135,14 +137,13 @@ components:
                 type: array
             type: object
           nullable: true
-          type: array
         url:
           description: The absolute URL of the resource
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.voice:
+      type: object
       properties:
         links:
           description: The URLs of the related Countries and Numbers resources
@@ -158,8 +159,8 @@ components:
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.voice.voice_country:
+      type: object
       properties:
         country:
           description: The name of the country
@@ -175,15 +176,15 @@ components:
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.voice.voice_country-instance:
+      type: object
       properties:
         country:
           description: The name of the country
           nullable: true
           type: string
         inbound_call_prices:
-          description: The list of InboundCallPrice records
+          type: array
           items:
             format: inbound-call-price
             properties:
@@ -195,14 +196,14 @@ components:
                 type: string
             type: object
           nullable: true
-          type: array
+          description: The list of InboundCallPrice records
         iso_country:
           description: The ISO country code
           format: iso-country-code
           nullable: true
           type: string
         outbound_prefix_prices:
-          description: The list of OutboundPrefixPriceWithOrigin records
+          type: array
           items:
             format: outbound-prefix-price-with-origin
             properties:
@@ -222,7 +223,7 @@ components:
                 type: array
             type: object
           nullable: true
-          type: array
+          description: The list of OutboundPrefixPriceWithOrigin records
         price_unit:
           description: The currency in which prices are measured, in ISO 4127 format
             (e.g. usd, eur, jpy)
@@ -234,8 +235,8 @@ components:
           format: uri
           nullable: true
           type: string
-      type: object
     pricing.v2.voice.voice_number:
+      type: object
       properties:
         country:
           description: The name of the country
@@ -269,7 +270,7 @@ components:
           nullable: true
           type: string
         outbound_call_prices:
-          description: The list of OutboundCallPriceWithOrigin records
+          type: array
           items:
             format: outbound-call-price-with-origin
             properties:
@@ -283,7 +284,7 @@ components:
                 type: array
             type: object
           nullable: true
-          type: array
+          description: The list of OutboundCallPriceWithOrigin records
         price_unit:
           description: The currency in which prices are measured, in ISO 4127 format
             (e.g. usd, eur, jpy)
@@ -295,7 +296,6 @@ components:
           format: uri
           nullable: true
           type: string
-      type: object
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -311,11 +311,18 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
   title: Twilio - Pricing
-  version: 1.31.0
+  version: 1.29.2
 openapi: 3.0.1
 paths:
   /v2/Trunking/Countries:
+    servers:
+    - url: https://pricing.twilio.com
     description: Trunking pricing by country
+    x-twilio:
+      defaultOutputProperties:
+      - country
+      - price_unit
+      pathType: list
     get:
       description: ''
       operationId: ListTrunkingCountry
@@ -333,17 +340,18 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                title: ListTrunkingCountryResponse
                 properties:
                   countries:
+                    type: array
                     items:
                       $ref: '#/components/schemas/pricing.v2.trunking_country'
-                    type: array
                   meta:
+                    type: object
                     properties:
                       first_page_url:
                         format: uri
-                        type: string
-                      key:
                         type: string
                       next_page_url:
                         format: uri
@@ -358,23 +366,22 @@ paths:
                       url:
                         format: uri
                         type: string
-                    type: object
-                title: ListTrunkingCountryResponse
-                type: object
+                      key:
+                        type: string
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Trunking/Countries/{IsoCountry}:
     servers:
     - url: https://pricing.twilio.com
+    description: Trunking pricing by country
     x-twilio:
       defaultOutputProperties:
       - country
       - price_unit
-      pathType: list
-  /v2/Trunking/Countries/{IsoCountry}:
-    description: Trunking pricing by country
+      pathType: instance
     get:
       description: Fetch a specific Country.
       operationId: FetchTrunkingCountry
@@ -398,15 +405,16 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Trunking/Numbers/{DestinationNumber}:
     servers:
     - url: https://pricing.twilio.com
+    description: Trunking pricing for a specific phone number
     x-twilio:
       defaultOutputProperties:
       - country
+      - inbound_call_price
       - price_unit
       pathType: instance
-  /v2/Trunking/Numbers/{DestinationNumber}:
-    description: Trunking pricing for a specific phone number
     get:
       description: Fetch pricing information for a specific destination and, optionally,
         origination phone number.
@@ -440,24 +448,34 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Trunking/Numbers:
     servers:
     - url: https://pricing.twilio.com
+    description: Trunking pricing for a specific phone number
     x-twilio:
       defaultOutputProperties:
       - country
       - inbound_call_price
       - price_unit
-      pathType: instance
+      pathType: list
   /v2/Voice:
-    description: Voice pricing
     servers:
     - url: https://pricing.twilio.com
+    description: Voice pricing
     x-twilio:
       defaultOutputProperties:
       - name
       pathType: instance
   /v2/Voice/Countries:
+    servers:
+    - url: https://pricing.twilio.com
     description: Voice pricing by country
+    x-twilio:
+      defaultOutputProperties:
+      - country
+      - price_unit
+      pathType: list
+      parent: /Voice
     get:
       description: ''
       operationId: ListVoiceCountry
@@ -475,17 +493,18 @@ paths:
           content:
             application/json:
               schema:
+                type: object
+                title: ListVoiceCountryResponse
                 properties:
                   countries:
+                    type: array
                     items:
                       $ref: '#/components/schemas/pricing.v2.voice.voice_country'
-                    type: array
                   meta:
+                    type: object
                     properties:
                       first_page_url:
                         format: uri
-                        type: string
-                      key:
                         type: string
                       next_page_url:
                         format: uri
@@ -500,24 +519,23 @@ paths:
                       url:
                         format: uri
                         type: string
-                    type: object
-                title: ListVoiceCountryResponse
-                type: object
+                      key:
+                        type: string
           description: OK
       security:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Voice/Countries/{IsoCountry}:
     servers:
     - url: https://pricing.twilio.com
+    description: Voice pricing by country
     x-twilio:
       defaultOutputProperties:
       - country
       - price_unit
+      pathType: instance
       parent: /Voice
-      pathType: list
-  /v2/Voice/Countries/{IsoCountry}:
-    description: Voice pricing by country
     get:
       description: Fetch a specific Country.
       operationId: FetchVoiceCountry
@@ -541,16 +559,17 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Voice/Numbers/{DestinationNumber}:
     servers:
     - url: https://pricing.twilio.com
+    description: Voice pricing for a specific phone number
     x-twilio:
       defaultOutputProperties:
       - country
+      - inbound_call_price
       - price_unit
-      parent: /Voice
       pathType: instance
-  /v2/Voice/Numbers/{DestinationNumber}:
-    description: Voice pricing for a specific phone number
+      parent: /Voice
     get:
       description: Fetch pricing information for a specific destination and, optionally,
         origination phone number.
@@ -584,17 +603,19 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - GA
+  /v2/Voice/Numbers:
     servers:
     - url: https://pricing.twilio.com
+    description: Voice pricing for a specific phone number
     x-twilio:
       defaultOutputProperties:
       - country
       - inbound_call_price
       - price_unit
+      pathType: list
       parent: /Voice
-      pathType: instance
 servers:
 - url: https://pricing.twilio.com
 x-maturity:
-- description: This product is Generally Available.
-  name: GA
+- name: GA
+  description: This product is Generally Available.
