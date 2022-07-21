@@ -1,13 +1,14 @@
 components:
   schemas:
     lookups.v2.phone_number:
+      type: object
       properties:
         call_forwarding:
+          nullable: true
           description: An object that contains call forwarding status information
-          nullable: true
         caller_name:
-          description: An object that contains caller name information
           nullable: true
+          description: An object that contains caller name information
         calling_country_code:
           description: International dialing prefix
           nullable: true
@@ -17,11 +18,11 @@ components:
           nullable: true
           type: string
         line_type_intelligence:
+          nullable: true
           description: An object that contains line type information
-          nullable: true
         live_activity:
-          description: An object that contains live activity information
           nullable: true
+          description: An object that contains live activity information
         national_format:
           description: Phone number in national format
           nullable: true
@@ -32,8 +33,8 @@ components:
           nullable: true
           type: string
         sim_swap:
-          description: An object that contains SIM swap information
           nullable: true
+          description: An object that contains SIM swap information
         url:
           description: The absolute URL of the resource
           format: uri
@@ -44,19 +45,27 @@ components:
           nullable: true
           type: boolean
         validation_errors:
-          description: Contains reasons why a phone number is invalid
-          items:
-            enum:
-            - TOO_SHORT
-            - TOO_LONG
-            - INVALID_BUT_POSSIBLE
-            - INVALID_COUNTRY_CODE
-            - INVALID_LENGTH
-            - NOT_A_NUMBER
-            type: string
-          nullable: true
           type: array
-      type: object
+          items:
+            type: string
+            $ref: '#/components/schemas/phone_number_enum_validation_error'
+          nullable: true
+          description: Contains reasons why a phone number is invalid
+    phone_number_enum_type:
+      enum:
+      - landline
+      - mobile
+      - voip
+      type: string
+    phone_number_enum_validation_error:
+      enum:
+      - TOO_SHORT
+      - TOO_LONG
+      - INVALID_BUT_POSSIBLE
+      - INVALID_COUNTRY_CODE
+      - INVALID_LENGTH
+      - NOT_A_NUMBER
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -72,12 +81,23 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
   title: Twilio - Lookups
-  version: 1.31.0
+  version: 1.32.0
 openapi: 3.0.1
 paths:
   /v2/PhoneNumbers/{PhoneNumber}:
+    servers:
+    - url: https://lookups.twilio.com
     description: Query information on a phone number so that you can make a trusted
       interaction with your user
+    x-twilio:
+      defaultOutputProperties:
+      - calling_country_code
+      - phone_number
+      - country_code
+      - valid
+      - validation_results
+      - national_format
+      pathType: instance
     get:
       description: ''
       operationId: FetchPhoneNumber
@@ -112,20 +132,9 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Beta
-    servers:
-    - url: https://lookups.twilio.com
-    x-twilio:
-      defaultOutputProperties:
-      - calling_country_code
-      - phone_number
-      - country_code
-      - valid
-      - validation_results
-      - national_format
-      pathType: instance
 servers:
 - url: https://lookups.twilio.com
 x-maturity:
-- description: PLEASE NOTE that this is a Beta product that is subject to change.
+- name: Beta
+  description: PLEASE NOTE that this is a Beta product that is subject to change.
     Use it with caution.
-  name: Beta

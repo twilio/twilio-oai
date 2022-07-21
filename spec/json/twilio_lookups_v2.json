@@ -2,130 +2,157 @@
   "components": {
     "schemas": {
       "lookups.v2.phone_number": {
+        "type": "object",
         "properties": {
-          "call_forwarding": {
-            "description": "An object that contains call forwarding status information",
-            "nullable": true
-          },
-          "caller_name": {
-            "description": "An object that contains caller name information",
-            "nullable": true
-          },
           "calling_country_code": {
-            "description": "International dialing prefix",
+            "type": "string",
             "nullable": true,
-            "type": "string"
+            "description": "International dialing prefix"
           },
           "country_code": {
-            "description": "Phone number's ISO country code",
+            "type": "string",
             "nullable": true,
-            "type": "string"
-          },
-          "line_type_intelligence": {
-            "description": "An object that contains line type information",
-            "nullable": true
-          },
-          "live_activity": {
-            "description": "An object that contains live activity information",
-            "nullable": true
-          },
-          "national_format": {
-            "description": "Phone number in national format",
-            "nullable": true,
-            "type": "string"
+            "description": "Phone number's ISO country code"
           },
           "phone_number": {
-            "description": "Phone number in E.164 format",
+            "type": "string",
             "format": "phone-number",
             "nullable": true,
-            "type": "string"
+            "description": "Phone number in E.164 format"
           },
-          "sim_swap": {
-            "description": "An object that contains SIM swap information",
-            "nullable": true
-          },
-          "url": {
-            "description": "The absolute URL of the resource",
-            "format": "uri",
+          "national_format": {
+            "type": "string",
             "nullable": true,
-            "type": "string"
+            "description": "Phone number in national format"
           },
           "valid": {
-            "description": "Boolean which indicates if the phone number is valid",
+            "type": "boolean",
             "nullable": true,
-            "type": "boolean"
+            "description": "Boolean which indicates if the phone number is valid"
           },
           "validation_errors": {
-            "description": "Contains reasons why a phone number is invalid",
+            "type": "array",
             "items": {
-              "enum": [
-                "TOO_SHORT",
-                "TOO_LONG",
-                "INVALID_BUT_POSSIBLE",
-                "INVALID_COUNTRY_CODE",
-                "INVALID_LENGTH",
-                "NOT_A_NUMBER"
-              ],
-              "type": "string"
+              "type": "string",
+              "$ref": "#/components/schemas/phone_number_enum_validation_error"
             },
             "nullable": true,
-            "type": "array"
+            "description": "Contains reasons why a phone number is invalid"
+          },
+          "caller_name": {
+            "nullable": true,
+            "description": "An object that contains caller name information"
+          },
+          "sim_swap": {
+            "nullable": true,
+            "description": "An object that contains SIM swap information"
+          },
+          "call_forwarding": {
+            "nullable": true,
+            "description": "An object that contains call forwarding status information"
+          },
+          "live_activity": {
+            "nullable": true,
+            "description": "An object that contains live activity information"
+          },
+          "line_type_intelligence": {
+            "nullable": true,
+            "description": "An object that contains line type information"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the resource"
           }
-        },
-        "type": "object"
+        }
+      },
+      "phone_number_enum_type": {
+        "type": "string",
+        "enum": [
+          "landline",
+          "mobile",
+          "voip"
+        ]
+      },
+      "phone_number_enum_validation_error": {
+        "type": "string",
+        "enum": [
+          "TOO_SHORT",
+          "TOO_LONG",
+          "INVALID_BUT_POSSIBLE",
+          "INVALID_COUNTRY_CODE",
+          "INVALID_LENGTH",
+          "NOT_A_NUMBER"
+        ]
       }
     },
     "securitySchemes": {
       "accountSid_authToken": {
-        "scheme": "basic",
-        "type": "http"
+        "type": "http",
+        "scheme": "basic"
       }
     }
   },
   "info": {
-    "contact": {
-      "email": "support@twilio.com",
-      "name": "Twilio Support",
-      "url": "https://support.twilio.com"
-    },
+    "title": "Twilio - Lookups",
     "description": "This is the public Twilio REST API.",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
     "license": {
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "termsOfService": "https://www.twilio.com/legal/tos",
-    "title": "Twilio - Lookups",
-    "version": "1.31.0"
+    "version": "1.32.0"
   },
   "openapi": "3.0.1",
   "paths": {
     "/v2/PhoneNumbers/{PhoneNumber}": {
+      "servers": [
+        {
+          "url": "https://lookups.twilio.com"
+        }
+      ],
       "description": "Query information on a phone number so that you can make a trusted interaction with your user",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "calling_country_code",
+          "phone_number",
+          "country_code",
+          "valid",
+          "validation_results",
+          "national_format"
+        ],
+        "pathType": "instance"
+      },
       "get": {
         "description": "",
-        "operationId": "FetchPhoneNumber",
         "parameters": [
           {
-            "description": "The phone number to lookup in E.164 or national format. Default country code is +1 (North America).",
-            "in": "path",
             "name": "PhoneNumber",
-            "required": true,
+            "in": "path",
+            "description": "The phone number to lookup in E.164 or national format. Default country code is +1 (North America).",
             "schema": {
               "type": "string"
-            }
+            },
+            "required": true
           },
           {
-            "description": "A comma-separated list of fields to return. Possible values are caller_name, sim_swap, call_forwarding, live_activity, line_type_intelligence.",
-            "in": "query",
             "name": "Fields",
+            "in": "query",
+            "description": "A comma-separated list of fields to return. Possible values are caller_name, sim_swap, call_forwarding, live_activity, line_type_intelligence.",
             "schema": {
               "type": "string"
             }
           },
           {
-            "description": "The [country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) used if the phone number provided is in national format.",
-            "in": "query",
             "name": "CountryCode",
+            "in": "query",
+            "description": "The [country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) used if the phone number provided is in national format.",
             "schema": {
               "type": "string"
             }
@@ -148,25 +175,10 @@
             "accountSid_authToken": []
           }
         ],
+        "operationId": "FetchPhoneNumber",
         "x-maturity": [
           "Beta"
         ]
-      },
-      "servers": [
-        {
-          "url": "https://lookups.twilio.com"
-        }
-      ],
-      "x-twilio": {
-        "defaultOutputProperties": [
-          "calling_country_code",
-          "phone_number",
-          "country_code",
-          "valid",
-          "validation_results",
-          "national_format"
-        ],
-        "pathType": "instance"
       }
     }
   },
@@ -177,8 +189,8 @@
   ],
   "x-maturity": [
     {
-      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution.",
-      "name": "Beta"
+      "name": "Beta",
+      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
     }
   ]
 }

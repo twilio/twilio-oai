@@ -1,6 +1,7 @@
 components:
   schemas:
     frontline.v1.user:
+      type: object
       properties:
         avatar:
           description: The avatar URL which will be shown in Frontline application
@@ -19,25 +20,27 @@ components:
           nullable: true
           type: boolean
         sid:
-          description: The unique string that identifies the resource
-          maxLength: 34
+          type: string
           minLength: 34
-          nullable: true
+          maxLength: 34
           pattern: ^US[0-9a-fA-F]{32}$
-          type: string
-        state:
-          description: Current state of this user
-          enum:
-          - active
-          - deactivated
           nullable: true
+          description: The unique string that identifies the resource
+        state:
           type: string
+          $ref: '#/components/schemas/user_enum_state_type'
+          nullable: true
+          description: Current state of this user
         url:
           description: An absolute URL for this user.
           format: uri
           nullable: true
           type: string
-      type: object
+    user_enum_state_type:
+      enum:
+      - active
+      - deactivated
+      type: string
   securitySchemes:
     accountSid_authToken:
       scheme: basic
@@ -53,11 +56,18 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: https://www.twilio.com/legal/tos
   title: Twilio - Frontline
-  version: 1.31.0
+  version: 1.32.0
 openapi: 3.0.1
 paths:
   /v1/Users/{Sid}:
+    servers:
+    - url: https://frontline-api.twilio.com
     description: A User resource represents a frontline user.
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - identity
+      pathType: instance
     get:
       description: Fetch a frontline user
       operationId: FetchUser
@@ -96,24 +106,22 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               properties:
-                Avatar:
-                  description: The avatar URL which will be shown in Frontline application.
-                  type: string
                 FriendlyName:
                   description: The string that you assigned to describe the User.
                   type: string
+                Avatar:
+                  description: The avatar URL which will be shown in Frontline application.
+                  type: string
+                State:
+                  type: string
+                  $ref: '#/components/schemas/user_enum_state_type'
+                  description: Current state of this user. Can be either `active`
+                    or `deactivated`.
                 IsAvailable:
                   description: Whether the User is available for new conversations.
                     Set to `false` to prevent User from receiving new inbound conversations
                     if you are using [Pool Routing](https://www.twilio.com/docs/frontline/handle-incoming-conversations#3-pool-routing).
                   type: boolean
-                State:
-                  description: Current state of this user. Can be either `active`
-                    or `deactivated`.
-                  enum:
-                  - active
-                  - deactivated
-                  type: string
               title: UpdateUserRequest
               type: object
       responses:
@@ -127,16 +135,9 @@ paths:
       - accountSid_authToken: []
       x-maturity:
       - Beta
-    servers:
-    - url: https://frontline-api.twilio.com
-    x-twilio:
-      defaultOutputProperties:
-      - sid
-      - identity
-      pathType: instance
 servers:
 - url: https://frontline-api.twilio.com
 x-maturity:
-- description: PLEASE NOTE that this is a Beta product that is subject to change.
+- name: Beta
+  description: PLEASE NOTE that this is a Beta product that is subject to change.
     Use it with caution.
-  name: Beta
