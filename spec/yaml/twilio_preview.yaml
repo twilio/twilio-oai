@@ -1,172 +1,5 @@
 components:
   schemas:
-    preview.bulk_exports.export.day:
-      type: object
-      properties:
-        create_date:
-          description: The date when resource is created
-          nullable: true
-          type: string
-        day:
-          description: The date of the data in the file
-          nullable: true
-          type: string
-        friendly_name:
-          description: The friendly name specified when creating the job
-          nullable: true
-          type: string
-        resource_type:
-          description: "The type of communication \u2013 Messages, Calls, Conferences,\
-            \ and Participants"
-          nullable: true
-          type: string
-        size:
-          description: Size of the file in bytes
-          nullable: true
-          type: integer
-    preview.bulk_exports.export.day-instance:
-      type: object
-      properties:
-        redirect_to:
-          format: uri
-          nullable: true
-          type: string
-    preview.bulk_exports.export:
-      type: object
-      properties:
-        links:
-          description: Nested resource URLs.
-          format: uri-map
-          nullable: true
-          type: object
-        resource_type:
-          description: "The type of communication \u2013 Messages, Calls, Conferences,\
-            \ and Participants"
-          nullable: true
-          type: string
-        url:
-          description: The URL of this resource.
-          format: uri
-          nullable: true
-          type: string
-    preview.bulk_exports.export_configuration:
-      type: object
-      properties:
-        enabled:
-          description: Whether files are automatically generated
-          nullable: true
-          type: boolean
-        resource_type:
-          description: "The type of communication \u2013 Messages, Calls, Conferences,\
-            \ and Participants"
-          nullable: true
-          type: string
-        url:
-          description: The URL of this resource.
-          format: uri
-          nullable: true
-          type: string
-        webhook_method:
-          description: Whether to GET or POST to the webhook url
-          nullable: true
-          type: string
-        webhook_url:
-          description: URL targeted at export
-          format: uri
-          nullable: true
-          type: string
-    preview.bulk_exports.export.export_custom_job:
-      type: object
-      properties:
-        details:
-          nullable: true
-        email:
-          description: The optional email to send the completion notification to
-          nullable: true
-          type: string
-        end_day:
-          description: The end day for the custom export specified as a string in
-            the format of yyyy-MM-dd
-          nullable: true
-          type: string
-        friendly_name:
-          description: The friendly name specified when creating the job
-          nullable: true
-          type: string
-        job_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^JS[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique job_sid returned when the custom export was created.
-            This can be used to look up the status of the job.
-        resource_type:
-          description: "The type of communication \u2013 Messages, Calls, Conferences,\
-            \ and Participants"
-          nullable: true
-          type: string
-        start_day:
-          description: The start day for the custom export specified as a string in
-            the format of yyyy-MM-dd
-          nullable: true
-          type: string
-        webhook_method:
-          description: This is the method used to call the webhook
-          nullable: true
-          type: string
-        webhook_url:
-          description: The optional webhook url called on completion
-          nullable: true
-          type: string
-    preview.bulk_exports.export.job:
-      type: object
-      properties:
-        details:
-          nullable: true
-          description: This is a list of the completed, pending, or errored dates
-            within the export time range, with one entry for each status with more
-            than one day in that status
-        email:
-          description: The optional email to send the completion notification to
-          nullable: true
-          type: string
-        end_day:
-          description: The end time for the export specified when creating the job
-          nullable: true
-          type: string
-        friendly_name:
-          description: The friendly name specified when creating the job
-          nullable: true
-          type: string
-        job_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^JS[0-9a-fA-F]{32}$
-          nullable: true
-          description: The job_sid returned when the export was created
-        resource_type:
-          description: "The type of communication \u2013 Messages, Calls, Conferences,\
-            \ and Participants"
-          nullable: true
-          type: string
-        start_day:
-          description: The start time for the export specified when creating the job
-          nullable: true
-          type: string
-        url:
-          format: uri
-          nullable: true
-          type: string
-        webhook_method:
-          description: This is the method used to call the webhook
-          nullable: true
-          type: string
-        webhook_url:
-          description: The optional webhook url called on completion
-          nullable: true
-          type: string
     preview.deployed_devices.fleet.certificate:
       type: object
       properties:
@@ -2508,402 +2341,6 @@ info:
   version: 1.32.0
 openapi: 3.0.1
 paths:
-  /BulkExports/Exports/{ResourceType}/Days/{Day}:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: instance
-      parent: /Exports
-    get:
-      description: Fetch a specific Day.
-      operationId: FetchDay
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      - description: The ISO 8601 format date of the resources in the file, for a
-          UTC day
-        in: path
-        name: Day
-        required: true
-        schema:
-          type: string
-      responses:
-        '307':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export.day-instance'
-          description: Temporary Redirect
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports/{ResourceType}/Days:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: list
-      parent: /Exports
-    get:
-      description: Retrieve a list of all Days for a resource.
-      operationId: ListDay
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
-        in: query
-        name: PageSize
-        schema:
-          maximum: 1000
-          minimum: 1
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                title: ListDayResponse
-                properties:
-                  days:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/preview.bulk_exports.export.day'
-                  meta:
-                    type: object
-                    properties:
-                      first_page_url:
-                        format: uri
-                        type: string
-                      next_page_url:
-                        format: uri
-                        type: string
-                      page:
-                        type: integer
-                      page_size:
-                        type: integer
-                      previous_page_url:
-                        format: uri
-                        type: string
-                      url:
-                        format: uri
-                        type: string
-                      key:
-                        type: string
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports/{ResourceType}:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: instance
-    get:
-      description: Fetch a specific Export.
-      operationId: FetchExport
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: list
-  /BulkExports/Exports/{ResourceType}/Configuration:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: instance
-      className: export_configuration
-    get:
-      description: Fetch a specific Export Configuration.
-      operationId: FetchExportConfiguration
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export_configuration'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    post:
-      description: Update a specific Export Configuration.
-      operationId: UpdateExportConfiguration
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                Enabled:
-                  description: If true, Twilio will automatically generate every day's
-                    file when the day is over.
-                  type: boolean
-                WebhookUrl:
-                  description: Stores the URL destination for the method specified
-                    in webhook_method.
-                  format: uri
-                  type: string
-                WebhookMethod:
-                  description: Sets whether Twilio should call a webhook URL when
-                    the automatic generation is complete, using GET or POST. The actual
-                    destination is set in the webhook_url
-                  type: string
-              title: UpdateExportConfigurationRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export_configuration'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports/{ResourceType}/Jobs:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: list
-      parent: /Exports
-      className: export_custom_job
-    get:
-      description: ''
-      operationId: ListExportCustomJob
-      parameters:
-      - description: "The type of communication \u2013 Messages, Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
-        in: query
-        name: PageSize
-        schema:
-          maximum: 1000
-          minimum: 1
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                title: ListExportCustomJobResponse
-                properties:
-                  jobs:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/preview.bulk_exports.export.export_custom_job'
-                  meta:
-                    type: object
-                    properties:
-                      first_page_url:
-                        format: uri
-                        type: string
-                      next_page_url:
-                        format: uri
-                        type: string
-                      page:
-                        type: integer
-                      page_size:
-                        type: integer
-                      previous_page_url:
-                        format: uri
-                        type: string
-                      url:
-                        format: uri
-                        type: string
-                      key:
-                        type: string
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    post:
-      description: ''
-      operationId: CreateExportCustomJob
-      parameters:
-      - description: "The type of communication \u2013 Messages or Calls, Conferences,\
-          \ and Participants"
-        in: path
-        name: ResourceType
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                StartDay:
-                  description: The start day for the custom export specified as a
-                    string in the format of yyyy-mm-dd
-                  type: string
-                EndDay:
-                  description: The end day for the custom export specified as a string
-                    in the format of yyyy-mm-dd. End day is inclusive and must be
-                    2 days earlier than the current UTC day.
-                  type: string
-                FriendlyName:
-                  description: The friendly name specified when creating the job
-                  type: string
-                WebhookUrl:
-                  description: The optional webhook url called on completion of the
-                    job. If this is supplied, `WebhookMethod` must also be supplied.
-                  type: string
-                WebhookMethod:
-                  description: This is the method used to call the webhook on completion
-                    of the job. If this is supplied, `WebhookUrl` must also be supplied.
-                  type: string
-                Email:
-                  description: The optional email to send the completion notification
-                    to
-                  type: string
-              required:
-              - StartDay
-              - EndDay
-              - FriendlyName
-              title: CreateExportCustomJobRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export.export_custom_job'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports/Jobs/{JobSid}:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: instance
-      parent: /Exports
-    get:
-      description: ''
-      operationId: FetchJob
-      parameters:
-      - description: The unique string that that we created to identify the Bulk Export
-          job
-        in: path
-        name: JobSid
-        required: true
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^JS[0-9a-fA-F]{32}$
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/preview.bulk_exports.export.job'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-    delete:
-      description: ''
-      operationId: DeleteJob
-      parameters:
-      - description: The unique string that that we created to identify the Bulk Export
-          job
-        in: path
-        name: JobSid
-        required: true
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^JS[0-9a-fA-F]{32}$
-      responses:
-        '204':
-          description: The resource was deleted successfully.
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - Preview
-  /BulkExports/Exports/Jobs:
-    servers:
-    - url: https://preview.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: list
-      parent: /Exports
   /DeployedDevices/Fleets/{FleetSid}/Certificates/{Sid}:
     servers:
     - url: https://preview.twilio.com
@@ -2915,7 +2352,7 @@ paths:
     get:
       description: Fetch information about a specific Certificate credential in the
         Fleet.
-      operationId: FetchCertificate
+      operationId: FetchDeployedDevicesCertificate
       parameters:
       - description: ''
         in: path
@@ -2947,7 +2384,7 @@ paths:
     delete:
       description: Unregister a specific Certificate credential from the Fleet, effectively
         disallowing any inbound client connections that are presenting it.
-      operationId: DeleteCertificate
+      operationId: DeleteDeployedDevicesCertificate
       parameters:
       - description: ''
         in: path
@@ -2975,7 +2412,7 @@ paths:
     post:
       description: Update the given properties of a specific Certificate credential
         in the Fleet, giving it a friendly name or assigning to a Device.
-      operationId: UpdateCertificate
+      operationId: UpdateDeployedDevicesCertificate
       parameters:
       - description: ''
         in: path
@@ -3009,7 +2446,7 @@ paths:
                   pattern: ^TH[0-9a-fA-F]{32}$
                   description: Provides the unique string identifier of an existing
                     Device to become authenticated with this Certificate credential.
-              title: UpdateCertificateRequest
+              title: UpdateDeployedDevicesCertificateRequest
               type: object
       responses:
         '200':
@@ -3033,7 +2470,7 @@ paths:
     post:
       description: Enroll a new Certificate credential to the Fleet, optionally giving
         it a friendly name and assigning to a Device.
-      operationId: CreateCertificate
+      operationId: CreateDeployedDevicesCertificate
       parameters:
       - description: ''
         in: path
@@ -3063,7 +2500,7 @@ paths:
                     Device to become authenticated with this Certificate credential.
               required:
               - CertificateData
-              title: CreateCertificateRequest
+              title: CreateDeployedDevicesCertificateRequest
               type: object
       responses:
         '201':
@@ -3079,7 +2516,7 @@ paths:
     get:
       description: Retrieve a list of all Certificate credentials belonging to the
         Fleet.
-      operationId: ListCertificate
+      operationId: ListDeployedDevicesCertificate
       parameters:
       - description: ''
         in: path
@@ -3110,7 +2547,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListCertificateResponse
+                title: ListDeployedDevicesCertificateResponse
                 properties:
                   certificates:
                     type: array
@@ -3152,7 +2589,7 @@ paths:
       parent: /Fleets
     get:
       description: Fetch information about a specific Deployment in the Fleet.
-      operationId: FetchDeployment
+      operationId: FetchDeployedDevicesDeployment
       parameters:
       - description: ''
         in: path
@@ -3184,7 +2621,7 @@ paths:
     delete:
       description: Delete a specific Deployment from the Fleet, leaving associated
         devices effectively undeployed.
-      operationId: DeleteDeployment
+      operationId: DeleteDeployedDevicesDeployment
       parameters:
       - description: ''
         in: path
@@ -3213,7 +2650,7 @@ paths:
       description: Update the given properties of a specific Deployment credential
         in the Fleet, giving it a friendly name or linking to a specific Twilio Sync
         service instance.
-      operationId: UpdateDeployment
+      operationId: UpdateDeployedDevicesDeployment
       parameters:
       - description: ''
         in: path
@@ -3248,7 +2685,7 @@ paths:
                   description: Provides the unique string identifier of the Twilio
                     Sync service instance that will be linked to and accessible by
                     this Deployment.
-              title: UpdateDeploymentRequest
+              title: UpdateDeployedDevicesDeploymentRequest
               type: object
       responses:
         '200':
@@ -3272,7 +2709,7 @@ paths:
     post:
       description: Create a new Deployment in the Fleet, optionally giving it a friendly
         name and linking to a specific Twilio Sync service instance.
-      operationId: CreateDeployment
+      operationId: CreateDeployedDevicesDeployment
       parameters:
       - description: ''
         in: path
@@ -3297,7 +2734,7 @@ paths:
                   description: Provides the unique string identifier of the Twilio
                     Sync service instance that will be linked to and accessible by
                     this Deployment.
-              title: CreateDeploymentRequest
+              title: CreateDeployedDevicesDeploymentRequest
               type: object
       responses:
         '201':
@@ -3312,7 +2749,7 @@ paths:
       - Preview
     get:
       description: Retrieve a list of all Deployments belonging to the Fleet.
-      operationId: ListDeployment
+      operationId: ListDeployedDevicesDeployment
       parameters:
       - description: ''
         in: path
@@ -3334,7 +2771,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListDeploymentResponse
+                title: ListDeployedDevicesDeploymentResponse
                 properties:
                   deployments:
                     type: array
@@ -3376,7 +2813,7 @@ paths:
       parent: /Fleets
     get:
       description: Fetch information about a specific Device in the Fleet.
-      operationId: FetchDevice
+      operationId: FetchDeployedDevicesDevice
       parameters:
       - description: ''
         in: path
@@ -3405,7 +2842,7 @@ paths:
     delete:
       description: Delete a specific Device from the Fleet, also removing it from
         associated Deployments.
-      operationId: DeleteDevice
+      operationId: DeleteDeployedDevicesDevice
       parameters:
       - description: ''
         in: path
@@ -3430,7 +2867,7 @@ paths:
     post:
       description: Update the given properties of a specific Device in the Fleet,
         giving it a friendly name, assigning to a Deployment, or a human identity.
-      operationId: UpdateDevice
+      operationId: UpdateDeployedDevicesDevice
       parameters:
       - description: ''
         in: path
@@ -3469,7 +2906,7 @@ paths:
                 Enabled:
                   description: ''
                   type: boolean
-              title: UpdateDeviceRequest
+              title: UpdateDeployedDevicesDeviceRequest
               type: object
       responses:
         '200':
@@ -3493,7 +2930,7 @@ paths:
     post:
       description: Create a new Device in the Fleet, optionally giving it a unique
         name, friendly name, and assigning to a Deployment and/or human identity.
-      operationId: CreateDevice
+      operationId: CreateDeployedDevicesDevice
       parameters:
       - description: ''
         in: path
@@ -3530,7 +2967,7 @@ paths:
                 Enabled:
                   description: ''
                   type: boolean
-              title: CreateDeviceRequest
+              title: CreateDeployedDevicesDeviceRequest
               type: object
       responses:
         '201':
@@ -3545,7 +2982,7 @@ paths:
       - Preview
     get:
       description: Retrieve a list of all Devices belonging to the Fleet.
-      operationId: ListDevice
+      operationId: ListDeployedDevicesDevice
       parameters:
       - description: ''
         in: path
@@ -3576,7 +3013,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListDeviceResponse
+                title: ListDeployedDevicesDeviceResponse
                 properties:
                   devices:
                     type: array
@@ -3617,7 +3054,7 @@ paths:
       pathType: instance
     get:
       description: Fetch information about a specific Fleet in your account.
-      operationId: FetchFleet
+      operationId: FetchDeployedDevicesFleet
       parameters:
       - description: Provides a 34 character string that uniquely identifies the requested
           Fleet resource.
@@ -3640,7 +3077,7 @@ paths:
     delete:
       description: 'Delete a specific Fleet from your account, also destroys all nested
         resources: Devices, Deployments, Certificates, Keys.'
-      operationId: DeleteFleet
+      operationId: DeleteDeployedDevicesFleet
       parameters:
       - description: Provides a 34 character string that uniquely identifies the requested
           Fleet resource.
@@ -3658,7 +3095,7 @@ paths:
       - Preview
     post:
       description: Update the friendly name property of a specific Fleet in your account.
-      operationId: UpdateFleet
+      operationId: UpdateDeployedDevicesFleet
       parameters:
       - description: Provides a 34 character string that uniquely identifies the requested
           Fleet resource.
@@ -3683,7 +3120,7 @@ paths:
                   pattern: ^DL[0-9a-fA-F]{32}$
                   description: Provides a string identifier of a Deployment that is
                     going to be used as a default one for this Fleet.
-              title: UpdateFleetRequest
+              title: UpdateDeployedDevicesFleetRequest
               type: object
       responses:
         '200':
@@ -3706,7 +3143,7 @@ paths:
     post:
       description: Create a new Fleet for scoping of deployed devices within your
         account.
-      operationId: CreateFleet
+      operationId: CreateDeployedDevicesFleet
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3716,7 +3153,7 @@ paths:
                   description: Provides a human readable descriptive text for this
                     Fleet, up to 256 characters long.
                   type: string
-              title: CreateFleetRequest
+              title: CreateDeployedDevicesFleetRequest
               type: object
       responses:
         '201':
@@ -3731,7 +3168,7 @@ paths:
       - Preview
     get:
       description: Retrieve a list of all Fleets belonging to your account.
-      operationId: ListFleet
+      operationId: ListDeployedDevicesFleet
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -3747,7 +3184,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListFleetResponse
+                title: ListDeployedDevicesFleetResponse
                 properties:
                   fleets:
                     type: array
@@ -3789,7 +3226,7 @@ paths:
       parent: /Fleets
     get:
       description: Fetch information about a specific Key credential in the Fleet.
-      operationId: FetchKey
+      operationId: FetchDeployedDevicesKey
       parameters:
       - description: ''
         in: path
@@ -3821,7 +3258,7 @@ paths:
     delete:
       description: Delete a specific Key credential from the Fleet, effectively disallowing
         any inbound client connections that are presenting it.
-      operationId: DeleteKey
+      operationId: DeleteDeployedDevicesKey
       parameters:
       - description: ''
         in: path
@@ -3849,7 +3286,7 @@ paths:
     post:
       description: Update the given properties of a specific Key credential in the
         Fleet, giving it a friendly name or assigning to a Device.
-      operationId: UpdateKey
+      operationId: UpdateDeployedDevicesKey
       parameters:
       - description: ''
         in: path
@@ -3883,7 +3320,7 @@ paths:
                   pattern: ^TH[0-9a-fA-F]{32}$
                   description: Provides the unique string identifier of an existing
                     Device to become authenticated with this Key credential.
-              title: UpdateKeyRequest
+              title: UpdateDeployedDevicesKeyRequest
               type: object
       responses:
         '200':
@@ -3907,7 +3344,7 @@ paths:
     post:
       description: Create a new Key credential in the Fleet, optionally giving it
         a friendly name and assigning to a Device.
-      operationId: CreateKey
+      operationId: CreateDeployedDevicesKey
       parameters:
       - description: ''
         in: path
@@ -3931,7 +3368,7 @@ paths:
                   pattern: ^TH[0-9a-fA-F]{32}$
                   description: Provides the unique string identifier of an existing
                     Device to become authenticated with this Key credential.
-              title: CreateKeyRequest
+              title: CreateDeployedDevicesKeyRequest
               type: object
       responses:
         '201':
@@ -3946,7 +3383,7 @@ paths:
       - Preview
     get:
       description: Retrieve a list of all Keys credentials belonging to the Fleet.
-      operationId: ListKey
+      operationId: ListDeployedDevicesKey
       parameters:
       - description: ''
         in: path
@@ -3977,7 +3414,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListKeyResponse
+                title: ListDeployedDevicesKeyResponse
                 properties:
                   keys:
                     type: array
@@ -4018,7 +3455,7 @@ paths:
       pathType: instance
     get:
       description: Fetch a specific AuthorizationDocument.
-      operationId: FetchAuthorizationDocument
+      operationId: FetchHostedNumbersAuthorizationDocument
       parameters:
       - description: A 34 character string that uniquely identifies this AuthorizationDocument.
         in: path
@@ -4042,7 +3479,7 @@ paths:
       - Preview
     post:
       description: Updates a specific AuthorizationDocument.
-      operationId: UpdateAuthorizationDocument
+      operationId: UpdateHostedNumbersAuthorizationDocument
       parameters:
       - description: ''
         in: path
@@ -4097,7 +3534,7 @@ paths:
                   description: The contact phone number of the person authorized to
                     sign the Authorization Document.
                   type: string
-              title: UpdateAuthorizationDocumentRequest
+              title: UpdateHostedNumbersAuthorizationDocumentRequest
               type: object
       responses:
         '200':
@@ -4120,7 +3557,7 @@ paths:
     get:
       description: Retrieve a list of AuthorizationDocuments belonging to the account
         initiating the request.
-      operationId: ListAuthorizationDocument
+      operationId: ListHostedNumbersAuthorizationDocument
       parameters:
       - description: Email that this AuthorizationDocument will be sent to for signing.
         in: query
@@ -4150,7 +3587,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListAuthorizationDocumentResponse
+                title: ListHostedNumbersAuthorizationDocumentResponse
                 properties:
                   items:
                     type: array
@@ -4185,7 +3622,7 @@ paths:
     post:
       description: Create an AuthorizationDocument for authorizing the hosting of
         phone number capabilities on Twilio's platform.
-      operationId: CreateAuthorizationDocument
+      operationId: CreateHostedNumbersAuthorizationDocument
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -4229,7 +3666,7 @@ paths:
               - Email
               - ContactTitle
               - ContactPhoneNumber
-              title: CreateAuthorizationDocumentRequest
+              title: CreateHostedNumbersAuthorizationDocumentRequest
               type: object
       responses:
         '201':
@@ -4253,7 +3690,7 @@ paths:
     get:
       description: Retrieve a list of dependent HostedNumberOrders belonging to the
         AuthorizationDocument.
-      operationId: ListDependentHostedNumberOrder
+      operationId: ListHostedNumbersDependentHostedNumberOrder
       parameters:
       - description: ''
         in: path
@@ -4314,7 +3751,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListDependentHostedNumberOrderResponse
+                title: ListHostedNumbersDependentHostedNumberOrderResponse
                 properties:
                   items:
                     type: array
@@ -4355,7 +3792,7 @@ paths:
       pathType: instance
     get:
       description: Fetch a specific HostedNumberOrder.
-      operationId: FetchHostedNumberOrder
+      operationId: FetchHostedNumbersHostedNumberOrder
       parameters:
       - description: A 34 character string that uniquely identifies this HostedNumberOrder.
         in: path
@@ -4380,7 +3817,7 @@ paths:
     delete:
       description: Cancel the HostedNumberOrder (only available when the status is
         in `received`).
-      operationId: DeleteHostedNumberOrder
+      operationId: DeleteHostedNumbersHostedNumberOrder
       parameters:
       - description: A 34 character string that uniquely identifies this HostedNumberOrder.
         in: path
@@ -4400,7 +3837,7 @@ paths:
       - Preview
     post:
       description: Updates a specific HostedNumberOrder.
-      operationId: UpdateHostedNumberOrder
+      operationId: UpdateHostedNumbersHostedNumberOrder
       parameters:
       - description: ''
         in: path
@@ -4466,7 +3903,7 @@ paths:
                   description: The number of seconds, between 0 and 60, to delay before
                     initiating the verification call. Defaults to 0.
                   type: integer
-              title: UpdateHostedNumberOrderRequest
+              title: UpdateHostedNumbersHostedNumberOrderRequest
               type: object
       responses:
         '200':
@@ -4489,7 +3926,7 @@ paths:
     get:
       description: Retrieve a list of HostedNumberOrders belonging to the account
         initiating the request.
-      operationId: ListHostedNumberOrder
+      operationId: ListHostedNumbersHostedNumberOrder
       parameters:
       - description: The Status of this HostedNumberOrder. One of `received`, `pending-verification`,
           `verified`, `pending-loa`, `carrier-processing`, `testing`, `completed`,
@@ -4540,7 +3977,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListHostedNumberOrderResponse
+                title: ListHostedNumbersHostedNumberOrderResponse
                 properties:
                   items:
                     type: array
@@ -4574,7 +4011,7 @@ paths:
       - Preview
     post:
       description: Host a phone number's capability on Twilio's platform.
-      operationId: CreateHostedNumberOrder
+      operationId: CreateHostedNumbersHostedNumberOrder
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -4705,7 +4142,7 @@ paths:
               required:
               - PhoneNumber
               - SmsCapability
-              title: CreateHostedNumberOrderRequest
+              title: CreateHostedNumbersHostedNumberOrderRequest
               type: object
       responses:
         '201':
@@ -4727,7 +4164,7 @@ paths:
       pathType: instance
     get:
       description: Fetch an instance of an Add-on currently available to be installed.
-      operationId: FetchAvailableAddOn
+      operationId: FetchMarketplaceAvailableAddOn
       parameters:
       - description: The SID of the AvailableAddOn resource to fetch.
         in: path
@@ -4758,7 +4195,7 @@ paths:
       pathType: list
     get:
       description: Retrieve a list of Add-ons currently available to be installed.
-      operationId: ListAvailableAddOn
+      operationId: ListMarketplaceAvailableAddOn
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -4774,7 +4211,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListAvailableAddOnResponse
+                title: ListMarketplaceAvailableAddOnResponse
                 properties:
                   available_add_ons:
                     type: array
@@ -4817,7 +4254,7 @@ paths:
       className: available_add_on_extension
     get:
       description: Fetch an instance of an Extension for the Available Add-on.
-      operationId: FetchAvailableAddOnExtension
+      operationId: FetchMarketplaceAvailableAddOnExtension
       parameters:
       - description: The SID of the AvailableAddOn resource with the extension to
           fetch.
@@ -4860,7 +4297,7 @@ paths:
       className: available_add_on_extension
     get:
       description: Retrieve a list of Extensions for the Available Add-on.
-      operationId: ListAvailableAddOnExtension
+      operationId: ListMarketplaceAvailableAddOnExtension
       parameters:
       - description: The SID of the AvailableAddOn resource with the extensions to
           read.
@@ -4886,7 +4323,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListAvailableAddOnExtensionResponse
+                title: ListMarketplaceAvailableAddOnExtensionResponse
                 properties:
                   extensions:
                     type: array
@@ -4927,7 +4364,7 @@ paths:
       pathType: list
     post:
       description: Install an Add-on for the Account specified.
-      operationId: CreateInstalledAddOn
+      operationId: CreateMarketplaceInstalledAddOn
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -4952,7 +4389,7 @@ paths:
               required:
               - AvailableAddOnSid
               - AcceptTermsOfService
-              title: CreateInstalledAddOnRequest
+              title: CreateMarketplaceInstalledAddOnRequest
               type: object
       responses:
         '201':
@@ -4967,7 +4404,7 @@ paths:
       - Preview
     get:
       description: Retrieve a list of Add-ons currently installed on this Account.
-      operationId: ListInstalledAddOn
+      operationId: ListMarketplaceInstalledAddOn
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -4983,7 +4420,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInstalledAddOnResponse
+                title: ListMarketplaceInstalledAddOnResponse
                 properties:
                   installed_add_ons:
                     type: array
@@ -5024,7 +4461,7 @@ paths:
       pathType: instance
     delete:
       description: Remove an Add-on installation from your account
-      operationId: DeleteInstalledAddOn
+      operationId: DeleteMarketplaceInstalledAddOn
       parameters:
       - description: The SID of the InstalledAddOn resource to delete.
         in: path
@@ -5044,7 +4481,7 @@ paths:
       - Preview
     get:
       description: Fetch an instance of an Add-on currently installed on this Account.
-      operationId: FetchInstalledAddOn
+      operationId: FetchMarketplaceInstalledAddOn
       parameters:
       - description: The SID of the InstalledAddOn resource to fetch.
         in: path
@@ -5068,7 +4505,7 @@ paths:
       - Preview
     post:
       description: Update an Add-on installation for the Account specified.
-      operationId: UpdateInstalledAddOn
+      operationId: UpdateMarketplaceInstalledAddOn
       parameters:
       - description: The SID of the InstalledAddOn resource to update.
         in: path
@@ -5092,7 +4529,7 @@ paths:
                   description: An application-defined string that uniquely identifies
                     the resource. This value must be unique within the Account.
                   type: string
-              title: UpdateInstalledAddOnRequest
+              title: UpdateMarketplaceInstalledAddOnRequest
               type: object
       responses:
         '200':
@@ -5116,7 +4553,7 @@ paths:
       className: installed_add_on_extension
     get:
       description: Fetch an instance of an Extension for the Installed Add-on.
-      operationId: FetchInstalledAddOnExtension
+      operationId: FetchMarketplaceInstalledAddOnExtension
       parameters:
       - description: The SID of the InstalledAddOn resource with the extension to
           fetch.
@@ -5150,7 +4587,7 @@ paths:
       - Preview
     post:
       description: Update an Extension for an Add-on installation.
-      operationId: UpdateInstalledAddOnExtension
+      operationId: UpdateMarketplaceInstalledAddOnExtension
       parameters:
       - description: The SID of the InstalledAddOn resource with the extension to
           update.
@@ -5181,7 +4618,7 @@ paths:
                   type: boolean
               required:
               - Enabled
-              title: UpdateInstalledAddOnExtensionRequest
+              title: UpdateMarketplaceInstalledAddOnExtensionRequest
               type: object
       responses:
         '200':
@@ -5205,7 +4642,7 @@ paths:
       className: installed_add_on_extension
     get:
       description: Retrieve a list of Extensions for the Installed Add-on.
-      operationId: ListInstalledAddOnExtension
+      operationId: ListMarketplaceInstalledAddOnExtension
       parameters:
       - description: The SID of the InstalledAddOn resource with the extensions to
           read.
@@ -5231,7 +4668,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInstalledAddOnExtensionResponse
+                title: ListMarketplaceInstalledAddOnExtensionResponse
                 properties:
                   extensions:
                     type: array
@@ -5273,7 +4710,7 @@ paths:
       parent: /Services
     get:
       description: ''
-      operationId: FetchDocument
+      operationId: FetchSyncDocument
       parameters:
       - description: ''
         in: path
@@ -5303,7 +4740,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteDocument
+      operationId: DeleteSyncDocument
       parameters:
       - description: ''
         in: path
@@ -5329,7 +4766,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateDocument
+      operationId: UpdateSyncDocument
       parameters:
       - description: ''
         in: path
@@ -5360,7 +4797,7 @@ paths:
                   description: ''
               required:
               - Data
-              title: UpdateDocumentRequest
+              title: UpdateSyncDocumentRequest
               type: object
       responses:
         '200':
@@ -5383,7 +4820,7 @@ paths:
       parent: /Services
     post:
       description: ''
-      operationId: CreateDocument
+      operationId: CreateSyncDocument
       parameters:
       - description: ''
         in: path
@@ -5404,7 +4841,7 @@ paths:
                   type: string
                 Data:
                   description: ''
-              title: CreateDocumentRequest
+              title: CreateSyncDocumentRequest
               type: object
       responses:
         '201':
@@ -5419,7 +4856,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListDocument
+      operationId: ListSyncDocument
       parameters:
       - description: ''
         in: path
@@ -5444,7 +4881,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListDocumentResponse
+                title: ListSyncDocumentResponse
                 properties:
                   documents:
                     type: array
@@ -5487,7 +4924,7 @@ paths:
       className: document_permission
     get:
       description: Fetch a specific Sync Document Permission.
-      operationId: FetchDocumentPermission
+      operationId: FetchSyncDocumentPermission
       parameters:
       - description: ''
         in: path
@@ -5524,7 +4961,7 @@ paths:
       - Preview
     delete:
       description: Delete a specific Sync Document Permission.
-      operationId: DeleteDocumentPermission
+      operationId: DeleteSyncDocumentPermission
       parameters:
       - description: ''
         in: path
@@ -5557,7 +4994,7 @@ paths:
       - Preview
     post:
       description: Update an identity's access to a specific Sync Document.
-      operationId: UpdateDocumentPermission
+      operationId: UpdateSyncDocumentPermission
       parameters:
       - description: The unique SID identifier of the Sync Service Instance.
         in: path
@@ -5602,7 +5039,7 @@ paths:
               - Read
               - Write
               - Manage
-              title: UpdateDocumentPermissionRequest
+              title: UpdateSyncDocumentPermissionRequest
               type: object
       responses:
         '200':
@@ -5626,7 +5063,7 @@ paths:
       className: document_permission
     get:
       description: Retrieve a list of all Permissions applying to a Sync Document.
-      operationId: ListDocumentPermission
+      operationId: ListSyncDocumentPermission
       parameters:
       - description: ''
         in: path
@@ -5657,7 +5094,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListDocumentPermissionResponse
+                title: ListSyncDocumentPermissionResponse
                 properties:
                   permissions:
                     type: array
@@ -5698,7 +5135,7 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchService
+      operationId: FetchSyncService
       parameters:
       - description: ''
         in: path
@@ -5722,7 +5159,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteService
+      operationId: DeleteSyncService
       parameters:
       - description: ''
         in: path
@@ -5742,7 +5179,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateService
+      operationId: UpdateSyncService
       parameters:
       - description: ''
         in: path
@@ -5771,7 +5208,7 @@ paths:
                 AclEnabled:
                   description: ''
                   type: boolean
-              title: UpdateServiceRequest
+              title: UpdateSyncServiceRequest
               type: object
       responses:
         '200':
@@ -5793,7 +5230,7 @@ paths:
       pathType: list
     post:
       description: ''
-      operationId: CreateService
+      operationId: CreateSyncService
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -5812,7 +5249,7 @@ paths:
                 AclEnabled:
                   description: ''
                   type: boolean
-              title: CreateServiceRequest
+              title: CreateSyncServiceRequest
               type: object
       responses:
         '201':
@@ -5827,7 +5264,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListService
+      operationId: ListSyncService
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -5843,7 +5280,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListServiceResponse
+                title: ListSyncServiceResponse
                 properties:
                   services:
                     type: array
@@ -5886,7 +5323,7 @@ paths:
       className: sync_list
     get:
       description: ''
-      operationId: FetchSyncList
+      operationId: FetchSyncSyncList
       parameters:
       - description: ''
         in: path
@@ -5916,7 +5353,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteSyncList
+      operationId: DeleteSyncSyncList
       parameters:
       - description: ''
         in: path
@@ -5951,7 +5388,7 @@ paths:
       className: sync_list
     post:
       description: ''
-      operationId: CreateSyncList
+      operationId: CreateSyncSyncList
       parameters:
       - description: ''
         in: path
@@ -5970,7 +5407,7 @@ paths:
                 UniqueName:
                   description: ''
                   type: string
-              title: CreateSyncListRequest
+              title: CreateSyncSyncListRequest
               type: object
       responses:
         '201':
@@ -5985,7 +5422,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListSyncList
+      operationId: ListSyncSyncList
       parameters:
       - description: ''
         in: path
@@ -6010,7 +5447,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncListResponse
+                title: ListSyncSyncListResponse
                 properties:
                   lists:
                     type: array
@@ -6053,7 +5490,7 @@ paths:
       className: sync_list_item
     get:
       description: ''
-      operationId: FetchSyncListItem
+      operationId: FetchSyncSyncListItem
       parameters:
       - description: ''
         in: path
@@ -6089,7 +5526,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteSyncListItem
+      operationId: DeleteSyncSyncListItem
       parameters:
       - description: ''
         in: path
@@ -6126,7 +5563,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateSyncListItem
+      operationId: UpdateSyncSyncListItem
       parameters:
       - description: ''
         in: path
@@ -6163,7 +5600,7 @@ paths:
                   description: ''
               required:
               - Data
-              title: UpdateSyncListItemRequest
+              title: UpdateSyncSyncListItemRequest
               type: object
       responses:
         '200':
@@ -6187,7 +5624,7 @@ paths:
       className: sync_list_item
     post:
       description: ''
-      operationId: CreateSyncListItem
+      operationId: CreateSyncSyncListItem
       parameters:
       - description: ''
         in: path
@@ -6213,7 +5650,7 @@ paths:
                   description: ''
               required:
               - Data
-              title: CreateSyncListItemRequest
+              title: CreateSyncSyncListItemRequest
               type: object
       responses:
         '201':
@@ -6228,7 +5665,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListSyncListItem
+      operationId: ListSyncSyncListItem
       parameters:
       - description: ''
         in: path
@@ -6276,7 +5713,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncListItemResponse
+                title: ListSyncSyncListItemResponse
                 properties:
                   items:
                     type: array
@@ -6319,7 +5756,7 @@ paths:
       className: sync_list_permission
     get:
       description: Fetch a specific Sync List Permission.
-      operationId: FetchSyncListPermission
+      operationId: FetchSyncSyncListPermission
       parameters:
       - description: ''
         in: path
@@ -6356,7 +5793,7 @@ paths:
       - Preview
     delete:
       description: Delete a specific Sync List Permission.
-      operationId: DeleteSyncListPermission
+      operationId: DeleteSyncSyncListPermission
       parameters:
       - description: ''
         in: path
@@ -6389,7 +5826,7 @@ paths:
       - Preview
     post:
       description: Update an identity's access to a specific Sync List.
-      operationId: UpdateSyncListPermission
+      operationId: UpdateSyncSyncListPermission
       parameters:
       - description: The unique SID identifier of the Sync Service Instance.
         in: path
@@ -6434,7 +5871,7 @@ paths:
               - Read
               - Write
               - Manage
-              title: UpdateSyncListPermissionRequest
+              title: UpdateSyncSyncListPermissionRequest
               type: object
       responses:
         '200':
@@ -6458,7 +5895,7 @@ paths:
       className: sync_list_permission
     get:
       description: Retrieve a list of all Permissions applying to a Sync List.
-      operationId: ListSyncListPermission
+      operationId: ListSyncSyncListPermission
       parameters:
       - description: ''
         in: path
@@ -6489,7 +5926,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncListPermissionResponse
+                title: ListSyncSyncListPermissionResponse
                 properties:
                   permissions:
                     type: array
@@ -6532,7 +5969,7 @@ paths:
       className: sync_map
     get:
       description: ''
-      operationId: FetchSyncMap
+      operationId: FetchSyncSyncMap
       parameters:
       - description: ''
         in: path
@@ -6562,7 +5999,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteSyncMap
+      operationId: DeleteSyncSyncMap
       parameters:
       - description: ''
         in: path
@@ -6597,7 +6034,7 @@ paths:
       className: sync_map
     post:
       description: ''
-      operationId: CreateSyncMap
+      operationId: CreateSyncSyncMap
       parameters:
       - description: ''
         in: path
@@ -6616,7 +6053,7 @@ paths:
                 UniqueName:
                   description: ''
                   type: string
-              title: CreateSyncMapRequest
+              title: CreateSyncSyncMapRequest
               type: object
       responses:
         '201':
@@ -6631,7 +6068,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListSyncMap
+      operationId: ListSyncSyncMap
       parameters:
       - description: ''
         in: path
@@ -6656,7 +6093,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncMapResponse
+                title: ListSyncSyncMapResponse
                 properties:
                   maps:
                     type: array
@@ -6699,7 +6136,7 @@ paths:
       className: sync_map_item
     get:
       description: ''
-      operationId: FetchSyncMapItem
+      operationId: FetchSyncSyncMapItem
       parameters:
       - description: ''
         in: path
@@ -6735,7 +6172,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteSyncMapItem
+      operationId: DeleteSyncSyncMapItem
       parameters:
       - description: ''
         in: path
@@ -6772,7 +6209,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateSyncMapItem
+      operationId: UpdateSyncSyncMapItem
       parameters:
       - description: ''
         in: path
@@ -6809,7 +6246,7 @@ paths:
                   description: ''
               required:
               - Data
-              title: UpdateSyncMapItemRequest
+              title: UpdateSyncSyncMapItemRequest
               type: object
       responses:
         '200':
@@ -6833,7 +6270,7 @@ paths:
       className: sync_map_item
     post:
       description: ''
-      operationId: CreateSyncMapItem
+      operationId: CreateSyncSyncMapItem
       parameters:
       - description: ''
         in: path
@@ -6863,7 +6300,7 @@ paths:
               required:
               - Key
               - Data
-              title: CreateSyncMapItemRequest
+              title: CreateSyncSyncMapItemRequest
               type: object
       responses:
         '201':
@@ -6878,7 +6315,7 @@ paths:
       - Preview
     get:
       description: ''
-      operationId: ListSyncMapItem
+      operationId: ListSyncSyncMapItem
       parameters:
       - description: ''
         in: path
@@ -6926,7 +6363,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncMapItemResponse
+                title: ListSyncSyncMapItemResponse
                 properties:
                   items:
                     type: array
@@ -6969,7 +6406,7 @@ paths:
       className: sync_map_permission
     get:
       description: Fetch a specific Sync Map Permission.
-      operationId: FetchSyncMapPermission
+      operationId: FetchSyncSyncMapPermission
       parameters:
       - description: ''
         in: path
@@ -7006,7 +6443,7 @@ paths:
       - Preview
     delete:
       description: Delete a specific Sync Map Permission.
-      operationId: DeleteSyncMapPermission
+      operationId: DeleteSyncSyncMapPermission
       parameters:
       - description: ''
         in: path
@@ -7039,7 +6476,7 @@ paths:
       - Preview
     post:
       description: Update an identity's access to a specific Sync Map.
-      operationId: UpdateSyncMapPermission
+      operationId: UpdateSyncSyncMapPermission
       parameters:
       - description: The unique SID identifier of the Sync Service Instance.
         in: path
@@ -7084,7 +6521,7 @@ paths:
               - Read
               - Write
               - Manage
-              title: UpdateSyncMapPermissionRequest
+              title: UpdateSyncSyncMapPermissionRequest
               type: object
       responses:
         '200':
@@ -7108,7 +6545,7 @@ paths:
       className: sync_map_permission
     get:
       description: Retrieve a list of all Permissions applying to a Sync Map.
-      operationId: ListSyncMapPermission
+      operationId: ListSyncSyncMapPermission
       parameters:
       - description: ''
         in: path
@@ -7139,7 +6576,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSyncMapPermissionResponse
+                title: ListSyncSyncMapPermissionResponse
                 properties:
                   permissions:
                     type: array
@@ -7180,7 +6617,7 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchAssistant
+      operationId: FetchUnderstandAssistant
       parameters:
       - description: A 34 character string that uniquely identifies this resource.
         in: path
@@ -7201,7 +6638,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateAssistant
+      operationId: UpdateUnderstandAssistant
       parameters:
       - description: A 34 character string that uniquely identifies this resource.
         in: path
@@ -7246,7 +6683,7 @@ paths:
                 StyleSheet:
                   description: The JSON object that holds the style sheet for the
                     assistant
-              title: UpdateAssistantRequest
+              title: UpdateUnderstandAssistantRequest
               type: object
       responses:
         '200':
@@ -7261,7 +6698,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteAssistant
+      operationId: DeleteUnderstandAssistant
       parameters:
       - description: A 34 character string that uniquely identifies this resource.
         in: path
@@ -7285,7 +6722,7 @@ paths:
       pathType: list
     get:
       description: ''
-      operationId: ListAssistant
+      operationId: ListUnderstandAssistant
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -7301,7 +6738,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListAssistantResponse
+                title: ListUnderstandAssistantResponse
                 properties:
                   assistants:
                     type: array
@@ -7335,7 +6772,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateAssistant
+      operationId: CreateUnderstandAssistant
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -7373,7 +6810,7 @@ paths:
                 StyleSheet:
                   description: The JSON object that holds the style sheet for the
                     assistant
-              title: CreateAssistantRequest
+              title: CreateUnderstandAssistantRequest
               type: object
       responses:
         '201':
@@ -7397,7 +6834,7 @@ paths:
       className: assistant_fallback_actions
     get:
       description: ''
-      operationId: FetchAssistantFallbackActions
+      operationId: FetchUnderstandAssistantFallbackActions
       parameters:
       - description: ''
         in: path
@@ -7418,7 +6855,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateAssistantFallbackActions
+      operationId: UpdateUnderstandAssistantFallbackActions
       parameters:
       - description: ''
         in: path
@@ -7433,7 +6870,7 @@ paths:
               properties:
                 FallbackActions:
                   description: ''
-              title: UpdateAssistantFallbackActionsRequest
+              title: UpdateUnderstandAssistantFallbackActionsRequest
               type: object
       responses:
         '200':
@@ -7457,7 +6894,7 @@ paths:
       className: assistant_initiation_actions
     get:
       description: ''
-      operationId: FetchAssistantInitiationActions
+      operationId: FetchUnderstandAssistantInitiationActions
       parameters:
       - description: ''
         in: path
@@ -7478,7 +6915,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateAssistantInitiationActions
+      operationId: UpdateUnderstandAssistantInitiationActions
       parameters:
       - description: ''
         in: path
@@ -7493,7 +6930,7 @@ paths:
               properties:
                 InitiationActions:
                   description: ''
-              title: UpdateAssistantInitiationActionsRequest
+              title: UpdateUnderstandAssistantInitiationActionsRequest
               type: object
       responses:
         '200':
@@ -7516,7 +6953,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: FetchDialogue
+      operationId: FetchUnderstandDialogue
       parameters:
       - description: ''
         in: path
@@ -7559,7 +6996,7 @@ paths:
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
-      operationId: FetchField
+      operationId: FetchUnderstandField
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -7592,7 +7029,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteField
+      operationId: DeleteUnderstandField
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -7629,7 +7066,7 @@ paths:
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
-      operationId: ListField
+      operationId: ListUnderstandField
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -7657,7 +7094,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListFieldResponse
+                title: ListUnderstandFieldResponse
                 properties:
                   fields:
                     type: array
@@ -7691,7 +7128,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateField
+      operationId: CreateUnderstandField
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -7723,7 +7160,7 @@ paths:
               required:
               - FieldType
               - UniqueName
-              title: CreateFieldRequest
+              title: CreateUnderstandFieldRequest
               type: object
       responses:
         '201':
@@ -7746,7 +7183,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: FetchFieldType
+      operationId: FetchUnderstandFieldType
       parameters:
       - description: ''
         in: path
@@ -7773,7 +7210,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateFieldType
+      operationId: UpdateUnderstandFieldType
       parameters:
       - description: ''
         in: path
@@ -7801,7 +7238,7 @@ paths:
                     resource as an alternative to the sid. Unique up to 64 characters
                     long.
                   type: string
-              title: UpdateFieldTypeRequest
+              title: UpdateUnderstandFieldTypeRequest
               type: object
       responses:
         '200':
@@ -7816,7 +7253,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteFieldType
+      operationId: DeleteUnderstandFieldType
       parameters:
       - description: ''
         in: path
@@ -7847,7 +7284,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: ListFieldType
+      operationId: ListUnderstandFieldType
       parameters:
       - description: ''
         in: path
@@ -7869,7 +7306,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListFieldTypeResponse
+                title: ListUnderstandFieldTypeResponse
                 properties:
                   field_types:
                     type: array
@@ -7903,7 +7340,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateFieldType
+      operationId: CreateUnderstandFieldType
       parameters:
       - description: ''
         in: path
@@ -7927,7 +7364,7 @@ paths:
                   type: string
               required:
               - UniqueName
-              title: CreateFieldTypeRequest
+              title: CreateUnderstandFieldTypeRequest
               type: object
       responses:
         '201':
@@ -7950,7 +7387,7 @@ paths:
       parent: /Assistants/{AssistantSid}/FieldTypes
     get:
       description: ''
-      operationId: FetchFieldValue
+      operationId: FetchUnderstandFieldValue
       parameters:
       - description: ''
         in: path
@@ -7983,7 +7420,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteFieldValue
+      operationId: DeleteUnderstandFieldValue
       parameters:
       - description: ''
         in: path
@@ -8020,7 +7457,7 @@ paths:
       parent: /Assistants/{AssistantSid}/FieldTypes
     get:
       description: ''
-      operationId: ListFieldValue
+      operationId: ListUnderstandFieldValue
       parameters:
       - description: ''
         in: path
@@ -8053,7 +7490,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListFieldValueResponse
+                title: ListUnderstandFieldValueResponse
                 properties:
                   field_values:
                     type: array
@@ -8087,7 +7524,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateFieldValue
+      operationId: CreateUnderstandFieldValue
       parameters:
       - description: ''
         in: path
@@ -8121,7 +7558,7 @@ paths:
               required:
               - Language
               - Value
-              title: CreateFieldValueRequest
+              title: CreateUnderstandFieldValueRequest
               type: object
       responses:
         '201':
@@ -8144,7 +7581,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: FetchModelBuild
+      operationId: FetchUnderstandModelBuild
       parameters:
       - description: ''
         in: path
@@ -8171,7 +7608,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateModelBuild
+      operationId: UpdateUnderstandModelBuild
       parameters:
       - description: ''
         in: path
@@ -8195,7 +7632,7 @@ paths:
                     resource as an alternative to the sid. Unique up to 64 characters
                     long. For example: v0.1'
                   type: string
-              title: UpdateModelBuildRequest
+              title: UpdateUnderstandModelBuildRequest
               type: object
       responses:
         '200':
@@ -8210,7 +7647,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteModelBuild
+      operationId: DeleteUnderstandModelBuild
       parameters:
       - description: ''
         in: path
@@ -8241,7 +7678,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: ListModelBuild
+      operationId: ListUnderstandModelBuild
       parameters:
       - description: ''
         in: path
@@ -8263,7 +7700,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListModelBuildResponse
+                title: ListUnderstandModelBuildResponse
                 properties:
                   model_builds:
                     type: array
@@ -8297,7 +7734,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateModelBuild
+      operationId: CreateUnderstandModelBuild
       parameters:
       - description: ''
         in: path
@@ -8319,7 +7756,7 @@ paths:
                     resource as an alternative to the sid. Unique up to 64 characters
                     long. For example: v0.1'
                   type: string
-              title: CreateModelBuildRequest
+              title: CreateUnderstandModelBuildRequest
               type: object
       responses:
         '201':
@@ -8342,7 +7779,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: FetchQuery
+      operationId: FetchUnderstandQuery
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8369,7 +7806,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateQuery
+      operationId: UpdateUnderstandQuery
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -8399,7 +7836,7 @@ paths:
                   description: 'A string that described the query status. The values
                     can be: pending_review, reviewed, discarded'
                   type: string
-              title: UpdateQueryRequest
+              title: UpdateUnderstandQueryRequest
               type: object
       responses:
         '200':
@@ -8414,7 +7851,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteQuery
+      operationId: DeleteUnderstandQuery
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8445,7 +7882,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: ListQuery
+      operationId: ListUnderstandQuery
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -8483,7 +7920,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListQueryResponse
+                title: ListUnderstandQueryResponse
                 properties:
                   queries:
                     type: array
@@ -8517,7 +7954,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateQuery
+      operationId: CreateUnderstandQuery
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -8555,7 +7992,7 @@ paths:
               required:
               - Language
               - Query
-              title: CreateQueryRequest
+              title: CreateUnderstandQueryRequest
               type: object
       responses:
         '201':
@@ -8578,7 +8015,7 @@ paths:
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
-      operationId: FetchSample
+      operationId: FetchUnderstandSample
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8614,7 +8051,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateSample
+      operationId: UpdateUnderstandSample
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8654,7 +8091,7 @@ paths:
                     It can be: *voice*, *sms*, *chat*, *alexa*, *google-assistant*,
                     or *slack*. If not included the value will be null'
                   type: string
-              title: UpdateSampleRequest
+              title: UpdateUnderstandSampleRequest
               type: object
       responses:
         '200':
@@ -8669,7 +8106,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteSample
+      operationId: DeleteUnderstandSample
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8709,7 +8146,7 @@ paths:
       parent: /Assistants/{AssistantSid}/Tasks
     get:
       description: ''
-      operationId: ListSample
+      operationId: ListUnderstandSample
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8742,7 +8179,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSampleResponse
+                title: ListUnderstandSampleResponse
                 properties:
                   samples:
                     type: array
@@ -8776,7 +8213,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateSample
+      operationId: CreateUnderstandSample
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8810,7 +8247,7 @@ paths:
               required:
               - Language
               - TaggedText
-              title: CreateSampleRequest
+              title: CreateUnderstandSampleRequest
               type: object
       responses:
         '201':
@@ -8833,7 +8270,7 @@ paths:
       parent: /Assistants
     get:
       description: Returns Style sheet JSON object for this Assistant
-      operationId: FetchStyleSheet
+      operationId: FetchUnderstandStyleSheet
       parameters:
       - description: The unique ID of the Assistant
         in: path
@@ -8855,7 +8292,7 @@ paths:
     post:
       description: Updates the style sheet for an assistant identified by {AssistantSid}
         or {AssistantUniqueName}.
-      operationId: UpdateStyleSheet
+      operationId: UpdateUnderstandStyleSheet
       parameters:
       - description: The unique ID of the Assistant
         in: path
@@ -8870,7 +8307,7 @@ paths:
               properties:
                 StyleSheet:
                   description: The JSON Style sheet string
-              title: UpdateStyleSheetRequest
+              title: UpdateUnderstandStyleSheetRequest
               type: object
       responses:
         '200':
@@ -8893,7 +8330,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: FetchTask
+      operationId: FetchUnderstandTask
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8920,7 +8357,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateTask
+      operationId: UpdateUnderstandTask
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -8956,7 +8393,7 @@ paths:
                     fetches actions
                   format: uri
                   type: string
-              title: UpdateTaskRequest
+              title: UpdateUnderstandTaskRequest
               type: object
       responses:
         '200':
@@ -8971,7 +8408,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteTask
+      operationId: DeleteUnderstandTask
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -9002,7 +8439,7 @@ paths:
       parent: /Assistants
     get:
       description: ''
-      operationId: ListTask
+      operationId: ListUnderstandTask
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -9024,7 +8461,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListTaskResponse
+                title: ListUnderstandTaskResponse
                 properties:
                   tasks:
                     type: array
@@ -9058,7 +8495,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateTask
+      operationId: CreateUnderstandTask
       parameters:
       - description: The unique ID of the Assistant.
         in: path
@@ -9090,7 +8527,7 @@ paths:
                   type: string
               required:
               - UniqueName
-              title: CreateTaskRequest
+              title: CreateUnderstandTaskRequest
               type: object
       responses:
         '201':
@@ -9114,7 +8551,7 @@ paths:
       className: task_actions
     get:
       description: Returns JSON actions for this Task.
-      operationId: FetchTaskActions
+      operationId: FetchUnderstandTaskActions
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -9141,7 +8578,7 @@ paths:
       - Preview
     post:
       description: Updates the actions of an Task identified by {TaskSid} or {TaskUniqueName}.
-      operationId: UpdateTaskActions
+      operationId: UpdateUnderstandTaskActions
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -9163,7 +8600,7 @@ paths:
                 Actions:
                   description: The JSON actions that instruct the Assistant how to
                     perform this task.
-              title: UpdateTaskActionsRequest
+              title: UpdateUnderstandTaskActionsRequest
               type: object
       responses:
         '200':
@@ -9187,7 +8624,7 @@ paths:
       className: task_statistics
     get:
       description: ''
-      operationId: FetchTaskStatistics
+      operationId: FetchUnderstandTaskStatistics
       parameters:
       - description: The unique ID of the parent Assistant.
         in: path
@@ -9221,7 +8658,7 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchCommand
+      operationId: FetchWirelessCommand
       parameters:
       - description: ''
         in: path
@@ -9252,7 +8689,7 @@ paths:
       pathType: list
     get:
       description: ''
-      operationId: ListCommand
+      operationId: ListWirelessCommand
       parameters:
       - description: ''
         in: query
@@ -9288,7 +8725,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListCommandResponse
+                title: ListWirelessCommandResponse
                 properties:
                   commands:
                     type: array
@@ -9322,7 +8759,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateCommand
+      operationId: CreateWirelessCommand
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9352,7 +8789,7 @@ paths:
                   type: string
               required:
               - Command
-              title: CreateCommandRequest
+              title: CreateWirelessCommandRequest
               type: object
       responses:
         '201':
@@ -9374,7 +8811,7 @@ paths:
       pathType: list
     get:
       description: ''
-      operationId: ListRatePlan
+      operationId: ListWirelessRatePlan
       parameters:
       - description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
@@ -9390,7 +8827,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListRatePlanResponse
+                title: ListWirelessRatePlanResponse
                 properties:
                   rate_plans:
                     type: array
@@ -9424,7 +8861,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: CreateRatePlan
+      operationId: CreateWirelessRatePlan
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -9462,7 +8899,7 @@ paths:
                   items:
                     type: string
                   description: ''
-              title: CreateRatePlanRequest
+              title: CreateWirelessRatePlanRequest
               type: object
       responses:
         '201':
@@ -9484,7 +8921,7 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchRatePlan
+      operationId: FetchWirelessRatePlan
       parameters:
       - description: ''
         in: path
@@ -9505,7 +8942,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateRatePlan
+      operationId: UpdateWirelessRatePlan
       parameters:
       - description: ''
         in: path
@@ -9524,7 +8961,7 @@ paths:
                 FriendlyName:
                   description: ''
                   type: string
-              title: UpdateRatePlanRequest
+              title: UpdateWirelessRatePlanRequest
               type: object
       responses:
         '200':
@@ -9539,7 +8976,7 @@ paths:
       - Preview
     delete:
       description: ''
-      operationId: DeleteRatePlan
+      operationId: DeleteWirelessRatePlan
       parameters:
       - description: ''
         in: path
@@ -9563,7 +9000,7 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchSim
+      operationId: FetchWirelessSim
       parameters:
       - description: ''
         in: path
@@ -9584,7 +9021,7 @@ paths:
       - Preview
     post:
       description: ''
-      operationId: UpdateSim
+      operationId: UpdateWirelessSim
       parameters:
       - description: ''
         in: path
@@ -9691,7 +9128,7 @@ paths:
                   description: ''
                   format: uri
                   type: string
-              title: UpdateSimRequest
+              title: UpdateWirelessSimRequest
               type: object
       responses:
         '200':
@@ -9713,7 +9150,7 @@ paths:
       pathType: list
     get:
       description: ''
-      operationId: ListSim
+      operationId: ListWirelessSim
       parameters:
       - description: ''
         in: query
@@ -9754,7 +9191,7 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListSimResponse
+                title: ListWirelessSimResponse
                 properties:
                   sims:
                     type: array
@@ -9796,7 +9233,7 @@ paths:
       parent: /Sims
     get:
       description: ''
-      operationId: FetchUsage
+      operationId: FetchWirelessUsage
       parameters:
       - description: ''
         in: path
@@ -9840,7 +9277,7 @@ paths:
       pathType: instance
     get:
       description: Fetch a specific Branded Channel.
-      operationId: FetchBrandedChannel
+      operationId: FetchTrustedCommsBrandedChannel
       parameters:
       - description: The unique SID identifier of the Branded Channel.
         in: path
@@ -9888,7 +9325,7 @@ paths:
       pathType: instance
     get:
       description: Retrieve the newest available BrandInformation
-      operationId: FetchBrandsInformation
+      operationId: FetchTrustedCommsBrandsInformation
       parameters:
       - description: 'Standard `If-None-Match` HTTP header. For more information visit:
           https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/If-None-Match.'
@@ -9924,7 +9361,7 @@ paths:
       parent: /BrandedChannels
     post:
       description: Associate a channel to a branded channel
-      operationId: CreateChannel
+      operationId: CreateTrustedCommsChannel
       parameters:
       - description: The unique SID identifier of the Branded Channel. The given phone
           number is going to be assigned to this Branded Channel
@@ -9950,7 +9387,7 @@ paths:
                     Phone number to be assigned to the Branded Channel.
               required:
               - PhoneNumberSid
-              title: CreateChannelRequest
+              title: CreateTrustedCommsChannelRequest
               type: object
       responses:
         '201':
@@ -9977,7 +9414,7 @@ paths:
     get:
       description: Fetch a specific Call Placement Service (CPS) given a phone number
         via `X-XCNAM-Sensitive-Phone-Number` header.
-      operationId: FetchCps
+      operationId: FetchTrustedCommsCps
       parameters:
       - description: Phone number used to retrieve its corresponding CPS.
         in: header
@@ -10020,7 +9457,7 @@ paths:
       description: Retrieve a current call given the originating and terminating number
         via `X-XCNAM-Sensitive-Phone-Number-From` and `X-XCNAM-Sensitive-Phone-Number-To`
         headers.
-      operationId: FetchCurrentCall
+      operationId: FetchTrustedCommsCurrentCall
       parameters:
       - description: The originating Phone Number, given in [E.164 format](https://www.twilio.com/docs/glossary/what-e164).
           This phone number should be a Twilio number, otherwise it will return an
