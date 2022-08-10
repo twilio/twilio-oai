@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2022-08-10] Version 1.33.0
+---------------------------
+**Library - Feature**
+- [PR #72](https://github.com/twilio/twilio-oai/pull/72): Addition of spec files for preview domain. Thanks to [@AsabuHere](https://github.com/AsabuHere)!
+
+**Routes**
+- Inbound Proccessing Region API - Public GA
+
+**Supersim**
+- Allow updating `DataLimit` on a Fleet
+
+
 [2022-07-21] Version 1.32.0
 ---------------------------
 **Flex**
