@@ -1,5 +1,24 @@
 twilio-oai changelog
 ====================
+[2022-09-07] Version 1.35.0
+---------------------------
+**Flex**
+- Removed redundant `close` status from Flex Interactions flow **(breaking change)**
+- Adding `debugger_integration` and `flex_ui_status_report` to Flex Configuration
+
+**Messaging**
+- Add create, list and get tollfree verification API
+
+**Verify**
+- Verify SafeList API endpoints added.
+
+**Video**
+- Add `Anonymize` API
+
+**Twiml**
+- Update `event` value `call-in-progress` to `call-answered`
+
+
 [2022-08-24] Version 1.34.0
 ---------------------------
 **Library - Test**

@@ -805,6 +805,91 @@
           "disconnected"
         ]
       },
+      "video.v1.room.room_participant.room_participant_anonymize": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PA[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that identifies the resource"
+          },
+          "room_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^RM[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the participant's room"
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Account that created the resource"
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/room_participant_anonymize_enum_status",
+            "nullable": true,
+            "description": "The status of the Participant"
+          },
+          "identity": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PA[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the participant"
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The ISO 8601 date and time in GMT when the resource was created"
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The ISO 8601 date and time in GMT when the resource was last updated"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The time of participant connected to the room in ISO 8601 format"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The time when the participant disconnected from the room in ISO 8601 format"
+          },
+          "duration": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Duration of time in seconds the participant was connected"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the resource"
+          }
+        }
+      },
+      "room_participant_anonymize_enum_status": {
+        "type": "string",
+        "enum": [
+          "connected",
+          "disconnected"
+        ]
+      },
       "video.v1.room.room_participant.room_participant_published_track": {
         "type": "object",
         "properties": {
@@ -1233,7 +1318,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.34.0"
+    "version": "1.35.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -3021,6 +3106,67 @@
           }
         ],
         "operationId": "ListRoomParticipant",
+        "x-maturity": [
+          "GA"
+        ]
+      }
+    },
+    "/v1/Rooms/{RoomSid}/Participants/{Sid}/Anonymize": {
+      "servers": [
+        {
+          "url": "https://video.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "identity",
+          "status"
+        ],
+        "pathType": "instance",
+        "parent": "/Rooms/{RoomSid}/Participants"
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "RoomSid",
+            "in": "path",
+            "description": "The SID of the room with the participant to update.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID of the RoomParticipant resource to update.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/video.v1.room.room_participant.room_participant_anonymize"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateRoomParticipantAnonymize",
         "x-maturity": [
           "GA"
         ]
