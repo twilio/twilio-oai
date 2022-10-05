@@ -1,5 +1,18 @@
 twilio-oai changelog
 ====================
+[2022-10-05] Version 1.36.0
+---------------------------
+**Library - Feature**
+- [PR #77](https://github.com/twilio/twilio-oai/pull/77): add helper libs semantic types configuration. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Api**
+- Added `virtual-agent` to `usage_record` API.
+- Add AMD attributes to participant create request
+
+**Twiml**
+- Add AMD attributes to `Number` and `Sip`
+
+
 [2022-09-07] Version 1.35.0
 ---------------------------
 **Flex**
