@@ -3,47 +3,27 @@ components:
     lookups.v2.phone_number:
       type: object
       properties:
-        call_forwarding:
-          nullable: true
-          description: An object that contains call forwarding status information
-        caller_name:
-          nullable: true
-          description: An object that contains caller name information
         calling_country_code:
+          type: string
+          nullable: true
           description: International dialing prefix
-          nullable: true
-          type: string
         country_code:
+          type: string
+          nullable: true
           description: Phone number's ISO country code
-          nullable: true
-          type: string
-        line_type_intelligence:
-          nullable: true
-          description: An object that contains line type information
-        live_activity:
-          nullable: true
-          description: An object that contains live activity information
-        national_format:
-          description: Phone number in national format
-          nullable: true
-          type: string
         phone_number:
-          description: Phone number in E.164 format
+          type: string
           format: phone-number
           nullable: true
+          description: Phone number in E.164 format
+        national_format:
           type: string
-        sim_swap:
           nullable: true
-          description: An object that contains SIM swap information
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
+          description: Phone number in national format
         valid:
-          description: Boolean which indicates if the phone number is valid
-          nullable: true
           type: boolean
+          nullable: true
+          description: Boolean which indicates if the phone number is valid
         validation_errors:
           type: array
           items:
@@ -51,13 +31,34 @@ components:
             $ref: '#/components/schemas/phone_number_enum_validation_error'
           nullable: true
           description: Contains reasons why a phone number is invalid
+        caller_name:
+          nullable: true
+          description: An object that contains caller name information
+        sim_swap:
+          nullable: true
+          description: An object that contains SIM swap information
+        call_forwarding:
+          nullable: true
+          description: An object that contains call forwarding status information
+        live_activity:
+          nullable: true
+          description: An object that contains live activity information
+        line_type_intelligence:
+          nullable: true
+          description: An object that contains line type information
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
     phone_number_enum_type:
+      type: string
       enum:
       - landline
       - mobile
       - voip
-      type: string
     phone_number_enum_validation_error:
+      type: string
       enum:
       - TOO_SHORT
       - TOO_LONG
@@ -65,23 +66,22 @@ components:
       - INVALID_COUNTRY_CODE
       - INVALID_LENGTH
       - NOT_A_NUMBER
-      type: string
   securitySchemes:
     accountSid_authToken:
-      scheme: basic
       type: http
+      scheme: basic
 info:
+  title: Twilio - Lookups
+  description: This is the public Twilio REST API.
+  termsOfService: https://www.twilio.com/legal/tos
   contact:
-    email: support@twilio.com
     name: Twilio Support
     url: https://support.twilio.com
-  description: This is the public Twilio REST API.
+    email: support@twilio.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: https://www.twilio.com/legal/tos
-  title: Twilio - Lookups
-  version: 1.36.0
+  version: 1.29.1
 openapi: 3.0.1
 paths:
   /v2/PhoneNumbers/{PhoneNumber}:
@@ -100,25 +100,24 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchPhoneNumber
       parameters:
-      - description: The phone number to lookup in E.164 or national format. Default
-          country code is +1 (North America).
+      - name: PhoneNumber
         in: path
-        name: PhoneNumber
+        description: The phone number to lookup in E.164 or national format. Default
+          country code is +1 (North America).
+        schema:
+          type: string
         required: true
-        schema:
-          type: string
-      - description: A comma-separated list of fields to return. Possible values are
+      - name: Fields
+        in: query
+        description: A comma-separated list of fields to return. Possible values are
           caller_name, sim_swap, call_forwarding, live_activity, line_type_intelligence.
-        in: query
-        name: Fields
         schema:
           type: string
-      - description: The [country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-          used if the phone number provided is in national format.
+      - name: CountryCode
         in: query
-        name: CountryCode
+        description: The [country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+          used if the phone number provided is in national format.
         schema:
           type: string
       responses:
@@ -130,6 +129,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchPhoneNumber
       x-maturity:
       - Beta
 servers:

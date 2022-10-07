@@ -12,9 +12,9 @@ components:
           description: The SID of the Account that the secondary Auth Token was created
             for
         auth_token:
-          description: The promoted Auth Token
-          nullable: true
           type: string
+          nullable: true
+          description: The promoted Auth Token
         date_created:
           type: string
           format: date-time
@@ -28,16 +28,23 @@ components:
           description: The ISO 8601 formatted date and time in UTC when the resource
             was last updated
         url:
-          description: The URI for this resource, relative to `https://accounts.twilio.com`
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URI for this resource, relative to `https://accounts.twilio.com`
     accounts.v1.credential:
       type: object
       properties: {}
     accounts.v1.credential.credential_aws:
       type: object
       properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
         account_sid:
           type: string
           minLength: 34
@@ -45,6 +52,10 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
         date_created:
           type: string
           format: date-time
@@ -56,10 +67,14 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT when the resource was last
             updated
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
+        url:
           type: string
+          format: uri
+          nullable: true
+          description: The URI for this resource, relative to `https://accounts.twilio.com`
+    accounts.v1.credential.credential_public_key:
+      type: object
+      properties:
         sid:
           type: string
           minLength: 34
@@ -67,14 +82,6 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies the resource
-        url:
-          description: The URI for this resource, relative to `https://accounts.twilio.com`
-          format: uri
-          nullable: true
-          type: string
-    accounts.v1.credential.credential_public_key:
-      type: object
-      properties:
         account_sid:
           type: string
           minLength: 34
@@ -83,6 +90,10 @@ components:
           nullable: true
           description: The SID of the Account that created the Credential that the
             PublicKey resource belongs to
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
         date_created:
           type: string
           format: date-time
@@ -94,22 +105,11 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT when the resource was last
             updated
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^CR[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
         url:
-          description: The URI for this resource, relative to `https://accounts.twilio.com`
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URI for this resource, relative to `https://accounts.twilio.com`
     accounts.v1.secondary_auth_token:
       type: object
       properties:
@@ -134,30 +134,30 @@ components:
           description: The ISO 8601 formatted date and time in UTC when the resource
             was last updated
         secondary_auth_token:
-          description: The generated secondary Auth Token
-          nullable: true
           type: string
+          nullable: true
+          description: The generated secondary Auth Token
         url:
-          description: The URI for this resource, relative to `https://accounts.twilio.com`
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URI for this resource, relative to `https://accounts.twilio.com`
   securitySchemes:
     accountSid_authToken:
-      scheme: basic
       type: http
+      scheme: basic
 info:
+  title: Twilio - Accounts
+  description: This is the public Twilio REST API.
+  termsOfService: https://www.twilio.com/legal/tos
   contact:
-    email: support@twilio.com
     name: Twilio Support
     url: https://support.twilio.com
-  description: This is the public Twilio REST API.
+    email: support@twilio.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: https://www.twilio.com/legal/tos
-  title: Twilio - Accounts
-  version: 1.36.0
+  version: 1.29.1
 openapi: 3.0.1
 paths:
   /v1/AuthTokens/Promote:
@@ -175,7 +175,6 @@ paths:
       description: Promote the secondary Auth Token to primary. After promoting the
         new token, all requests to Twilio using your old primary Auth Token will result
         in an error.
-      operationId: UpdateAuthTokenPromotion
       responses:
         '200':
           content:
@@ -185,6 +184,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateAuthTokenPromotion
       x-maturity:
       - GA
   /v1/Credentials:
@@ -208,16 +208,15 @@ paths:
     get:
       description: Retrieves a collection of AWS Credentials belonging to the account
         used to make the request
-      operationId: ListCredentialAws
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -234,45 +233,59 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListCredentialAws
       x-maturity:
       - GA
     post:
       description: Create a new AWS Credential
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accounts.v1.credential.credential_aws'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateCredentialAws
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateCredentialAwsRequest
               properties:
                 Credentials:
+                  type: string
                   description: A string that contains the AWS access credentials in
                     the format `<AWS_ACCESS_KEY_ID>:<AWS_SECRET_ACCESS_KEY>`. For
                     example, `AKIAIOSFODNN7EXAMPLE:wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
-                  type: string
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It can be up to 64 characters long.
-                  type: string
                 AccountSid:
                   type: string
                   minLength: 34
@@ -283,19 +296,6 @@ paths:
                     issuing the request.
               required:
               - Credentials
-              title: CreateCredentialAwsRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/accounts.v1.credential.credential_aws'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Credentials/AWS/{Sid}:
     servers:
     - url: https://accounts.twilio.com
@@ -310,18 +310,17 @@ paths:
     get:
       description: Fetch the AWS credentials specified by the provided Credential
         Sid
-      operationId: FetchCredentialAws
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the AWS resource
-          to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the AWS resource
+          to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -331,33 +330,22 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchCredentialAws
       x-maturity:
       - GA
     post:
       description: Modify the properties of a given Account
-      operationId: UpdateCredentialAws
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the AWS resource
-          to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the AWS resource
+          to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
-                  type: string
-              title: UpdateCredentialAwsRequest
-              type: object
+        required: true
       responses:
         '200':
           content:
@@ -367,27 +355,39 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateCredentialAws
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateCredentialAwsRequest
+              properties:
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
     delete:
       description: Delete a Credential from your account
-      operationId: DeleteCredentialAws
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the AWS resource
-          to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the AWS resource
+          to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteCredentialAws
       x-maturity:
       - GA
   /v1/Credentials/PublicKeys:
@@ -404,16 +404,15 @@ paths:
     get:
       description: Retrieves a collection of Public Key Credentials belonging to the
         account used to make the request
-      operationId: ListCredentialPublicKey
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -430,45 +429,59 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListCredentialPublicKey
       x-maturity:
       - GA
     post:
       description: Create a new Public Key Credential
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accounts.v1.credential.credential_public_key'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateCredentialPublicKey
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateCredentialPublicKeyRequest
               properties:
                 PublicKey:
+                  type: string
                   description: A URL encoded representation of the public key. For
                     example, `-----BEGIN PUBLIC KEY-----MIIBIjANB.pa9xQIDAQAB-----END
                     PUBLIC KEY-----`
-                  type: string
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It can be up to 64 characters long.
-                  type: string
                 AccountSid:
                   type: string
                   minLength: 34
@@ -479,19 +492,6 @@ paths:
                     issuing the request
               required:
               - PublicKey
-              title: CreateCredentialPublicKeyRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/accounts.v1.credential.credential_public_key'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Credentials/PublicKeys/{Sid}:
     servers:
     - url: https://accounts.twilio.com
@@ -505,18 +505,17 @@ paths:
       parent: /Credentials
     get:
       description: Fetch the public key specified by the provided Credential Sid
-      operationId: FetchCredentialPublicKey
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the PublicKey
-          resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the PublicKey
+          resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -526,33 +525,22 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchCredentialPublicKey
       x-maturity:
       - GA
     post:
       description: Modify the properties of a given Account
-      operationId: UpdateCredentialPublicKey
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the PublicKey
-          resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the PublicKey
+          resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It can be up to 64 characters long.
-                  type: string
-              title: UpdateCredentialPublicKeyRequest
-              type: object
+        required: true
       responses:
         '200':
           content:
@@ -562,27 +550,39 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateCredentialPublicKey
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateCredentialPublicKeyRequest
+              properties:
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
     delete:
       description: Delete a Credential from your account
-      operationId: DeleteCredentialPublicKey
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the PublicKey
-          resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the PublicKey
+          resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteCredentialPublicKey
       x-maturity:
       - GA
   /v1/AuthTokens/Secondary:
@@ -598,7 +598,6 @@ paths:
       className: secondary_auth_token
     post:
       description: Create a new secondary Auth Token
-      operationId: CreateSecondaryAuthToken
       responses:
         '201':
           content:
@@ -608,16 +607,17 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateSecondaryAuthToken
       x-maturity:
       - GA
     delete:
       description: Delete the secondary Auth Token from your account
-      operationId: DeleteSecondaryAuthToken
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteSecondaryAuthToken
       x-maturity:
       - GA
 servers:

@@ -4,10 +4,10 @@ components:
       type: object
       properties:
         date:
-          description: date
+          type: string
           format: date
           nullable: true
-          type: string
+          description: date
         sid:
           type: string
           minLength: 34
@@ -16,10 +16,10 @@ components:
           nullable: true
           description: sid
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of the resource
     voice.v1.byoc_trunk:
       type: object
       properties:
@@ -30,10 +30,72 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
-        cnam_lookup_enabled:
-          description: Whether Caller ID Name (CNAM) lookup is enabled for the trunk
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^BY[0-9a-fA-F]{32}$
           nullable: true
+          description: The unique string that identifies the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
+        voice_url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL we call when receiving a call
+        voice_method:
+          type: string
+          format: http-method
+          enum:
+          - HEAD
+          - GET
+          - POST
+          - PATCH
+          - PUT
+          - DELETE
+          nullable: true
+          description: The HTTP method to use with voice_url
+        voice_fallback_url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL we call when an error occurs while executing TwiML
+        voice_fallback_method:
+          type: string
+          format: http-method
+          enum:
+          - HEAD
+          - GET
+          - POST
+          - PATCH
+          - PUT
+          - DELETE
+          nullable: true
+          description: The HTTP method used with voice_fallback_url
+        status_callback_url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL that we call with status updates
+        status_callback_method:
+          type: string
+          format: http-method
+          enum:
+          - HEAD
+          - GET
+          - POST
+          - PATCH
+          - PUT
+          - DELETE
+          nullable: true
+          description: The HTTP method we use to call status_callback_url
+        cnam_lookup_enabled:
           type: boolean
+          nullable: true
+          description: Whether Caller ID Name (CNAM) lookup is enabled for the trunk
         connection_policy_sid:
           type: string
           minLength: 34
@@ -41,6 +103,14 @@ components:
           pattern: ^NY[0-9a-fA-F]{32}$
           nullable: true
           description: Origination Connection Policy (to your Carrier)
+        from_domain_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^SD[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the SIP Domain that should be used in the `From`
+            header of originating calls
         date_created:
           type: string
           format: date-time
@@ -52,81 +122,11 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT that the resource was last
             updated
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        from_domain_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^SD[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the SIP Domain that should be used in the `From`
-            header of originating calls
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^BY[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        status_callback_method:
-          description: The HTTP method we use to call status_callback_url
-          enum:
-          - HEAD
-          - GET
-          - POST
-          - PATCH
-          - PUT
-          - DELETE
-          format: http-method
-          nullable: true
-          type: string
-        status_callback_url:
-          description: The URL that we call with status updates
-          format: uri
-          nullable: true
-          type: string
         url:
+          type: string
+          format: uri
+          nullable: true
           description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-        voice_fallback_method:
-          description: The HTTP method used with voice_fallback_url
-          enum:
-          - HEAD
-          - GET
-          - POST
-          - PATCH
-          - PUT
-          - DELETE
-          format: http-method
-          nullable: true
-          type: string
-        voice_fallback_url:
-          description: The URL we call when an error occurs while executing TwiML
-          format: uri
-          nullable: true
-          type: string
-        voice_method:
-          description: The HTTP method to use with voice_url
-          enum:
-          - HEAD
-          - GET
-          - POST
-          - PATCH
-          - PUT
-          - DELETE
-          format: http-method
-          nullable: true
-          type: string
-        voice_url:
-          description: The URL we call when receiving a call
-          format: uri
-          nullable: true
-          type: string
     voice.v1.connection_policy:
       type: object
       properties:
@@ -137,6 +137,17 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^NY[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
         date_created:
           type: string
           format: date-time
@@ -148,27 +159,16 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT when the resource was last
             updated
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        links:
-          description: The URLs of related resources
-          format: uri-map
-          nullable: true
-          type: object
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^NY[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of the resource
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: The URLs of related resources
     voice.v1.connection_policy.connection_policy_target:
       type: object
       properties:
@@ -186,6 +186,35 @@ components:
           pattern: ^NY[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Connection Policy that owns the Target
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^NE[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
+        target:
+          type: string
+          format: uri
+          nullable: true
+          description: The SIP address you want Twilio to route your calls to
+        priority:
+          type: integer
+          nullable: true
+          description: The relative importance of the target
+        weight:
+          type: integer
+          nullable: true
+          description: The value that determines the relative load the Target should
+            receive compared to others with the same priority
+        enabled:
+          type: boolean
+          nullable: true
+          description: Whether the target is enabled
         date_created:
           type: string
           format: date-time
@@ -197,164 +226,135 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT when the resource was last
             updated
-        enabled:
-          description: Whether the target is enabled
-          nullable: true
-          type: boolean
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        priority:
-          description: The relative importance of the target
-          nullable: true
-          type: integer
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^NE[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        target:
-          description: The SIP address you want Twilio to route your calls to
-          format: uri
-          nullable: true
-          type: string
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
-        weight:
-          description: The value that determines the relative load the Target should
-            receive compared to others with the same priority
-          nullable: true
-          type: integer
+          description: The absolute URL of the resource
     voice.v1.dialing_permissions:
       type: object
       properties: {}
     voice.v1.dialing_permissions.dialing_permissions_country:
       type: object
       properties:
-        continent:
-          description: The name of the continent in which the country is located
-          nullable: true
+        iso_code:
           type: string
+          format: iso-country-code
+          nullable: true
+          description: The ISO country code
+        name:
+          type: string
+          nullable: true
+          description: The name of the country
+        continent:
+          type: string
+          nullable: true
+          description: The name of the continent in which the country is located
         country_codes:
           type: array
           items:
             type: string
           nullable: true
           description: The E.164 assigned country codes(s)
-        high_risk_special_numbers_enabled:
-          description: Whether dialing to high-risk special services numbers is enabled
-          nullable: true
+        low_risk_numbers_enabled:
           type: boolean
+          nullable: true
+          description: Whether dialing to low-risk numbers is enabled
+        high_risk_special_numbers_enabled:
+          type: boolean
+          nullable: true
+          description: Whether dialing to high-risk special services numbers is enabled
         high_risk_tollfraud_numbers_enabled:
+          type: boolean
+          nullable: true
           description: Whether dialing to high-risk toll fraud numbers is enabled,
             else `false`
-          nullable: true
-          type: boolean
-        iso_code:
-          description: The ISO country code
-          format: iso-country-code
-          nullable: true
-          type: string
-        links:
-          description: A list of URLs related to this resource
-          format: uri-map
-          nullable: true
-          type: object
-        low_risk_numbers_enabled:
-          description: Whether dialing to low-risk numbers is enabled
-          nullable: true
-          type: boolean
-        name:
-          description: The name of the country
-          nullable: true
-          type: string
         url:
-          description: The absolute URL of this resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of this resource
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: A list of URLs related to this resource
     voice.v1.dialing_permissions.dialing_permissions_country-instance:
       type: object
       properties:
-        continent:
-          description: The name of the continent in which the country is located
-          nullable: true
+        iso_code:
           type: string
+          format: iso-country-code
+          nullable: true
+          description: The ISO country code
+        name:
+          type: string
+          nullable: true
+          description: The name of the country
+        continent:
+          type: string
+          nullable: true
+          description: The name of the continent in which the country is located
         country_codes:
           type: array
           items:
             type: string
           nullable: true
           description: The E.164 assigned country codes(s)
-        high_risk_special_numbers_enabled:
-          description: Whether dialing to high-risk special services numbers is enabled
-          nullable: true
+        low_risk_numbers_enabled:
           type: boolean
+          nullable: true
+          description: Whether dialing to low-risk numbers is enabled
+        high_risk_special_numbers_enabled:
+          type: boolean
+          nullable: true
+          description: Whether dialing to high-risk special services numbers is enabled
         high_risk_tollfraud_numbers_enabled:
+          type: boolean
+          nullable: true
           description: Whether dialing to high-risk toll fraud numbers is enabled,
             else `false`
-          nullable: true
-          type: boolean
-        iso_code:
-          description: The ISO country code
-          format: iso-country-code
-          nullable: true
-          type: string
-        links:
-          description: A list of URLs related to this resource
-          format: uri-map
-          nullable: true
-          type: object
-        low_risk_numbers_enabled:
-          description: Whether dialing to low-risk numbers is enabled
-          nullable: true
-          type: boolean
-        name:
-          description: The name of the country
-          nullable: true
-          type: string
         url:
-          description: The absolute URL of this resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of this resource
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: A list of URLs related to this resource
     voice.v1.dialing_permissions.dialing_permissions_country_bulk_update:
       type: object
       properties:
         update_count:
-          description: The number of countries updated
-          nullable: true
           type: integer
-        update_request:
-          description: A URL encoded JSON array of update objects
           nullable: true
+          description: The number of countries updated
+        update_request:
           type: string
+          nullable: true
+          description: A URL encoded JSON array of update objects
     voice.v1.dialing_permissions.dialing_permissions_country.dialing_permissions_hrs_prefixes:
       type: object
       properties:
         prefix:
-          description: A prefix that includes the E.164 assigned country code
-          nullable: true
           type: string
+          nullable: true
+          description: A prefix that includes the E.164 assigned country code
     voice.v1.dialing_permissions.dialing_permissions_settings:
       type: object
       properties:
         dialing_permissions_inheritance:
+          type: boolean
+          nullable: true
           description: '`true` if the sub-account will inherit voice dialing permissions
             from the Master Project; otherwise `false`'
-          nullable: true
-          type: boolean
         url:
-          description: The absolute URL of this resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of this resource
     voice.v1.ip_record:
       type: object
       properties:
@@ -365,31 +365,6 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
-        cidr_prefix_length:
-          description: An integer representing the length of the [CIDR](https://tools.ietf.org/html/rfc4632)
-            prefix to use with this IP address. By default the entire IP address is
-            used, which for IPv4 is value 32.
-          nullable: true
-          type: integer
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT that the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The RFC 2822 date and time in GMT that the resource was last
-            updated
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        ip_address:
-          description: An IP address in dotted decimal notation, IPv4 only.
-          nullable: true
-          type: string
         sid:
           type: string
           minLength: 34
@@ -397,14 +372,20 @@ components:
           pattern: ^IL[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies the resource
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
+        friendly_name:
           type: string
-    voice.v1.source_ip_mapping:
-      type: object
-      properties:
+          nullable: true
+          description: The string that you assigned to describe the resource
+        ip_address:
+          type: string
+          nullable: true
+          description: An IP address in dotted decimal notation, IPv4 only.
+        cidr_prefix_length:
+          type: integer
+          nullable: true
+          description: An integer representing the length of the [CIDR](https://tools.ietf.org/html/rfc4632)
+            prefix to use with this IP address. By default the entire IP address is
+            used, which for IPv4 is value 32.
         date_created:
           type: string
           format: date-time
@@ -416,13 +397,14 @@ components:
           nullable: true
           description: The RFC 2822 date and time in GMT that the resource was last
             updated
-        ip_record_sid:
+        url:
           type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^IL[0-9a-fA-F]{32}$
+          format: uri
           nullable: true
-          description: The unique string that identifies an IP Record
+          description: The absolute URL of the resource
+    voice.v1.source_ip_mapping:
+      type: object
+      properties:
         sid:
           type: string
           minLength: 34
@@ -430,6 +412,13 @@ components:
           pattern: ^IB[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies the resource
+        ip_record_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^IL[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies an IP Record
         sip_domain_sid:
           type: string
           minLength: 34
@@ -437,27 +426,38 @@ components:
           pattern: ^SD[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies a SIP Domain
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The RFC 2822 date and time in GMT that the resource was created
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The RFC 2822 date and time in GMT that the resource was last
+            updated
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of the resource
   securitySchemes:
     accountSid_authToken:
-      scheme: basic
       type: http
+      scheme: basic
 info:
+  title: Twilio - Voice
+  description: This is the public Twilio REST API.
+  termsOfService: https://www.twilio.com/legal/tos
   contact:
-    email: support@twilio.com
     name: Twilio Support
     url: https://support.twilio.com
-  description: This is the public Twilio REST API.
+    email: support@twilio.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: https://www.twilio.com/legal/tos
-  title: Twilio - Voice
-  version: 1.36.0
+  version: 1.29.1
 openapi: 3.0.1
 paths:
   /v1/Archives/{Date}/Calls/{Sid}:
@@ -471,30 +471,30 @@ paths:
     delete:
       description: 'Delete an archived call record from Bulk Export. Note: this does
         not also delete the record from the Voice API.'
-      operationId: DeleteArchivedCall
       parameters:
-      - description: The date of the Call in UTC.
+      - name: Date
         in: path
-        name: Date
-        required: true
+        description: The date of the Call in UTC.
         schema:
-          format: date
           type: string
-      - description: The Twilio-provided Call SID that uniquely identifies the Call
-          resource to delete
-        in: path
-        name: Sid
+          format: date
         required: true
+      - name: Sid
+        in: path
+        description: The Twilio-provided Call SID that uniquely identifies the Call
+          resource to delete
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CA[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteArchivedCall
       x-maturity:
       - Beta
   /v1/ByocTrunks:
@@ -510,58 +510,71 @@ paths:
       pathType: list
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v1.byoc_trunk'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateByocTrunk
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateByocTrunkRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It is not unique and can be up to 255 characters long.
-                  type: string
                 VoiceUrl:
+                  type: string
+                  format: uri
                   description: The URL we should call when the BYOC Trunk receives
                     a call.
-                  format: uri
-                  type: string
                 VoiceMethod:
+                  type: string
+                  format: http-method
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
                   description: 'The HTTP method we should use to call `voice_url`.
                     Can be: `GET` or `POST`.'
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
                 VoiceFallbackUrl:
+                  type: string
+                  format: uri
                   description: The URL that we should call when an error occurs while
                     retrieving or executing the TwiML from `voice_url`.
-                  format: uri
-                  type: string
                 VoiceFallbackMethod:
+                  type: string
+                  format: http-method
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
                   description: 'The HTTP method we should use to call `voice_fallback_url`.
                     Can be: `GET` or `POST`.'
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
                 StatusCallbackUrl:
+                  type: string
+                  format: uri
                   description: The URL that we should call to pass status parameters
                     (such as call ended) to your application.
-                  format: uri
-                  type: string
                 StatusCallbackMethod:
-                  description: 'The HTTP method we should use to call `status_callback_url`.
-                    Can be: `GET` or `POST`.'
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -569,15 +582,15 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: 'The HTTP method we should use to call `status_callback_url`.
+                    Can be: `GET` or `POST`.'
                 CnamLookupEnabled:
+                  type: boolean
                   description: Whether Caller ID Name (CNAM) lookup is enabled for
                     the trunk. If enabled, all inbound calls to the BYOC Trunk from
                     the United States and Canada automatically perform a CNAM Lookup
                     and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
                     for more information.
-                  type: boolean
                 ConnectionPolicySid:
                   type: string
                   minLength: 34
@@ -596,31 +609,17 @@ paths:
                     call, configure this with a [SIP Domain](https://www.twilio.com/docs/voice/api/sending-sip)
                     to ensure proper routing. If not configured, the from domain will
                     default to "sip.twilio.com".
-              title: CreateByocTrunkRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/voice.v1.byoc_trunk'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
     get:
       description: ''
-      operationId: ListByocTrunk
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -637,26 +636,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListByocTrunk
       x-maturity:
       - GA
   /v1/ByocTrunks/{Sid}:
@@ -672,18 +672,17 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchByocTrunk
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the BYOC
-          Trunk resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the BYOC
+          Trunk resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^BY[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -693,38 +692,53 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchByocTrunk
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateByocTrunk
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the BYOC
-          Trunk resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the BYOC
+          Trunk resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^BY[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v1.byoc_trunk'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateByocTrunk
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateByocTrunkRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It is not unique and can be up to 255 characters long.
-                  type: string
                 VoiceUrl:
+                  type: string
+                  format: uri
                   description: The URL we should call when the BYOC Trunk receives
                     a call.
-                  format: uri
-                  type: string
                 VoiceMethod:
-                  description: The HTTP method we should use to call `voice_url`
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -732,33 +746,32 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: The HTTP method we should use to call `voice_url`
                 VoiceFallbackUrl:
+                  type: string
+                  format: uri
                   description: The URL that we should call when an error occurs while
                     retrieving or executing the TwiML requested by `voice_url`.
-                  format: uri
-                  type: string
                 VoiceFallbackMethod:
+                  type: string
+                  format: http-method
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
                   description: 'The HTTP method we should use to call `voice_fallback_url`.
                     Can be: `GET` or `POST`.'
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
                 StatusCallbackUrl:
+                  type: string
+                  format: uri
                   description: The URL that we should call to pass status parameters
                     (such as call ended) to your application.
-                  format: uri
-                  type: string
                 StatusCallbackMethod:
-                  description: 'The HTTP method we should use to call `status_callback_url`.
-                    Can be: `GET` or `POST`.'
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -766,15 +779,15 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: 'The HTTP method we should use to call `status_callback_url`.
+                    Can be: `GET` or `POST`.'
                 CnamLookupEnabled:
+                  type: boolean
                   description: Whether Caller ID Name (CNAM) lookup is enabled for
                     the trunk. If enabled, all inbound calls to the BYOC Trunk from
                     the United States and Canada automatically perform a CNAM Lookup
                     and display Caller ID data on your phone. See [CNAM Lookups](https://www.twilio.com/docs/sip-trunking#CNAM)
                     for more information.
-                  type: boolean
                 ConnectionPolicySid:
                   type: string
                   minLength: 34
@@ -793,38 +806,25 @@ paths:
                     call, configure this with a [SIP Domain](https://www.twilio.com/docs/voice/api/sending-sip)
                     to ensure proper routing. If not configured, the from domain will
                     default to "sip.twilio.com".
-              title: UpdateByocTrunkRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/voice.v1.byoc_trunk'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
     delete:
       description: ''
-      operationId: DeleteByocTrunk
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the BYOC
-          Trunk resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the BYOC
+          Trunk resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^BY[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteByocTrunk
       x-maturity:
       - GA
   /v1/ConnectionPolicies:
@@ -838,18 +838,6 @@ paths:
       pathType: list
     post:
       description: ''
-      operationId: CreateConnectionPolicy
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
-                  type: string
-              title: CreateConnectionPolicyRequest
-              type: object
       responses:
         '201':
           content:
@@ -859,20 +847,31 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateConnectionPolicy
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateConnectionPolicyRequest
+              properties:
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It is not unique and can be up to 255 characters long.
     get:
       description: ''
-      operationId: ListConnectionPolicy
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -889,26 +888,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListConnectionPolicy
       x-maturity:
       - GA
   /v1/ConnectionPolicies/{Sid}:
@@ -922,18 +922,17 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchConnectionPolicy
       parameters:
-      - description: The unique string that we created to identify the Connection
-          Policy resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The unique string that we created to identify the Connection
+          Policy resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -943,33 +942,22 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchConnectionPolicy
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateConnectionPolicy
       parameters:
-      - description: The unique string that we created to identify the Connection
-          Policy resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The unique string that we created to identify the Connection
+          Policy resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
-                  type: string
-              title: UpdateConnectionPolicyRequest
-              type: object
+        required: true
       responses:
         '200':
           content:
@@ -979,27 +967,39 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateConnectionPolicy
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateConnectionPolicyRequest
+              properties:
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It is not unique and can be up to 255 characters long.
     delete:
       description: ''
-      operationId: DeleteConnectionPolicy
       parameters:
-      - description: The unique string that we created to identify the Connection
-          Policy resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The unique string that we created to identify the Connection
+          Policy resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteConnectionPolicy
       x-maturity:
       - GA
   /v1/ConnectionPolicies/{ConnectionPolicySid}/Targets:
@@ -1017,50 +1017,16 @@ paths:
       className: connection_policy_target
     post:
       description: ''
-      operationId: CreateConnectionPolicyTarget
       parameters:
-      - description: The SID of the Connection Policy that owns the Target.
+      - name: ConnectionPolicySid
         in: path
-        name: ConnectionPolicySid
-        required: true
+        description: The SID of the Connection Policy that owns the Target.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                Target:
-                  description: The SIP address you want Twilio to route your calls
-                    to. This must be a `sip:` schema. `sips` is NOT supported.
-                  format: uri
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
-                  type: string
-                Priority:
-                  description: The relative importance of the target. Can be an integer
-                    from 0 to 65535, inclusive, and the default is 10. The lowest
-                    number represents the most important target.
-                  type: integer
-                Weight:
-                  description: The value that determines the relative share of the
-                    load the Target should receive compared to other Targets with
-                    the same priority. Can be an integer from 1 to 65535, inclusive,
-                    and the default is 10. Targets with higher values receive more
-                    load than those with lower ones with the same priority.
-                  type: integer
-                Enabled:
-                  description: Whether the Target is enabled. The default is `true`.
-                  type: boolean
-              required:
-              - Target
-              title: CreateConnectionPolicyTargetRequest
-              type: object
+        required: true
       responses:
         '201':
           content:
@@ -1070,29 +1036,62 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateConnectionPolicyTarget
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateConnectionPolicyTargetRequest
+              properties:
+                Target:
+                  type: string
+                  format: uri
+                  description: The SIP address you want Twilio to route your calls
+                    to. This must be a `sip:` schema. `sips` is NOT supported.
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It is not unique and can be up to 255 characters long.
+                Priority:
+                  type: integer
+                  description: The relative importance of the target. Can be an integer
+                    from 0 to 65535, inclusive, and the default is 10. The lowest
+                    number represents the most important target.
+                Weight:
+                  type: integer
+                  description: The value that determines the relative share of the
+                    load the Target should receive compared to other Targets with
+                    the same priority. Can be an integer from 1 to 65535, inclusive,
+                    and the default is 10. Targets with higher values receive more
+                    load than those with lower ones with the same priority.
+                Enabled:
+                  type: boolean
+                  description: Whether the Target is enabled. The default is `true`.
+              required:
+              - Target
     get:
       description: ''
-      operationId: ListConnectionPolicyTarget
       parameters:
-      - description: The SID of the Connection Policy from which to read the Targets.
+      - name: ConnectionPolicySid
         in: path
-        name: ConnectionPolicySid
-        required: true
+        description: The SID of the Connection Policy from which to read the Targets.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+        required: true
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1109,26 +1108,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListConnectionPolicyTarget
       x-maturity:
       - GA
   /v1/ConnectionPolicies/{ConnectionPolicySid}/Targets/{Sid}:
@@ -1146,27 +1146,26 @@ paths:
       className: connection_policy_target
     get:
       description: ''
-      operationId: FetchConnectionPolicyTarget
       parameters:
-      - description: The SID of the Connection Policy that owns the Target.
+      - name: ConnectionPolicySid
         in: path
-        name: ConnectionPolicySid
-        required: true
+        description: The SID of the Connection Policy that owns the Target.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      - description: The unique string that we created to identify the Target resource
-          to fetch.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The unique string that we created to identify the Target resource
+          to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NE[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1176,101 +1175,102 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchConnectionPolicyTarget
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateConnectionPolicyTarget
       parameters:
-      - description: The SID of the Connection Policy that owns the Target.
+      - name: ConnectionPolicySid
         in: path
-        name: ConnectionPolicySid
-        required: true
+        description: The SID of the Connection Policy that owns the Target.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      - description: The unique string that we created to identify the Target resource
-          to update.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The unique string that we created to identify the Target resource
+          to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NE[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v1.connection_policy.connection_policy_target'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateConnectionPolicyTarget
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateConnectionPolicyTargetRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It is not unique and can be up to 255 characters long.
-                  type: string
                 Target:
+                  type: string
+                  format: uri
                   description: The SIP address you want Twilio to route your calls
                     to. This must be a `sip:` schema. `sips` is NOT supported.
-                  format: uri
-                  type: string
                 Priority:
+                  type: integer
                   description: The relative importance of the target. Can be an integer
                     from 0 to 65535, inclusive. The lowest number represents the most
                     important target.
-                  type: integer
                 Weight:
+                  type: integer
                   description: The value that determines the relative share of the
                     load the Target should receive compared to other Targets with
                     the same priority. Can be an integer from 1 to 65535, inclusive.
                     Targets with higher values receive more load than those with lower
                     ones with the same priority.
-                  type: integer
                 Enabled:
-                  description: Whether the Target is enabled.
                   type: boolean
-              title: UpdateConnectionPolicyTargetRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/voice.v1.connection_policy.connection_policy_target'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
+                  description: Whether the Target is enabled.
     delete:
       description: ''
-      operationId: DeleteConnectionPolicyTarget
       parameters:
-      - description: The SID of the Connection Policy that owns the Target.
+      - name: ConnectionPolicySid
         in: path
-        name: ConnectionPolicySid
-        required: true
+        description: The SID of the Connection Policy that owns the Target.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NY[0-9a-fA-F]{32}$
-      - description: The unique string that we created to identify the Target resource
-          to delete.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The unique string that we created to identify the Target resource
+          to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^NE[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteConnectionPolicyTarget
       x-maturity:
       - GA
   /v1/DialingPermissions:
@@ -1295,16 +1295,15 @@ paths:
     get:
       description: Retrieve voice dialing country permissions identified by the given
         ISO country code
-      operationId: FetchDialingPermissionsCountry
       parameters:
-      - description: The [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-          of the DialingPermissions Country resource to fetch
+      - name: IsoCode
         in: path
-        name: IsoCode
-        required: true
+        description: The [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+          of the DialingPermissions Country resource to fetch
         schema:
-          format: iso-country-code
           type: string
+          format: iso-country-code
+        required: true
       responses:
         '200':
           content:
@@ -1314,6 +1313,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchDialingPermissionsCountry
       x-maturity:
       - Preview
   /v1/DialingPermissions/Countries:
@@ -1329,53 +1329,52 @@ paths:
       parent: /DialingPermissions
     get:
       description: Retrieve all voice dialing country permissions for this account
-      operationId: ListDialingPermissionsCountry
       parameters:
-      - description: Filter to retrieve the country permissions by specifying the
+      - name: IsoCode
+        in: query
+        description: Filter to retrieve the country permissions by specifying the
           [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-        in: query
-        name: IsoCode
         schema:
+          type: string
           format: iso-country-code
-          type: string
-      - description: Filter to retrieve the country permissions by specifying the
+      - name: Continent
+        in: query
+        description: Filter to retrieve the country permissions by specifying the
           continent
-        in: query
-        name: Continent
         schema:
           type: string
-      - description: Filter the results by specified [country codes](https://www.itu.int/itudoc/itu-t/ob-lists/icc/e164_763.html)
+      - name: CountryCode
         in: query
-        name: CountryCode
+        description: Filter the results by specified [country codes](https://www.itu.int/itudoc/itu-t/ob-lists/icc/e164_763.html)
         schema:
           type: string
-      - description: 'Filter to retrieve the country permissions with dialing to low-risk
+      - name: LowRiskNumbersEnabled
+        in: query
+        description: 'Filter to retrieve the country permissions with dialing to low-risk
           numbers enabled. Can be: `true` or `false`.'
-        in: query
-        name: LowRiskNumbersEnabled
         schema:
           type: boolean
-      - description: 'Filter to retrieve the country permissions with dialing to high-risk
+      - name: HighRiskSpecialNumbersEnabled
+        in: query
+        description: 'Filter to retrieve the country permissions with dialing to high-risk
           special service numbers enabled. Can be: `true` or `false`'
-        in: query
-        name: HighRiskSpecialNumbersEnabled
         schema:
           type: boolean
-      - description: 'Filter to retrieve the country permissions with dialing to high-risk
+      - name: HighRiskTollfraudNumbersEnabled
+        in: query
+        description: 'Filter to retrieve the country permissions with dialing to high-risk
           [toll fraud](https://www.twilio.com/learn/voice-and-video/toll-fraud) numbers
           enabled. Can be: `true` or `false`.'
-        in: query
-        name: HighRiskTollfraudNumbersEnabled
         schema:
           type: boolean
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1392,26 +1391,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListDialingPermissionsCountry
       x-maturity:
       - Preview
   /v1/DialingPermissions/BulkCountryUpdates:
@@ -1427,21 +1427,6 @@ paths:
     post:
       description: Create a bulk update request to change voice dialing country permissions
         of one or more countries identified by the corresponding [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-      operationId: CreateDialingPermissionsCountryBulkUpdate
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                UpdateRequest:
-                  description: 'URL encoded JSON array of update objects. example
-                    : `[ { "iso_code": "GB", "low_risk_numbers_enabled": "true", "high_risk_special_numbers_enabled":"true",
-                    "high_risk_tollfraud_numbers_enabled": "false" } ]`'
-                  type: string
-              required:
-              - UpdateRequest
-              title: CreateDialingPermissionsCountryBulkUpdateRequest
-              type: object
       responses:
         '201':
           content:
@@ -1451,8 +1436,23 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateDialingPermissionsCountryBulkUpdate
       x-maturity:
       - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateDialingPermissionsCountryBulkUpdateRequest
+              properties:
+                UpdateRequest:
+                  type: string
+                  description: 'URL encoded JSON array of update objects. example
+                    : `[ { "iso_code": "GB", "low_risk_numbers_enabled": "true", "high_risk_special_numbers_enabled":"true",
+                    "high_risk_tollfraud_numbers_enabled": "false" } ]`'
+              required:
+              - UpdateRequest
   /v1/DialingPermissions/Countries/{IsoCode}/HighRiskSpecialPrefixes:
     servers:
     - url: https://voice.twilio.com
@@ -1466,25 +1466,24 @@ paths:
     get:
       description: Fetch the high-risk special services prefixes from the country
         resource corresponding to the [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
-      operationId: ListDialingPermissionsHrsPrefixes
       parameters:
-      - description: The [ISO 3166-1 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+      - name: IsoCode
+        in: path
+        description: The [ISO 3166-1 country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
           to identify the country permissions from which high-risk special service
           number prefixes are fetched
-        in: path
-        name: IsoCode
-        required: true
         schema:
-          format: iso-country-code
           type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+          format: iso-country-code
+        required: true
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1501,26 +1500,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListDialingPermissionsHrsPrefixes
       x-maturity:
       - Preview
   /v1/Settings:
@@ -1535,7 +1535,6 @@ paths:
       className: settings
     get:
       description: Retrieve voice dialing permissions inheritance for the sub-account
-      operationId: FetchDialingPermissionsSettings
       responses:
         '200':
           content:
@@ -1545,22 +1544,11 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchDialingPermissionsSettings
       x-maturity:
       - Preview
     post:
       description: Update voice dialing permissions inheritance for the sub-account
-      operationId: UpdateDialingPermissionsSettings
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                DialingPermissionsInheritance:
-                  description: '`true` for the sub-account to inherit voice dialing
-                    permissions from the Master Project; otherwise `false`.'
-                  type: boolean
-              title: UpdateDialingPermissionsSettingsRequest
-              type: object
       responses:
         '202':
           content:
@@ -1570,8 +1558,20 @@ paths:
           description: Accepted
       security:
       - accountSid_authToken: []
+      operationId: UpdateDialingPermissionsSettings
       x-maturity:
       - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateDialingPermissionsSettingsRequest
+              properties:
+                DialingPermissionsInheritance:
+                  type: boolean
+                  description: '`true` for the sub-account to inherit voice dialing
+                    permissions from the Master Project; otherwise `false`.'
   /v1/IpRecords:
     servers:
     - url: https://voice.twilio.com
@@ -1586,28 +1586,6 @@ paths:
       pathType: list
     post:
       description: ''
-      operationId: CreateIpRecord
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                IpAddress:
-                  description: An IP address in dotted decimal notation, IPv4 only.
-                  type: string
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
-                  type: string
-                CidrPrefixLength:
-                  description: An integer representing the length of the [CIDR](https://tools.ietf.org/html/rfc4632)
-                    prefix to use with this IP address. By default the entire IP address
-                    is used, which for IPv4 is value 32.
-                  type: integer
-              required:
-              - IpAddress
-              title: CreateIpRecordRequest
-              type: object
       responses:
         '201':
           content:
@@ -1617,20 +1595,41 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateIpRecord
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateIpRecordRequest
+              properties:
+                IpAddress:
+                  type: string
+                  description: An IP address in dotted decimal notation, IPv4 only.
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It is not unique and can be up to 255 characters long.
+                CidrPrefixLength:
+                  type: integer
+                  description: An integer representing the length of the [CIDR](https://tools.ietf.org/html/rfc4632)
+                    prefix to use with this IP address. By default the entire IP address
+                    is used, which for IPv4 is value 32.
+              required:
+              - IpAddress
     get:
       description: ''
-      operationId: ListIpRecord
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1647,26 +1646,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListIpRecord
       x-maturity:
       - GA
   /v1/IpRecords/{Sid}:
@@ -1683,18 +1683,17 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchIpRecord
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IL[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1704,33 +1703,22 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchIpRecord
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateIpRecord
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IL[0-9a-fA-F]{32}$
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                FriendlyName:
-                  description: A descriptive string that you create to describe the
-                    resource. It is not unique and can be up to 255 characters long.
-                  type: string
-              title: UpdateIpRecordRequest
-              type: object
+        required: true
       responses:
         '200':
           content:
@@ -1740,27 +1728,39 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateIpRecord
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateIpRecordRequest
+              properties:
+                FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It is not unique and can be up to 255 characters long.
     delete:
       description: ''
-      operationId: DeleteIpRecord
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IL[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteIpRecord
       x-maturity:
       - GA
   /v1/SourceIpMappings:
@@ -1777,11 +1777,24 @@ paths:
       pathType: list
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v1.source_ip_mapping'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateSourceIpMapping
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateSourceIpMappingRequest
               properties:
                 IpRecordSid:
                   type: string
@@ -1800,31 +1813,17 @@ paths:
               required:
               - IpRecordSid
               - SipDomainSid
-              title: CreateSourceIpMappingRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/voice.v1.source_ip_mapping'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
     get:
       description: ''
-      operationId: ListSourceIpMapping
       parameters:
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1841,26 +1840,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListSourceIpMapping
       x-maturity:
       - GA
   /v1/SourceIpMappings/{Sid}:
@@ -1877,18 +1877,17 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchSourceIpMapping
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IB[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1898,26 +1897,40 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchSourceIpMapping
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateSourceIpMapping
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IB[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v1.source_ip_mapping'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateSourceIpMapping
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateSourceIpMappingRequest
               properties:
                 SipDomainSid:
                   type: string
@@ -1928,38 +1941,25 @@ paths:
                     be mapped to.
               required:
               - SipDomainSid
-              title: UpdateSourceIpMappingRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/voice.v1.source_ip_mapping'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
     delete:
       description: ''
-      operationId: DeleteSourceIpMapping
       parameters:
-      - description: The Twilio-provided string that uniquely identifies the IP Record
-          resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The Twilio-provided string that uniquely identifies the IP Record
+          resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^IB[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteSourceIpMapping
       x-maturity:
       - GA
 servers:
