@@ -10,6 +10,42 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        status:
+          type: string
+          $ref: '#/components/schemas/composition_enum_status'
+          nullable: true
+          description: The status of the composition
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was created
+        date_completed:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date when the media processing task finished
+        date_deleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the composition generated
+            media was deleted
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CJ[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+        room_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RM[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Group Room that generated the audio and video
+            tracks used in the composition
         audio_sources:
           type: array
           items:
@@ -22,85 +58,52 @@ components:
             type: string
           nullable: true
           description: The array of track names to exclude from the composition
-        bitrate:
-          description: The average bit rate of the composition's media
+        video_layout:
           nullable: true
-          type: integer
-        date_completed:
+          description: An object that describes the video layout of the composition
+        resolution:
           type: string
-          format: date-time
           nullable: true
-          description: Date when the media processing task finished
-        date_created:
-          type: string
-          format: date-time
+          description: The dimensions of the video image in pixels expressed as columns
+            (width) and rows (height)
+        trim:
+          type: boolean
           nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was created
-        date_deleted:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the composition generated
-            media was deleted
-        duration:
-          description: The duration of the composition's media file in seconds
-          nullable: true
-          type: integer
+          description: Whether to remove intervals with no media
         format:
           type: string
           $ref: '#/components/schemas/composition_enum_format'
           nullable: true
           description: The container format of the composition's media files as specified
             in the POST request that created the Composition resource
-        links:
-          description: The URL of the media file associated with the composition
-          format: uri-map
+        bitrate:
+          type: integer
           nullable: true
-          type: object
-        media_external_location:
-          description: The URL of the media file associated with the composition when
-            stored externally
-          format: uri
-          nullable: true
-          type: string
-        resolution:
-          description: The dimensions of the video image in pixels expressed as columns
-            (width) and rows (height)
-          nullable: true
-          type: string
-        room_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RM[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Group Room that generated the audio and video
-            tracks used in the composition
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^CJ[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
+          description: The average bit rate of the composition's media
         size:
-          description: The size of the composed media file in bytes
+          type: integer
           format: int64
           nullable: true
+          description: The size of the composed media file in bytes
+        duration:
           type: integer
-        status:
-          type: string
-          $ref: '#/components/schemas/composition_enum_status'
           nullable: true
-          description: The status of the composition
-        status_callback:
-          description: The URL called to send status information on every composition
-            event.
+          description: The duration of the composition's media file in seconds
+        media_external_location:
+          type: string
           format: uri
           nullable: true
+          description: The URL of the media file associated with the composition when
+            stored externally
+        status_callback:
           type: string
+          format: uri
+          nullable: true
+          description: The URL called to send status information on every composition
+            event.
         status_callback_method:
-          description: The HTTP method used to call `status_callback`
+          type: string
+          format: http-method
           enum:
           - HEAD
           - GET
@@ -108,34 +111,31 @@ components:
           - PATCH
           - PUT
           - DELETE
-          format: http-method
           nullable: true
-          type: string
-        trim:
-          description: Whether to remove intervals with no media
-          nullable: true
-          type: boolean
+          description: The HTTP method used to call `status_callback`
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
-        video_layout:
+          description: The absolute URL of the resource
+        links:
+          type: object
+          format: uri-map
           nullable: true
-          description: An object that describes the video layout of the composition
+          description: The URL of the media file associated with the composition
     composition_enum_status:
+      type: string
       enum:
       - enqueued
       - processing
       - completed
       - deleted
       - failed
-      type: string
     composition_enum_format:
+      type: string
       enum:
       - mp4
       - webm
-      type: string
     video.v1.composition_hook:
       type: object
       properties:
@@ -146,6 +146,32 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
+        enabled:
+          type: boolean
+          nullable: true
+          description: Whether the CompositionHook is active
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was created
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was last
+            updated
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^HK[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
         audio_sources:
           type: array
           items:
@@ -160,50 +186,32 @@ components:
           nullable: true
           description: The array of track names to exclude from the compositions created
             by the composition hook
-        date_created:
+        video_layout:
+          nullable: true
+          description: A JSON object that describes the video layout of the Composition
+        resolution:
           type: string
-          format: date-time
           nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was last
-            updated
-        enabled:
-          description: Whether the CompositionHook is active
-          nullable: true
+          description: The dimensions of the video image in pixels expressed as columns
+            (width) and rows (height)
+        trim:
           type: boolean
+          nullable: true
+          description: Whether intervals with no media are clipped
         format:
           type: string
           $ref: '#/components/schemas/composition_hook_enum_format'
           nullable: true
           description: The container format of the media files used by the compositions
             created by the composition hook
-        friendly_name:
-          description: The string that you assigned to describe the resource
-          nullable: true
-          type: string
-        resolution:
-          description: The dimensions of the video image in pixels expressed as columns
-            (width) and rows (height)
-          nullable: true
-          type: string
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^HK[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
         status_callback:
-          description: The URL to send status information to your application
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URL to send status information to your application
         status_callback_method:
-          description: The HTTP method we should use to call status_callback
+          type: string
+          format: http-method
           enum:
           - HEAD
           - GET
@@ -211,26 +219,18 @@ components:
           - PATCH
           - PUT
           - DELETE
-          format: http-method
           nullable: true
-          type: string
-        trim:
-          description: Whether intervals with no media are clipped
-          nullable: true
-          type: boolean
+          description: The HTTP method we should use to call status_callback
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
-        video_layout:
-          nullable: true
-          description: A JSON object that describes the video layout of the Composition
+          description: The absolute URL of the resource
     composition_hook_enum_format:
+      type: string
       enum:
       - mp4
       - webm
-      type: string
     video.v1.composition_settings:
       type: object
       properties:
@@ -241,6 +241,10 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
         aws_credentials_sid:
           type: string
           minLength: 34
@@ -249,18 +253,14 @@ components:
           nullable: true
           description: The SID of the stored Credential resource
         aws_s3_url:
-          description: The URL of the AWS S3 bucket where the compositions are stored
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URL of the AWS S3 bucket where the compositions are stored
         aws_storage_enabled:
+          type: boolean
+          nullable: true
           description: Whether all compositions are written to the aws_s3_url
-          nullable: true
-          type: boolean
-        encryption_enabled:
-          description: Whether all compositions are stored in an encrypted form
-          nullable: true
-          type: boolean
         encryption_key_sid:
           type: string
           minLength: 34
@@ -268,15 +268,15 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Public Key resource used for encryption
-        friendly_name:
-          description: The string that you assigned to describe the resource
+        encryption_enabled:
+          type: boolean
           nullable: true
-          type: string
+          description: Whether all compositions are stored in an encrypted form
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of the resource
     video.v1.recording:
       type: object
       properties:
@@ -287,46 +287,16 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
-        codec:
+        status:
           type: string
-          $ref: '#/components/schemas/recording_enum_codec'
+          $ref: '#/components/schemas/recording_enum_status'
           nullable: true
-          description: The codec used to encode the track
-        container_format:
-          type: string
-          $ref: '#/components/schemas/recording_enum_format'
-          nullable: true
-          description: The file format for the recording
+          description: The status of the recording
         date_created:
           type: string
           format: date-time
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was created
-        duration:
-          description: The duration of the recording in seconds
-          nullable: true
-          type: integer
-        grouping_sids:
-          nullable: true
-          description: A list of SIDs related to the recording
-        links:
-          description: The URLs of related resources
-          format: uri-map
-          nullable: true
-          type: object
-        media_external_location:
-          description: The URL of the media file associated with the recording when
-            stored externally
-          format: uri
-          nullable: true
-          type: string
-        offset:
-          description: The number of milliseconds between a point in time that is
-            common to all rooms in a group and when the source room of the recording
-            started
-          format: int64
-          nullable: true
-          type: integer
         sid:
           type: string
           minLength: 34
@@ -334,11 +304,6 @@ components:
           pattern: ^RT[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies the resource
-        size:
-          description: The size of the recorded track, in bytes
-          format: int64
-          nullable: true
-          type: integer
         source_sid:
           type: string
           minLength: 34
@@ -346,19 +311,64 @@ components:
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the recording source
-        status:
-          type: string
-          $ref: '#/components/schemas/recording_enum_status'
+        size:
+          type: integer
+          format: int64
           nullable: true
-          description: The status of the recording
-        status_callback:
-          description: The URL called to send status information on every recording
-            event.
+          description: The size of the recorded track, in bytes
+        url:
+          type: string
           format: uri
           nullable: true
+          description: The absolute URL of the resource
+        type:
           type: string
+          $ref: '#/components/schemas/recording_enum_type'
+          nullable: true
+          description: The recording's media type
+        duration:
+          type: integer
+          nullable: true
+          description: The duration of the recording in seconds
+        container_format:
+          type: string
+          $ref: '#/components/schemas/recording_enum_format'
+          nullable: true
+          description: The file format for the recording
+        codec:
+          type: string
+          $ref: '#/components/schemas/recording_enum_codec'
+          nullable: true
+          description: The codec used to encode the track
+        grouping_sids:
+          nullable: true
+          description: A list of SIDs related to the recording
+        track_name:
+          type: string
+          nullable: true
+          description: The name that was given to the source track of the recording
+        offset:
+          type: integer
+          format: int64
+          nullable: true
+          description: The number of milliseconds between a point in time that is
+            common to all rooms in a group and when the source room of the recording
+            started
+        media_external_location:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the media file associated with the recording when
+            stored externally
+        status_callback:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL called to send status information on every recording
+            event.
         status_callback_method:
-          description: The HTTP method used to call `status_callback`
+          type: string
+          format: http-method
           enum:
           - HEAD
           - GET
@@ -366,48 +376,38 @@ components:
           - PATCH
           - PUT
           - DELETE
-          format: http-method
           nullable: true
-          type: string
-        track_name:
-          description: The name that was given to the source track of the recording
+          description: The HTTP method used to call `status_callback`
+        links:
+          type: object
+          format: uri-map
           nullable: true
-          type: string
-        type:
-          type: string
-          $ref: '#/components/schemas/recording_enum_type'
-          nullable: true
-          description: The recording's media type
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
+          description: The URLs of related resources
     recording_enum_status:
+      type: string
       enum:
       - processing
       - completed
       - deleted
       - failed
-      type: string
     recording_enum_type:
+      type: string
       enum:
       - audio
       - video
       - data
-      type: string
     recording_enum_format:
+      type: string
       enum:
       - mka
       - mkv
-      type: string
     recording_enum_codec:
+      type: string
       enum:
       - VP8
       - H264
       - OPUS
       - PCMU
-      type: string
     video.v1.recording_settings:
       type: object
       properties:
@@ -418,6 +418,10 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource
         aws_credentials_sid:
           type: string
           minLength: 34
@@ -426,18 +430,14 @@ components:
           nullable: true
           description: The SID of the stored Credential resource
         aws_s3_url:
-          description: The URL of the AWS S3 bucket where the recordings are stored
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URL of the AWS S3 bucket where the recordings are stored
         aws_storage_enabled:
+          type: boolean
+          nullable: true
           description: Whether all recordings are written to the aws_s3_url
-          nullable: true
-          type: boolean
-        encryption_enabled:
-          description: Whether all recordings are stored in an encrypted form
-          nullable: true
-          type: boolean
         encryption_key_sid:
           type: string
           minLength: 34
@@ -445,90 +445,18 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Public Key resource used for encryption
-        friendly_name:
-          description: The string that you assigned to describe the resource
+        encryption_enabled:
+          type: boolean
           nullable: true
-          type: string
+          description: Whether all recordings are stored in an encrypted form
         url:
-          description: The absolute URL of the resource
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The absolute URL of the resource
     video.v1.room:
       type: object
       properties:
-        account_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Account that created the resource
-        audio_only:
-          description: Indicates whether the room will only contain audio track participants
-            for group rooms.
-          nullable: true
-          type: boolean
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was last
-            updated
-        duration:
-          description: The duration of the room in seconds
-          nullable: true
-          type: integer
-        empty_room_timeout:
-          description: The time a room will remain active after last participant leaves.
-          nullable: true
-          type: integer
-        enable_turn:
-          description: Enable Twilio's Network Traversal TURN service
-          nullable: true
-          type: boolean
-        end_time:
-          type: string
-          format: date-time
-          nullable: true
-          description: The UTC end time of the room in UTC ISO 8601 format
-        large_room:
-          description: Indicates if this is a large room.
-          nullable: true
-          type: boolean
-        links:
-          description: The URLs of related resources
-          format: uri-map
-          nullable: true
-          type: object
-        max_concurrent_published_tracks:
-          description: The maximum number of published tracks allowed in the room
-            at the same time
-          nullable: true
-          type: integer
-        max_participant_duration:
-          description: The maximum number of seconds a Participant can be connected
-            to the room
-          nullable: true
-          type: integer
-        max_participants:
-          description: The maximum number of concurrent Participants allowed in the
-            room
-          nullable: true
-          type: integer
-        media_region:
-          description: The region for the media server in Group Rooms
-          nullable: true
-          type: string
-        record_participants_on_connect:
-          description: Whether to start recording when Participants connect
-          nullable: true
-          type: boolean
         sid:
           type: string
           minLength: 34
@@ -541,13 +469,41 @@ components:
           $ref: '#/components/schemas/room_enum_room_status'
           nullable: true
           description: The status of the room
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was created
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was last
+            updated
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Account that created the resource
+        enable_turn:
+          type: boolean
+          nullable: true
+          description: Enable Twilio's Network Traversal TURN service
+        unique_name:
+          type: string
+          nullable: true
+          description: An application-defined string that uniquely identifies the
+            resource
         status_callback:
-          description: The URL to send status information to your application
+          type: string
           format: uri
           nullable: true
-          type: string
+          description: The URL to send status information to your application
         status_callback_method:
-          description: The HTTP method we use to call status_callback
+          type: string
+          format: http-method
           enum:
           - HEAD
           - GET
@@ -555,28 +511,41 @@ components:
           - PATCH
           - PUT
           - DELETE
-          format: http-method
           nullable: true
+          description: The HTTP method we use to call status_callback
+        end_time:
           type: string
+          format: date-time
+          nullable: true
+          description: The UTC end time of the room in UTC ISO 8601 format
+        duration:
+          type: integer
+          nullable: true
+          description: The duration of the room in seconds
         type:
           type: string
           $ref: '#/components/schemas/room_enum_room_type'
           nullable: true
           description: The type of room
-        unique_name:
-          description: An application-defined string that uniquely identifies the
-            resource
-          nullable: true
-          type: string
-        unused_room_timeout:
-          description: The time a room will remain active when no one joins.
-          nullable: true
+        max_participants:
           type: integer
-        url:
-          description: The absolute URL of the resource
-          format: uri
           nullable: true
-          type: string
+          description: The maximum number of concurrent Participants allowed in the
+            room
+        max_participant_duration:
+          type: integer
+          nullable: true
+          description: The maximum number of seconds a Participant can be connected
+            to the room
+        max_concurrent_published_tracks:
+          type: integer
+          nullable: true
+          description: The maximum number of published tracks allowed in the room
+            at the same time
+        record_participants_on_connect:
+          type: boolean
+          nullable: true
+          description: Whether to start recording when Participants connect
         video_codecs:
           type: array
           items:
@@ -585,71 +554,58 @@ components:
           nullable: true
           description: An array of the video codecs that are supported when publishing
             a track in the room
+        media_region:
+          type: string
+          nullable: true
+          description: The region for the media server in Group Rooms
+        audio_only:
+          type: boolean
+          nullable: true
+          description: Indicates whether the room will only contain audio track participants
+            for group rooms.
+        empty_room_timeout:
+          type: integer
+          nullable: true
+          description: The time a room will remain active after last participant leaves.
+        unused_room_timeout:
+          type: integer
+          nullable: true
+          description: The time a room will remain active when no one joins.
+        large_room:
+          type: boolean
+          nullable: true
+          description: Indicates if this is a large room.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: The URLs of related resources
     room_enum_room_status:
+      type: string
       enum:
       - in-progress
       - completed
       - failed
-      type: string
     room_enum_room_type:
+      type: string
       enum:
       - go
       - peer-to-peer
       - group
       - group-small
-      type: string
     room_enum_video_codec:
+      type: string
       enum:
       - VP8
       - H264
-      type: string
     video.v1.room.room_participant:
       type: object
       properties:
-        account_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Account that created the resource
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was created
-        date_updated:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was last
-            updated
-        duration:
-          description: Duration of time in seconds the participant was connected
-          nullable: true
-          type: integer
-        end_time:
-          type: string
-          format: date-time
-          nullable: true
-          description: The time when the participant disconnected from the room in
-            ISO 8601 format
-        identity:
-          description: The string that identifies the resource's User
-          nullable: true
-          type: string
-        links:
-          description: The URLs of related resources
-          format: uri-map
-          nullable: true
-          type: object
-        room_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RM[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the participant's room
         sid:
           type: string
           minLength: 34
@@ -657,29 +613,13 @@ components:
           pattern: ^PA[0-9a-fA-F]{32}$
           nullable: true
           description: The unique string that identifies the resource
-        start_time:
+        room_sid:
           type: string
-          format: date-time
+          minLength: 34
+          maxLength: 34
+          pattern: ^RM[0-9a-fA-F]{32}$
           nullable: true
-          description: The time of participant connected to the room in ISO 8601 format
-        status:
-          type: string
-          $ref: '#/components/schemas/room_participant_enum_status'
-          nullable: true
-          description: The status of the Participant
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-    room_participant_enum_status:
-      enum:
-      - connected
-      - disconnected
-      type: string
-    video.v1.room.room_participant.room_participant_anonymize:
-      type: object
-      properties:
+          description: The SID of the participant's room
         account_sid:
           type: string
           minLength: 34
@@ -687,6 +627,15 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Account that created the resource
+        status:
+          type: string
+          $ref: '#/components/schemas/room_participant_enum_status'
+          nullable: true
+          description: The status of the Participant
+        identity:
+          type: string
+          nullable: true
+          description: The string that identifies the resource's User
         date_created:
           type: string
           format: date-time
@@ -698,16 +647,65 @@ components:
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was last
             updated
-        duration:
-          description: Duration of time in seconds the participant was connected
+        start_time:
+          type: string
+          format: date-time
           nullable: true
-          type: integer
+          description: The time of participant connected to the room in ISO 8601 format
         end_time:
           type: string
           format: date-time
           nullable: true
           description: The time when the participant disconnected from the room in
             ISO 8601 format
+        duration:
+          type: integer
+          nullable: true
+          description: Duration of time in seconds the participant was connected
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: The URLs of related resources
+    room_participant_enum_status:
+      type: string
+      enum:
+      - connected
+      - disconnected
+    video.v1.room.room_participant.room_participant_anonymize:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PA[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+        room_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RM[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the participant's room
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Account that created the resource
+        status:
+          type: string
+          $ref: '#/components/schemas/room_participant_anonymize_enum_status'
+          nullable: true
+          description: The status of the Participant
         identity:
           type: string
           minLength: 34
@@ -715,43 +713,6 @@ components:
           pattern: ^PA[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the participant
-        room_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RM[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the participant's room
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^PA[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        start_time:
-          type: string
-          format: date-time
-          nullable: true
-          description: The time of participant connected to the room in ISO 8601 format
-        status:
-          type: string
-          $ref: '#/components/schemas/room_participant_anonymize_enum_status'
-          nullable: true
-          description: The status of the Participant
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-    room_participant_anonymize_enum_status:
-      enum:
-      - connected
-      - disconnected
-      type: string
-    video.v1.room.room_participant.room_participant_published_track:
-      type: object
-      properties:
         date_created:
           type: string
           format: date-time
@@ -763,19 +724,41 @@ components:
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was last
             updated
-        enabled:
-          description: Whether the track is enabled
-          nullable: true
-          type: boolean
-        kind:
+        start_time:
           type: string
-          $ref: '#/components/schemas/room_participant_published_track_enum_kind'
+          format: date-time
           nullable: true
-          description: The track type
-        name:
-          description: The track name
-          nullable: true
+          description: The time of participant connected to the room in ISO 8601 format
+        end_time:
           type: string
+          format: date-time
+          nullable: true
+          description: The time when the participant disconnected from the room in
+            ISO 8601 format
+        duration:
+          type: integer
+          nullable: true
+          description: Duration of time in seconds the participant was connected
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+    room_participant_anonymize_enum_status:
+      type: string
+      enum:
+      - connected
+      - disconnected
+    video.v1.room.room_participant.room_participant_published_track:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MT[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
         participant_sid:
           type: string
           minLength: 34
@@ -790,27 +773,10 @@ components:
           pattern: ^RM[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Room resource where the track is published
-        sid:
+        name:
           type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^MT[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-    room_participant_published_track_enum_kind:
-      enum:
-      - audio
-      - video
-      - data
-      type: string
-    video.v1.room.room_participant.room_participant_subscribe_rule:
-      type: object
-      properties:
+          description: The track name
         date_created:
           type: string
           format: date-time
@@ -822,6 +788,29 @@ components:
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was last
             updated
+        enabled:
+          type: boolean
+          nullable: true
+          description: Whether the track is enabled
+        kind:
+          type: string
+          $ref: '#/components/schemas/room_participant_published_track_enum_kind'
+          nullable: true
+          description: The track type
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+    room_participant_published_track_enum_kind:
+      type: string
+      enum:
+      - audio
+      - video
+      - data
+    video.v1.room.room_participant.room_participant_subscribe_rule:
+      type: object
+      properties:
         participant_sid:
           type: string
           minLength: 34
@@ -839,27 +828,24 @@ components:
         rules:
           type: array
           items:
+            type: object
             format: subscribe-rule
             properties:
+              type:
+                type: string
               all:
                 type: boolean
-              kind:
-                type: string
-              priority:
-                type: string
               publisher:
                 type: string
               track:
                 type: string
-              type:
+              kind:
                 type: string
-            type: object
+              priority:
+                type: string
           nullable: true
           description: A collection of Subscribe Rules that describe how to include
             or exclude matching tracks
-    video.v1.room.room_participant.room_participant_subscribed_track:
-      type: object
-      properties:
         date_created:
           type: string
           format: date-time
@@ -871,19 +857,16 @@ components:
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was last
             updated
-        enabled:
-          description: Whether the track is enabled
-          nullable: true
-          type: boolean
-        kind:
+    video.v1.room.room_participant.room_participant_subscribed_track:
+      type: object
+      properties:
+        sid:
           type: string
-          $ref: '#/components/schemas/room_participant_subscribed_track_enum_kind'
+          minLength: 34
+          maxLength: 34
+          pattern: ^MT[0-9a-fA-F]{32}$
           nullable: true
-          description: The track type
-        name:
-          description: The track name
-          nullable: true
-          type: string
+          description: The unique string that identifies the resource
         participant_sid:
           type: string
           minLength: 34
@@ -905,147 +888,10 @@ components:
           pattern: ^RM[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the room where the track is published
-        sid:
+        name:
           type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^MT[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that identifies the resource
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-    room_participant_subscribed_track_enum_kind:
-      enum:
-      - audio
-      - video
-      - data
-      type: string
-    video.v1.room.room_recording:
-      type: object
-      properties:
-        account_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Account that created the resource
-        codec:
-          type: string
-          $ref: '#/components/schemas/room_recording_enum_codec'
-          nullable: true
-          description: The codec used for the recording
-        container_format:
-          type: string
-          $ref: '#/components/schemas/room_recording_enum_format'
-          nullable: true
-          description: The file format for the recording
-        date_created:
-          type: string
-          format: date-time
-          nullable: true
-          description: The ISO 8601 date and time in GMT when the resource was created
-        duration:
-          description: The duration of the recording in seconds
-          nullable: true
-          type: integer
-        grouping_sids:
-          nullable: true
-          description: A list of SIDs related to the Recording
-        links:
-          description: The URLs of related resources
-          format: uri-map
-          nullable: true
-          type: object
-        media_external_location:
-          description: The URL of the media file associated with the recording when
-            stored externally
-          format: uri
-          nullable: true
-          type: string
-        offset:
-          description: The number of milliseconds between a point in time that is
-            common to all rooms in a group and when the source room of the recording
-            started
-          format: int64
-          nullable: true
-          type: integer
-        room_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RM[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the Room resource the recording is associated with
-        sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RT[0-9a-fA-F]{32}$
-          nullable: true
-          description: The unique string that identifies the resource
-        size:
-          description: The size of the recorded track in bytes
-          format: int64
-          nullable: true
-          type: integer
-        source_sid:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
-          nullable: true
-          description: The SID of the recording source
-        status:
-          type: string
-          $ref: '#/components/schemas/room_recording_enum_status'
-          nullable: true
-          description: The status of the recording
-        track_name:
-          description: The name that was given to the source track of the recording
-          nullable: true
-          type: string
-        type:
-          type: string
-          $ref: '#/components/schemas/room_recording_enum_type'
-          nullable: true
-          description: The recording's media type
-        url:
-          description: The absolute URL of the resource
-          format: uri
-          nullable: true
-          type: string
-    room_recording_enum_status:
-      enum:
-      - processing
-      - completed
-      - deleted
-      - failed
-      type: string
-    room_recording_enum_type:
-      enum:
-      - audio
-      - video
-      - data
-      type: string
-    room_recording_enum_format:
-      enum:
-      - mka
-      - mkv
-      type: string
-    room_recording_enum_codec:
-      enum:
-      - VP8
-      - H264
-      - OPUS
-      - PCMU
-      type: string
-    video.v1.room.room_recording_rule:
-      type: object
-      properties:
+          description: The track name
         date_created:
           type: string
           format: date-time
@@ -1057,6 +903,149 @@ components:
           nullable: true
           description: The ISO 8601 date and time in GMT when the resource was last
             updated
+        enabled:
+          type: boolean
+          nullable: true
+          description: Whether the track is enabled
+        kind:
+          type: string
+          $ref: '#/components/schemas/room_participant_subscribed_track_enum_kind'
+          nullable: true
+          description: The track type
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+    room_participant_subscribed_track_enum_kind:
+      type: string
+      enum:
+      - audio
+      - video
+      - data
+    video.v1.room.room_recording:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Account that created the resource
+        status:
+          type: string
+          $ref: '#/components/schemas/room_recording_enum_status'
+          nullable: true
+          description: The status of the recording
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was created
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RT[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+        source_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the recording source
+        size:
+          type: integer
+          format: int64
+          nullable: true
+          description: The size of the recorded track in bytes
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the resource
+        type:
+          type: string
+          $ref: '#/components/schemas/room_recording_enum_type'
+          nullable: true
+          description: The recording's media type
+        duration:
+          type: integer
+          nullable: true
+          description: The duration of the recording in seconds
+        container_format:
+          type: string
+          $ref: '#/components/schemas/room_recording_enum_format'
+          nullable: true
+          description: The file format for the recording
+        codec:
+          type: string
+          $ref: '#/components/schemas/room_recording_enum_codec'
+          nullable: true
+          description: The codec used for the recording
+        grouping_sids:
+          nullable: true
+          description: A list of SIDs related to the Recording
+        track_name:
+          type: string
+          nullable: true
+          description: The name that was given to the source track of the recording
+        offset:
+          type: integer
+          format: int64
+          nullable: true
+          description: The number of milliseconds between a point in time that is
+            common to all rooms in a group and when the source room of the recording
+            started
+        media_external_location:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the media file associated with the recording when
+            stored externally
+        room_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RM[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Room resource the recording is associated with
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: The URLs of related resources
+    room_recording_enum_status:
+      type: string
+      enum:
+      - processing
+      - completed
+      - deleted
+      - failed
+    room_recording_enum_type:
+      type: string
+      enum:
+      - audio
+      - video
+      - data
+    room_recording_enum_format:
+      type: string
+      enum:
+      - mka
+      - mkv
+    room_recording_enum_codec:
+      type: string
+      enum:
+      - VP8
+      - H264
+      - OPUS
+      - PCMU
+    video.v1.room.room_recording_rule:
+      type: object
+      properties:
         room_sid:
           type: string
           minLength: 34
@@ -1067,38 +1056,49 @@ components:
         rules:
           type: array
           items:
+            type: object
             format: recording-rule
             properties:
+              type:
+                type: string
               all:
                 type: boolean
-              kind:
-                type: string
               publisher:
                 type: string
               track:
                 type: string
-              type:
+              kind:
                 type: string
-            type: object
           nullable: true
           description: A collection of recording Rules that describe how to include
             or exclude matching tracks for recording
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was created
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The ISO 8601 date and time in GMT when the resource was last
+            updated
   securitySchemes:
     accountSid_authToken:
-      scheme: basic
       type: http
+      scheme: basic
 info:
+  title: Twilio - Video
+  description: This is the public Twilio REST API.
+  termsOfService: https://www.twilio.com/legal/tos
   contact:
-    email: support@twilio.com
     name: Twilio Support
     url: https://support.twilio.com
-  description: This is the public Twilio REST API.
+    email: support@twilio.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: https://www.twilio.com/legal/tos
-  title: Twilio - Video
-  version: 1.36.0
+  version: 1.29.1
 openapi: 3.0.1
 paths:
   /v1/Compositions/{Sid}:
@@ -1115,17 +1115,16 @@ paths:
     get:
       description: Returns a single Composition resource identified by a Composition
         SID.
-      operationId: FetchComposition
       parameters:
-      - description: The SID of the Composition resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Composition resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CJ[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1135,27 +1134,28 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchComposition
       x-maturity:
       - GA
     delete:
       description: Delete a Recording Composition resource identified by a Composition
         SID.
-      operationId: DeleteComposition
       parameters:
-      - description: The SID of the Composition resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Composition resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CJ[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteComposition
       x-maturity:
       - GA
   /v1/Compositions:
@@ -1171,45 +1171,44 @@ paths:
       pathType: list
     get:
       description: List of all Recording compositions.
-      operationId: ListComposition
       parameters:
-      - description: 'Read only Composition resources with this status. Can be: `enqueued`,
-          `processing`, `completed`, `deleted`, or `failed`.'
+      - name: Status
         in: query
-        name: Status
+        description: 'Read only Composition resources with this status. Can be: `enqueued`,
+          `processing`, `completed`, `deleted`, or `failed`.'
         schema:
           type: string
           $ref: '#/components/schemas/composition_enum_status'
-      - description: Read only Composition resources created on or after this [ISO
+      - name: DateCreatedAfter
+        in: query
+        description: Read only Composition resources created on or after this [ISO
           8601](https://en.wikipedia.org/wiki/ISO_8601) date-time with time zone.
-        in: query
-        name: DateCreatedAfter
         schema:
           type: string
           format: date-time
-      - description: Read only Composition resources created before this ISO 8601
+      - name: DateCreatedBefore
+        in: query
+        description: Read only Composition resources created before this ISO 8601
           date-time with time zone.
-        in: query
-        name: DateCreatedBefore
         schema:
           type: string
           format: date-time
-      - description: Read only Composition resources with this Room SID.
+      - name: RoomSid
         in: query
-        name: RoomSid
+        description: Read only Composition resources with this Room SID.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1226,35 +1225,49 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListComposition
       x-maturity:
       - GA
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.composition'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateComposition
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateCompositionRequest
               properties:
                 RoomSid:
                   type: string
@@ -1293,6 +1306,7 @@ paths:
                     example, `student*` excludes `student` as well as `studentTeam`.
                     This parameter can also be empty.
                 Resolution:
+                  type: string
                   description: "A string that describes the columns (width) and rows\
                     \ (height) of the generated composed video in pixels. Defaults\
                     \ to `640x480`. \nThe string's format is `{width}x{height}` where:\
@@ -1304,7 +1318,6 @@ paths:
                     \ tracks are constrained by the aspect ratio, they are scaled\
                     \ to fit. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)\
                     \ for more info."
-                  type: string
                 Format:
                   type: string
                   $ref: '#/components/schemas/composition_enum_format'
@@ -1314,14 +1327,14 @@ paths:
                     and/or a `video_layout` element that contains a valid `video_sources`
                     list, otherwise an error occurs.'
                 StatusCallback:
+                  type: string
+                  format: uri
                   description: The URL we should call using the `status_callback_method`
                     to send status information to your application on every composition
                     event. If not provided, status callback events will not be dispatched.
-                  format: uri
-                  type: string
                 StatusCallbackMethod:
-                  description: 'The HTTP method we should use to call `status_callback`.
-                    Can be: `POST` or `GET` and the default is `POST`.'
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -1329,9 +1342,10 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: 'The HTTP method we should use to call `status_callback`.
+                    Can be: `POST` or `GET` and the default is `POST`.'
                 Trim:
+                  type: boolean
                   description: Whether to clip the intervals where there is no active
                     media in the composition. The default is `true`. Compositions
                     with `trim` enabled are shorter when the Room is created and no
@@ -1339,22 +1353,8 @@ paths:
                     leave the room and join later, because those gaps will be removed.
                     See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
                     for more info.
-                  type: boolean
               required:
               - RoomSid
-              title: CreateCompositionRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.composition'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/CompositionHooks/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -1368,17 +1368,16 @@ paths:
     get:
       description: Returns a single CompositionHook resource identified by a CompositionHook
         SID.
-      operationId: FetchCompositionHook
       parameters:
-      - description: The SID of the CompositionHook resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the CompositionHook resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^HK[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1388,58 +1387,72 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchCompositionHook
       x-maturity:
       - GA
     delete:
       description: Delete a Recording CompositionHook resource identified by a `CompositionHook
         SID`.
-      operationId: DeleteCompositionHook
       parameters:
-      - description: The SID of the CompositionHook resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the CompositionHook resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^HK[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteCompositionHook
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateCompositionHook
       parameters:
-      - description: The SID of the CompositionHook resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the CompositionHook resource to update.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^HK[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.composition_hook'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateCompositionHook
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateCompositionHookRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It can be up to  100 characters long and it must be
                     unique within the account.
-                  type: string
                 Enabled:
+                  type: boolean
                   description: Whether the composition hook is active. When `true`,
                     the composition hook will be triggered for every completed Group
                     Room in the account. When `false`, the composition hook never
                     triggers.
-                  type: boolean
                 VideoLayout:
                   description: A JSON object that describes the video layout of the
                     composition hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
@@ -1469,6 +1482,7 @@ paths:
                     a track name. For example, `student*` excludes `student` as well
                     as `studentTeam`. This parameter can also be empty.
                 Trim:
+                  type: boolean
                   description: Whether to clip the intervals where there is no active
                     media in the compositions triggered by the composition hook. The
                     default is `true`. Compositions with `trim` enabled are shorter
@@ -1476,7 +1490,6 @@ paths:
                     as well as if all the Participants leave the room and join later,
                     because those gaps will be removed. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
                     for more info.
-                  type: boolean
                 Format:
                   type: string
                   $ref: '#/components/schemas/composition_hook_enum_format'
@@ -1486,6 +1499,7 @@ paths:
                     must have one or more tracks and/or a `video_layout` element must
                     contain a valid `video_sources` list, otherwise an error occurs.'
                 Resolution:
+                  type: string
                   description: "A string that describes the columns (width) and rows\
                     \ (height) of the generated composed video in pixels. Defaults\
                     \ to `640x480`. \nThe string's format is `{width}x{height}` where:\
@@ -1497,16 +1511,15 @@ paths:
                     \ tracks are constrained by the aspect ratio, they are scaled\
                     \ to fit. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)\
                     \ for more info."
-                  type: string
                 StatusCallback:
+                  type: string
+                  format: uri
                   description: The URL we should call using the `status_callback_method`
                     to send status information to your application on every composition
                     event. If not provided, status callback events will not be dispatched.
-                  format: uri
-                  type: string
                 StatusCallbackMethod:
-                  description: 'The HTTP method we should use to call `status_callback`.
-                    Can be: `POST` or `GET` and the default is `POST`.'
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -1514,23 +1527,10 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: 'The HTTP method we should use to call `status_callback`.
+                    Can be: `POST` or `GET` and the default is `POST`.'
               required:
               - FriendlyName
-              title: UpdateCompositionHookRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.composition_hook'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/CompositionHooks:
     servers:
     - url: https://video.twilio.com
@@ -1543,43 +1543,42 @@ paths:
       pathType: list
     get:
       description: List of all Recording CompositionHook resources.
-      operationId: ListCompositionHook
       parameters:
-      - description: Read only CompositionHook resources with an `enabled` value that
-          matches this parameter.
+      - name: Enabled
         in: query
-        name: Enabled
+        description: Read only CompositionHook resources with an `enabled` value that
+          matches this parameter.
         schema:
           type: boolean
-      - description: Read only CompositionHook resources created on or after this
+      - name: DateCreatedAfter
+        in: query
+        description: Read only CompositionHook resources created on or after this
           [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) datetime with time zone.
-        in: query
-        name: DateCreatedAfter
         schema:
           type: string
           format: date-time
-      - description: Read only CompositionHook resources created before this [ISO
+      - name: DateCreatedBefore
+        in: query
+        description: Read only CompositionHook resources created before this [ISO
           8601](https://en.wikipedia.org/wiki/ISO_8601) datetime with time zone.
-        in: query
-        name: DateCreatedBefore
         schema:
           type: string
           format: date-time
-      - description: Read only CompositionHook resources with friendly names that
+      - name: FriendlyName
+        in: query
+        description: Read only CompositionHook resources with friendly names that
           match this string. The match is not case sensitive and can include asterisk
           `*` characters as wildcard match.
-        in: query
-        name: FriendlyName
         schema:
           type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1596,47 +1595,61 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListCompositionHook
       x-maturity:
       - GA
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.composition_hook'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateCompositionHook
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateCompositionHookRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource. It can be up to  100 characters long and it must be
                     unique within the account.
-                  type: string
                 Enabled:
+                  type: boolean
                   description: Whether the composition hook is active. When `true`,
                     the composition hook will be triggered for every completed Group
                     Room in the account. When `false`, the composition hook will never
                     be triggered.
-                  type: boolean
                 VideoLayout:
                   description: An object that describes the video layout of the composition
                     hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
@@ -1666,6 +1679,7 @@ paths:
                     a track name. For example, `student*` excludes `student` as well
                     as `studentTeam`. This parameter can also be empty.
                 Resolution:
+                  type: string
                   description: "A string that describes the columns (width) and rows\
                     \ (height) of the generated composed video in pixels. Defaults\
                     \ to `640x480`. \nThe string's format is `{width}x{height}` where:\
@@ -1677,7 +1691,6 @@ paths:
                     \ tracks are constrained by the aspect ratio, they are scaled\
                     \ to fit. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)\
                     \ for more info."
-                  type: string
                 Format:
                   type: string
                   $ref: '#/components/schemas/composition_hook_enum_format'
@@ -1687,14 +1700,14 @@ paths:
                     must have one or more tracks and/or a `video_layout` element must
                     contain a valid `video_sources` list, otherwise an error occurs.'
                 StatusCallback:
+                  type: string
+                  format: uri
                   description: The URL we should call using the `status_callback_method`
                     to send status information to your application on every composition
                     event. If not provided, status callback events will not be dispatched.
-                  format: uri
-                  type: string
                 StatusCallbackMethod:
-                  description: 'The HTTP method we should use to call `status_callback`.
-                    Can be: `POST` or `GET` and the default is `POST`.'
+                  type: string
+                  format: http-method
                   enum:
                   - HEAD
                   - GET
@@ -1702,9 +1715,10 @@ paths:
                   - PATCH
                   - PUT
                   - DELETE
-                  format: http-method
-                  type: string
+                  description: 'The HTTP method we should use to call `status_callback`.
+                    Can be: `POST` or `GET` and the default is `POST`.'
                 Trim:
+                  type: boolean
                   description: Whether to clip the intervals where there is no active
                     media in the Compositions triggered by the composition hook. The
                     default is `true`. Compositions with `trim` enabled are shorter
@@ -1712,22 +1726,8 @@ paths:
                     as well as if all the Participants leave the room and join later,
                     because those gaps will be removed. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts)
                     for more info.
-                  type: boolean
               required:
               - FriendlyName
-              title: CreateCompositionHookRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.composition_hook'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/CompositionSettings/Default:
     servers:
     - url: https://video.twilio.com
@@ -1741,7 +1741,6 @@ paths:
       className: composition_settings
     get:
       description: ''
-      operationId: FetchCompositionSettings
       responses:
         '200':
           content:
@@ -1751,20 +1750,34 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchCompositionSettings
       x-maturity:
       - GA
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.composition_settings'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateCompositionSettings
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateCompositionSettingsRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource and show to the user in the console
-                  type: string
                 AwsCredentialsSid:
                   type: string
                   minLength: 34
@@ -1778,37 +1791,24 @@ paths:
                   pattern: ^CR[0-9a-fA-F]{32}$
                   description: The SID of the Public Key resource to use for encryption.
                 AwsS3Url:
+                  type: string
+                  format: uri
                   description: The URL of the AWS S3 bucket where the compositions
                     should be stored. We only support DNS-compliant URLs like `https://documentation-example-twilio-bucket/compositions`,
                     where `compositions` is the path in which you want the compositions
                     to be stored. This URL accepts only URI-valid characters, as described
                     in the <a href='https://tools.ietf.org/html/rfc3986#section-2'>RFC
                     3986</a>.
-                  format: uri
-                  type: string
                 AwsStorageEnabled:
+                  type: boolean
                   description: Whether all compositions should be written to the `aws_s3_url`.
                     When `false`, all compositions are stored in our cloud.
-                  type: boolean
                 EncryptionEnabled:
+                  type: boolean
                   description: Whether all compositions should be stored in an encrypted
                     form. The default is `false`.
-                  type: boolean
               required:
               - FriendlyName
-              title: CreateCompositionSettingsRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.composition_settings'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Recordings/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -1824,17 +1824,16 @@ paths:
       pathType: instance
     get:
       description: Returns a single Recording resource identified by a Recording SID.
-      operationId: FetchRecording
       parameters:
-      - description: The SID of the Recording resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Recording resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RT[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -1844,26 +1843,27 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRecording
       x-maturity:
       - GA
     delete:
       description: Delete a Recording resource identified by a Recording SID.
-      operationId: DeleteRecording
       parameters:
-      - description: The SID of the Recording resource to delete.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Recording resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RT[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteRecording
       x-maturity:
       - GA
   /v1/Recordings:
@@ -1881,27 +1881,26 @@ paths:
       pathType: list
     get:
       description: List of all Track recordings.
-      operationId: ListRecording
       parameters:
-      - description: 'Read only the recordings that have this status. Can be: `processing`,
-          `completed`, or `deleted`.'
+      - name: Status
         in: query
-        name: Status
+        description: 'Read only the recordings that have this status. Can be: `processing`,
+          `completed`, or `deleted`.'
         schema:
           type: string
           $ref: '#/components/schemas/recording_enum_status'
-      - description: Read only the recordings that have this `source_sid`.
+      - name: SourceSid
         in: query
-        name: SourceSid
+        description: Read only the recordings that have this `source_sid`.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
-      - description: Read only recordings with this `grouping_sid`, which may include
-          a `participant_sid` and/or a `room_sid`.
+      - name: GroupingSid
         in: query
-        name: GroupingSid
+        description: Read only recordings with this `grouping_sid`, which may include
+          a `participant_sid` and/or a `room_sid`.
         schema:
           type: array
           items:
@@ -1909,35 +1908,35 @@ paths:
             minLength: 34
             maxLength: 34
             pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
-      - description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+      - name: DateCreatedAfter
+        in: query
+        description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
           date-time with time zone.
-        in: query
-        name: DateCreatedAfter
         schema:
           type: string
           format: date-time
-      - description: Read only recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+      - name: DateCreatedBefore
+        in: query
+        description: Read only recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
           date-time with time zone, given as `YYYY-MM-DDThh:mm:ss+|-hh:mm` or `YYYY-MM-DDThh:mm:ssZ`.
-        in: query
-        name: DateCreatedBefore
         schema:
           type: string
           format: date-time
-      - description: Read only recordings that have this media type. Can be either
-          `audio` or `video`.
+      - name: MediaType
         in: query
-        name: MediaType
+        description: Read only recordings that have this media type. Can be either
+          `audio` or `video`.
         schema:
           type: string
           $ref: '#/components/schemas/recording_enum_type'
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -1954,26 +1953,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRecording
       x-maturity:
       - GA
   /v1/RecordingSettings/Default:
@@ -1989,7 +1989,6 @@ paths:
       className: recording_settings
     get:
       description: ''
-      operationId: FetchRecordingSettings
       responses:
         '200':
           content:
@@ -1999,20 +1998,34 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRecordingSettings
       x-maturity:
       - GA
     post:
       description: ''
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.recording_settings'
+          description: Created
+      security:
+      - accountSid_authToken: []
       operationId: CreateRecordingSettings
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: CreateRecordingSettingsRequest
               properties:
                 FriendlyName:
+                  type: string
                   description: A descriptive string that you create to describe the
                     resource and be shown to users in the console
-                  type: string
                 AwsCredentialsSid:
                   type: string
                   minLength: 34
@@ -2026,37 +2039,24 @@ paths:
                   pattern: ^CR[0-9a-fA-F]{32}$
                   description: The SID of the Public Key resource to use for encryption.
                 AwsS3Url:
+                  type: string
+                  format: uri
                   description: The URL of the AWS S3 bucket where the recordings should
                     be stored. We only support DNS-compliant URLs like `https://documentation-example-twilio-bucket/recordings`,
                     where `recordings` is the path in which you want the recordings
                     to be stored. This URL accepts only URI-valid characters, as described
                     in the <a href='https://tools.ietf.org/html/rfc3986#section-2'>RFC
                     3986</a>.
-                  format: uri
-                  type: string
                 AwsStorageEnabled:
+                  type: boolean
                   description: Whether all recordings should be written to the `aws_s3_url`.
                     When `false`, all recordings are stored in our cloud.
-                  type: boolean
                 EncryptionEnabled:
+                  type: boolean
                   description: Whether all recordings should be stored in an encrypted
                     form. The default is `false`.
-                  type: boolean
               required:
               - FriendlyName
-              title: CreateRecordingSettingsRequest
-              type: object
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.recording_settings'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Rooms/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -2069,14 +2069,13 @@ paths:
       pathType: instance
     get:
       description: ''
-      operationId: FetchRoom
       parameters:
-      - description: The SID of the Room resource to fetch.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Room resource to fetch.
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -2086,22 +2085,36 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoom
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateRoom
       parameters:
-      - description: The SID of the Room resource to update.
+      - name: Sid
         in: path
-        name: Sid
-        required: true
+        description: The SID of the Room resource to update.
         schema:
           type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.room'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateRoom
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateRoomRequest
               properties:
                 Status:
                   type: string
@@ -2110,19 +2123,6 @@ paths:
                     to end the room.
               required:
               - Status
-              title: UpdateRoomRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.room'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Rooms:
     servers:
     - url: https://video.twilio.com
@@ -2135,101 +2135,6 @@ paths:
       pathType: list
     post:
       description: ''
-      operationId: CreateRoom
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                EnableTurn:
-                  description: Deprecated, now always considered to be true.
-                  type: boolean
-                Type:
-                  type: string
-                  $ref: '#/components/schemas/room_enum_room_type'
-                  description: 'The type of room. Can be: `go`, `peer-to-peer`, `group-small`,
-                    or `group`. The default value is `group`.'
-                UniqueName:
-                  description: An application-defined string that uniquely identifies
-                    the resource. It can be used as a `room_sid` in place of the resource's
-                    `sid` in the URL to address the resource, assuming it does not
-                    contain any [reserved characters](https://tools.ietf.org/html/rfc3986#section-2.2)
-                    that would need to be URL encoded. This value is unique for `in-progress`
-                    rooms. SDK clients can use this name to connect to the room. REST
-                    API clients can use this name in place of the Room SID to interact
-                    with the room as long as the room is `in-progress`.
-                  type: string
-                StatusCallback:
-                  description: The URL we should call using the `status_callback_method`
-                    to send status information to your application on every room event.
-                    See [Status Callbacks](https://www.twilio.com/docs/video/api/status-callbacks)
-                    for more info.
-                  format: uri
-                  type: string
-                StatusCallbackMethod:
-                  description: The HTTP method we should use to call `status_callback`.
-                    Can be `POST` or `GET`.
-                  enum:
-                  - HEAD
-                  - GET
-                  - POST
-                  - PATCH
-                  - PUT
-                  - DELETE
-                  format: http-method
-                  type: string
-                MaxParticipants:
-                  description: The maximum number of concurrent Participants allowed
-                    in the room. Peer-to-peer rooms can have up to 10 Participants.
-                    Small Group rooms can have up to 4 Participants. Group rooms can
-                    have up to 50 Participants.
-                  type: integer
-                RecordParticipantsOnConnect:
-                  description: Whether to start recording when Participants connect.
-                    ***This feature is not available in `peer-to-peer` rooms.***
-                  type: boolean
-                VideoCodecs:
-                  type: array
-                  items:
-                    type: string
-                    $ref: '#/components/schemas/room_enum_video_codec'
-                  description: 'An array of the video codecs that are supported when
-                    publishing a track in the room.  Can be: `VP8` and `H264`.  ***This
-                    feature is not available in `peer-to-peer` rooms***'
-                MediaRegion:
-                  description: 'The region for the media server in Group Rooms.  Can
-                    be: one of the [available Media Regions](https://www.twilio.com/docs/video/ip-address-whitelisting#group-rooms-media-servers).
-                    ***This feature is not available in `peer-to-peer` rooms.***'
-                  type: string
-                RecordingRules:
-                  description: A collection of Recording Rules that describe how to
-                    include or exclude matching tracks for recording
-                AudioOnly:
-                  description: When set to true, indicates that the participants in
-                    the room will only publish audio. No video tracks will be allowed.
-                    Group rooms only.
-                  type: boolean
-                MaxParticipantDuration:
-                  description: The maximum number of seconds a Participant can be
-                    connected to the room. The maximum possible value is 86400 seconds
-                    (24 hours). The default is 14400 seconds (4 hours).
-                  type: integer
-                EmptyRoomTimeout:
-                  description: Configures how long (in minutes) a room will remain
-                    active after last participant leaves. Valid values range from
-                    1 to 60 minutes (no fractions).
-                  type: integer
-                UnusedRoomTimeout:
-                  description: Configures how long (in minutes) a room will remain
-                    active if no one joins. Valid values range from 1 to 60 minutes
-                    (no fractions).
-                  type: integer
-                LargeRoom:
-                  description: When set to true, indicated that this is the large
-                    room.
-                  type: boolean
-              title: CreateRoomRequest
-              type: object
       responses:
         '201':
           content:
@@ -2239,45 +2144,139 @@ paths:
           description: Created
       security:
       - accountSid_authToken: []
+      operationId: CreateRoom
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateRoomRequest
+              properties:
+                EnableTurn:
+                  type: boolean
+                  description: Deprecated, now always considered to be true.
+                Type:
+                  type: string
+                  $ref: '#/components/schemas/room_enum_room_type'
+                  description: 'The type of room. Can be: `go`, `peer-to-peer`, `group-small`,
+                    or `group`. The default value is `group`.'
+                UniqueName:
+                  type: string
+                  description: An application-defined string that uniquely identifies
+                    the resource. It can be used as a `room_sid` in place of the resource's
+                    `sid` in the URL to address the resource, assuming it does not
+                    contain any [reserved characters](https://tools.ietf.org/html/rfc3986#section-2.2)
+                    that would need to be URL encoded. This value is unique for `in-progress`
+                    rooms. SDK clients can use this name to connect to the room. REST
+                    API clients can use this name in place of the Room SID to interact
+                    with the room as long as the room is `in-progress`.
+                StatusCallback:
+                  type: string
+                  format: uri
+                  description: The URL we should call using the `status_callback_method`
+                    to send status information to your application on every room event.
+                    See [Status Callbacks](https://www.twilio.com/docs/video/api/status-callbacks)
+                    for more info.
+                StatusCallbackMethod:
+                  type: string
+                  format: http-method
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  description: The HTTP method we should use to call `status_callback`.
+                    Can be `POST` or `GET`.
+                MaxParticipants:
+                  type: integer
+                  description: The maximum number of concurrent Participants allowed
+                    in the room. Peer-to-peer rooms can have up to 10 Participants.
+                    Small Group rooms can have up to 4 Participants. Group rooms can
+                    have up to 50 Participants.
+                RecordParticipantsOnConnect:
+                  type: boolean
+                  description: Whether to start recording when Participants connect.
+                    ***This feature is not available in `peer-to-peer` rooms.***
+                VideoCodecs:
+                  type: array
+                  items:
+                    type: string
+                    $ref: '#/components/schemas/room_enum_video_codec'
+                  description: 'An array of the video codecs that are supported when
+                    publishing a track in the room.  Can be: `VP8` and `H264`.  ***This
+                    feature is not available in `peer-to-peer` rooms***'
+                MediaRegion:
+                  type: string
+                  description: 'The region for the media server in Group Rooms.  Can
+                    be: one of the [available Media Regions](https://www.twilio.com/docs/video/ip-address-whitelisting#group-rooms-media-servers).
+                    ***This feature is not available in `peer-to-peer` rooms.***'
+                RecordingRules:
+                  description: A collection of Recording Rules that describe how to
+                    include or exclude matching tracks for recording
+                AudioOnly:
+                  type: boolean
+                  description: When set to true, indicates that the participants in
+                    the room will only publish audio. No video tracks will be allowed.
+                    Group rooms only.
+                MaxParticipantDuration:
+                  type: integer
+                  description: The maximum number of seconds a Participant can be
+                    connected to the room. The maximum possible value is 86400 seconds
+                    (24 hours). The default is 14400 seconds (4 hours).
+                EmptyRoomTimeout:
+                  type: integer
+                  description: Configures how long (in minutes) a room will remain
+                    active after last participant leaves. Valid values range from
+                    1 to 60 minutes (no fractions).
+                UnusedRoomTimeout:
+                  type: integer
+                  description: Configures how long (in minutes) a room will remain
+                    active if no one joins. Valid values range from 1 to 60 minutes
+                    (no fractions).
+                LargeRoom:
+                  type: boolean
+                  description: When set to true, indicated that this is the large
+                    room.
     get:
       description: ''
-      operationId: ListRoom
       parameters:
-      - description: 'Read only the rooms with this status. Can be: `in-progress`
-          (default) or `completed`'
+      - name: Status
         in: query
-        name: Status
+        description: 'Read only the rooms with this status. Can be: `in-progress`
+          (default) or `completed`'
         schema:
           type: string
           $ref: '#/components/schemas/room_enum_room_status'
-      - description: Read only rooms with the this `unique_name`.
+      - name: UniqueName
         in: query
-        name: UniqueName
+        description: Read only rooms with the this `unique_name`.
         schema:
           type: string
-      - description: Read only rooms that started on or after this date, given as
+      - name: DateCreatedAfter
+        in: query
+        description: Read only rooms that started on or after this date, given as
           `YYYY-MM-DD`.
-        in: query
-        name: DateCreatedAfter
         schema:
           type: string
           format: date-time
-      - description: Read only rooms that started before this date, given as `YYYY-MM-DD`.
+      - name: DateCreatedBefore
         in: query
-        name: DateCreatedBefore
+        description: Read only rooms that started before this date, given as `YYYY-MM-DD`.
         schema:
           type: string
           format: date-time
-      - description: How many resources to return in each list page. The default is
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
-        in: query
-        name: PageSize
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -2294,26 +2293,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRoom
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{Sid}:
@@ -2329,20 +2329,19 @@ paths:
       parent: /Rooms
     get:
       description: ''
-      operationId: FetchRoomParticipant
       parameters:
-      - description: The SID of the room with the Participant resource to fetch.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the Participant resource to fetch.
         schema:
           type: string
-      - description: The SID of the RoomParticipant resource to fetch.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomParticipant resource to fetch.
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -2352,28 +2351,42 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomParticipant
       x-maturity:
       - GA
     post:
       description: ''
-      operationId: UpdateRoomParticipant
       parameters:
-      - description: The SID of the room with the participant to update.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the participant to update.
         schema:
           type: string
-      - description: The SID of the RoomParticipant resource to update.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomParticipant resource to update.
         schema:
           type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video.v1.room.room_participant'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateRoomParticipant
+      x-maturity:
+      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
+              type: object
+              title: UpdateRoomParticipantRequest
               properties:
                 Status:
                   type: string
@@ -2382,19 +2395,6 @@ paths:
                     or `disconnected`. For `in-progress` Rooms the default Status
                     is `connected`, for `completed` Rooms only `disconnected` Participants
                     are returned.'
-              title: UpdateRoomParticipantRequest
-              type: object
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/video.v1.room.room_participant'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants:
     servers:
     - url: https://video.twilio.com
@@ -2408,50 +2408,49 @@ paths:
       parent: /Rooms
     get:
       description: ''
-      operationId: ListRoomParticipant
       parameters:
-      - description: The SID of the room with the Participant resources to read.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the Participant resources to read.
         schema:
           type: string
-      - description: 'Read only the participants with this status. Can be: `connected`
+        required: true
+      - name: Status
+        in: query
+        description: 'Read only the participants with this status. Can be: `connected`
           or `disconnected`. For `in-progress` Rooms the default Status is `connected`,
           for `completed` Rooms only `disconnected` Participants are returned.'
-        in: query
-        name: Status
         schema:
           type: string
           $ref: '#/components/schemas/room_participant_enum_status'
-      - description: Read only the Participants with this [User](https://www.twilio.com/docs/chat/rest/user-resource)
+      - name: Identity
+        in: query
+        description: Read only the Participants with this [User](https://www.twilio.com/docs/chat/rest/user-resource)
           `identity` value.
-        in: query
-        name: Identity
         schema:
           type: string
-      - description: Read only Participants that started after this date in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#UTC)
+      - name: DateCreatedAfter
+        in: query
+        description: Read only Participants that started after this date in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#UTC)
           format.
-        in: query
-        name: DateCreatedAfter
         schema:
           type: string
           format: date-time
-      - description: Read only Participants that started before this date in [ISO
+      - name: DateCreatedBefore
+        in: query
+        description: Read only Participants that started before this date in [ISO
           8601](https://en.wikipedia.org/wiki/ISO_8601#UTC) format.
-        in: query
-        name: DateCreatedBefore
         schema:
           type: string
           format: date-time
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -2468,26 +2467,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRoomParticipant
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{Sid}/Anonymize:
@@ -2503,20 +2503,19 @@ paths:
       parent: /Rooms/{RoomSid}/Participants
     post:
       description: ''
-      operationId: UpdateRoomParticipantAnonymize
       parameters:
-      - description: The SID of the room with the participant to update.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the participant to update.
         schema:
           type: string
-      - description: The SID of the RoomParticipant resource to update.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomParticipant resource to update.
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -2526,6 +2525,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: UpdateRoomParticipantAnonymize
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/PublishedTracks/{Sid}:
@@ -2542,28 +2542,27 @@ paths:
       parent: /Rooms/{RoomSid}/Participants
     get:
       description: Returns a single Track resource represented by TrackName or SID.
-      operationId: FetchRoomParticipantPublishedTrack
       parameters:
-      - description: The SID of the Room resource where the Track resource to fetch
+      - name: RoomSid
+        in: path
+        description: The SID of the Room resource where the Track resource to fetch
           is published.
-        in: path
-        name: RoomSid
-        required: true
         schema:
           type: string
-      - description: The SID of the Participant resource with the published track
+        required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the Participant resource with the published track
           to fetch.
-        in: path
-        name: ParticipantSid
-        required: true
         schema:
           type: string
-      - description: The SID of the RoomParticipantPublishedTrack resource to fetch.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomParticipantPublishedTrack resource to fetch.
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -2573,6 +2572,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomParticipantPublishedTrack
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/PublishedTracks:
@@ -2590,30 +2590,29 @@ paths:
     get:
       description: Returns a list of tracks associated with a given Participant. Only
         `currently` Published Tracks are in the list resource.
-      operationId: ListRoomParticipantPublishedTrack
       parameters:
-      - description: The SID of the Room resource where the Track resources to read
+      - name: RoomSid
+        in: path
+        description: The SID of the Room resource where the Track resources to read
           are published.
-        in: path
-        name: RoomSid
-        required: true
         schema:
           type: string
-      - description: The SID of the Participant resource with the published tracks
+        required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the Participant resource with the published tracks
           to read.
-        in: path
-        name: ParticipantSid
-        required: true
         schema:
           type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+        required: true
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -2630,26 +2629,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRoomParticipantPublishedTrack
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribeRules:
@@ -2666,22 +2666,21 @@ paths:
       className: subscribe_rules
     get:
       description: Returns a list of Subscribe Rules for the Participant.
-      operationId: FetchRoomParticipantSubscribeRule
       parameters:
-      - description: The SID of the Room resource where the subscribe rules to fetch
+      - name: RoomSid
+        in: path
+        description: The SID of the Room resource where the subscribe rules to fetch
           apply.
-        in: path
-        name: RoomSid
-        required: true
         schema:
           type: string
-      - description: The SID of the Participant resource with the subscribe rules
+        required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the Participant resource with the subscribe rules
           to fetch.
-        in: path
-        name: ParticipantSid
-        required: true
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -2691,36 +2690,25 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomParticipantSubscribeRule
       x-maturity:
       - GA
     post:
       description: Update the Subscribe Rules for the Participant
-      operationId: UpdateRoomParticipantSubscribeRule
       parameters:
-      - description: The SID of the Room resource where the subscribe rules to update
+      - name: RoomSid
+        in: path
+        description: The SID of the Room resource where the subscribe rules to update
           apply.
-        in: path
-        name: RoomSid
-        required: true
         schema:
           type: string
-      - description: The SID of the Participant resource to update the Subscribe Rules.
-        in: path
-        name: ParticipantSid
         required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the Participant resource to update the Subscribe Rules.
         schema:
           type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                Rules:
-                  description: A JSON-encoded array of subscribe rules. See the [Specifying
-                    Subscribe Rules](https://www.twilio.com/docs/video/api/track-subscriptions#specifying-sr)
-                    section for further information.
-              title: UpdateRoomParticipantSubscribeRuleRequest
-              type: object
+        required: true
       responses:
         '202':
           content:
@@ -2730,8 +2718,20 @@ paths:
           description: Accepted
       security:
       - accountSid_authToken: []
+      operationId: UpdateRoomParticipantSubscribeRule
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateRoomParticipantSubscribeRuleRequest
+              properties:
+                Rules:
+                  description: A JSON-encoded array of subscribe rules. See the [Specifying
+                    Subscribe Rules](https://www.twilio.com/docs/video/api/track-subscriptions#specifying-sr)
+                    section for further information.
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribedTracks/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -2748,30 +2748,29 @@ paths:
       description: 'Returns a single Track resource represented by `track_sid`.  Note:
         This is one resource with the Video API that requires a SID, be Track Name
         on the subscriber side is not guaranteed to be unique.'
-      operationId: FetchRoomParticipantSubscribedTrack
       parameters:
-      - description: The SID of the Room where the Track resource to fetch is subscribed.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the Room where the Track resource to fetch is subscribed.
         schema:
           type: string
-      - description: The SID of the participant that subscribes to the Track resource
+        required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the participant that subscribes to the Track resource
           to fetch.
-        in: path
-        name: ParticipantSid
-        required: true
         schema:
           type: string
-      - description: The SID of the RoomParticipantSubscribedTrack resource to fetch.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomParticipantSubscribedTrack resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^MT[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -2781,6 +2780,7 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomParticipantSubscribedTrack
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribedTracks:
@@ -2797,29 +2797,28 @@ paths:
       parent: /Rooms/{RoomSid}/Participants
     get:
       description: Returns a list of tracks that are subscribed for the participant.
-      operationId: ListRoomParticipantSubscribedTrack
       parameters:
-      - description: The SID of the Room resource with the Track resources to read.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the Room resource with the Track resources to read.
         schema:
           type: string
-      - description: The SID of the participant that subscribes to the Track resources
+        required: true
+      - name: ParticipantSid
+        in: path
+        description: The SID of the participant that subscribes to the Track resources
           to read.
-        in: path
-        name: ParticipantSid
-        required: true
         schema:
           type: string
-      - description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+        required: true
+      - name: PageSize
         in: query
-        name: PageSize
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -2836,26 +2835,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRoomParticipantSubscribedTrack
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Recordings/{Sid}:
@@ -2875,26 +2875,25 @@ paths:
       className: room_recording
     get:
       description: ''
-      operationId: FetchRoomRecording
       parameters:
-      - description: The SID of the Room resource with the recording to fetch.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the Room resource with the recording to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
-      - description: The SID of the RoomRecording resource to fetch.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomRecording resource to fetch.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RT[0-9a-fA-F]{32}$
+        required: true
       responses:
         '200':
           content:
@@ -2904,35 +2903,36 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomRecording
       x-maturity:
       - GA
     delete:
       description: ''
-      operationId: DeleteRoomRecording
       parameters:
-      - description: The SID of the room with the RoomRecording resource to delete.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the RoomRecording resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
-      - description: The SID of the RoomRecording resource to delete.
-        in: path
-        name: Sid
         required: true
+      - name: Sid
+        in: path
+        description: The SID of the RoomRecording resource to delete.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RT[0-9a-fA-F]{32}$
+        required: true
       responses:
         '204':
           description: The resource was deleted successfully.
       security:
       - accountSid_authToken: []
+      operationId: DeleteRoomRecording
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/Recordings:
@@ -2952,54 +2952,53 @@ paths:
       className: room_recording
     get:
       description: ''
-      operationId: ListRoomRecording
       parameters:
-      - description: The SID of the room with the RoomRecording resources to read.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the room with the RoomRecording resources to read.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
-      - description: 'Read only the recordings with this status. Can be: `processing`,
-          `completed`, or `deleted`.'
+        required: true
+      - name: Status
         in: query
-        name: Status
+        description: 'Read only the recordings with this status. Can be: `processing`,
+          `completed`, or `deleted`.'
         schema:
           type: string
           $ref: '#/components/schemas/room_recording_enum_status'
-      - description: Read only the recordings that have this `source_sid`.
+      - name: SourceSid
         in: query
-        name: SourceSid
+        description: Read only the recordings that have this `source_sid`.
         schema:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
-      - description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-          datetime with time zone.
+      - name: DateCreatedAfter
         in: query
-        name: DateCreatedAfter
+        description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+          datetime with time zone.
         schema:
           type: string
           format: date-time
-      - description: Read only Recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-          datetime with time zone.
+      - name: DateCreatedBefore
         in: query
-        name: DateCreatedBefore
+        description: Read only Recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+          datetime with time zone.
         schema:
           type: string
           format: date-time
-      - description: How many resources to return in each list page. The default is
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
           50, and the maximum is 1000.
-        in: query
-        name: PageSize
         schema:
-          maximum: 1000
-          minimum: 1
           type: integer
+          minimum: 1
+          maximum: 1000
       responses:
         '200':
           content:
@@ -3016,26 +3015,27 @@ paths:
                     type: object
                     properties:
                       first_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       next_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        format: uri
                         type: string
+                        format: uri
                       url:
-                        format: uri
                         type: string
+                        format: uri
                       key:
                         type: string
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: ListRoomRecording
       x-maturity:
       - GA
   /v1/Rooms/{RoomSid}/RecordingRules:
@@ -3051,15 +3051,14 @@ paths:
       className: recording_rules
     get:
       description: Returns a list of Recording Rules for the Room.
-      operationId: FetchRoomRecordingRule
       parameters:
-      - description: The SID of the Room resource where the recording rules to fetch
-          apply.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the Room resource where the recording rules to fetch
+          apply.
         schema:
           type: string
+        required: true
       responses:
         '200':
           content:
@@ -3069,28 +3068,19 @@ paths:
           description: OK
       security:
       - accountSid_authToken: []
+      operationId: FetchRoomRecordingRule
       x-maturity:
       - GA
     post:
       description: Update the Recording Rules for the Room
-      operationId: UpdateRoomRecordingRule
       parameters:
-      - description: The SID of the Room resource where the recording rules to update
-          apply.
+      - name: RoomSid
         in: path
-        name: RoomSid
-        required: true
+        description: The SID of the Room resource where the recording rules to update
+          apply.
         schema:
           type: string
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                Rules:
-                  description: A JSON-encoded array of recording rules.
-              title: UpdateRoomRecordingRuleRequest
-              type: object
+        required: true
       responses:
         '202':
           content:
@@ -3100,8 +3090,18 @@ paths:
           description: Accepted
       security:
       - accountSid_authToken: []
+      operationId: UpdateRoomRecordingRule
       x-maturity:
       - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateRoomRecordingRuleRequest
+              properties:
+                Rules:
+                  description: A JSON-encoded array of recording rules.
 servers:
 - url: https://video.twilio.com
 x-maturity:
