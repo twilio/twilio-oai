@@ -9454,6 +9454,81 @@
           "price"
         ]
       },
+      "api.v2010.account.call.user_defined_message": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Account Sid."
+          },
+          "call_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CA[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Call Sid."
+          },
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^KX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A string that uniquely identifies this User Defined Message."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time-rfc-2822",
+            "nullable": true,
+            "description": "The date this User Defined Message was created"
+          }
+        }
+      },
+      "api.v2010.account.call.user_defined_message_subscription": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Account Sid."
+          },
+          "call_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CA[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Call Sid."
+          },
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^ZY[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "User Defined Message Subscription Sid"
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time-rfc-2822",
+            "nullable": true,
+            "description": "The date this User Defined Message Subscription was created"
+          },
+          "uri": {
+            "type": "string",
+            "nullable": true,
+            "description": "The URI of the resource, relative to `https://api.twilio.com`."
+          }
+        }
+      },
       "api.v2010.account.validation_request": {
         "type": "object",
         "properties": {
@@ -9512,7 +9587,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.37.0"
+    "version": "1.37.1"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -19271,6 +19346,17 @@
                   "SendAsMms": {
                     "type": "boolean",
                     "description": "If set to True, Twilio will deliver the message as a single MMS message, regardless of the presence of media."
+                  },
+                  "ContentSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^HX[0-9a-fA-F]{32}$",
+                    "description": "The SID of the Content object returned at Content API content create time (https://www.twilio.com/docs/content-api/create-and-send-your-first-content-api-template#create-a-template). If this parameter is not specified, then the Content API will not be utilized."
+                  },
+                  "ContentVariables": {
+                    "type": "string",
+                    "description": "Key-value pairs of variable names to substitution values, used alongside a content_sid. If not specified, Content API will default to the default variables defined at create time."
                   },
                   "From": {
                     "type": "string",
@@ -30950,6 +31036,267 @@
           }
         ],
         "operationId": "ListUsageTrigger",
+        "x-maturity": [
+          "GA"
+        ]
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessages.json": {
+      "servers": [
+        {
+          "url": "https://api.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid"
+        ],
+        "pathType": "list",
+        "parent": "/Accounts/{AccountSid}/Calls/{Sid}.json"
+      },
+      "post": {
+        "description": "Create a new User Defined Message for the given call sid.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created User Defined Message.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^AC[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "CallSid",
+            "in": "path",
+            "description": "The SID of the [Call](https://www.twilio.com/docs/voice/api/call-resource) the User Defined Message is associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^CA[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.v2010.account.call.user_defined_message"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateUserDefinedMessage",
+        "x-maturity": [
+          "GA"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateUserDefinedMessageRequest",
+                "properties": {
+                  "Content": {
+                    "type": "string",
+                    "description": "A unique string value to identify API call. This should be a unique string value per API call and can be a randomly generated."
+                  },
+                  "IdempotencyKey": {
+                    "type": "string",
+                    "description": "A unique string value to identify API call. This should be a unique string value per API call and can be a randomly generated."
+                  }
+                },
+                "required": [
+                  "Content"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions.json": {
+      "servers": [
+        {
+          "url": "https://api.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid"
+        ],
+        "pathType": "list",
+        "parent": "/Accounts/{AccountSid}/Calls/{Sid}.json"
+      },
+      "post": {
+        "description": "Subscribe to User Defined Messages for a given call sid.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that subscribed to the User Defined Messages.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^AC[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "CallSid",
+            "in": "path",
+            "description": "The SID of the [Call](https://www.twilio.com/docs/voice/api/call-resource) the User Defined Messages subscription is associated with. This refers to the call sid that is producing the user defined messages.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^CA[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/api.v2010.account.call.user_defined_message_subscription"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateUserDefinedMessageSubscription",
+        "x-maturity": [
+          "GA"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateUserDefinedMessageSubscriptionRequest",
+                "properties": {
+                  "Callback": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL we should call using the `method` to send user defined events to your application. URLs must contain a valid hostname (underscores are not permitted)."
+                  },
+                  "Method": {
+                    "type": "string",
+                    "format": "http-method",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "description": "The HTTP method Twilio will use when requesting the above `Url`. Either `GET` or `POST`."
+                  },
+                  "IdempotencyKey": {
+                    "type": "string",
+                    "description": "A unique string value to identify API call. This should be a unique string value per API call and can be a randomly generated."
+                  }
+                },
+                "required": [
+                  "Callback",
+                  "Method"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/UserDefinedMessageSubscriptions/{Sid}.json": {
+      "servers": [
+        {
+          "url": "https://api.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid"
+        ],
+        "pathType": "instance",
+        "parent": "/Accounts/{AccountSid}/Calls/{Sid}.json"
+      },
+      "delete": {
+        "description": "Delete a specific User Defined Message Subscription.",
+        "parameters": [
+          {
+            "name": "AccountSid",
+            "in": "path",
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that subscribed to the User Defined Messages.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^AC[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "CallSid",
+            "in": "path",
+            "description": "The SID of the [Call](https://www.twilio.com/docs/voice/api/call-resource) the User Defined Messages subscription is associated with. This refers to the call sid that is producing the user defined messages.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^CA[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID that uniquely identifies this User Defined Message Subscription.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^ZY[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteUserDefinedMessageSubscription",
         "x-maturity": [
           "GA"
         ]

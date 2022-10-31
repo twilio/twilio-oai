@@ -1,5 +1,28 @@
 twilio-oai changelog
 ====================
+[2022-10-31] Version 1.37.1
+---------------------------
+**Library - Fix**
+- [PR #80](https://github.com/twilio/twilio-oai/pull/80): update parent logic for handling of parents vs. containers. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Api**
+- Added `contentSid` and `contentVariables` to Message resource with public visibility as Beta
+- Add `UserDefinedMessageSubscription` and `UserDefinedMessage` resource
+
+**Proxy**
+- Remove FailOnParticipantConflict param from Proxy Session create and update and Proxy Participant create
+
+**Supersim**
+- Update SettingsUpdates resource to remove PackageSid
+
+**Taskrouter**
+- Add `Ordering` query parameter to Workers and TaskQueues for sorting by
+- Add `worker_sid` query param for list reservations endpoint
+
+**Twiml**
+- Add `url` and `method` attributes to `<Conversation>`
+
+
 [2022-10-19] Version 1.37.0
 ---------------------------
 **Library - Chore**
