@@ -365,6 +365,26 @@ components:
       - studio
       - external
       - task
+    flex.v1.gooddata:
+      type: object
+      properties:
+        workspace_id:
+          type: string
+          nullable: true
+          description: Unique workspace ID in gooddata
+        session_expiry:
+          type: string
+          nullable: true
+          description: The session expiry date and time
+        session_id:
+          type: string
+          nullable: true
+          description: Unique session ID
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
     flex.v1.interaction:
       type: object
       properties:
@@ -543,6 +563,19 @@ components:
       - external
       - agent
       - unknown
+    flex.v1.user_roles:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Flex Insights roles for the user
+        url:
+          type: string
+          format: uri
+          nullable: true
     flex.v1.web_channel:
       type: object
       properties:
@@ -603,7 +636,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.37.1
+  version: 1.37.2
 openapi: 3.0.1
 paths:
   /v1/Channels:
@@ -1198,6 +1231,36 @@ paths:
       operationId: DeleteFlexFlow
       x-maturity:
       - GA
+  /v1/Accounts/GoodData:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - workspace_id
+      - session_expiry
+      - session_id
+      pathType: instance
+    post:
+      description: To create a GoodData Session id to access GoodData dashboards
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.gooddata'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateGooddata
+      x-maturity:
+      - GA
   /v1/Interactions/{Sid}:
     servers:
     - url: https://flex-api.twilio.com
@@ -1755,6 +1818,36 @@ paths:
                     must be an agent.'
               required:
               - Status
+  /v1/Accounts/UserRoles:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - roles
+      pathType: instance
+      className: user_roles
+    get:
+      description: This is used by Flex UI and Quality Management to fetch the Flex
+        Insights roles for the user
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.user_roles'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchUserRoles
+      x-maturity:
+      - GA
   /v1/WebChannels:
     servers:
     - url: https://flex-api.twilio.com

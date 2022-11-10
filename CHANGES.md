@@ -1,5 +1,20 @@
 twilio-oai changelog
 ====================
+[2022-11-10] Version 1.37.2
+---------------------------
+**Library - Fix**
+- [PR #81](https://github.com/twilio/twilio-oai/pull/81): add mount names when they cannot be derived from the path. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Flex**
+- Adding two new authorization API 'user_roles' and 'gooddata' in version `v1`
+
+**Messaging**
+- Add new Campaign properties (MessageFlow, OptInMessage, OptInKeywords, OptOutMessage, OptOutKeywords, HelpMessage, HelpKeywords)
+
+**Twiml**
+- Add new speech models to `Gather`.
+
+
 [2022-10-31] Version 1.37.1
 ---------------------------
 **Library - Fix**
