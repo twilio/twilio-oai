@@ -1,0 +1,292 @@
+{
+  "components": {
+    "schemas": {
+      "content.v1.content": {
+        "type": "object",
+        "properties": {
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The RFC 2822 date and time in GMT that the resource was created"
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The RFC 2822 date and time in GMT that the resource was last updated"
+          },
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^HX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that identifies the resource"
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Account that created the resource"
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "A string name used to describe the Content resource"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true,
+            "description": "Two-letter language code identifying the language the Content resource is in."
+          },
+          "variables": {
+            "nullable": true,
+            "description": "Defines the default placeholder values for variables included in the Content resource"
+          },
+          "types": {
+            "nullable": true,
+            "description": "The Content types (e.g. twilio/text) for this Content resource"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the resource, relative to `https://content.twilio.com`"
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true,
+            "description": "A list of links related to the Content resource"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "info": {
+    "title": "Twilio - Content",
+    "description": "This is the public Twilio REST API.",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.37.3"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/v1/Content/{Sid}": {
+      "servers": [
+        {
+          "url": "https://content.twilio.com"
+        }
+      ],
+      "description": "A Content resource represents rich messaging content.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "date_created",
+          "date_updated",
+          "sid",
+          "account_sid",
+          "friendly_name",
+          "language",
+          "variables",
+          "types"
+        ],
+        "pathType": "instance",
+        "mountName": "contents"
+      },
+      "get": {
+        "description": "Fetch a Content resource by its unique Content Sid",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The Twilio-provided string that uniquely identifies the Content resource to fetch.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/content.v1.content"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchContent",
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a Content resource",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The Twilio-provided string that uniquely identifies the Content resource to fetch.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteContent",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
+    "/v1/Content": {
+      "servers": [
+        {
+          "url": "https://content.twilio.com"
+        }
+      ],
+      "description": "A Content resource represents rich messaging content.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "date_created",
+          "date_updated",
+          "sid",
+          "account_sid",
+          "friendly_name",
+          "language",
+          "variables",
+          "types"
+        ],
+        "pathType": "list",
+        "mountName": "contents"
+      },
+      "get": {
+        "description": "Retrieve a list of Contents belonging to the account used to make the request",
+        "parameters": [
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListContentResponse",
+                  "properties": {
+                    "contents": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/content.v1.content"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListContent",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://content.twilio.com"
+    }
+  ],
+  "x-maturity": [
+    {
+      "name": "Preview",
+      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com."
+    }
+  ]
+}

@@ -1,5 +1,18 @@
 twilio-oai changelog
 ====================
+[2022-11-16] Version 1.37.3
+---------------------------
+**Api**
+- Set the Content resource to have public visibility as Preview
+
+**Flex**
+- Adding new parameter `base_url` to 'gooddata' response in version `v1`
+
+**Insights**
+- Added `answered_by` field in List Call Summary
+- Added `answered_by` field in call summary
+
+
 [2022-11-10] Version 1.37.2
 ---------------------------
 **Library - Fix**
