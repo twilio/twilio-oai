@@ -301,6 +301,122 @@
           }
         }
       },
+      "messaging.v1.domain_cert_v4": {
+        "type": "object",
+        "properties": {
+          "domain_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^DN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Domain resource."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date that this Domain was last updated."
+          },
+          "date_expires": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Expiration date for your private certificate."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date this Domain SID was created."
+          },
+          "domain_name": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Full url path for this domain."
+          },
+          "certificate_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CW[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify this Certificate resource."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "validated": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Certificate validation field"
+          }
+        }
+      },
+      "messaging.v1.domain_config": {
+        "type": "object",
+        "properties": {
+          "domain_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^DN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Domain resource."
+          },
+          "config_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^ZK[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Domain config (prefix ZK)."
+          },
+          "messaging_service_sids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "nullable": true,
+            "description": "A list of messagingServiceSids (with prefix MG)."
+          },
+          "fallback_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "We will redirect requests to urls we are unable to identify to this url."
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to receive click events to your webhook whenever the recipients click on the shortened links."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date this Domain Config was created."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date that this Domain Config was last updated."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "messaging.v1.external_campaign": {
         "type": "object",
         "properties": {
@@ -1034,7 +1150,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.37.3"
+    "version": "1.37.4"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1847,6 +1963,311 @@
         "operationId": "FetchDeactivation",
         "x-maturity": [
           "GA"
+        ]
+      }
+    },
+    "/v1/LinkShortening/Domains/{DomainSid}/Certificate": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "certificate_sid",
+          "domain_name",
+          "domain_sid",
+          "date_expires",
+          "date_created",
+          "date_updated",
+          "url",
+          "validated"
+        ],
+        "pathType": "instance",
+        "mountName": "domain_certs",
+        "className": "domain_certs"
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain that this certificate should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_cert_v4"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_cert_v4"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateDomainCertV4",
+        "x-maturity": [
+          "Beta"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateDomainCertV4Request",
+                "properties": {
+                  "TlsCert": {
+                    "type": "string",
+                    "description": "Contains the full TLS certificate and private for this domain in PEM format: https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail. Twilio uses this information to process HTTPS traffic sent to your domain."
+                  }
+                },
+                "required": [
+                  "TlsCert"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain that this certificate should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_cert_v4"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchDomainCertV4",
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain that this certificate should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteDomainCertV4",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
+    "/v1/LinkShortening/Domains/{DomainSid}/Config": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "config_sid",
+          "fallback_url",
+          "callback_url",
+          "date_created",
+          "date_updated",
+          "messaging_service_sids",
+          "url"
+        ],
+        "pathType": "instance",
+        "mountName": "domain_config"
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain that this config should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_config"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_config"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateDomainConfig",
+        "x-maturity": [
+          "Beta"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateDomainConfigRequest",
+                "properties": {
+                  "MessagingServiceSids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^MG[0-9a-fA-F]{32}$"
+                    },
+                    "description": "A list of messagingServiceSids (with prefix MG)"
+                  },
+                  "FallbackUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Any requests we receive to this domain that do not match an existing shortened message will be redirected to the fallback url. These will likely be either expired messages, random misdirected traffic, or intentional scraping."
+                  },
+                  "CallbackUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL to receive click events to your webhook whenever the recipients click on the shortened links"
+                  },
+                  "MessagingServiceSidsAction": {
+                    "type": "string",
+                    "description": "An action type for messaging_service_sids operation (ADD, DELETE, REPLACE)"
+                  }
+                },
+                "required": [
+                  "MessagingServiceSids"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain that this config should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_config"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchDomainConfig",
+        "x-maturity": [
+          "Beta"
         ]
       }
     },

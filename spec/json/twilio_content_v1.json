@@ -1,6 +1,37 @@
 {
   "components": {
     "schemas": {
+      "content.v1.content.approval_fetch": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^HX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that identifies the Content resource"
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Account that created the Content resource"
+          },
+          "whatsapp": {
+            "nullable": true,
+            "description": "Contains the whatsapp approval information for the Content resource"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the resource, relative to `https://content.twilio.com`"
+          }
+        }
+      },
       "content.v1.content": {
         "type": "object",
         "properties": {
@@ -85,10 +116,66 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.37.3"
+    "version": "1.37.4"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v1/Content/{Sid}/ApprovalRequests": {
+      "servers": [
+        {
+          "url": "https://content.twilio.com"
+        }
+      ],
+      "description": "An Approval Fetch resource represents the approval status of a Content resource.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "account_sid",
+          "whatsapp"
+        ],
+        "pathType": "instance",
+        "parent": "/Content/{Sid}",
+        "mountName": "approval_fetch"
+      },
+      "get": {
+        "description": "Fetch a Content resource's approval status by its unique Content Sid",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The Twilio-provided string that uniquely identifies the Content resource whose approval information to fetch.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/content.v1.content.approval_fetch"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchApprovalFetch",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
     "/v1/Content/{Sid}": {
       "servers": [
         {
