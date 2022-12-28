@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2022-12-28] Version 1.38.1
+---------------------------
+**Library - Fix**
+- [PR #83](https://github.com/twilio/twilio-oai/pull/83): singularize ice-server. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+
 [2022-12-14] Version 1.38.0
 ---------------------------
 **Api**
