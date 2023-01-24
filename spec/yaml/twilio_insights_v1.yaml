@@ -28,47 +28,65 @@ components:
           maxLength: 34
           pattern: ^CA[0-9a-fA-F]{32}$
           nullable: true
-          description: Call SID.
+          description: The unique SID identifier of the Call.
         account_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: Account SID.
+          description: The unique SID identifier of the Account.
         answered_by:
           type: string
           $ref: '#/components/schemas/annotation_enum_answered_by'
           nullable: true
-          description: Indicates the answering entity as determined by Answering Machine
-            Detection.
+          description: 'Which entity answered the call as determined by Answering
+            Machine Detection. Use this to provide feedback on Answering Machine Detection
+            accuracy. Possible enumerated values, one of: human, machine. human indicates
+            the call was answered by a person. machine indicates the call was answered
+            by an answering machine.'
         connectivity_issue:
           type: string
           $ref: '#/components/schemas/annotation_enum_connectivity_issue'
           nullable: true
-          description: Indicates if the call had any connectivity issue
+          description: 'Specify if the call had any connectivity issues. Possible
+            enumerated values, one : no_connectivity_issue, invalid_number, caller_id,
+            dropped_call, number_reachability.'
         quality_issues:
           type: array
           items:
             type: string
           nullable: true
-          description: Indicates if the call had audio quality issues.
+          description: 'Specify if the call had any subjective quality issues. Possible
+            values, one or more of:  no_quality_issue, low_volume, choppy_robotic,
+            echo, dtmf, latency, owa, static_noise. Use comma separated values to
+            indicate multiple quality issues for the same call'
         spam:
           type: boolean
           nullable: true
-          description: Call spam indicator
+          description: 'Specify if the call was a spam call. Use this to provide feedback
+            on whether calls placed from your account were marked as spam, or if inbound
+            calls received by your account were unwanted spam. Is of type Boolean:
+            true, false. Use true if the call was a spam call.'
         call_score:
           type: integer
           nullable: true
-          description: Call Score
+          description: 'Specify the call score. This is of type integer. Use a range
+            of 1-5 to indicate the call experience score, with the following mapping
+            as a reference for rating the call [5: Excellent, 4: Good, 3 : Fair, 2
+            : Poor, 1: Bad].'
         comment:
           type: string
           nullable: true
-          description: User comments
+          description: "Specify any comments pertaining to the call. This of type\
+            \ string with a max limit of 100 characters. Twilio does not treat this\
+            \ field as PII, so don\u2019t put any PII in here."
         incident:
           type: string
           nullable: true
-          description: Call tag for incidents or support ticket
+          description: "Associate this call with an incident or support ticket. This\
+            \ is of type string with a max limit of 100 characters. Twilio does not\
+            \ treat this field as PII, so don\u2019t put any PII in here."
         url:
           type: string
           format: uri
@@ -256,33 +274,35 @@ components:
           maxLength: 34
           pattern: ^CF[0-9a-fA-F]{32}$
           nullable: true
-          description: Conference SID.
+          description: The unique SID identifier of the Conference.
         account_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: Account SID.
+          description: The unique SID identifier of the Account.
         friendly_name:
           type: string
           nullable: true
-          description: Custom label for the conference.
+          description: Custom label for the conference resource, up to 64 characters.
         create_time:
           type: string
           format: date-time
           nullable: true
-          description: Conference creation date/time.
+          description: Conference creation date and time in ISO 8601 format.
         start_time:
           type: string
           format: date-time
           nullable: true
-          description: Timestamp in ISO 8601 format when the conference started.
+          description: Timestamp in ISO 8601 format when the conference started. Conferences
+            do not start until at least two participants join, at least one of whom
+            has startConferenceOnEnter=true.
         end_time:
           type: string
           format: date-time
           nullable: true
-          description: Conference end date/time.
+          description: Conference end date and time in ISO 8601 format.
         duration_seconds:
           type: integer
           nullable: true
@@ -290,68 +310,79 @@ components:
         connect_duration_seconds:
           type: integer
           nullable: true
-          description: Duration of the conference in seconds.
+          description: Duration of the between conference start event and conference
+            end event in seconds.
         status:
           type: string
           $ref: '#/components/schemas/conference_enum_conference_status'
           nullable: true
-          description: Status of conference
+          description: Status of this Conference; `in_progress`, `not_started`, `completed`
+            or `summary_timeout`. if Twilio don't receive `last_participant_left`
+            event, summary will be timeout after 24 hours
         max_participants:
           type: integer
           nullable: true
-          description: Max participants specified in config.
+          description: Maximum number of concurrent participants as specified by the
+            configuration.
         max_concurrent_participants:
           type: integer
           nullable: true
-          description: Actual maximum concurrent participants.
+          description: Actual maximum number of concurrent participants in the conference.
         unique_participants:
           type: integer
           nullable: true
-          description: Unique conference participants.
+          description: Unique conference participants based on caller ID.
         end_reason:
           type: string
           $ref: '#/components/schemas/conference_enum_conference_end_reason'
           nullable: true
-          description: Conference end reason.
+          description: Conference end reason; e.g. last participant left, modified
+            by API, etc.
         ended_by:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CA[0-9a-fA-F]{32}$
           nullable: true
-          description: Call SID that ended the conference.
+          description: Call SID of the participant whose actions ended the conference.
         mixer_region:
           type: string
           $ref: '#/components/schemas/conference_enum_region'
           nullable: true
-          description: Region where the conference was mixed.
+          description: Twilio region where the conference media was mixed.
         mixer_region_requested:
           type: string
           $ref: '#/components/schemas/conference_enum_region'
           nullable: true
-          description: Configuration-requested conference mixer region.
+          description: Twilio region where conference mixed was specified to be mixed
+            in configuration.
         recording_enabled:
           type: boolean
           nullable: true
-          description: Boolean. Indicates whether recording was enabled.
+          description: Boolean. Indicates whether recording was enabled at the conference
+            mixer.
         detected_issues:
           nullable: true
-          description: Potential issues detected during the conference.
+          description: Potential issues detected by Twilio during the conference.
         tags:
           type: array
           items:
             type: string
             $ref: '#/components/schemas/conference_enum_tag'
           nullable: true
-          description: Tags for detected conference conditions and participant behaviors.
+          description: Tags for detected conference conditions and participant behaviors
+            which may be of interest.
         tag_info:
           nullable: true
-          description: Object. Contains details about conference tags.
+          description: Object. Contains details about conference tags including severity.
         processing_state:
           type: string
           $ref: '#/components/schemas/conference_enum_processing_state'
           nullable: true
-          description: Processing state for the Conference Summary resource.
+          description: Processing state for the Conference Summary resource. Will
+            be `in_progress` while data is being aggregated, `timeout` if Twilio couldn't
+            process the summary in 24hrs, and `complete` once aggregations and analysis
+            has ended.
         url:
           type: string
           format: uri
@@ -361,7 +392,8 @@ components:
           type: object
           format: uri-map
           nullable: true
-          description: Nested resource URLs.
+          description: Contains a dictionary of URL links to nested resources of this
+            Conference.
     conference_enum_conference_status:
       type: string
       enum:
@@ -427,26 +459,27 @@ components:
           maxLength: 34
           pattern: ^CF[0-9a-fA-F]{32}$
           nullable: true
-          description: Conference SID.
+          description: The unique SID identifier of the Conference.
         call_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^CA[0-9a-fA-F]{32}$
           nullable: true
-          description: Unique SID identifier of the call.
+          description: Unique SID identifier of the call that generated the Participant
+            resource.
         account_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
-          description: Account SID.
+          description: The unique SID identifier of the Account.
         call_direction:
           type: string
           $ref: '#/components/schemas/conference_participant_enum_call_direction'
           nullable: true
-          description: Call direction of the participant.
+          description: Call direction of the participant; inbound or outbound.
         from:
           type: string
           nullable: true
@@ -463,7 +496,8 @@ components:
         country_code:
           type: string
           nullable: true
-          description: ISO alpha-2 country code of the participant.
+          description: ISO alpha-2 country code of the participant based on caller
+            ID or called number.
         is_moderator:
           type: boolean
           nullable: true
@@ -486,16 +520,17 @@ components:
         outbound_queue_length:
           type: integer
           nullable: true
-          description: Estimated time in queue at call creation.
+          description: Add Participant API only. Estimated time in queue at call creation.
         outbound_time_in_queue:
           type: integer
           nullable: true
-          description: Actual time in queue (seconds).
+          description: Add Participant API only. Actual time in queue in seconds.
         jitter_buffer_size:
           type: string
           $ref: '#/components/schemas/conference_participant_enum_jitter_buffer_size'
           nullable: true
-          description: The Jitter Buffer Size of this Conference Participant.
+          description: The Jitter Buffer Size of this Conference Participant. One
+            of `large`, `small`, `medium` or `off`.
         is_coach:
           type: boolean
           nullable: true
@@ -515,27 +550,32 @@ components:
           type: string
           $ref: '#/components/schemas/conference_participant_enum_region'
           nullable: true
-          description: The Conference Region of this Conference Participant.
+          description: The Conference Region of this Conference Participant. One of
+            `us1`, `us2`, `au1`, `br1`, `ie1`, `jp1`, `sg1` or `de1`.
         call_type:
           type: string
           $ref: '#/components/schemas/conference_participant_enum_call_type'
           nullable: true
-          description: The Call Type of this Conference Participant.
+          description: The Call Type of this Conference Participant. One of `carrier`,
+            `client` or `sip`.
         processing_state:
           type: string
           $ref: '#/components/schemas/conference_participant_enum_processing_state'
           nullable: true
-          description: Processing state of the Participant Summary.
+          description: Processing state of the Participant Summary. Will be `in_progress`
+            while data is being aggregated, `timeout` if Twilio couldn't process the
+            summary in 24hrs, and `complete` once aggregations and analysis has ended.
         properties:
           nullable: true
           description: Participant properties and metadata.
         events:
           nullable: true
           description: Object containing information of actions taken by participants.
-            Nested resource URLs.
+            Contains a dictionary of URL links to nested resources of this Conference
+            Participant.
         metrics:
           nullable: true
-          description: Object. Contains participant quality metrics.
+          description: Object. Contains participant call quality metrics.
         url:
           type: string
           format: uri
@@ -826,7 +866,7 @@ components:
           type: string
           format: date-time
           nullable: true
-          description: When the participant left the room
+          description: When the participant left the room.
         duration_sec:
           type: integer
           format: int64
@@ -850,18 +890,20 @@ components:
           type: string
           $ref: '#/components/schemas/video_participant_summary_enum_room_status'
           nullable: true
-          description: Status of the room.
+          description: Status of the room. Can be `in_progress` or `completed`.
         codecs:
           type: array
           items:
             type: string
             $ref: '#/components/schemas/video_participant_summary_enum_codec'
           nullable: true
-          description: Codecs detected from the participant.
+          description: Codecs detected from the participant. Can be `VP8`, `H264`,
+            or `VP9`.
         end_reason:
           type: string
           nullable: true
-          description: Reason the participant left the room.
+          description: Reason the participant left the room. See [the list of possible
+            values here](https://www.twilio.com/docs/video/video-log-analyzer/video-log-analyzer-api#end_reason).
         error_code:
           type: integer
           nullable: true
@@ -874,19 +916,25 @@ components:
           type: string
           $ref: '#/components/schemas/video_participant_summary_enum_twilio_realm'
           nullable: true
-          description: Twilio media region the participant connected to.
+          description: Twilio media region the participant connected to. See [the
+            list of possible media servers here](https://www.twilio.com/docs/video/ip-addresses).
         properties:
           nullable: true
           description: Object containing information about the participant's data
-            from the room.
+            from the room. See [below](https://www.twilio.com/docs/video/video-log-analyzer/video-log-analyzer-api#properties)
+            for more information.
         edge_location:
           type: string
           $ref: '#/components/schemas/video_participant_summary_enum_edge_location'
           nullable: true
-          description: Name of the edge location the participant connected to.
+          description: Name of the edge location the participant connected to. See
+            [the list of public edge locations](https://www.twilio.com/docs/global-infrastructure/edge-locations#public-edge-locations)
+            for the possible values.
         publisher_info:
           nullable: true
           description: Object containing information about the SDK name and version.
+            See [below](https://www.twilio.com/docs/video/video-log-analyzer/video-log-analyzer-api#publisher_info)
+            for more information.
         url:
           type: string
           format: uri
@@ -948,7 +996,7 @@ components:
         room_name:
           type: string
           nullable: true
-          description: room friendly name.
+          description: Room friendly name.
         create_time:
           type: string
           format: date-time
@@ -963,12 +1011,12 @@ components:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_room_type'
           nullable: true
-          description: Type of room.
+          description: Type of room. Can be `go`, `peer_to_peer`, `group`, or `group_small`.
         room_status:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_room_status'
           nullable: true
-          description: Status of the room.
+          description: Status of the room. Can be `in_progress` or `completed`.
         status_callback:
           type: string
           format: uri
@@ -990,12 +1038,12 @@ components:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_created_method'
           nullable: true
-          description: How the room was created.
+          description: How the room was created. Can be `sdk`, `ad_hoc`, or `api`.
         end_reason:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_end_reason'
           nullable: true
-          description: Reason the room ended.
+          description: Reason the room ended. Can be `room_ended_via_api` or `timeout`.
         max_participants:
           type: integer
           nullable: true
@@ -1025,12 +1073,14 @@ components:
             type: string
             $ref: '#/components/schemas/video_room_summary_enum_codec'
           nullable: true
-          description: Codecs used by participants in the room.
+          description: Codecs used by participants in the room. Can be `VP8`, `H264`,
+            or `VP9`.
         media_region:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_twilio_realm'
           nullable: true
-          description: Region of Twilio media servers for the room.
+          description: Region of Twilio media servers for the room. See [the list
+            of possible media servers here](https://www.twilio.com/docs/video/ip-addresses).
         duration_sec:
           type: integer
           format: int64
@@ -1052,7 +1102,8 @@ components:
           $ref: '#/components/schemas/video_room_summary_enum_processing_state'
           nullable: true
           description: Video Log Analyzer resource state. Will be either `in-progress`
-            or `complete`.
+            or `complete`. `in-progress` indicates that more details may be appended
+            to the resource. `complete` indicates no further information will be added.
         recording_enabled:
           type: boolean
           nullable: true
@@ -1061,7 +1112,9 @@ components:
           type: string
           $ref: '#/components/schemas/video_room_summary_enum_edge_location'
           nullable: true
-          description: Edge location of Twilio media servers for the room.
+          description: Edge location of Twilio media servers for the room. See [the
+            list of public edge locations](https://www.twilio.com/docs/global-infrastructure/edge-locations#public-edge-locations)
+            for the possible values.
         url:
           type: string
           format: uri
