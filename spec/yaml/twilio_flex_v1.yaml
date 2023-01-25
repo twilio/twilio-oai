@@ -1,13 +1,5 @@
 components:
   schemas:
-    flex.v1.assessments:
-      type: object
-      properties:
-        url:
-          type: string
-          format: uri
-          nullable: true
-          description: The URL of this resource.
     flex.v1.channel:
       type: object
       properties:
@@ -396,7 +388,76 @@ components:
       - studio
       - external
       - task
-    flex.v1.gooddata:
+    flex.v1.insights_assessments:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
+    flex.v1.insights_questionnaires_category:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Flex Insights resource and owns this resource.
+        category_id:
+          type: string
+          nullable: true
+          description: The unique ID for the category
+        name:
+          type: string
+          nullable: true
+          description: The name of this category.
+        url:
+          type: string
+          format: uri
+          nullable: true
+    flex.v1.insights_questionnaires_question:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Flex Insights resource and owns this resource.
+        question_id:
+          type: string
+          nullable: true
+          description: The unique ID of the question
+        question:
+          type: string
+          nullable: true
+          description: The question.
+        description:
+          type: string
+          nullable: true
+          description: The description for the question.
+        category:
+          nullable: true
+          description: The Category for the question.
+        answer_set_id:
+          type: string
+          nullable: true
+          description: The answer_set for the question.
+        allow_na:
+          type: boolean
+          nullable: true
+          description: The flag  to enable for disable NA for answer.
+        url:
+          type: string
+          format: uri
+          nullable: true
+    flex.v1.insights_session:
       type: object
       properties:
         workspace_id:
@@ -420,6 +481,60 @@ components:
           format: uri
           nullable: true
           description: The URL of this resource.
+    flex.v1.insights_settings_answersets:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Flex Insights resource and owns this resource.
+        answer_sets:
+          nullable: true
+          description: The lis of answer sets
+        answer_set_categories:
+          nullable: true
+          description: The list of answer set categories
+        not_applicable:
+          nullable: true
+          description: The details for not applicable answer set
+        url:
+          type: string
+          format: uri
+          nullable: true
+    flex.v1.insights_settings_comment:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Flex Insights resource and owns this resource.
+        comments:
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+    flex.v1.insights_user_roles:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Flex Insights roles for the user
+        url:
+          type: string
+          format: uri
+          nullable: true
     flex.v1.interaction:
       type: object
       properties:
@@ -621,19 +736,6 @@ components:
       - external
       - agent
       - unknown
-    flex.v1.user_roles:
-      type: object
-      properties:
-        roles:
-          type: array
-          items:
-            type: string
-          nullable: true
-          description: Flex Insights roles for the user
-        url:
-          type: string
-          format: uri
-          nullable: true
     flex.v1.web_channel:
       type: object
       properties:
@@ -696,33 +798,9 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.38.2
+  version: 1.38.3
 openapi: 3.0.1
 paths:
-  /v1/Accounts/Assessments:
-    servers:
-    - url: https://flex-api.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties: []
-      pathType: instance
-      className: assessments
-    post:
-      description: Add assessments against conversation to dynamo db. Used in assessments
-        screen by user. Users can select the questionnaire and pick up answers for
-        each and every question.
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/flex.v1.assessments'
-          description: Created
-      security:
-      - accountSid_authToken: []
-      operationId: CreateAssessments
-      x-maturity:
-      - GA
   /v1/Channels:
     servers:
     - url: https://flex-api.twilio.com
@@ -1319,6 +1397,289 @@ paths:
       operationId: DeleteFlexFlow
       x-maturity:
       - GA
+  /v1/Accounts/Assessments:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      className: assessments
+    post:
+      description: Add assessments against conversation to dynamo db. Used in assessments
+        screen by user. Users can select the questionnaire and pick up answers for
+        each and every question.
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_assessments'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateInsightsAssessments
+      x-maturity:
+      - GA
+  /v1/Insights/QM/Categories:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - account_sid
+      - category_id
+      - name
+      pathType: list
+      mountName: insights_questionnaires_category
+    post:
+      description: To create a category for Questions
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_questionnaires_category'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateInsightsQuestionnairesCategory
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateInsightsQuestionnairesCategoryRequest
+              properties:
+                Name:
+                  type: string
+                  description: The name of this category.
+              required:
+              - Name
+  /v1/Insights/QM/Categories/{CategoryId}:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - account_sid
+      - category_id
+      - name
+      pathType: instance
+      mountName: insights_questionnaires_category
+    post:
+      description: To update the category for Questions
+      parameters:
+      - name: CategoryId
+        in: path
+        description: The ID of the category to be update
+        schema:
+          type: string
+        required: true
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_questionnaires_category'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateInsightsQuestionnairesCategory
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateInsightsQuestionnairesCategoryRequest
+              properties:
+                Name:
+                  type: string
+                  description: The name of this category.
+              required:
+              - Name
+    delete:
+      description: ''
+      parameters:
+      - name: CategoryId
+        in: path
+        description: The ID of the category to be deleted
+        schema:
+          type: string
+        required: true
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteInsightsQuestionnairesCategory
+      x-maturity:
+      - Preview
+  /v1/Insights/QM/Questions:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - account_sid
+      - question_id
+      - question
+      pathType: list
+      mountName: insights_questionnaires_question
+    post:
+      description: To create a question for a Category
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_questionnaires_question'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateInsightsQuestionnairesQuestion
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateInsightsQuestionnairesQuestionRequest
+              properties:
+                CategoryId:
+                  type: string
+                  description: The ID of the category
+                Question:
+                  type: string
+                  description: The question.
+                Description:
+                  type: string
+                  description: The description for the question.
+                AnswerSetId:
+                  type: string
+                  description: The answer_set for the question.
+                AllowNa:
+                  type: boolean
+                  description: The flag to enable for disable NA for answer.
+              required:
+              - CategoryId
+              - Question
+              - Description
+              - AnswerSetId
+              - AllowNa
+  /v1/Insights/QM/Questions/{QuestionId}:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - account_sid
+      - question_id
+      - question
+      pathType: instance
+      mountName: insights_questionnaires_question
+    post:
+      description: To update the question
+      parameters:
+      - name: QuestionId
+        in: path
+        description: The unique ID of the question
+        schema:
+          type: string
+        required: true
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_questionnaires_question'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateInsightsQuestionnairesQuestion
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateInsightsQuestionnairesQuestionRequest
+              properties:
+                Question:
+                  type: string
+                  description: The question.
+                Description:
+                  type: string
+                  description: The description for the question.
+                AnswerSetId:
+                  type: string
+                  description: The answer_set for the question.
+                AllowNa:
+                  type: boolean
+                  description: The flag to enable for disable NA for answer.
+                CategoryId:
+                  type: string
+                  description: The ID of the category
+              required:
+              - Question
+              - Description
+              - AnswerSetId
+              - AllowNa
+    delete:
+      description: ''
+      parameters:
+      - name: QuestionId
+        in: path
+        description: The unique ID of the question
+        schema:
+          type: string
+        required: true
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteInsightsQuestionnairesQuestion
+      x-maturity:
+      - Preview
   /v1/Insights/Session:
     servers:
     - url: https://flex-api.twilio.com
@@ -1330,7 +1691,7 @@ paths:
       - session_id
       - base_url
       pathType: instance
-      mountName: good_data
+      mountName: insights_session
     post:
       description: To obtain session details for fetching reports and dashboards
       parameters:
@@ -1344,11 +1705,103 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/flex.v1.gooddata'
+                $ref: '#/components/schemas/flex.v1.insights_session'
           description: Created
       security:
       - accountSid_authToken: []
-      operationId: CreateGooddata
+      operationId: CreateInsightsSession
+      x-maturity:
+      - GA
+  /v1/Insights/QM/Settings/AnswerSets:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - answer_sets
+      - answer_set_categories
+      - not_applicable
+      pathType: list
+      mountName: insights_settings_answer_sets
+      className: insights_settings_answer_sets
+    get:
+      description: To get the Answer Set Settings for an Account
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_settings_answersets'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchInsightsSettingsAnswersets
+      x-maturity:
+      - Preview
+  /v1/Insights/QM/Settings/CommentTags:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - comments
+      pathType: list
+      mountName: insights_settings_comment
+    get:
+      description: To get the Comment Settings for an Account
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_settings_comment'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchInsightsSettingsComment
+      x-maturity:
+      - Preview
+  /v1/Insights/UserRoles:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - roles
+      pathType: instance
+      mountName: insights_user_roles
+      className: insights_user_roles
+    get:
+      description: This is used by Flex UI and Quality Management to fetch the Flex
+        Insights roles for the user
+      parameters:
+      - name: Token
+        in: header
+        description: The Token HTTP request header
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v1.insights_user_roles'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchInsightsUserRoles
       x-maturity:
       - GA
   /v1/Interactions/{Sid}:
@@ -1914,36 +2367,6 @@ paths:
                     must be an agent.'
               required:
               - Status
-  /v1/Insights/UserRoles:
-    servers:
-    - url: https://flex-api.twilio.com
-    description: 'TODO: Resource-level docs'
-    x-twilio:
-      defaultOutputProperties:
-      - roles
-      pathType: instance
-      className: user_roles
-    get:
-      description: This is used by Flex UI and Quality Management to fetch the Flex
-        Insights roles for the user
-      parameters:
-      - name: Token
-        in: header
-        description: The Token HTTP request header
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/flex.v1.user_roles'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      operationId: FetchUserRoles
-      x-maturity:
-      - GA
   /v1/WebChannels:
     servers:
     - url: https://flex-api.twilio.com
@@ -2150,3 +2573,7 @@ servers:
 x-maturity:
 - name: GA
   description: This product is Generally Available.
+- name: Preview
+  description: PLEASE NOTE that this is a Preview product that is subject to change.
+    Use it with caution. If you currently do not have developer preview access, please
+    contact help@twilio.com.
