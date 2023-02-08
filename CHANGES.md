@@ -1,5 +1,15 @@
 twilio-oai changelog
 ====================
+[2023-02-08] Version 1.39.0
+---------------------------
+**Library - Feature**
+- [PR #88](https://github.com/twilio/twilio-oai/pull/88): add Page and PageToken parameters to read operations. Thanks to [@childish-sambino](https://github.com/childish-sambino)!
+
+**Lookups**
+- Add `disposable_phone_number_risk` package to the lookup response
+- Add `sms_pumping_risk` package to the lookup response
+
+
 [2023-01-25] Version 1.38.3
 ---------------------------
 **Library - Fix**
