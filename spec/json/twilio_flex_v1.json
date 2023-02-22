@@ -440,11 +440,76 @@
       "flex.v1.insights_assessments": {
         "type": "object",
         "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Account."
+          },
+          "assessment_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The unique id of the assessment"
+          },
+          "offset": {
+            "type": "number",
+            "nullable": true,
+            "description": "Offset of the conversation"
+          },
+          "report": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "The flag indicating if this assessment is part of report "
+          },
+          "weight": {
+            "type": "number",
+            "nullable": true,
+            "description": "The weightage given to this comment"
+          },
+          "agent_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The id of the Agent"
+          },
+          "segment_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "Segment Id of conversation"
+          },
+          "user_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The name of the user."
+          },
+          "user_email": {
+            "type": "string",
+            "nullable": true,
+            "description": "The email id of the user."
+          },
+          "answer_text": {
+            "type": "string",
+            "nullable": true,
+            "description": "The answer text selected by user"
+          },
+          "answer_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The id of the answer selected by user"
+          },
+          "assessment": {
+            "nullable": true,
+            "description": "Assessment Details associated with an assessment"
+          },
+          "timestamp": {
+            "type": "number",
+            "nullable": true
+          },
           "url": {
             "type": "string",
             "format": "uri",
-            "nullable": true,
-            "description": "The URL of this resource."
+            "nullable": true
           }
         }
       },
@@ -632,6 +697,10 @@
             "nullable": true,
             "description": "Integer value that tells a particular question is used by how many questionnaires"
           },
+          "answer_set": {
+            "nullable": true,
+            "description": "Set of answers for the question"
+          },
           "url": {
             "type": "string",
             "format": "uri",
@@ -731,9 +800,8 @@
             "description": "The offset value for the recording."
           },
           "media": {
-            "type": "string",
             "nullable": true,
-            "description": "The link for the conversation."
+            "description": "The media identifiers of the conversation."
           },
           "assessment_type": {
             "nullable": true,
@@ -1145,7 +1213,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.39.0"
+    "version": "1.39.1"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1951,7 +2019,7 @@
         ]
       }
     },
-    "/v1/Accounts/Assessments": {
+    "/v1/Insights/QM/Assessments": {
       "servers": [
         {
           "url": "https://flex-api.twilio.com"
@@ -1959,12 +2027,26 @@
       ],
       "description": "TODO: Resource-level docs",
       "x-twilio": {
-        "defaultOutputProperties": [],
-        "pathType": "instance",
+        "defaultOutputProperties": [
+          "account_sid",
+          "assessment_id",
+          "assessment"
+        ],
+        "pathType": "list",
         "className": "assessments"
       },
       "post": {
         "description": "Add assessments against conversation to dynamo db. Used in assessments screen by user. Users can select the questionnaire and pick up answers for each and every question.",
+        "parameters": [
+          {
+            "name": "Token",
+            "in": "header",
+            "description": "The Token HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
             "content": {
@@ -1984,8 +2066,171 @@
         ],
         "operationId": "CreateInsightsAssessments",
         "x-maturity": [
-          "GA"
-        ]
+          "Preview"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateInsightsAssessmentsRequest",
+                "properties": {
+                  "CategoryId": {
+                    "type": "string",
+                    "description": "The id of the category "
+                  },
+                  "CategoryName": {
+                    "type": "string",
+                    "description": "The name of the category"
+                  },
+                  "SegmentId": {
+                    "type": "string",
+                    "description": "Segment Id of the conversation"
+                  },
+                  "UserName": {
+                    "type": "string",
+                    "description": "Name of the user assessing conversation"
+                  },
+                  "UserEmail": {
+                    "type": "string",
+                    "description": "Email of the user assessing conversation"
+                  },
+                  "AgentId": {
+                    "type": "string",
+                    "description": "The id of the Agent"
+                  },
+                  "Offset": {
+                    "type": "number",
+                    "description": "The offset of the conversation."
+                  },
+                  "MetricId": {
+                    "type": "string",
+                    "description": "The question Id selected for assessment"
+                  },
+                  "MetricName": {
+                    "type": "string",
+                    "description": "The question name of the assessment"
+                  },
+                  "AnswerText": {
+                    "type": "string",
+                    "description": "The answer text selected by user"
+                  },
+                  "AnswerId": {
+                    "type": "string",
+                    "description": "The id of the answer selected by user"
+                  },
+                  "QuestionnaireId": {
+                    "type": "string",
+                    "description": "Questionnaire Id of the associated question"
+                  }
+                },
+                "required": [
+                  "CategoryId",
+                  "CategoryName",
+                  "SegmentId",
+                  "UserName",
+                  "UserEmail",
+                  "AgentId",
+                  "Offset",
+                  "MetricId",
+                  "MetricName",
+                  "AnswerText",
+                  "AnswerId",
+                  "QuestionnaireId"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/Insights/QM/Assessments/{AssessmentId}": {
+      "servers": [
+        {
+          "url": "https://flex-api.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "account_sid",
+          "assessment_id",
+          "assessment"
+        ],
+        "pathType": "instance",
+        "className": "assessments"
+      },
+      "post": {
+        "description": "Update a specific Assessment assessed earlier",
+        "parameters": [
+          {
+            "name": "AssessmentId",
+            "in": "path",
+            "description": "The id of the assessment to be modified",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "Token",
+            "in": "header",
+            "description": "The Token HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flex.v1.insights_assessments"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateInsightsAssessments",
+        "x-maturity": [
+          "Preview"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateInsightsAssessmentsRequest",
+                "properties": {
+                  "Offset": {
+                    "type": "number",
+                    "description": "The offset of the conversation"
+                  },
+                  "AnswerText": {
+                    "type": "string",
+                    "description": "The answer text selected by user"
+                  },
+                  "AnswerId": {
+                    "type": "string",
+                    "description": "The id of the answer selected by user"
+                  }
+                },
+                "required": [
+                  "Offset",
+                  "AnswerText",
+                  "AnswerId"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/Insights/QM/Assessments/Comments": {
@@ -3283,6 +3528,122 @@
         "pathType": "list",
         "mountName": "insights_segments",
         "className": "insights_segments"
+      },
+      "get": {
+        "description": "To get segments for given reservation Ids",
+        "parameters": [
+          {
+            "name": "Token",
+            "in": "header",
+            "description": "The Token HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ReservationId",
+            "in": "query",
+            "description": "The list of reservation Ids",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 34,
+                "maxLength": 34,
+                "pattern": "^WR[0-9a-fA-F]{32}$"
+              }
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListInsightsSegmentsResponse",
+                  "properties": {
+                    "segments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/flex.v1.insights_segments"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListInsightsSegments",
+        "x-maturity": [
+          "Preview"
+        ]
       }
     },
     "/v1/Insights/Session": {

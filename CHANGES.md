@@ -1,5 +1,12 @@
 twilio-oai changelog
 ====================
+[2023-02-22] Version 1.39.1
+---------------------------
+**Api**
+- Remove `scheduled_for` property from message resource
+- Add `scheduled_for` property to message resource
+
+
 [2023-02-08] Version 1.39.0
 ---------------------------
 **Library - Feature**
