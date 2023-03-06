@@ -1,0 +1,462 @@
+{
+  "components": {
+    "schemas": {
+      "intelligence.v1.service": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Account the Service belongs to."
+          },
+          "auto_redaction": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts made on this service."
+          },
+          "media_redaction": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts media made on this service. The auto_redaction flag must be enabled, results in error otherwise."
+          },
+          "auto_transcribe": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Instructs the Speech Recognition service to automatically transcribe all recordings made on the account."
+          },
+          "data_logging": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Data logging allows Twilio to improve the quality of the speech recognition through using customer data to refine its speech recognition models."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this Service was created, given in ISO 8601 format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this Service was updated, given in ISO 8601 format."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "A human readable description of this resource, up to 64 characters."
+          },
+          "language_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The default language code of the audio."
+          },
+          "sid": {
+            "type": "string",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies this Service."
+          },
+          "unique_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Provides a unique and addressable name to be assigned to this Service, assigned by the developer, to be optionally used in addition to SID."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource."
+          },
+          "version": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The version number of this Service."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "info": {
+    "title": "Twilio - Intelligence",
+    "description": "This is the public Twilio REST API.",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.38.3"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/v1/Services": {
+      "servers": [
+        {
+          "url": "https://intelligence.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "unique_name",
+          "friendly_name",
+          "language_code",
+          "date_created",
+          "version"
+        ],
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Create a new Service for the given Account",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/intelligence.v1.service"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateService",
+        "x-maturity": [
+          "Preview"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateServiceRequest",
+                "properties": {
+                  "UniqueName": {
+                    "type": "string",
+                    "description": "Provides a unique and addressable name to be assigned to this Service, assigned by the developer, to be optionally used in addition to SID."
+                  },
+                  "AutoTranscribe": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically transcribe all recordings made on the account."
+                  },
+                  "DataLogging": {
+                    "type": "boolean",
+                    "description": "Data logging allows Twilio to improve the quality of the speech recognition through using customer data to refine its speech recognition models."
+                  },
+                  "FriendlyName": {
+                    "type": "string",
+                    "description": "A human readable description of this resource, up to 64 characters."
+                  },
+                  "LanguageCode": {
+                    "type": "string",
+                    "description": "The default language code of the audio."
+                  },
+                  "AutoRedaction": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts made on this service."
+                  },
+                  "MediaRedaction": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts media made on this service. The auto_redaction flag must be enabled, results in error otherwise."
+                  }
+                },
+                "required": [
+                  "UniqueName"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Retrieves a list of all Services for an account.",
+        "parameters": [
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListServiceResponse",
+                  "properties": {
+                    "services": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/intelligence.v1.service"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListService",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
+    "/v1/Services/{Sid}": {
+      "servers": [
+        {
+          "url": "https://intelligence.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "unique_name",
+          "friendly_name",
+          "language_code",
+          "date_created",
+          "version"
+        ],
+        "pathType": "instance"
+      },
+      "delete": {
+        "description": "Delete a specific Service.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this Service.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteService",
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "get": {
+        "description": "Fetch a specific Service.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this Service.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/intelligence.v1.service"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchService",
+        "x-maturity": [
+          "Preview"
+        ]
+      },
+      "post": {
+        "description": "Update a specific Service.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this Service.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "The If-Match HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/intelligence.v1.service"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateService",
+        "x-maturity": [
+          "Preview"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateServiceRequest",
+                "properties": {
+                  "AutoTranscribe": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically transcribe all recordings made on the account."
+                  },
+                  "DataLogging": {
+                    "type": "boolean",
+                    "description": "Data logging allows Twilio to improve the quality of the speech recognition through using customer data to refine its speech recognition models."
+                  },
+                  "FriendlyName": {
+                    "type": "string",
+                    "description": "A human readable description of this resource, up to 64 characters."
+                  },
+                  "LanguageCode": {
+                    "type": "string",
+                    "description": "The default language code of the audio."
+                  },
+                  "UniqueName": {
+                    "type": "string",
+                    "description": "Provides a unique and addressable name to be assigned to this Service, assigned by the developer, to be optionally used in addition to SID."
+                  },
+                  "AutoRedaction": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts made on this service."
+                  },
+                  "MediaRedaction": {
+                    "type": "boolean",
+                    "description": "Instructs the Speech Recognition service to automatically redact PII from all transcripts media made on this service. The auto_redaction flag must be enabled, results in error otherwise."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://intelligence.twilio.com"
+    }
+  ],
+  "x-maturity": [
+    {
+      "name": "Preview",
+      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com."
+    }
+  ]
+}

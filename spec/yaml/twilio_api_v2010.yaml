@@ -1172,6 +1172,9 @@ components:
           nullable: true
           description: Either `human` or `machine` if this call was initiated with
             answering machine detection. Empty otherwise.
+        annotation:
+          type: string
+          nullable: true
         api_version:
           type: string
           nullable: true
@@ -1767,6 +1770,7 @@ components:
           type: string
           nullable: true
           description: A string that you assigned to describe this conference room.
+            Maxiumum length is 128 characters.
         region:
           type: string
           nullable: true
@@ -2515,6 +2519,10 @@ components:
             phone number. Some regions require a Bundle to meet local Regulations.
         status:
           type: string
+          nullable: true
+        subresource_uris:
+          type: object
+          format: uri-map
           nullable: true
     incoming_phone_number_enum_address_requirement:
       type: string
@@ -3775,6 +3783,10 @@ components:
           nullable: true
           description: A list of related resources identified by their URIs relative
             to `https://api.twilio.com`
+        tags:
+          nullable: true
+          description: A string containing a JSON map of key value pairs of tags to
+            be recorded as metadata for the message.
     message_enum_status:
       type: string
       enum:
@@ -4421,6 +4433,10 @@ components:
           nullable: true
           description: ' The maximum number of calls that can be in the queue. The
             default is 100 and the maximum is 5000.'
+        subresource_uris:
+          type: object
+          format: uri-map
+          nullable: true
     api.v2010.account.recording:
       type: object
       properties:
@@ -12135,6 +12151,9 @@ paths:
                   description: The number of seconds that we should attempt to detect
                     an answering machine before timing out and sending a voice request
                     with `AnsweredBy` of `unknown`. The default timeout is 30 seconds.
+                ProviderSid:
+                  type: string
+                  description: ''
                 RecordingStatusCallbackEvent:
                   type: array
                   items:
@@ -12193,6 +12212,30 @@ paths:
                   - DELETE
                   description: 'The HTTP method we should use when calling the `async_amd_status_callback`
                     URL. Can be: `GET` or `POST` and the default is `POST`.'
+                MachineDetectionEngine:
+                  type: string
+                  description: 'Select answering machine detection engine. Can be:
+                    `Lumenvox` or `Asterisk`. Default: `Lumenvox`.'
+                MachineDetectionMinWordLength:
+                  type: integer
+                  description: 'The minimum duration in milliseconds of voice to be
+                    considered as a word. Default: 100.'
+                MachineDetectionMaxWordLength:
+                  type: integer
+                  description: 'The maximum duration in milliseconds of a word to
+                    accept. Default: 5000.'
+                MachineDetectionWordsSilence:
+                  type: integer
+                  description: 'The minimum duration in milliseconds of silence after
+                    a word to consider the audio what follows as a new word. Default:
+                    50.'
+                MachineDetectionMaxNumOfWords:
+                  type: integer
+                  description: 'The maximum number of words in the greeting. If exceeded
+                    then it''s considered as MACHINE. Default: 5.'
+                MachineDetectionSilenceThreshold:
+                  type: integer
+                  description: 'The silence threshold. Default: 256.'
                 Byoc:
                   type: string
                   minLength: 34
@@ -12225,6 +12268,14 @@ paths:
                   type: integer
                   description: The maximum duration of the call in seconds. Constraints
                     depend on account and configuration.
+                Transcribe:
+                  type: boolean
+                  description: Whether to transcribe the call recording. The default
+                    is `false`.
+                TranscriptionConfiguration:
+                  type: string
+                  description: The SID or (unique) friendly name of the transcription
+                    configuration object to use for transcribing.
                 Url:
                   type: string
                   format: uri
@@ -13247,6 +13298,9 @@ paths:
                     be: `mono` or `dual` and the default is `mono`. `mono` records
                     all parties of the call into one channel. `dual` records each
                     party of a 2-party call into separate channels.'
+                PlayBeep:
+                  type: boolean
+                  description: ''
                 RecordingTrack:
                   type: string
                   description: 'The audio track to record for the call. Can be: `inbound`,
@@ -13444,6 +13498,9 @@ paths:
                     during the pause period, while `silence` will replace the actual
                     audio of the call with silence during the pause period. This parameter
                     only applies when setting `status` is set to `paused`.'
+                PlayBeep:
+                  type: boolean
+                  description: ''
               required:
               - Status
     get:
@@ -13792,170 +13849,6 @@ paths:
       operationId: ListConference
       x-maturity:
       - GA
-  /2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json:
-    servers:
-    - url: https://api.twilio.com
-    description: Recordings of conferences
-    x-twilio:
-      defaultOutputProperties:
-      - sid
-      - conference_sid
-      - status
-      - start_time
-      - duration
-      pathType: instance
-      parent: /Accounts/{AccountSid}/Conferences/{Sid}.json
-    post:
-      description: 'Changes the status of the recording to paused, stopped, or in-progress.
-        Note: To use `Twilio.CURRENT`, pass it as recording sid.'
-      parameters:
-      - name: AccountSid
-        in: path
-        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
-          that created the Conference Recording resource to update.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-        required: true
-      - name: ConferenceSid
-        in: path
-        description: The Conference SID that identifies the conference associated
-          with the recording to update.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^CF[0-9a-fA-F]{32}$
-        required: true
-      - name: Sid
-        in: path
-        description: The Twilio-provided string that uniquely identifies the Conference
-          Recording resource to update. Use `Twilio.CURRENT` to reference the current
-          active recording.
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/api.v2010.account.conference.conference_recording'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      operationId: UpdateConferenceRecording
-      x-maturity:
-      - GA
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              title: UpdateConferenceRecordingRequest
-              properties:
-                Status:
-                  type: string
-                  $ref: '#/components/schemas/conference_recording_enum_status'
-                  description: 'The new status of the recording. Can be: `stopped`,
-                    `paused`, `in-progress`.'
-                PauseBehavior:
-                  type: string
-                  description: 'Whether to record during a pause. Can be: `skip` or
-                    `silence` and the default is `silence`. `skip` does not record
-                    during the pause period, while `silence` will replace the actual
-                    audio of the call with silence during the pause period. This parameter
-                    only applies when setting `status` is set to `paused`.'
-              required:
-              - Status
-    get:
-      description: Fetch an instance of a recording for a call
-      parameters:
-      - name: AccountSid
-        in: path
-        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
-          that created the Conference Recording resource to fetch.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-        required: true
-      - name: ConferenceSid
-        in: path
-        description: The Conference SID that identifies the conference associated
-          with the recording to fetch.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^CF[0-9a-fA-F]{32}$
-        required: true
-      - name: Sid
-        in: path
-        description: The Twilio-provided string that uniquely identifies the Conference
-          Recording resource to fetch.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RE[0-9a-fA-F]{32}$
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/api.v2010.account.conference.conference_recording'
-          description: OK
-      security:
-      - accountSid_authToken: []
-      operationId: FetchConferenceRecording
-      x-maturity:
-      - GA
-    delete:
-      description: Delete a recording from your account
-      parameters:
-      - name: AccountSid
-        in: path
-        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
-          that created the Conference Recording resources to delete.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^AC[0-9a-fA-F]{32}$
-        required: true
-      - name: ConferenceSid
-        in: path
-        description: The Conference SID that identifies the conference associated
-          with the recording to delete.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^CF[0-9a-fA-F]{32}$
-        required: true
-      - name: Sid
-        in: path
-        description: The Twilio-provided string that uniquely identifies the Conference
-          Recording resource to delete.
-        schema:
-          type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^RE[0-9a-fA-F]{32}$
-        required: true
-      responses:
-        '204':
-          description: The resource was deleted successfully.
-      security:
-      - accountSid_authToken: []
-      operationId: DeleteConferenceRecording
-      x-maturity:
-      - GA
   /2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings.json:
     servers:
     - url: https://api.twilio.com
@@ -13969,6 +13862,83 @@ paths:
       - duration
       pathType: list
       parent: /Accounts/{AccountSid}/Conferences/{Sid}.json
+    post:
+      description: Create a recording for the call
+      parameters:
+      - name: AccountSid
+        in: path
+        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+          that will create the resource.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+        required: true
+      - name: ConferenceSid
+        in: path
+        description: The Conference SID that identifies the conference associated
+          with the recording.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CF[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v2010.account.conference.conference_recording'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateConferenceRecording
+      x-maturity:
+      - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateConferenceRecordingRequest
+              properties:
+                RecordingStatusCallbackEvent:
+                  type: array
+                  items:
+                    type: string
+                  description: 'The recording status events on which we should call
+                    the `recording_status_callback` URL. Can be: `in-progress`, `completed`
+                    and `absent` and the default is `completed`. Separate multiple
+                    event values with a space.'
+                RecordingStatusCallback:
+                  type: string
+                  format: uri
+                  description: The URL we should call when the recording events specified
+                    in parameter `recording_status_callback_event` occur.
+                RecordingStatusCallbackMethod:
+                  type: string
+                  format: http-method
+                  enum:
+                  - HEAD
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  description: 'The HTTP method we should use to call `recording_status_callback`.
+                    Can be: `GET` or `POST` and the default is `POST`.'
+                Trim:
+                  type: string
+                  description: 'Whether to trim any leading and trailing silence in
+                    the recording. Can be: `trim-silence` or `do-not-trim` and the
+                    default is `do-not-trim`. `trim-silence` trims the silence from
+                    the beginning and end of the recording and `do-not-trim` does
+                    not.'
+                PlayBeep:
+                  type: boolean
+                  description: ''
     get:
       description: Retrieve a list of recordings belonging to the call used to make
         the request
@@ -14080,6 +14050,173 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: ListConferenceRecording
+      x-maturity:
+      - GA
+  /2010-04-01/Accounts/{AccountSid}/Conferences/{ConferenceSid}/Recordings/{Sid}.json:
+    servers:
+    - url: https://api.twilio.com
+    description: Recordings of conferences
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - conference_sid
+      - status
+      - start_time
+      - duration
+      pathType: instance
+      parent: /Accounts/{AccountSid}/Conferences/{Sid}.json
+    post:
+      description: 'Changes the status of the recording to paused, stopped, or in-progress.
+        Note: To use `Twilio.CURRENT`, pass it as recording sid.'
+      parameters:
+      - name: AccountSid
+        in: path
+        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+          that created the Conference Recording resource to update.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+        required: true
+      - name: ConferenceSid
+        in: path
+        description: The Conference SID that identifies the conference associated
+          with the recording to update.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CF[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The Twilio-provided string that uniquely identifies the Conference
+          Recording resource to update. Use `Twilio.CURRENT` to reference the current
+          active recording.
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v2010.account.conference.conference_recording'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateConferenceRecording
+      x-maturity:
+      - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateConferenceRecordingRequest
+              properties:
+                Status:
+                  type: string
+                  $ref: '#/components/schemas/conference_recording_enum_status'
+                  description: 'The new status of the recording. Can be: `stopped`,
+                    `paused`, `in-progress`.'
+                PauseBehavior:
+                  type: string
+                  description: 'Whether to record during a pause. Can be: `skip` or
+                    `silence` and the default is `silence`. `skip` does not record
+                    during the pause period, while `silence` will replace the actual
+                    audio of the call with silence during the pause period. This parameter
+                    only applies when setting `status` is set to `paused`.'
+                PlayBeep:
+                  type: boolean
+                  description: ''
+              required:
+              - Status
+    get:
+      description: Fetch an instance of a recording for a call
+      parameters:
+      - name: AccountSid
+        in: path
+        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+          that created the Conference Recording resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+        required: true
+      - name: ConferenceSid
+        in: path
+        description: The Conference SID that identifies the conference associated
+          with the recording to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CF[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The Twilio-provided string that uniquely identifies the Conference
+          Recording resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RE[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/api.v2010.account.conference.conference_recording'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchConferenceRecording
+      x-maturity:
+      - GA
+    delete:
+      description: Delete a recording from your account
+      parameters:
+      - name: AccountSid
+        in: path
+        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+          that created the Conference Recording resources to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+        required: true
+      - name: ConferenceSid
+        in: path
+        description: The Conference SID that identifies the conference associated
+          with the recording to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CF[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The Twilio-provided string that uniquely identifies the Conference
+          Recording resource to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RE[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteConferenceRecording
       x-maturity:
       - GA
   /2010-04-01/Accounts/{AccountSid}/ConnectApps/{Sid}.json:
@@ -17207,9 +17344,18 @@ paths:
                     a carrier, however, we cannot guarantee that the message will
                     not be queued after this period. We recommend that this value
                     be at least 5 seconds.
+                MaxRate:
+                  type: string
+                  description: ''
                 ForceDelivery:
                   type: boolean
                   description: Reserved
+                ProviderSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^OT[0-9a-fA-F]{32}$
+                  description: ''
                 ContentRetention:
                   type: string
                   $ref: '#/components/schemas/message_enum_content_retention'
@@ -17229,6 +17375,12 @@ paths:
                   items:
                     type: string
                   description: Rich actions for Channels Messages.
+                InteractiveData:
+                  type: string
+                  description: ''
+                ForceOptIn:
+                  type: boolean
+                  description: ''
                 ShortenUrls:
                   type: boolean
                   description: Determines the usage of Click Tracking. Setting it
@@ -17238,6 +17390,25 @@ paths:
                     we will use the value set on the Messaging Service. If this parameter
                     is not set and the value is not configured on the Messaging Service
                     used this will default to `false`.
+                DomainSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^DN[0-9a-fA-F]{32}$
+                  description: Sets the Domain object used to shorten links with Click
+                    Tracking. Links in the message body will be replaced with shortened
+                    links on the specified domain. This parameter will override what
+                    is configured on the Messaging Service used. If this parameter
+                    is not set and the value is not set on the Messaging Service then
+                    shortening cannot be used.
+                ClickTrackingCallback:
+                  type: string
+                  format: uri
+                  description: Sets the URL where Twilio will send a POST request
+                    each time an HTTP request is received to the shortened links in
+                    this message. If you include this parameter we will override what
+                    is configured on the Messaging Service. URLs must contain a valid
+                    hostname and underscores are not allowed.
                 ScheduleType:
                   type: string
                   $ref: '#/components/schemas/message_enum_schedule_type'
@@ -17248,6 +17419,9 @@ paths:
                   format: date-time
                   description: The time that Twilio will send the message. Must be
                     in ISO 8601 format.
+                InvoiceTag:
+                  type: string
+                  description: ''
                 SendAsMms:
                   type: boolean
                   description: If set to True, Twilio will deliver the message as
@@ -17266,6 +17440,14 @@ paths:
                   description: Key-value pairs of variable names to substitution values,
                     used alongside a content_sid. If not specified, Content API will
                     default to the default variables defined at create time.
+                MessageIntent:
+                  type: string
+                  description: ''
+                Tags:
+                  description: A string containing a JSON map of key value pairs of
+                    tags to be recorded as metadata for the message. The object may
+                    contain up to 10 tags. Keys and values can each be up to 128 characters
+                    in length.
                 From:
                   type: string
                   format: phone-number
@@ -18816,6 +18998,30 @@ paths:
                   - DELETE
                   description: 'The HTTP method we should use when calling the `amd_status_callback`
                     URL. Can be: `GET` or `POST` and the default is `POST`.'
+                MachineDetectionEngine:
+                  type: string
+                  description: 'Select answering machine detection engine. Can be:
+                    `Lumenvox` or `Asterisk`. Default: `Lumenvox`.'
+                MachineDetectionMinWordLength:
+                  type: integer
+                  description: 'The minimum duration in milliseconds of voice to be
+                    considered as a word. Default: 100.'
+                MachineDetectionMaxWordLength:
+                  type: integer
+                  description: 'The maximum duration in milliseconds of a word to
+                    accept. Default: 5000.'
+                MachineDetectionWordsSilence:
+                  type: integer
+                  description: 'The minimum duration in milliseconds of silence after
+                    a word to consider the audio what follows as a new word. Default:
+                    50.'
+                MachineDetectionMaxNumOfWords:
+                  type: integer
+                  description: 'The maximum number of words in the greeting. If exceeded,
+                    then it''s considered as MACHINE. Default: 5.'
+                MachineDetectionSilenceThreshold:
+                  type: integer
+                  description: 'The silence threshold. Default: 256.'
               required:
               - From
               - To

@@ -1,0 +1,349 @@
+{
+  "components": {
+    "schemas": {
+      "context.v1.identity": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "Contains a dictionary of URL links to nested resources of this Identity."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the Record resource."
+          }
+        }
+      },
+      "context.v1.record": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^DQ[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the record for an object."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique id of the [Account](https://www.twilio.com/docs/api/rest/account) that this Account belongs to."
+          },
+          "source_schema_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the source schema name of the record."
+          },
+          "source_type": {
+            "type": "string",
+            "$ref": "#/components/schemas/record_enum_source_type",
+            "nullable": true,
+            "description": "Source type can be either `zendesk`, `salesforce` or `default`"
+          },
+          "source_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Human-readable name of the source of the record."
+          },
+          "record_data": {
+            "nullable": true,
+            "description": "A key-value pair that contains the description of the given record instance."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this resource was created, given as GMT in [ISO 8601](http://www.iso.org/iso/home/standards/iso8601.htm) format."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this resource was last updated, given as GMT in [ISO 8601](http://www.iso.org/iso/home/standards/iso8601.htm) format."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the Record resource."
+          }
+        }
+      },
+      "record_enum_source_type": {
+        "type": "string",
+        "enum": [
+          "zendesk",
+          "salesforce",
+          "default"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  },
+  "info": {
+    "title": "Twilio - Context",
+    "description": "This is the public Twilio REST API.",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.38.3"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/v1/Identity": {
+      "servers": [
+        {
+          "url": "https://context.twilio.com"
+        }
+      ],
+      "description": "Context store's Identity API",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "Retrieves a list of identities.",
+        "parameters": [
+          {
+            "name": "ChannelFieldName",
+            "in": "query",
+            "description": "Name of the channel used to fetch identities",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ChannelFieldValue",
+            "in": "query",
+            "description": "Value of the channel for which identities are fetched",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/context.v1.identity"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchIdentity",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
+    "/v1/Objects/Contact/Records/{Sid}": {
+      "servers": [
+        {
+          "url": "https://context.twilio.com"
+        }
+      ],
+      "description": "Context store record's API",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "account_sid",
+          "source_schema_id",
+          "schema_type",
+          "source_name"
+        ],
+        "pathType": "instance",
+        "mountName": "record"
+      },
+      "get": {
+        "description": "Retrieves the Record instance for an Object from your Account.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies the record for an object.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DQ[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/context.v1.record"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchRecord",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
+    "/v1/Objects/Contact/Records": {
+      "servers": [
+        {
+          "url": "https://context.twilio.com"
+        }
+      ],
+      "description": "Context store record's API",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "account_sid",
+          "source_schema_id",
+          "schema_type",
+          "source_name"
+        ],
+        "pathType": "list",
+        "mountName": "record"
+      },
+      "get": {
+        "description": "Retrieve a paginated list of records belonging to the account used to make the request.",
+        "parameters": [
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListRecordResponse",
+                  "properties": {
+                    "records": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/context.v1.record"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListRecord",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://context.twilio.com"
+    }
+  ],
+  "x-maturity": [
+    {
+      "name": "Preview",
+      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com."
+    }
+  ]
+}

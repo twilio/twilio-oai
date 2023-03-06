@@ -663,6 +663,69 @@
           "POST"
         ]
       },
+      "conversations.v1.conversation_webhook": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique ID of the [Account](https://www.twilio.com/docs/iam/api/account) responsible for this conversation."
+          },
+          "method": {
+            "type": "string",
+            "$ref": "#/components/schemas/conversation_webhook_enum_method",
+            "nullable": true,
+            "description": "The HTTP method to be used when sending a webhook request."
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "The list of webhook event triggers that are enabled for this Service: `onMessageAdded`, `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`, `onConversationRemoved`, `onParticipantAdded`, `onParticipantUpdated`, `onParticipantRemoved`"
+          },
+          "pre_webhook_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "The absolute url the pre-event webhook request should be sent to."
+          },
+          "post_webhook_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "The absolute url the post-event webhook request should be sent to."
+          },
+          "target": {
+            "type": "string",
+            "$ref": "#/components/schemas/conversation_webhook_enum_target",
+            "nullable": true,
+            "description": "The routing target of the webhook. Can be ordinary or route internally to Flex"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "An absolute API resource URL for this webhook."
+          }
+        }
+      },
+      "conversation_webhook_enum_target": {
+        "type": "string",
+        "enum": [
+          "webhook",
+          "flex"
+        ]
+      },
+      "conversation_webhook_enum_method": {
+        "type": "string",
+        "enum": [
+          "GET",
+          "POST"
+        ]
+      },
       "conversations.v1.credential": {
         "type": "object",
         "properties": {
@@ -4795,6 +4858,107 @@
         "x-maturity": [
           "GA"
         ]
+      }
+    },
+    "/v1/Conversations/Webhooks": {
+      "servers": [
+        {
+          "url": "https://conversations.twilio.com"
+        }
+      ],
+      "description": "[DEPRECATED]. A Webhook resource manages a service-level set of callback URLs and their configuration for receiving all conversation events.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "target",
+          "method",
+          "pre_webhook_url",
+          "post_webhook_url"
+        ],
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "Fetch the configuration of global conversation webhooks",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.conversation_webhook"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchConversationWebhook",
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "post": {
+        "description": "Update the configration of global conversation webhooks",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations.v1.conversation_webhook"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateConversationWebhook",
+        "x-maturity": [
+          "GA"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateConversationWebhookRequest",
+                "properties": {
+                  "Method": {
+                    "type": "string",
+                    "description": "The HTTP method to be used when sending a webhook request."
+                  },
+                  "Filters": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The list of webhook event triggers that are enabled for this Service: `onMessageAdded`, `onMessageUpdated`, `onMessageRemoved`, `onConversationUpdated`, `onConversationRemoved`, `onParticipantAdded`, `onParticipantUpdated`, `onParticipantRemoved`"
+                  },
+                  "PreWebhookUrl": {
+                    "type": "string",
+                    "description": "The absolute url the pre-event webhook request should be sent to."
+                  },
+                  "PostWebhookUrl": {
+                    "type": "string",
+                    "description": "The absolute url the post-event webhook request should be sent to."
+                  },
+                  "Target": {
+                    "type": "string",
+                    "$ref": "#/components/schemas/conversation_webhook_enum_target",
+                    "description": "The routing target of the webhook. Can be ordinary or route internally to Flex"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/Credentials": {

@@ -415,6 +415,94 @@ components:
           nullable: true
           description: The date and time in GMT when the resource was created specified
             in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+    messaging.v1.service.message:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Message resource.
+        messaging_service_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+            the message belongs to.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the Message resource.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the Message resource.
+        recipients:
+          type: array
+          items: {}
+          nullable: true
+          description: The list of message recipients, formatted as `channel:number`.
+        from:
+          type: string
+          nullable: true
+          description: A single colon-delimited address.
+        body:
+          type: string
+          nullable: true
+          description: The message body.
+        broadcast_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^BC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Broadcast resource.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_of_expiry:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date when the resource expires.
+        template:
+          type: string
+          nullable: true
+          description: Template for message body.
+        template_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^HT[0-9a-fA-F]{32}$
+          nullable: true
+          description: Template sid to get template for message body.
+        template_language:
+          type: string
+          nullable: true
+          description: Template language which complements template sid to get template
+            for message body.
+        template_args:
+          nullable: true
+          description: The dictionary of arguments to construct message body from
+            template.
     messaging.v1.service.phone_number:
       type: object
       properties:
@@ -1948,6 +2036,306 @@ paths:
               required:
               - CampaignId
               - MessagingServiceSid
+  /v1/Services/{MessagingServiceSid}/Messages:
+    servers:
+    - url: https://messaging.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - from
+      - to
+      - date_created
+      pathType: list
+      parent: /Services/{Sid}
+    post:
+      description: ''
+      parameters:
+      - name: MessagingServiceSid
+        in: path
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+          the message belongs to.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messaging.v1.service.message'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateMessage
+      x-maturity:
+      - Beta
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateMessageRequest
+              properties:
+                Recipient:
+                  type: array
+                  items:
+                    type: string
+                  description: The list of message recipients, formatted as `channel:number`.
+                From:
+                  type: string
+                  description: A single colon-delimited address.
+                Ttl:
+                  type: integer
+                  description: The message's time-to-live in seconds. Can be an integer
+                    between 1 and 14,400.
+                Template:
+                  type: string
+                  description: Template for message body.
+                TemplateSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^HT[0-9a-fA-F]{32}$
+                  description: Template sid to get template for message body.
+                TemplateLanguage:
+                  type: string
+                  description: Template language which complements template sid to
+                    get template for message body.
+                TemplateArgs:
+                  description: The dictionary of arguments to construct message body
+                    from template.
+                Body:
+                  type: string
+                  description: The message body.
+                MediaUrl:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  description: The list of media URLs.
+              required:
+              - Recipient
+      x-twilio:
+        conditional:
+        - - body
+          - media_url
+    get:
+      description: ''
+      parameters:
+      - name: MessagingServiceSid
+        in: path
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+          with the Message resources to read.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+        required: true
+      - name: DateSent
+        in: query
+        description: The date when the resources to read were created.
+        schema:
+          type: string
+          format: date
+      - name: DateSent<
+        in: query
+        description: The date when the resources to read were created.
+        schema:
+          type: string
+          format: date
+      - name: DateSent>
+        in: query
+        description: The date when the resources to read were created.
+        schema:
+          type: string
+          format: date
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListMessageResponse
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/messaging.v1.service.message'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListMessage
+      x-maturity:
+      - Beta
+  /v1/Services/{MessagingServiceSid}/Messages/{Sid}:
+    servers:
+    - url: https://messaging.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - from
+      - to
+      - date_created
+      pathType: instance
+      parent: /Services/{Sid}
+    get:
+      description: ''
+      parameters:
+      - name: MessagingServiceSid
+        in: path
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+          with the Message resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The SID of the Message resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messaging.v1.service.message'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchMessage
+      x-maturity:
+      - Beta
+    delete:
+      description: ''
+      parameters:
+      - name: MessagingServiceSid
+        in: path
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+          with the Message resource to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The SID of the Message resource to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteMessage
+      x-maturity:
+      - Beta
+    post:
+      description: ''
+      parameters:
+      - name: MessagingServiceSid
+        in: path
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services/api)
+          with the Message resource to update.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: The SID of the Message resource to update.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messaging.v1.service.message'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateMessage
+      x-maturity:
+      - Beta
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateMessageRequest
+              properties:
+                Body:
+                  type: string
+                  description: The message body.
+              required:
+              - Body
   /v1/Services/{ServiceSid}/PhoneNumbers:
     servers:
     - url: https://messaging.twilio.com

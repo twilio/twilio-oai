@@ -485,6 +485,120 @@
           }
         }
       },
+      "voice.v1.recording": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "call_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CA[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "conference_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CF[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time-rfc-2822",
+            "nullable": true
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time-rfc-2822",
+            "nullable": true
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time-rfc-2822",
+            "nullable": true
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true
+          },
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^RE[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "nullable": true
+          },
+          "price_unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/recording_enum_status",
+            "nullable": true
+          },
+          "channels": {
+            "type": "integer",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "$ref": "#/components/schemas/recording_enum_source",
+            "nullable": true
+          },
+          "error_code": {
+            "type": "integer",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true
+          },
+          "encryption_details": {
+            "nullable": true
+          }
+        }
+      },
+      "recording_enum_status": {
+        "type": "string",
+        "enum": [
+          "in-progress",
+          "paused",
+          "stopped",
+          "processing",
+          "completed",
+          "absent"
+        ]
+      },
+      "recording_enum_source": {
+        "type": "string",
+        "enum": [
+          "DialVerb",
+          "Conference",
+          "OutboundAPI",
+          "Trunking",
+          "RecordVerb",
+          "StartCallRecordingAPI",
+          "StartConferenceRecordingAPI"
+        ]
+      },
       "voice.v1.source_ip_mapping": {
         "type": "object",
         "properties": {
@@ -2507,6 +2621,254 @@
           }
         ],
         "operationId": "DeleteIpRecord",
+        "x-maturity": [
+          "GA"
+        ]
+      }
+    },
+    "/v1/Recordings/{Sid}": {
+      "servers": [
+        {
+          "url": "https://voice.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "call_sid",
+          "status",
+          "start_time",
+          "duration"
+        ],
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^RE[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/voice.v1.recording"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchRecording",
+        "x-maturity": [
+          "GA"
+        ]
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^RE[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteRecording",
+        "x-maturity": [
+          "GA"
+        ]
+      }
+    },
+    "/v1/Recordings": {
+      "servers": [
+        {
+          "url": "https://voice.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "call_sid",
+          "status",
+          "start_time",
+          "duration"
+        ],
+        "pathType": "list"
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "DateCreated",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "DateCreated<",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "DateCreated>",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "CallSid",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^CA[0-9a-fA-F]{32}$"
+            }
+          },
+          {
+            "name": "ConferenceSid",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^CF[0-9a-fA-F]{32}$"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListRecordingResponse",
+                  "properties": {
+                    "recordings": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/voice.v1.recording"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListRecording",
         "x-maturity": [
           "GA"
         ]

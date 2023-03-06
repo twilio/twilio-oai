@@ -308,6 +308,151 @@ components:
           nullable: true
           description: Specifies the date this Key credential was last updated, given
             in UTC ISO 8601 format.
+    preview.dispatch.message.channel:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DC[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Channel
+            resource.
+        message_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DM[0-9a-fA-F]{32}$
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was updated specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        channel:
+          type: string
+          $ref: '#/components/schemas/channel_enum_channel_name'
+          nullable: true
+          description: The name of this Channel resource. One of `sms`.
+        from:
+          type: string
+          format: phone-number
+          nullable: true
+          description: A single address in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format.
+        to:
+          type: string
+          format: phone-number
+          nullable: true
+          description: A single address in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format.
+        message:
+          type: string
+          nullable: true
+          description: The message body.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the Channel resource.
+    channel_enum_channel_name:
+      type: string
+      enum:
+      - sms
+    preview.dispatch.message:
+      type: object
+      properties:
+        api_version:
+          type: string
+          nullable: true
+          description: The version of the API used to create the Message resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Account that created the Message resource.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DM[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Message
+            resource.
+        msg_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the underlying Message resource from the [Messaging
+            API](https://www.twilio.com/docs/sms/api/message-resource).
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was updated specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        channel_used:
+          type: string
+          $ref: '#/components/schemas/message_enum_channel_name'
+          nullable: true
+          description: The name of the Channel used to dispatch the message. One of
+            `sms`.
+        send_at:
+          type: string
+          nullable: true
+          description: A string representing the date and time requested for scheduling
+            the dispatch of the Message resource.
+        scheduled_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The scheduled date and time that Twilio will dispatch the Message
+            resource in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format
+            in GMT. This will reflect recipient timezone adjustments when timezone
+            is not specified in send_at
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: The scheduled date and time that Twilio actually dispatched
+            the Message resource in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+            format in GMT.
+        status:
+          type: string
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this Message resource.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: Contains a dictionary of URL links to nested resources of this
+            Message resource.
+    message_enum_channel_name:
+      type: string
+      enum:
+      - sms
     preview.hosted_numbers.authorization_document:
       type: object
       properties:
@@ -368,11 +513,10 @@ components:
     authorization_document_enum_status:
       type: string
       enum:
-      - opened
+      - open
       - signing
       - signed
       - canceled
-      - failed
     preview.hosted_numbers.authorization_document.dependent_hosted_number_order:
       type: object
       properties:
@@ -888,6 +1032,687 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the resource.
+    preview.numbers.active_number:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the ActiveNumber resource.
+        capabilities:
+          nullable: true
+          description: An object that describes the phone number's capabilities.
+        configurations:
+          nullable: true
+          description: The phone number's configuration for the capabilities enabled.
+            These attributes are mutable and can be changed based on differing operations.
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format, which consists of a + followed by the country code and subscriber
+            number.
+        geography:
+          nullable: true
+          description: An object that describes geographic information about the number.
+            The detail provided depends on the phone number.
+        lifecycle:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_lifecycle'
+          nullable: true
+          description: 'The lifecycle phase of the phone number. Can be: `developer-preview`,
+            `private-offering`, `beta`, or `generally-available`.'
+        regulatory:
+          nullable: true
+          description: The regulations that apply to the phone number. These can include
+            the pre-request address and identity requirements that must be met before
+            purchasing.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the ActiveNumber
+            resource.
+        type:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_type'
+          nullable: true
+          description: 'The phone number type. Can be: `local`, `tollfree`, `mobile`,
+            `national`, `voip`, `machine-to-machine`, or `shared-cost`.'
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the ActiveNumber resource.
+    active_number_enum_type:
+      type: string
+      enum:
+      - local
+      - tollfree
+      - mobile
+      - national
+      - voip
+      - machine-to-machine
+      - shared-cost
+    active_number_enum_inbound_caller_sender_id_preservation:
+      type: string
+      enum:
+      - none
+      - domestic
+      - international
+    active_number_enum_inbound_reachability:
+      type: string
+      enum:
+      - domestic
+      - foreign
+      - global
+    active_number_enum_address_requirements:
+      type: string
+      enum:
+      - none
+      - any
+      - local
+      - foreign
+    active_number_enum_lifecycle:
+      type: string
+      enum:
+      - developer-preview
+      - private-offering
+      - beta
+      - generally-available
+    preview.numbers.available_number:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format, which consists of a + followed by the country code and subscriber
+            number.
+        lifecycle:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_lifecycle'
+          nullable: true
+          description: 'The lifecycle phase of the phone number. Can be: `developer-preview`,
+            `private-offering`, `beta`, or `generally-available`.'
+        type:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_type'
+          nullable: true
+          description: 'The phone number type. Can be: `local`, `tollfree`, `mobile`,
+            `national`, `voip`, `machine-to-machine`, or `shared-cost`.'
+        geography:
+          nullable: true
+          description: An object that describes geographic information about the number.
+            The detail provided depends on the phone number.
+        capabilities:
+          nullable: true
+          description: An object that describes the phone number's capabilities.
+        regulatory:
+          nullable: true
+          description: The regulations that apply to the phone number. These can include
+            the pre-request address and identity requirements that must be met before
+            purchasing.
+        base_recurring_price:
+          type: number
+          nullable: true
+          description: The base recurring price for the number. This price recurs
+            until the number is released. Note that this price does not take into
+            account PricingModels.
+        base_setup_price:
+          type: number
+          nullable: true
+          description: The base setup price for the number. This price is charged
+            to your account only once, when the number is first purchased.
+    available_number_enum_lifecycle:
+      type: string
+      enum:
+      - developer-preview
+      - private-offering
+      - beta
+      - generally-available
+    available_number_enum_type:
+      type: string
+      enum:
+      - local
+      - tollfree
+      - mobile
+      - national
+      - voip
+      - machine-to-machine
+      - shared-cost
+    available_number_enum_inbound_caller_sender_id_preservation:
+      type: string
+      enum:
+      - none
+      - domestic
+      - international
+    available_number_enum_inbound_reachability:
+      type: string
+      enum:
+      - domestic
+      - foreign
+      - global
+    available_number_enum_address_requirements:
+      type: string
+      enum:
+      - none
+      - any
+      - local
+      - foreign
+    preview.port_in.authorization_document:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this AuthorizationDocument.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+        port_order_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+          nullable: true
+        status:
+          type: string
+          $ref: '#/components/schemas/authorization_document_enum_status'
+          nullable: true
+          description: 'Status of an instance resource. It can hold one of the values:
+            1. opened 2. signing, 3. signed LOA, 4. canceled, 5. failed. See the section
+            entitled [Status Values](https://www.twilio.com/docs/api/phone-numbers/port-in-authorization-documents#status-values)
+            for more information on each of these statuses.'
+        signer_name:
+          type: string
+          nullable: true
+          description: Name of the signer used in the email of the Signing Document.
+        cc_emails:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Email recipients who will be informed when an Authorization
+            Document has been sent and signed.
+        url:
+          type: string
+          format: uri
+          nullable: true
+    preview.port_in.port_order.port_number:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PU[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the PortInNumber.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the account.
+        port_order_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the PortInOrder.
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: Phone number to be ported into Twilio. This must be in [E.164](https://en.wikipedia.org/wiki/E.164)
+            format, e.g., +16175551212
+        phone_number_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the [IncomingPhoneNumber](https://www.twilio.com/docs/api/rest/incoming-phone-numbers)
+            resource that represents the phone number being ported into Twilio.
+        status:
+          type: string
+          $ref: '#/components/schemas/port_number_enum_status'
+          nullable: true
+          description: The Status of this PortInNumber. One of `twilio-processing`,
+            `initialized`, `pending-carrier-processing`, `carrier-processing`, `accepted`,
+            `rejected`, `ported-in`, `pending-cancelation`, `canceled`, `failed`.
+        type:
+          type: string
+          nullable: true
+          description: Type of phone number that is porting into Twilio and can be
+            `local`, `tollfree`, `mobile` depending on the country.
+        carrier_account_number:
+          type: string
+          nullable: true
+          description: External carrier account number of this phone number used for
+            ownerhsip authorization.
+        current_carrier:
+          type: string
+          nullable: true
+          description: The current carrier of the phone number.
+        current_resp_org:
+          type: string
+          nullable: true
+          description: Current responsible organization of this phone number if it
+            is a toll-free phone number.
+        confirmed_activation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: "The confirmed Firm Order Commitment (FOC) date and time, given\
+            \ as ISO 8601 format \u2013 i.e., the date and time at which the number\
+            \ will port. This will be overridden if the earliest possible FOC date\
+            \ is on a later date."
+        partner_reference_id:
+          type: string
+          nullable: true
+          description: External ID of the port order for a phone number on the partnered
+            provider sid.
+        rejection_codes:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: A list of rejection codes as integers that are referencable
+            in [Twilio's error and warning dictionary](https://www.twilio.com/docs/api/errors).
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date this resource was created, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt)
+            format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was updated, given as [GMT RFC
+            2822](http://www.ietf.org/rfc/rfc2822.txt) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this PortInNumber.
+    port_number_enum_status:
+      type: string
+      enum:
+      - initialized
+      - pending-carrier-processing
+      - carrier-processing
+      - accepted
+      - rejected
+      - ported-in
+      - pending-cancelation
+      - canceled
+      - failed
+    preview.port_in.port_order:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this PortInOrder.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the account.
+        authorization_document_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies the [Authorization
+            Document](https://www.twilio.com/docs/api/phone-numbers/port-in-order-authorization-documents)
+            the user needs to sign.
+        status:
+          type: string
+          $ref: '#/components/schemas/port_order_enum_status'
+          nullable: true
+          description: The Status of this PortInOrder. One of `twilio-processing`,
+            `received`, `pending-loa`, `processing`, `customer-action-required`, `review`,
+            `completed`, `canceled`.
+        iso_country:
+          type: string
+          nullable: true
+          description: "The country in iso (ISO_3166-1) format the service address\
+            \ associated with the porting phone number. This is a 2 letter country\
+            \ code, e.g., \u201CCA\u201D or \u201CUS\u201D."
+        friendly_name:
+          type: string
+          nullable: true
+          description: Friendly name of this PortOrder.
+        company_name:
+          type: string
+          nullable: true
+          description: Name of the company that owns the porting phone number.
+        first_name:
+          type: string
+          nullable: true
+          description: Authorized signatory First Name.
+        last_name:
+          type: string
+          nullable: true
+          description: Authorized signatory Last Name.
+        street_number:
+          type: string
+          nullable: true
+          description: Street number of the numbers service address with current provider.
+        street_name:
+          type: string
+          nullable: true
+          description: Street name of the numbers service address with current provider.
+        city:
+          type: string
+          nullable: true
+          description: City name of the numbers service address with current provider.
+        region:
+          type: string
+          nullable: true
+          description: "Name of the region in the service address associated with\
+            \ the porting phone number. This can be a 2 letter state code in US, e.g.,\
+            \ \u201CCA\u201D."
+        postal_code:
+          type: string
+          nullable: true
+          description: Zip or Postal code of the numbers service address with current
+            provider.
+        requested_activation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: "Desired Firm Order Commitment (FOC) date and time, given as\
+            \ ISO 8601 format \u2013 i.e., the date and time at which the number will\
+            \ port. This will be overridden if the earliest possible FOC date is on\
+            \ a later date."
+        status_updates_email:
+          type: string
+          nullable: true
+          description: Email of the owner of this phone number that is being ported
+            into Twilio.
+        status_callback_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Optional. The Status Callback URL used to send status updates
+            to when PortInOrders transition.
+        billing_phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The billing telephone number used by losing carrier to authorize
+            legitimate port outs from their network.
+        rejection_codes:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: A list of rejection codes as integers that are referencable
+            in [Twilio's error and warning dictionary](https://www.twilio.com/docs/api/errors).
+        loa_date_signed:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date the AuthorizationDocument for this PortOrder was signed,
+            given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date this resource was created, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt)
+            format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was updated, given as [GMT RFC
+            2822](http://www.ietf.org/rfc/rfc2822.txt) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this PortInOrder.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+    port_order_enum_status:
+      type: string
+      enum:
+      - twilio-processing
+      - received
+      - pending-loa
+      - processing
+      - customer-action-required
+      - review
+      - completed
+      - failed
+    preview.studio.flow.engagement:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FN[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Engagement.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Account.
+        flow_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Flow.
+        contact_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Contact.
+        contact_channel_address:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number, SIP address or Client identifier that triggered
+            this Engagement. Phone numbers are in E.164 format (e.g. +16175551212).
+            SIP addresses are formatted as `name@company.com`. Client identifiers
+            are formatted `client:name`.
+        status:
+          type: string
+          $ref: '#/components/schemas/engagement_enum_status'
+          nullable: true
+          description: The Status of this Engagement. One of `active` or `ended`.
+        context:
+          nullable: true
+          description: Contains a dictionary of URL links to nested resources of this
+            Engagement.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Engagement was created, given in ISO 8601
+            format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Engagement was updated, given in ISO 8601
+            format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: Contains a dictionary of URL links to nested resources of this
+            Engagement.
+    engagement_enum_status:
+      type: string
+      enum:
+      - active
+      - ended
+    preview.studio.flow:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Flow.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Account.
+        friendly_name:
+          type: string
+          nullable: true
+          description: A human readable description of this resource, up to 64 characters.
+        status:
+          type: string
+          $ref: '#/components/schemas/flow_enum_status'
+          nullable: true
+          description: The Status of this Flow. One of `draft` or `published`.
+        debug:
+          type: boolean
+          nullable: true
+          description: Boolean flag which will cause extra log data to be written
+            to the SystemLog in a Flow Engagement Step.
+        version:
+          type: integer
+          nullable: true
+          description: The latest version number of this Flow's definition.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Flow was created, given in ISO 8601 format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Flow was updated, given in ISO 8601 format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: Contains a dictionary of URL links to nested resources of this
+            Flow.
+    flow_enum_status:
+      type: string
+      enum:
+      - draft
+      - published
+    preview.studio.flow.engagement.step:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FT[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Step.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Account.
+        flow_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Flow.
+        engagement_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Engagement.
+        name:
+          type: string
+          nullable: true
+          description: The Widget that implemented this Step.
+        context:
+          nullable: true
+          description: Contains a dictionary of URL links to nested resources of this
+            Step.
+        transitioned_from:
+          type: string
+          nullable: true
+          description: The Widget that preceded the Widget for this Step.
+        transitioned_to:
+          type: string
+          nullable: true
+          description: The Widget that will follow the Widget for this Step.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Step was created, given in ISO 8601 format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this Step was updated, given in ISO 8601 format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
     preview.sync.service.document:
       type: object
       properties:
@@ -2245,6 +3070,82 @@ components:
           type: string
           format: uri
           nullable: true
+    preview.payment.credential_aci_commerce_gateway:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: AccountSid the Credential resource belongs to.
+        friendly_name:
+          type: string
+          nullable: true
+          description: A human readable description of this resource, up to 64 characters.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was created, given as GMT in ISO
+            8601 format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was updated, given as GMT in ISO
+            8601 format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URI for this resource, relative to `https://preview.twilio.com`.
+    preview.payment.credential_stripe:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: AccountSid the Credential resource belongs to.
+        friendly_name:
+          type: string
+          nullable: true
+          description: A human readable description of this resource, up to 64 characters.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was created, given as GMT in ISO
+            8601 format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this resource was updated, given as GMT in ISO
+            8601 format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URI for this resource, relative to `https://preview.twilio.com`
   securitySchemes:
     accountSid_authToken:
       type: http
@@ -3431,6 +4332,210 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: ListDeployedDevicesKey
+      x-maturity:
+      - Preview
+  /Dispatch/Messages/{MessageSid}/Channels/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      parent: /Messages/{Sid}
+    get:
+      description: Fetch a specific Channel.
+      parameters:
+      - name: MessageSid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DM[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this Channel.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DC[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.dispatch.message.channel'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchDispatchChannel
+      x-maturity:
+      - Preview
+  /Dispatch/Messages/{MessageSid}/Channels:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      parent: /Messages/{Sid}
+    get:
+      description: Retrieve a list of Channels belonging to a specific Message.
+      parameters:
+      - name: MessageSid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DM[0-9a-fA-F]{32}$
+        required: true
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListDispatchChannelResponse
+                properties:
+                  channels:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.dispatch.message.channel'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListDispatchChannel
+      x-maturity:
+      - Preview
+  /Dispatch/Messages:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    post:
+      description: Create a new Message
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.dispatch.message'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateDispatchMessage
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateDispatchMessageRequest
+              properties:
+                From:
+                  type: string
+                  format: phone-number
+                  description: A single address in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+                    format.
+                To:
+                  type: string
+                  format: phone-number
+                  description: A single address in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+                    format.
+                Message:
+                  type: string
+                  description: The message body.
+                SendAt:
+                  type: string
+                  description: A string representing the date and time requested for
+                    scheduling the dispatch of the Message resource. If specifying
+                    an exact time, convert to GMT first. If the string does not end
+                    with 'Z', we will use recipient timezone
+              required:
+              - From
+              - To
+              - Message
+              - SendAt
+  /Dispatch/Messages/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+    get:
+      description: Fetch a specific Message
+      parameters:
+      - name: Sid
+        in: path
+        description: The SID of the Message resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^DM[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.dispatch.message'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchDispatchMessage
       x-maturity:
       - Preview
   /HostedNumbers/AuthorizationDocuments/{Sid}:
@@ -4776,6 +5881,1940 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: ListMarketplaceInstalledAddOnExtension
+      x-maturity:
+      - Preview
+  /Numbers/ActiveNumbers/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+    get:
+      description: Fetch a specific Active Number.
+      parameters:
+      - name: Sid
+        in: path
+        description: The SID of the ActiveNumber resource to fetch.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.numbers.active_number'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchNumbersActiveNumber
+      x-maturity:
+      - Preview
+    post:
+      description: Update a specific Active Number.
+      parameters:
+      - name: Sid
+        in: path
+        description: The SID of the ActiveNumber resource to update.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.numbers.active_number'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateNumbersActiveNumber
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateNumbersActiveNumberRequest
+              properties:
+                Configurations.FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                Configurations.Voice.Url:
+                  type: string
+                  description: The URL Twilio we should call using the `voice.method`
+                    when the phone number receives a call. The `voice.url` is ignored
+                    if a `voice.application_sid` or a `trunk_sid` is set.
+                Configurations.Voice.Method:
+                  type: string
+                  description: 'The HTTP method we should use to call `voice.url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Voice.FallbackUrl:
+                  type: string
+                  description: The URL that we should call if an error occurs while
+                    retrieving or executing the TwiML requested by `voice.url`.
+                Configurations.Voice.FallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `voice.fallback_url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Voice.ApplicationSid:
+                  type: string
+                  description: The SID of the application we should use to handle
+                    phone calls to the phone number. If a `voice.application_sid`
+                    is present, we ignore all of the voice urls and use those of the
+                    application. Setting a `voice.application_sid`  automatically
+                    deletes your `trunk_sid` and vice versa.
+                Configurations.Sms.Url:
+                  type: string
+                  description: The URL we should call using the `sms.method` when
+                    the phone number receives an incoming SMS message.
+                Configurations.Sms.Method:
+                  type: string
+                  description: 'The HTTP method we should use to call `sms.url`. Can
+                    be: `GET` or `POST`.'
+                Configurations.Sms.FallbackUrl:
+                  type: string
+                  description: The URL that we should call using the `sms.fallback_method`
+                    if an error occurs while retrieving or executing the TwiML returned
+                    by the `sms.url`.
+                Configurations.Sms.FallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `sms.fallback_url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Sms.ApplicationSid:
+                  type: string
+                  description: The SID of the application we should use to handle
+                    SMS messages sent to the number. If an `sms.application_sid` is
+                    present, we ignore the SMS URLs and use those of the application.
+                Configurations.StatusCallback:
+                  type: string
+                  description: The URL that we should call using the `status_callback_method`
+                    to pass status parameters (such as call ended) to your application.
+                Configurations.StatusCallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `status_callback`.
+                    Can be: `GET` or `POST`.'
+    delete:
+      description: Delete a specific Active Number.
+      parameters:
+      - name: Sid
+        in: path
+        description: The SID of the ActiveNumber resource to delete.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteNumbersActiveNumber
+      x-maturity:
+      - Preview
+  /Numbers/ActiveNumbers:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    get:
+      description: Retrieve a list of all Active Numbers for an account.
+      parameters:
+      - name: AccountSid
+        in: query
+        description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+          that created the ActiveNumber resources to read.
+        schema:
+          type: string
+      - name: PhoneNumber
+        in: query
+        description: Show only the active phone numbers that match this phone number
+          in [E.164](https://www.twilio.com/docs/glossary/what-e164) format, which
+          consists of a + followed by the country code and subscriber number
+        schema:
+          type: string
+      - name: Type
+        in: query
+        description: 'Show only the active phone numbers that match this type of phone
+          number. can be: `local`, `tollfree`, `mobile`, `national`, `voip`, `machine-to-machine`,
+          or `shared-cost`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_type'
+      - name: Geography.IsoCountry
+        in: query
+        description: Show only the active phone numbers that match this ISO country
+          code.
+        schema:
+          type: string
+      - name: Geography.Lata
+        in: query
+        description: Show only the active phone numbers that match this LATA. Only
+          available for countries in the North American Numbering Plan (NANPA).
+        schema:
+          type: string
+      - name: Geography.Latitude
+        in: query
+        description: Show only the active phone numbers that match this latitude coordinate.
+        schema:
+          type: number
+      - name: Geography.Longitude
+        in: query
+        description: Show only the active phone numbers that match this longitude
+          coordinate.
+        schema:
+          type: number
+      - name: Geography.Locality
+        in: query
+        description: Show only the active phone numbers that match this locality/city.
+        schema:
+          type: string
+      - name: Geography.PostalCode
+        in: query
+        description: Show only the active phone numbers that match this postal (Zip)
+          code.
+        schema:
+          type: string
+      - name: Geography.RateCenter
+        in: query
+        description: Show only the active phone numbers that match this rate center.
+          Only available for countries in the North American Numbering Plan (NANPA).
+        schema:
+          type: string
+      - name: Geography.Region
+        in: query
+        description: Show only the active phone numbers that match this two-letter
+          state or province abbreviation.
+        schema:
+          type: string
+      - name: Capabilities.Voice.InboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this support for
+          inbound voice connectivity into Twilio.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.OutboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this support for
+          outbound voice connectivity from Twilio.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.E911
+        in: query
+        description: Show only the active phone numbers that match this Emergency
+          911 connectivity capability.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.Fax
+        in: query
+        description: Show only the active phone numbers that match this fax capability.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.CallsPerSecond
+        in: query
+        description: Show only the active phone numbers that match this number of
+          calls that can be initiated per second.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.ConcurrentCallsLimit
+        in: query
+        description: Show only the active phone numbers that match this number of
+          calls that can be active at one time.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.LongRecordLength
+        in: query
+        description: Show only the active phone numbers that match this length in
+          seconds that it can record a voicemail.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.InboundCalledDtmf
+        in: query
+        description: Show only the active phone numbers that match this support for
+          Dual-Tone Multi Frequency (DTMF) capability with inbound called party.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.InboundCallerDtmf
+        in: query
+        description: Show only the active phone numbers that match this support for
+          Dual-Tone Multi Frequency (DTMF) capability with inbound caller party.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.SipTrunking
+        in: query
+        description: Show only the active phone numbers that match this support for
+          SIP Trunking.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.InboundCallerIdPreservation
+        in: query
+        description: 'Show only the active phone numbers that match this support for
+          inbound voice Caller ID ([E.164](https://www.twilio.com/docs/glossary/what-e164))
+          preservation of a number. Can be: `none`, `domestic`, or `international`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_inbound_caller_sender_id_preservation'
+      - name: Capabilities.Voice.InboundReachability
+        in: query
+        description: 'Show only the active phone numbers that match this support for
+          inbound voice reachability of a number. Can be: `domestic`, `foreign` or
+          `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_inbound_reachability'
+      - name: Capabilities.Sms.InboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this inbound SMS
+          connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.OutboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this outbound SMS
+          connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.Gsm7
+        in: query
+        description: Show only the active phone numbers that match this `sms.gsm7`
+          capability. GSM-7 is a character encoding standard which packs the most
+          commonly used letters and symbols in many languages into 7 bits each for
+          usage on GSM networks.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.Ucs2
+        in: query
+        description: Show only the active phone numbers that match this `sms.ucs2`
+          value. UCS-2 is a character encoding standard in which characters are represented
+          by a fixed-length 16 bits (2 bytes).
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.InboundSenderIdPreservation
+        in: query
+        description: 'Show only the active phone numbers that match this inbound SMS
+          Sender ID Preservation value. Can be: `none`, `domestic`, or `international`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_inbound_caller_sender_id_preservation'
+      - name: Capabilities.Sms.InboundReachability
+        in: query
+        description: 'Show only the active phone numbers that match this inbound SMS
+          Reachability value. Can be: `domestic`, `foreign`, or `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_inbound_reachability'
+      - name: Capabilities.Sms.InboundMps
+        in: query
+        description: Show only the active phone numbers that match this SMS inbound
+          message per second limit value.
+        schema:
+          type: integer
+      - name: Capabilities.Mms.InboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this inbound MMS
+          connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Mms.OutboundConnectivity
+        in: query
+        description: Show only the active phone numbers that match this outbound MMS
+          connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Mms.InboundReachability
+        in: query
+        description: 'Show only the active phone numbers that match this `capabilities.mms.inbound_reachability`
+          value. Can be: `domestic`, `foreign`, or `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_inbound_reachability'
+      - name: Capabilities.Mms.InboundMps
+        in: query
+        description: Show only the active phone numbers that match this MMS inbound
+          message per second limit value.
+        schema:
+          type: integer
+      - name: Regulatory.AddressRequirements
+        in: query
+        description: 'Show only the active phone numbers that match this address requirement.
+          Can be: `none`, `any`, `local`, or `foreign`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/active_number_enum_address_requirements'
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListNumbersActiveNumberResponse
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.numbers.active_number'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListNumbersActiveNumber
+      x-maturity:
+      - Preview
+    post:
+      description: Create a new Active Number for an account
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.numbers.active_number'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateNumbersActiveNumber
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateNumbersActiveNumberRequest
+              properties:
+                PhoneNumber:
+                  type: string
+                  format: phone-number
+                  description: The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+                    format, which consists of a + followed by the country code and
+                    subscriber number.
+                Configurations.FriendlyName:
+                  type: string
+                  description: A descriptive string that you create to describe the
+                    resource. It can be up to 64 characters long.
+                Configurations.Voice.Url:
+                  type: string
+                  description: The URL Twilio we should call using the `voice.method`
+                    when the phone number receives a call. The `voice.url` is ignored
+                    if a `voice.application_sid` or a `trunk_sid` is set.
+                Configurations.Voice.Method:
+                  type: string
+                  description: 'The HTTP method we should use to call `voice.url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Voice.FallbackUrl:
+                  type: string
+                  description: The URL that we should call if an error occurs while
+                    retrieving or executing the TwiML requested by `voice.url`.
+                Configurations.Voice.FallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `voice.fallback_url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Voice.ApplicationSid:
+                  type: string
+                  description: The SID of the application we should use to handle
+                    phone calls to the phone number. If a `voice.application_sid`
+                    is present, we ignore all of the voice urls and use those of the
+                    application. Setting a `voice.application_sid`  automatically
+                    deletes your `trunk_sid` and vice versa.
+                Configurations.Sms.Url:
+                  type: string
+                  description: The URL we should call using the `sms.method` when
+                    the phone number receives an incoming SMS message.
+                Configurations.Sms.Method:
+                  type: string
+                  description: 'The HTTP method we should use to call `sms.url`. Can
+                    be: `GET` or `POST`.'
+                Configurations.Sms.FallbackUrl:
+                  type: string
+                  description: The URL that we should call using the `sms.fallback_method`
+                    if an error occurs while retrieving or executing the TwiML returned
+                    by the `sms.url`.
+                Configurations.Sms.FallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `sms.fallback_url`.
+                    Can be: `GET` or `POST`.'
+                Configurations.Sms.ApplicationSid:
+                  type: string
+                  description: The SID of the application we should use to handle
+                    SMS messages sent to the number. If an `sms.application_sid` is
+                    present, we ignore the SMS URLs and use those of the application.
+                Configurations.StatusCallback:
+                  type: string
+                  description: The URL that we should call using the `status_callback_method`
+                    to pass status parameters (such as call ended) to your application.
+                Configurations.StatusCallbackMethod:
+                  type: string
+                  description: 'The HTTP method we should use to call `status_callback`.
+                    Can be: `GET` or `POST`.'
+              required:
+              - PhoneNumber
+  /Numbers/AvailableNumbers:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    get:
+      description: Returns a list of AvailableNumbers that match the specified filters,
+        each representing a phone number that is currently available for provisioning
+        to your account.
+      parameters:
+      - name: PhoneNumber
+        in: query
+        description: Show only the available phone numbers that match this phone number
+          in [E.164](https://www.twilio.com/docs/glossary/what-e164) format, which
+          consists of a + followed by the country code and subscriber number
+        schema:
+          type: string
+      - name: Lifecycle
+        in: query
+        description: 'Show only the available phone numbers that match this lifecycle
+          phase. Can be: `developer-preview`, `private-offering`, `beta`, or `generally-available`.'
+        schema:
+          type: array
+          items:
+            type: string
+            $ref: '#/components/schemas/available_number_enum_lifecycle'
+      - name: Type
+        in: query
+        description: 'Show only the available phone numbers that match this type of
+          phone number. can be: `local`, `tollfree`, `mobile`, `national`, `voip`,
+          `machine-to-machine`, or `shared-cost`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_type'
+      - name: SavedSearch
+        in: query
+        description: Show only the phone numbers that can support a specific Twilio
+          use case. Can be one of the [pre-defined use case saved searches](https://www.twilio.com/docs/phone-numbers/global-catalog/api/available-numbers#saved-search).
+        schema:
+          type: array
+          items:
+            type: string
+      - name: Geography.IsoCountry
+        in: query
+        description: Show only the available phone numbers that match this ISO country
+          code.
+        schema:
+          type: string
+      - name: Geography.Lata
+        in: query
+        description: Show only the available phone numbers that match this LATA. Only
+          available for countries in the North American Numbering Plan (NANPA).
+        schema:
+          type: string
+      - name: Geography.RateCenter
+        in: query
+        description: Show only the available phone numbers that match this rate center.
+          Only available for countries in the North American Numbering Plan (NANPA).
+        schema:
+          type: string
+      - name: Geography.Latitude
+        in: query
+        description: Show only the available phone numbers that match this latitude
+          coordinate.
+        schema:
+          type: number
+      - name: Geography.Longitude
+        in: query
+        description: Show only the available phone numbers that match this longitude
+          coordinate.
+        schema:
+          type: number
+      - name: Geography.Region
+        in: query
+        description: Show only the available phone numbers that match this two-letter
+          state or province abbreviation.
+        schema:
+          type: string
+      - name: Geography.Locality
+        in: query
+        description: Show only the available phone numbers that match this locality/city.
+        schema:
+          type: string
+      - name: Geography.PostalCode
+        in: query
+        description: Show only the available phone numbers that match this postal
+          (Zip) code.
+        schema:
+          type: string
+      - name: Capabilities.Voice.InboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this support
+          for inbound voice connectivity into Twilio.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.OutboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this support
+          for outbound voice connectivity from Twilio.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.E911
+        in: query
+        description: Show only the available phone numbers that match this Emergency
+          911 connectivity capability.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.Fax
+        in: query
+        description: Show only the available phone numbers that match this fax capability.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.SipTrunking
+        in: query
+        description: Show only the available phone numbers that match this support
+          for SIP Trunking.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.CallsPerSecond
+        in: query
+        description: Show only the available phone numbers that match this number
+          of calls that can be initiated per second.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.ConcurrentCallsLimit
+        in: query
+        description: Show only the available phone numbers that match this number
+          of calls that can be active at one time.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.LongRecordLength
+        in: query
+        description: Show only the available phone numbers that match this length
+          in seconds that it can record a voicemail.
+        schema:
+          type: integer
+      - name: Capabilities.Voice.InboundCalledDtmf
+        in: query
+        description: Show only the available phone numbers that match this support
+          for Dual-Tone Multi Frequency (DTMF) capability with inbound called party.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.InboundCallerDtmf
+        in: query
+        description: Show only the available phone numbers that match this support
+          for Dual-Tone Multi Frequency (DTMF) capability with inbound caller party.
+        schema:
+          type: boolean
+      - name: Capabilities.Voice.InboundCallerIdPreservation
+        in: query
+        description: 'Show only the available phone numbers that match this support
+          for inbound voice Caller ID ([E.164](https://www.twilio.com/docs/glossary/what-e164))
+          preservation of a number. Can be: `none`, `domestic`, or `international`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_inbound_caller_sender_id_preservation'
+      - name: Capabilities.Voice.InboundReachability
+        in: query
+        description: 'Show only the available phone numbers that match this support
+          for inbound voice reachability of a number. Can be: `domestic`, `foreign`
+          or `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_inbound_reachability'
+      - name: Capabilities.Sms.InboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this inbound
+          SMS connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.OutboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this outbound
+          SMS connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.Gsm7
+        in: query
+        description: Show only the available phone numbers that match this `sms.gsm7`
+          capability. GSM-7 is a character encoding standard which packs the most
+          commonly used letters and symbols in many languages into 7 bits each for
+          usage on GSM networks.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.Ucs2
+        in: query
+        description: Show only the available phone numbers that match this `sms.ucs2`
+          value. UCS-2 is a character encoding standard in which characters are represented
+          by a fixed-length 16 bits (2 bytes).
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.InboundSenderIdPreservation
+        in: query
+        description: 'Show only the available phone numbers that match this inbound
+          SMS Sender ID Preservation value. Can be: `none`, `domestic`, or `international`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_inbound_caller_sender_id_preservation'
+      - name: Capabilities.Sms.InboundReachability
+        in: query
+        description: 'Show only the available phone numbers that match this inbound
+          SMS Reachability value. Can be: `domestic`, `foreign`, or `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_inbound_reachability'
+      - name: Capabilities.Sms.InboundMps
+        in: query
+        description: Show only the available phone numbers that match this SMS inbound
+          message per second limit value.
+        schema:
+          type: integer
+      - name: Capabilities.Sms.Gsm7Concatenation
+        in: query
+        description: Show only the available phone numbers that match this `sms.gsm7_concatenation`
+          capability. GSM-7 is a character encoding standard which packs the most
+          commonly used letters and symbols in many languages into 7 bits each for
+          usage on GSM networks.
+        schema:
+          type: boolean
+      - name: Capabilities.Sms.Ucs2Concatenation
+        in: query
+        description: Show only the available phone numbers that match this `sms.ucs2_concatenation`
+          value. UCS-2 is a character encoding standard in which characters are represented
+          by a fixed-length 16 bits (2 bytes).
+        schema:
+          type: boolean
+      - name: Capabilities.Mms.InboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this inbound
+          MMS connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Mms.OutboundConnectivity
+        in: query
+        description: Show only the available phone numbers that match this outbound
+          MMS connectivity value.
+        schema:
+          type: boolean
+      - name: Capabilities.Mms.InboundReachability
+        in: query
+        description: 'Show only the available phone numbers that match this `capabilities.mms.inbound_reachability`
+          value. Can be: `domestic`, `foreign`, or `global`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_inbound_reachability'
+      - name: Capabilities.Mms.InboundMps
+        in: query
+        description: Show only the available phone numbers that match this MMS inbound
+          message per second limit value.
+        schema:
+          type: integer
+      - name: Regulatory.AddressRequirements
+        in: query
+        description: 'Show only the available phone numbers that match this address
+          requirement. Can be: `none`, `any`, `local`, or `foreign`.'
+        schema:
+          type: string
+          $ref: '#/components/schemas/available_number_enum_address_requirements'
+      - name: MinBaseRecurringPrice
+        in: query
+        description: Show only the available phone numbers with a `base_recurring_price`
+          greater than or equal to this minimum base setup price for a number in US
+          dollars. Combined with `max_base_recurring_price`, these filters act as
+          BETWEEN filters.
+        schema:
+          type: number
+      - name: MaxBaseRecurringPrice
+        in: query
+        description: Show only the available phone numbers with a `base_recurring_price`
+          less than or equal to this maximum base recurring price in US dollars. Combined
+          with `min_base_recurring_price`, these filters act as BETWEEN filters.
+        schema:
+          type: number
+      - name: MinBaseSetupPrice
+        in: query
+        description: Show only the available phone numbers with a `base_setup_price`
+          greater than or equal to this minimum base setup price for a number in US
+          dollars. Combined with `max_base_setup_price`, these filters act as BETWEEN
+          filters.
+        schema:
+          type: number
+      - name: MaxBaseSetupPrice
+        in: query
+        description: Show only the available phone numbers with a `base_setup_price`
+          less than or equal to this maximum base setup price for a number in US dollars.
+          Combined with `min_base_setup_price`, these filters act as BETWEEN filters.
+        schema:
+          type: number
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListNumbersAvailableNumberResponse
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.numbers.available_number'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListNumbersAvailableNumber
+      x-maturity:
+      - Preview
+  /PortIn/Orders/AuthorizationDocuments/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      className: authorization_documents
+    get:
+      description: Fetch a specific AuthorizationDocument.
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this AuthorizationDocument.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.port_in.authorization_document'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPortInAuthorizationDocument
+      x-maturity:
+      - Preview
+    delete:
+      description: Cancel a specific AuthorizationDocument.
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this AuthorizationDocument.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeletePortInAuthorizationDocument
+      x-maturity:
+      - Preview
+  /PortIn/Orders/AuthorizationDocuments:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      className: authorization_documents
+  /PortIn/Orders/{PortOrderSid}/Numbers/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      parent: /Orders/{Sid}
+      mountName: port_numbers
+      className: port_numbers
+    get:
+      description: Fetch a specific PortInNumber.
+      parameters:
+      - name: PortOrderSid
+        in: path
+        description: A 34 character string that uniquely identifies the PortOrder
+          this resource belongs to.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInNumber.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PU[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.port_in.port_order.port_number'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPortInPortNumber
+      x-maturity:
+      - Preview
+    delete:
+      description: Cancel the PortInNumber (only available when the status is in `initialized`,
+        `pending-carrier-processing`, `carrier-processing`, `accepted`, `rejected`).
+      parameters:
+      - name: PortOrderSid
+        in: path
+        description: A 34 character string that uniquely identifies the PortOrder
+          this resource belongs to.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInNumber.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PU[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeletePortInPortNumber
+      x-maturity:
+      - Preview
+    post:
+      description: Updates a specific PortInNumber.
+      parameters:
+      - name: PortOrderSid
+        in: path
+        description: A 34 character string that uniquely identifies the PortOrder
+          this resource belongs to.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInNumber.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PU[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.port_in.port_order.port_number'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdatePortInPortNumber
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdatePortInPortNumberRequest
+              properties:
+                CarrierAccountNumber:
+                  type: string
+                  description: External carrier account number of this phone number
+                    used for ownerhsip authorization.
+                PhoneNumberPin:
+                  type: string
+                  description: PIN number of the account (with your current provider/carrier)
+                    that is associated with the porting phone number in this port
+                    request. This is mandatory for Wireless numbers but optional for
+                    Landline and Toll Free numbers.
+  /PortIn/Orders/{PortOrderSid}/Numbers:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      parent: /Orders/{Sid}
+      mountName: port_numbers
+      className: port_numbers
+    get:
+      description: Retrieve a list of PortInNumbers belonging to the account initiating
+        the request.
+      parameters:
+      - name: PortOrderSid
+        in: path
+        description: A 34 character string that uniquely identifies the PortInOrder.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      - name: PhoneNumber
+        in: query
+        description: Phone number to be ported into Twilio. This must be in [E.164](https://en.wikipedia.org/wiki/E.164)
+          format, e.g., +16175551212
+        schema:
+          type: string
+          format: phone-number
+      - name: PhoneNumberSid
+        in: query
+        description: A 34 character string that uniquely identifies the [IncomingPhoneNumber](https://www.twilio.com/docs/api/rest/incoming-phone-numbers)
+          resource that represents the phone number being ported into Twilio.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+      - name: Status
+        in: query
+        description: The Status of this PortInNumber. One of `twilio-processing`,
+          `initialized`, `pending-carrier-processing`, `carrier-processing`, `accepted`,
+          `rejected`, `ported-in`, `pending-cancelation`, `canceled`, `failed`.
+        schema:
+          type: string
+          $ref: '#/components/schemas/port_number_enum_status'
+      - name: Type
+        in: query
+        description: Type of phone number that is porting into Twilio and can be `local`,
+          `tollfree`, `mobile` depending on the country.
+        schema:
+          type: string
+      - name: CarrierAccountNumber
+        in: query
+        description: External carrier account number of this phone number used for
+          ownerhsip authorization.
+        schema:
+          type: string
+      - name: CurrentCarrier
+        in: query
+        description: The current carrier of the phone number.
+        schema:
+          type: string
+      - name: CurrentRespOrg
+        in: query
+        description: Current responsible organization of this phone number if it is
+          a toll-free phone number.
+        schema:
+          type: string
+      - name: ConfirmedActivationDate
+        in: query
+        description: "The confirmed Firm Order Commitment (FOC) date and time, given\
+          \ as ISO 8601 format \u2013 i.e., the date and time at which the number\
+          \ will port. This will be overridden if the earliest possible FOC date is\
+          \ on a later date."
+        schema:
+          type: string
+          format: date-time
+      - name: PartnerReferenceId
+        in: query
+        description: External ID of the port order for a phone number on the partnered
+          provider sid.
+        schema:
+          type: string
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListPortInPortNumberResponse
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.port_in.port_order.port_number'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListPortInPortNumber
+      x-maturity:
+      - Preview
+  /PortIn/Orders/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      mountName: port_orders
+      className: port_orders
+    get:
+      description: Fetch a specific PortInOrder.
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInOrder.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.port_in.port_order'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPortInPortOrder
+      x-maturity:
+      - Preview
+    delete:
+      description: Cancel the PortInOrder (only available when the status is in `received`).
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInOrder.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeletePortInPortOrder
+      x-maturity:
+      - Preview
+    post:
+      description: Updates a specific PortInOrder.
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this PortInOrder.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PO[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.port_in.port_order'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdatePortInPortOrder
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdatePortInPortOrderRequest
+              properties:
+                IsoCountry:
+                  type: string
+                  description: "The country in iso (ISO_3166-1) format the service\
+                    \ address associated with the porting phone number. This is a\
+                    \ 2 letter country code, e.g., \u201CCA\u201D or \u201CUS\u201D\
+                    ."
+                FriendlyName:
+                  type: string
+                  description: Friendly name of this PortOrder.
+                CompanyName:
+                  type: string
+                  description: Name of the company that owns the porting phone number.
+                FirstName:
+                  type: string
+                  description: Authorized signatory First Name.
+                LastName:
+                  type: string
+                  description: Authorized signatory Last Name.
+                StreetNumber:
+                  type: string
+                  description: Street number of the numbers service address with current
+                    provider.
+                StreetName:
+                  type: string
+                  description: Street name of the numbers service address with current
+                    provider.
+                City:
+                  type: string
+                  description: City name of the numbers service address with current
+                    provider.
+                Region:
+                  type: string
+                  description: "Name of the region in the service address associated\
+                    \ with the porting phone number. This can be a 2 letter state\
+                    \ code in US, e.g., \u201CCA\u201D."
+                PostalCode:
+                  type: string
+                  description: Zip or Postal code of the numbers service address with
+                    current provider.
+                RequestedActivationDate:
+                  type: string
+                  format: date-time
+                  description: "Desired Firm Order Commitment (FOC) date and time,\
+                    \ given as ISO 8601 format \u2013 i.e., the date and time at which\
+                    \ the number will port. This will be overridden if the earliest\
+                    \ possible FOC date is on a later date."
+                StatusUpdatesEmail:
+                  type: string
+                  description: Email of the owner of this phone number that is being
+                    ported into Twilio.
+                StatusCallbackUrl:
+                  type: string
+                  format: uri
+                  description: Optional. The Status Callback URL used to send status
+                    updates to when PortInOrders transition.
+                BillingPhoneNumber:
+                  type: string
+                  format: phone-number
+                  description: The billing telephone number used by losing carrier
+                    to authorize legitimate port outs from their network.
+  /PortIn/Orders:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      mountName: port_orders
+      className: port_orders
+    get:
+      description: Retrieve a list of PortInOrder belonging to the account initiating
+        the request.
+      parameters:
+      - name: IsoCountry
+        in: query
+        description: "The country in iso (ISO_3166-1) format the service address associated\
+          \ with the porting phone number. This is a 2 letter country code, e.g.,\
+          \ \u201CCA\u201D or \u201CUS\u201D."
+        schema:
+          type: string
+      - name: FriendlyName
+        in: query
+        description: Friendly name of this PortOrder.
+        schema:
+          type: string
+      - name: CompanyName
+        in: query
+        description: Name of the company that owns the porting phone number.
+        schema:
+          type: string
+      - name: FirstName
+        in: query
+        description: Authorized signatory First Name.
+        schema:
+          type: string
+      - name: LastName
+        in: query
+        description: Authorized signatory Last Name.
+        schema:
+          type: string
+      - name: StreetNumber
+        in: query
+        description: Street number of the numbers service address with current provider.
+        schema:
+          type: string
+      - name: StreetName
+        in: query
+        description: Street name of the numbers service address with current provider.
+        schema:
+          type: string
+      - name: City
+        in: query
+        description: City name of the numbers service address with current provider.
+        schema:
+          type: string
+      - name: Region
+        in: query
+        description: "Name of the region in the service address associated with the\
+          \ porting phone number. This can be a 2 letter state code in US, e.g., \u201C\
+          CA\u201D."
+        schema:
+          type: string
+      - name: PostalCode
+        in: query
+        description: Zip or Postal code of the numbers service address with current
+          provider.
+        schema:
+          type: string
+      - name: RequestedActivationDate
+        in: query
+        description: "Desired Firm Order Commitment (FOC) date and time, given as\
+          \ ISO 8601 format \u2013 i.e., the date and time at which the number will\
+          \ port. This will be overridden if the earliest possible FOC date is on\
+          \ a later date."
+        schema:
+          type: string
+          format: date-time
+      - name: StatusUpdatesEmail
+        in: query
+        description: Email of the owner of this phone number that is being ported
+          into Twilio.
+        schema:
+          type: string
+      - name: StatusCallbackUrl
+        in: query
+        description: Optional. The Status Callback URL used to send status updates
+          to when PortInOrders transition.
+        schema:
+          type: string
+          format: uri
+      - name: BillingPhoneNumber
+        in: query
+        description: The billing telephone number used by losing carrier to authorize
+          legitimate port outs from their network.
+        schema:
+          type: string
+          format: phone-number
+      - name: Status
+        in: query
+        description: The Status of this PortInOrder. One of `twilio-processing`, `received`,
+          `pending-loa`, `processing`, `customer-action-required`, `review`, `completed`,
+          `canceled`.
+        schema:
+          type: string
+          $ref: '#/components/schemas/port_order_enum_status'
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListPortInPortOrderResponse
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.port_in.port_order'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListPortInPortOrder
+      x-maturity:
+      - Preview
+  /Studio/Flows/{FlowSid}/Engagements:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      parent: /Flows/{Sid}
+    get:
+      description: Retrieve a list of all Engagements for the Flow.
+      parameters:
+      - name: FlowSid
+        in: path
+        description: The unique SID identifier of the Flow.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListStudioEngagementResponse
+                properties:
+                  engagements:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.studio.flow.engagement'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListStudioEngagement
+      x-maturity:
+      - Preview
+    post:
+      description: Triggers a new Engagement for the Flow
+      parameters:
+      - name: FlowSid
+        in: path
+        description: The unique SID identifier of the Flow.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.studio.flow.engagement'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateStudioEngagement
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateStudioEngagementRequest
+              properties:
+                To:
+                  type: string
+                  format: phone-number
+                  description: ''
+                From:
+                  type: string
+                  format: phone-number
+                  description: ''
+                Parameters:
+                  type: string
+                  description: ''
+              required:
+              - To
+              - From
+  /Studio/Flows/{FlowSid}/Engagements/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      parent: /Flows/{Sid}
+    get:
+      description: ''
+      parameters:
+      - name: FlowSid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FN[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.studio.flow.engagement'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchStudioEngagement
+      x-maturity:
+      - Preview
+  /Studio/Flows:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    get:
+      description: Retrieve a list of all Flows.
+      parameters:
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListStudioFlowResponse
+                properties:
+                  flows:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.studio.flow'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListStudioFlow
+      x-maturity:
+      - Preview
+  /Studio/Flows/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+    get:
+      description: ''
+      parameters:
+      - name: Sid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.studio.flow'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchStudioFlow
+      x-maturity:
+      - Preview
+    delete:
+      description: Delete a specific Flow.
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this Flow.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeleteStudioFlow
+      x-maturity:
+      - Preview
+  /Studio/Flows/{FlowSid}/Engagements/{EngagementSid}/Steps:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+      parent: /Flows/{FlowSid}/Engagements/{Sid}
+    get:
+      description: Retrieve a list of all Steps for an Engagement.
+      parameters:
+      - name: FlowSid
+        in: path
+        description: The unique SID identifier of the Flow.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      - name: EngagementSid
+        in: path
+        description: The unique SID identifier of the Engagement.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FN[0-9a-fA-F]{32}$
+        required: true
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListStudioStepResponse
+                properties:
+                  steps:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.studio.flow.engagement.step'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListStudioStep
+      x-maturity:
+      - Preview
+  /Studio/Flows/{FlowSid}/Engagements/{EngagementSid}/Steps/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+      parent: /Flows/{FlowSid}/Engagements/{Sid}
+    get:
+      description: ''
+      parameters:
+      - name: FlowSid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FW[0-9a-fA-F]{32}$
+        required: true
+      - name: EngagementSid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FN[0-9a-fA-F]{32}$
+        required: true
+      - name: Sid
+        in: path
+        description: ''
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FT[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.studio.flow.engagement.step'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchStudioStep
       x-maturity:
       - Preview
   /Sync/Services/{ServiceSid}/Documents/{Sid}:
@@ -9601,6 +12640,418 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: FetchWirelessUsage
+      x-maturity:
+      - Preview
+  /payment/Credentials/ACICommerceGateway:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    get:
+      description: Retrieves a collection of ACI Commerce Gateway Credential metadata
+        (not actual credentials) belonging to the account used to make the request
+      parameters:
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListPaymentCredentialAciCommerceGatewayResponse
+                properties:
+                  credentials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.payment.credential_aci_commerce_gateway'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListPaymentCredentialAciCommerceGateway
+      x-maturity:
+      - Preview
+    post:
+      description: Create a new ACI Commerce Gateway Credential
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_aci_commerce_gateway'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreatePaymentCredentialAciCommerceGateway
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreatePaymentCredentialAciCommerceGatewayRequest
+              properties:
+                Credentials:
+                  description: 'Json String containing ACI Commerce Gateway credentials
+                    with format (name and value must be in double quotes) {account_id:<TRANSPORTAL_IDENTIFICATION_NUMBER>,
+                    password_hash:<SHA1_TRANSPORTAL_PASSWORD>} e.g: {account_id:"12345",
+                    password_hash:"abcdef="}'
+                FriendlyName:
+                  type: string
+                  description: A human readable description of this resource, up to
+                    64 characters.
+                AccountSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^AC[0-9a-fA-F]{32}$
+                  description: The Subaccount this Credential should be associated
+                    with. Needs to be a valid Subaccount of the account issuing the
+                    request
+              required:
+              - Credentials
+  /payment/Credentials/ACICommerceGateway/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+    get:
+      description: Fetch the ACI Commerce Gateway credential metadata (not actual
+        credentials) specified by the provided Credential Sid
+      parameters:
+      - name: Sid
+        in: path
+        description: The Credential Sid that uniquely identifies the Credential to
+          fetch
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_aci_commerce_gateway'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPaymentCredentialAciCommerceGateway
+      x-maturity:
+      - Preview
+    post:
+      description: Modify the ACI Commerce Gateway credentials of a given sid
+      parameters:
+      - name: Sid
+        in: path
+        description: The Credential Sid that uniquely identifies the Credential to
+          update
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_aci_commerce_gateway'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdatePaymentCredentialAciCommerceGateway
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdatePaymentCredentialAciCommerceGatewayRequest
+              properties:
+                Credentials:
+                  description: 'Json String containing ACI Commerce Gateway credentials
+                    with format (name and value must be in double quotes) {account_id:<TRANSPORTAL_IDENTIFICATION_NUMBER>,
+                    password_hash:<SHA1_TRANSPORTAL_PASSWORD>} e.g: {account_id:"12345",
+                    password_hash:"abcdef="}'
+                FriendlyName:
+                  type: string
+                  description: A human readable description of this resource, up to
+                    64 characters.
+              required:
+              - Credentials
+    delete:
+      description: Delete a Credential from your account
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this resource.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeletePaymentCredentialAciCommerceGateway
+      x-maturity:
+      - Preview
+  /payment/Credentials/Stripe:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    get:
+      description: Retrieves a collection of Stripe Credential metadata (not actual
+        credentials) belonging to the account used to make the request
+      parameters:
+      - name: PageSize
+        in: query
+        description: How many resources to return in each list page. The default is
+          50, and the maximum is 1000.
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+      - name: Page
+        in: query
+        description: The page index. This value is simply for client state.
+        schema:
+          type: integer
+          minimum: 0
+      - name: PageToken
+        in: query
+        description: The page token. This is provided by the API.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                title: ListPaymentCredentialStripeResponse
+                properties:
+                  credentials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/preview.payment.credential_stripe'
+                  meta:
+                    type: object
+                    properties:
+                      first_page_url:
+                        type: string
+                        format: uri
+                      next_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      page:
+                        type: integer
+                      page_size:
+                        type: integer
+                      previous_page_url:
+                        type: string
+                        format: uri
+                        nullable: true
+                      url:
+                        type: string
+                        format: uri
+                      key:
+                        type: string
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: ListPaymentCredentialStripe
+      x-maturity:
+      - Preview
+    post:
+      description: Create a new Stripe Credential
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_stripe'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreatePaymentCredentialStripe
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreatePaymentCredentialStripeRequest
+              properties:
+                Credentials:
+                  description: Following Json format containing Stripe credentials
+                    are supported (name and value must be in double quotes). 1.{api_key:<API_KEY>}
+                    e.g. {api_key:"rk_test_N12345678"}
+                FriendlyName:
+                  type: string
+                  description: A human readable description of this resource, up to
+                    64 characters.
+                AccountSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^AC[0-9a-fA-F]{32}$
+                  description: The Subaccount this Credential should be associated
+                    with. Needs to be a valid Subaccount of the account issuing the
+                    request
+              required:
+              - Credentials
+  /payment/Credentials/Stripe/{Sid}:
+    servers:
+    - url: https://preview.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: instance
+    get:
+      description: Fetch the Stripe credentials metadata (not actual credentials)
+        specified by the provided Credential Sid
+      parameters:
+      - name: Sid
+        in: path
+        description: The Credential Sid that uniquely identifies the Credential to
+          fetch
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_stripe'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPaymentCredentialStripe
+      x-maturity:
+      - Preview
+    post:
+      description: Modify the Stripe credentials of a given sid
+      parameters:
+      - name: Sid
+        in: path
+        description: The Credential Sid that uniquely identifies the Credential to
+          update
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/preview.payment.credential_stripe'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdatePaymentCredentialStripe
+      x-maturity:
+      - Preview
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdatePaymentCredentialStripeRequest
+              properties:
+                Credentials:
+                  description: Following Json format containing Stripe credentials
+                    are supported (name and value must be in double quotes). 1.{api_key:<API_KEY>}
+                    e.g. {api_key:"rk_test_N12345678"}
+                FriendlyName:
+                  type: string
+                  description: A human readable description of this resource, up to
+                    64 characters.
+              required:
+              - Credentials
+    delete:
+      description: Delete a Credential from your account
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies this resource.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '204':
+          description: The resource was deleted successfully.
+      security:
+      - accountSid_authToken: []
+      operationId: DeletePaymentCredentialStripe
       x-maturity:
       - Preview
 servers:
