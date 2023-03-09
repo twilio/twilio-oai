@@ -94,6 +94,40 @@
             "format": "uri",
             "nullable": true,
             "description": "The URL of this resource."
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true
+          }
+        }
+      },
+      "microvisor.v1.app.app_manifest": {
+        "type": "object",
+        "properties": {
+          "app_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^KA[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34-character string that uniquely identifies this App."
+          },
+          "hash": {
+            "type": "string",
+            "nullable": true,
+            "description": "App manifest hash represented as `hash_algorithm:hash_value`."
+          },
+          "encoded_bytes": {
+            "type": "string",
+            "nullable": true,
+            "description": "The base-64 encoded manifest"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of this Manifest."
           }
         }
       },
@@ -239,7 +273,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.39.1"
+    "version": "1.39.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -995,6 +1029,55 @@
           }
         ],
         "operationId": "DeleteApp",
+        "x-maturity": [
+          "Preview"
+        ]
+      }
+    },
+    "/v1/Apps/{AppSid}/Manifest": {
+      "servers": [
+        {
+          "url": "https://microvisor.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance",
+        "parent": "/Apps/{Sid}",
+        "mountName": "app_manifests"
+      },
+      "get": {
+        "description": "Retrieve the Manifest for an App.",
+        "parameters": [
+          {
+            "name": "AppSid",
+            "in": "path",
+            "description": "A 34-character string that uniquely identifies this App.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/microvisor.v1.app.app_manifest"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchAppManifest",
         "x-maturity": [
           "Preview"
         ]

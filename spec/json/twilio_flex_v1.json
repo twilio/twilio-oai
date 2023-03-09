@@ -1213,7 +1213,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.39.1"
+    "version": "1.39.2"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -2142,6 +2142,116 @@
             }
           }
         }
+      },
+      "get": {
+        "description": "Get assessments done for a conversation by logged in user",
+        "parameters": [
+          {
+            "name": "Token",
+            "in": "header",
+            "description": "The Token HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SegmentId",
+            "in": "query",
+            "description": "The id of the segment.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListInsightsAssessmentsResponse",
+                  "properties": {
+                    "assessments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/flex.v1.insights_assessments"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListInsightsAssessments",
+        "x-maturity": [
+          "Preview"
+        ]
       }
     },
     "/v1/Insights/QM/Assessments/{AssessmentId}": {
@@ -3177,10 +3287,6 @@
                     "type": "string",
                     "description": "The question."
                   },
-                  "Description": {
-                    "type": "string",
-                    "description": "The description for the question."
-                  },
                   "AnswerSetId": {
                     "type": "string",
                     "description": "The answer_set for the question."
@@ -3188,12 +3294,15 @@
                   "AllowNa": {
                     "type": "boolean",
                     "description": "The flag to enable for disable NA for answer."
+                  },
+                  "Description": {
+                    "type": "string",
+                    "description": "The description for the question."
                   }
                 },
                 "required": [
                   "CategoryId",
                   "Question",
-                  "Description",
                   "AnswerSetId",
                   "AllowNa"
                 ]
