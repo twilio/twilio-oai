@@ -61,6 +61,27 @@
           }
         }
       },
+      "messaging.v1.brand_registrations.brand_registration_otp": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the Brand Registration resource."
+          },
+          "brand_registration_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string to identify Brand Registration of Sole Proprietor Brand"
+          }
+        }
+      },
       "messaging.v1.brand_registrations": {
         "type": "object",
         "properties": {
@@ -111,7 +132,7 @@
           "brand_type": {
             "type": "string",
             "nullable": true,
-            "description": "Type of brand. One of: \"STANDARD\", \"STARTER\". STARTER is for the low volume, STARTER campaign use case. There can only be one STARTER campaign created per STARTER brand. STANDARD is for all other campaign use cases. Multiple campaign use cases can be created per STANDARD brand."
+            "description": "Type of brand. One of: \"STANDARD\", \"SOLE_PROPRIETOR\". SOLE_PROPRIETOR is for the low volume, SOLE_PROPRIETOR campaign use case. There can only be one SOLE_PROPRIETOR campaign created per SOLE_PROPRIETOR brand. STANDARD is for all other campaign use cases. Multiple campaign use cases can be created per STANDARD brand."
           },
           "status": {
             "type": "string",
@@ -1095,7 +1116,7 @@
           "us_app_to_person_usecase": {
             "type": "string",
             "nullable": true,
-            "description": "A2P Campaign Use Case. Examples: [ 2FA, EMERGENCY, MARKETING, STARTER...]. STARTER campaign use cases can only be created by STARTER Brands, and there can only be one STARTER campaign created per STARTER Brand."
+            "description": "A2P Campaign Use Case. Examples: [ 2FA, EMERGENCY, MARKETING, SOLE_PROPRIETOR...]. SOLE_PROPRIETOR campaign use cases can only be created by SOLE_PROPRIETOR Brands, and there can only be one SOLE_PROPRIETOR campaign created per SOLE_PROPRIETOR Brand."
           },
           "has_embedded_links": {
             "type": "boolean",
@@ -1238,7 +1259,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.40.0"
+    "version": "1.41.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1524,6 +1545,61 @@
         ]
       }
     },
+    "/v1/a2p/BrandRegistrations/{BrandRegistrationSid}/SmsOtp": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "A Messaging Service resource to retry OTP verification for Sole Proprietor Brand Registrations.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "account_sid",
+          "brand_registration_sid"
+        ],
+        "pathType": "list",
+        "parent": "/a2p/BrandRegistrations/{Sid}",
+        "mountName": "brand_registration_otps"
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "BrandRegistrationSid",
+            "in": "path",
+            "description": "Brand Registration Sid of Sole Proprietor Brand.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^BN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.brand_registrations.brand_registration_otp"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateBrandRegistrationOtp",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
     "/v1/a2p/BrandRegistrations/{Sid}": {
       "servers": [
         {
@@ -1769,7 +1845,7 @@
                   },
                   "BrandType": {
                     "type": "string",
-                    "description": "Type of brand being created. One of: \"STANDARD\", \"STARTER\". STARTER is for low volume, starter use cases. STANDARD is for all other use cases."
+                    "description": "Type of brand being created. One of: \"STANDARD\", \"SOLE_PROPRIETOR\". SOLE_PROPRIETOR is for low volume, SOLE_PROPRIETOR use cases. STANDARD is for all other use cases."
                   },
                   "Mock": {
                     "type": "boolean",
