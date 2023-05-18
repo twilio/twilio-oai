@@ -9,7 +9,7 @@ spectral: install
 spectral-ruleset:
 	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq --ruleset rulesets/twilio_open_api_ruleset.yaml --verbose
 
-test: spectral
+test: spectral spectral-ruleset
 
 test-docker:
 	docker build -t twilio/twilio-oai .

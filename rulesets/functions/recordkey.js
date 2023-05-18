@@ -1,6 +1,6 @@
 import { containsPathInstance, isInstancePath } from './utils';
 
-const isRecordKey = (value) => {
+const isRecordKey = (value, pathKey) => {
     const results = [];
     let flag = false;
     for (const [_, prop ] of Object.entries(value["responses"]["200"]["content"]["application/json"]["schema"]["properties"])) {
@@ -11,7 +11,7 @@ const isRecordKey = (value) => {
     if (!flag) {
         results.push(
             {
-            message: "Missing record Key",
+            message: "Missing record key for pathkey " + pathKey,
             }
         );
     };
@@ -25,7 +25,7 @@ export default (ops) => {
         if (!containsPathInstance(pathObj) && !isInstancePath(pathKey)) {
             for (const [key, value] of Object.entries(pathObj)) {
                 if (key == "get") {
-                    results.concat(isRecordKey(value));
+                    results.concat(isRecordKey(value, pathKey));
                 }  
             }
         };

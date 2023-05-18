@@ -5,7 +5,7 @@ module.exports = (ops) => {
         return results
     }
     let flag = false;
-    for (const [pathKey, pathObj] of Object.entries(ops.paths)) {
+    for (const [_, pathObj] of Object.entries(ops.paths)) {
         if (!pathObj.servers) {
             flag = true
         }
@@ -13,7 +13,7 @@ module.exports = (ops) => {
     if (flag == true) {
         results.push(
             {
-            message: "Either add serverurl globallay or add it all the local paths",
+            message: "Either add serverurl globally or add it serverurl for all the paths",
             }
         )
     }
