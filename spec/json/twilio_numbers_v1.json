@@ -1,6 +1,73 @@
 {
   "components": {
     "schemas": {
+      "numbers.v1.bulk_eligibility": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^EC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the bulk eligibility check that you want to know about."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "This is the url of the request that you're trying to reach out to locate the resource."
+          },
+          "results": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "The result set that contains the eligibility check response for each requested number, each result has at least the following attributes:  phone_number: The requested phone number ,hosting_account_sid: The account sid where the phone number will be hosted, country: Phone number\u2019s country, eligibility_status: Indicates the eligibility status of the PN (Eligible/Ineligible), eligibility_sub_status: Indicates the sub status of the eligibility , ineligibility_reason: Reason for number's ineligibility (if applicable), next_step: Suggested next step in the hosting process based on the eligibility status."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "This is the string that you assigned as a friendly name for describing the eligibility check request."
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "description": "This is the status of the bulk eligibility check request. (Example: COMPLETE, IN_PROGRESS)"
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "date_completed": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "bulk_eligibility_enum_eligibility_status": {
+        "type": "string",
+        "enum": [
+          "ineligible",
+          "eligible"
+        ]
+      },
+      "bulk_eligibility_enum_eligibility_sub_status": {
+        "type": "string",
+        "enum": [
+          "country-ineligible",
+          "number-format-ineligible",
+          "number-type-ineligible",
+          "carrier-ineligible",
+          "already-in-twilio",
+          "internal-processing-error",
+          "invalid-phone-number",
+          "invalid-hosting-account-sid",
+          "eligible",
+          "eligible-by-manual-process"
+        ]
+      },
       "numbers.v1.eligibility": {
         "type": "object",
         "properties": {
@@ -54,10 +121,74 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.43.0"
+    "version": "1.43.1"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v1/HostedNumber/Eligibility/Bulk": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "list",
+        "mountName": "bulk_eligibilities"
+      }
+    },
+    "/v1/HostedNumber/Eligibility/Bulk/{RequestId}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance",
+        "mountName": "bulk_eligibilities"
+      },
+      "get": {
+        "description": "Fetch an eligibility bulk check that you requested to host in Twilio.",
+        "parameters": [
+          {
+            "name": "RequestId",
+            "in": "path",
+            "description": "The SID of the bulk eligibility check that you want to know about.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^EC[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.bulk_eligibility"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchBulkEligibility",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
     "/v1/HostedNumber/Eligibility": {
       "servers": [
         {
@@ -77,5 +208,10 @@
       "url": "https://numbers.twilio.com"
     }
   ],
-  "x-maturity": []
+  "x-maturity": [
+    {
+      "name": "Beta",
+      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
+    }
+  ]
 }

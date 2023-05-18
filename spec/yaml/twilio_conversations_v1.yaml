@@ -98,6 +98,11 @@ components:
           format: uri
           nullable: true
           description: An absolute API resource URL for this address configuration.
+        address_country:
+          type: string
+          nullable: true
+          description: An ISO 3166-1 alpha-2n country code which the address belongs
+            to. This is currently only applicable to short code addresses.
     configuration_address_enum_type:
       type: string
       enum:
@@ -2187,7 +2192,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.0
+  version: 1.43.1
 openapi: 3.0.1
 paths:
   /v1/Configuration:
@@ -2419,6 +2424,10 @@ paths:
                   type: integer
                   description: For type `studio`, number of times to retry the webhook
                     request
+                AddressCountry:
+                  type: string
+                  description: An ISO 3166-1 alpha-2n country code which the address
+                    belongs to. This is currently only applicable to short code addresses.
               required:
               - Type
               - Address
@@ -2636,9 +2645,9 @@ paths:
       - date_created
       pathType: list
       dependentProperties:
-        conversations/v1/conversation_participant: '{conversation_sid: sid}'
-        conversations/v1/conversation_message: '{conversation_sid: sid}'
-        conversations/v1/conversation_scoped_webhook: '{conversation_sid: sid}'
+        participant: '{conversation_sid: sid}'
+        message: '{conversation_sid: sid}'
+        webhook: '{conversation_sid: sid}'
     post:
       description: Create a new conversation in your account's default service
       parameters:
@@ -2713,6 +2722,27 @@ paths:
     get:
       description: Retrieve a list of conversations in your account's default service
       parameters:
+      - name: StartDate
+        in: query
+        description: Start date or time in ISO8601 format for filtering list of Conversations.
+          If a date is provided, the start time of the date is used (YYYY-MM-DDT00:00:00Z).
+          Can be combined with other filters.
+        schema:
+          type: string
+      - name: EndDate
+        in: query
+        description: End date or time in ISO8601 format for filtering list of Conversations.
+          If a date is provided, the end time of the date is used (YYYY-MM-DDT23:59:59Z).
+          Can be combined with other filters.
+        schema:
+          type: string
+      - name: State
+        in: query
+        description: State for sorting and filtering list of Conversations. Can be
+          `active`, `inactive` or `closed`
+        schema:
+          type: string
+          $ref: '#/components/schemas/conversation_enum_state'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2786,9 +2816,9 @@ paths:
       - date_created
       pathType: instance
       dependentProperties:
-        conversations/v1/conversation_participant: '{conversation_sid: sid}'
-        conversations/v1/conversation_message: '{conversation_sid: sid}'
-        conversations/v1/conversation_scoped_webhook: '{conversation_sid: sid}'
+        participant: '{conversation_sid: sid}'
+        message: '{conversation_sid: sid}'
+        webhook: '{conversation_sid: sid}'
     post:
       description: Update an existing conversation in your account's default service
       parameters:
@@ -2925,8 +2955,7 @@ paths:
       - date_created
       pathType: list
       dependentProperties:
-        conversations/v1/conversation_message_receipt: '{conversation_sid: conversation_sid,
-          message_sid: sid}'
+        delivery_receipt: '{conversation_sid: conversation_sid, message_sid: sid}'
       parent: /Conversations/{Sid}
     post:
       description: Add a new message to the conversation
@@ -3094,8 +3123,7 @@ paths:
       - date_created
       pathType: instance
       dependentProperties:
-        conversations/v1/conversation_message_receipt: '{conversation_sid: conversation_sid,
-          message_sid: sid}'
+        delivery_receipt: '{conversation_sid: conversation_sid, message_sid: sid}'
       parent: /Conversations/{Sid}
     post:
       description: Update an existing message in the conversation
@@ -4545,12 +4573,12 @@ paths:
       - friendly_name
       pathType: list
       dependentProperties:
-        conversations/v1/service_conversation: '{chat_service_sid: sid}'
-        conversations/v1/service_binding: '{chat_service_sid: sid}'
-        conversations/v1/service_user: '{chat_service_sid: sid}'
-        conversations/v1/service_role: '{chat_service_sid: sid}'
-        conversations/v1/service_configuration: '{chat_service_sid: sid}'
-        conversations/v1/service_participant_conversation: '{chat_service_sid: sid}'
+        conversation: '{chat_service_sid: sid}'
+        binding: '{chat_service_sid: sid}'
+        user: '{chat_service_sid: sid}'
+        role: '{chat_service_sid: sid}'
+        configuration: '{chat_service_sid: sid}'
+        participant_conversation: '{chat_service_sid: sid}'
     post:
       description: Create a new conversation service on your account
       responses:
@@ -4652,12 +4680,12 @@ paths:
       - friendly_name
       pathType: instance
       dependentProperties:
-        conversations/v1/service_conversation: '{chat_service_sid: sid}'
-        conversations/v1/service_binding: '{chat_service_sid: sid}'
-        conversations/v1/service_user: '{chat_service_sid: sid}'
-        conversations/v1/service_role: '{chat_service_sid: sid}'
-        conversations/v1/service_configuration: '{chat_service_sid: sid}'
-        conversations/v1/service_participant_conversation: '{chat_service_sid: sid}'
+        conversation: '{chat_service_sid: sid}'
+        binding: '{chat_service_sid: sid}'
+        user: '{chat_service_sid: sid}'
+        role: '{chat_service_sid: sid}'
+        configuration: '{chat_service_sid: sid}'
+        participant_conversation: '{chat_service_sid: sid}'
     delete:
       description: Remove a conversation service with all its nested resources from
         your account
@@ -4991,12 +5019,9 @@ paths:
       - date_created
       pathType: list
       dependentProperties:
-        conversations/v1/service_conversation_participant: '{chat_service_sid: chat_service_sid,
-          conversation_sid: sid}'
-        conversations/v1/service_conversation_message: '{chat_service_sid: chat_service_sid,
-          conversation_sid: sid}'
-        conversations/v1/service_conversation_scoped_webhook: '{chat_service_sid:
-          chat_service_sid, conversation_sid: sid}'
+        participant: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        message: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        webhook: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
       parent: /Services/{Sid}
     post:
       description: Create a new conversation in your service
@@ -5092,6 +5117,27 @@ paths:
           maxLength: 34
           pattern: ^IS[0-9a-fA-F]{32}$
         required: true
+      - name: StartDate
+        in: query
+        description: Start date or time in ISO8601 format for filtering list of Conversations.
+          If a date is provided, the start time of the date is used (YYYY-MM-DDT00:00:00Z).
+          Can be combined with other filters.
+        schema:
+          type: string
+      - name: EndDate
+        in: query
+        description: End date or time in ISO8601 format for filtering list of Conversations.
+          If a date is provided, the end time of the date is used (YYYY-MM-DDT23:59:59Z).
+          Can be combined with other filters.
+        schema:
+          type: string
+      - name: State
+        in: query
+        description: State for sorting and filtering list of Conversations. Can be
+          `active`, `inactive` or `closed`
+        schema:
+          type: string
+          $ref: '#/components/schemas/service_conversation_enum_state'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -5165,12 +5211,9 @@ paths:
       - date_created
       pathType: instance
       dependentProperties:
-        conversations/v1/service_conversation_participant: '{chat_service_sid: chat_service_sid,
-          conversation_sid: sid}'
-        conversations/v1/service_conversation_message: '{chat_service_sid: chat_service_sid,
-          conversation_sid: sid}'
-        conversations/v1/service_conversation_scoped_webhook: '{chat_service_sid:
-          chat_service_sid, conversation_sid: sid}'
+        participant: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        message: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        webhook: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
       parent: /Services/{Sid}
     post:
       description: Update an existing conversation in your service
@@ -5339,8 +5382,8 @@ paths:
       - date_created
       pathType: list
       dependentProperties:
-        conversations/v1/service_conversation_message_receipt: '{chat_service_sid:
-          chat_service_sid, conversation_sid: conversation_sid, message_sid: sid}'
+        delivery_receipt: '{chat_service_sid: chat_service_sid, conversation_sid:
+          conversation_sid, message_sid: sid}'
       parent: /Services/{ChatServiceSid}/Conversations/{Sid}
     post:
       description: Add a new message to the conversation in a specific service
@@ -5529,8 +5572,8 @@ paths:
       - date_created
       pathType: instance
       dependentProperties:
-        conversations/v1/service_conversation_message_receipt: '{chat_service_sid:
-          chat_service_sid, conversation_sid: conversation_sid, message_sid: sid}'
+        delivery_receipt: '{chat_service_sid: chat_service_sid, conversation_sid:
+          conversation_sid, message_sid: sid}'
       parent: /Services/{ChatServiceSid}/Conversations/{Sid}
     post:
       description: Update an existing message in the conversation
@@ -7064,8 +7107,7 @@ paths:
       - identity
       pathType: list
       dependentProperties:
-        conversations/v1/service_user_conversation: '{chat_service_sid: chat_service_sid,
-          user_sid: sid}'
+        user_conversation: '{chat_service_sid: chat_service_sid, user_sid: sid}'
       parent: /Services/{Sid}
     post:
       description: Add a new conversation user to your service
@@ -7210,8 +7252,7 @@ paths:
       - identity
       pathType: instance
       dependentProperties:
-        conversations/v1/service_user_conversation: '{chat_service_sid: chat_service_sid,
-          user_sid: sid}'
+        user_conversation: '{chat_service_sid: chat_service_sid, user_sid: sid}'
       parent: /Services/{Sid}
     post:
       description: Update an existing conversation user in your service
@@ -7689,7 +7730,7 @@ paths:
       - identity
       pathType: list
       dependentProperties:
-        conversations/v1/user_conversation: '{user_sid: sid}'
+        user_conversation: '{user_sid: sid}'
     post:
       description: Add a new conversation user to your account's default service
       parameters:
@@ -7814,7 +7855,7 @@ paths:
       - identity
       pathType: instance
       dependentProperties:
-        conversations/v1/user_conversation: '{user_sid: sid}'
+        user_conversation: '{user_sid: sid}'
     post:
       description: Update an existing conversation user in your account's default
         service

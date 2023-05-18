@@ -407,6 +407,11 @@
             "nullable": true,
             "description": "URL to receive click events to your webhook whenever the recipients click on the shortened links."
           },
+          "continue_on_failure": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Boolean field to set customer delivery preference when there is a failure in linkShortening service"
+          },
           "date_created": {
             "type": "string",
             "format": "date-time",
@@ -423,6 +428,11 @@
             "type": "string",
             "format": "uri",
             "nullable": true
+          },
+          "disable_https": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Customer's choice to send links with/without \"https://\" attached to shortened url. If true, messages will not be sent with https:// at the beginning of the url. If false, messages will be sent with https:// at the beginning of the url. False is the default behavior if it is not specified."
           }
         }
       },
@@ -464,6 +474,11 @@
             "format": "uri",
             "nullable": true,
             "description": "URL to receive click events to your webhook whenever the recipients click on the shortened links."
+          },
+          "continue_on_failure": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Boolean field to set customer delivery preference when there is a failure in linkShortening service"
           },
           "date_created": {
             "type": "string",
@@ -534,6 +549,32 @@
             "pattern": "^DN[0-9a-fA-F]{32}$",
             "nullable": true,
             "description": "The unique string identifies the domain resource"
+          },
+          "messaging_service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that identifies the messaging service"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "messaging.v1.linkshortening_messaging_service_domain_association": {
+        "type": "object",
+        "properties": {
+          "domain_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^DN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Domain resource."
           },
           "messaging_service_sid": {
             "type": "string",
@@ -1035,7 +1076,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.43.0"
+    "version": "1.43.1"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -1390,8 +1431,8 @@
         ],
         "pathType": "instance",
         "dependentProperties": {
-          "messaging/v1/brand_vetting": "{brand_sid: sid}",
-          "messaging/v1/brand_registration_otp": "{brand_registration_sid: sid}"
+          "brand_vetting": "{brand_sid: sid}",
+          "brand_registration_otp": "{brand_registration_sid: sid}"
         }
       },
       "get": {
@@ -1485,8 +1526,8 @@
         ],
         "pathType": "list",
         "dependentProperties": {
-          "messaging/v1/brand_vetting": "{brand_sid: sid}",
-          "messaging/v1/brand_registration_otp": "{brand_registration_sid: sid}"
+          "brand_vetting": "{brand_sid: sid}",
+          "brand_registration_otp": "{brand_registration_sid: sid}"
         }
       },
       "get": {
@@ -2141,9 +2182,11 @@
           "config_sid",
           "fallback_url",
           "callback_url",
+          "continue_on_failure",
           "date_created",
           "date_updated",
-          "url"
+          "url",
+          "disable_https"
         ],
         "pathType": "instance",
         "mountName": "domain_config"
@@ -2211,6 +2254,14 @@
                     "type": "string",
                     "format": "uri",
                     "description": "URL to receive click events to your webhook whenever the recipients click on the shortened links"
+                  },
+                  "ContinueOnFailure": {
+                    "type": "boolean",
+                    "description": "Boolean field to set customer delivery preference when there is a failure in linkShortening service"
+                  },
+                  "DisableHttps": {
+                    "type": "boolean",
+                    "description": "Customer's choice to send links with/without \"https://\" attached to shortened url. If true, messages will not be sent with https:// at the beginning of the url. If false, messages will be sent with https:// at the beginning of the url. False is the default behavior if it is not specified."
                   }
                 }
               }
@@ -2270,6 +2321,7 @@
           "config_sid",
           "fallback_url",
           "callback_url",
+          "continue_on_failure",
           "date_created",
           "date_updated",
           "url",
@@ -2489,6 +2541,61 @@
           }
         ],
         "operationId": "DeleteLinkshorteningMessagingService",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
+    "/v1/LinkShortening/MessagingServices/{MessagingServiceSid}/Domain": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "domain_sid",
+          "messaging_service_sid",
+          "url"
+        ],
+        "pathType": "instance",
+        "mountName": "linkshortening_messaging_service_domain_association"
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "MessagingServiceSid",
+            "in": "path",
+            "description": "Unique string used to identify the Messaging service that this domain should be associated with.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.linkshortening_messaging_service_domain_association"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchLinkshorteningMessagingServiceDomainAssociation",
         "x-maturity": [
           "Beta"
         ]
@@ -2796,12 +2903,12 @@
         ],
         "pathType": "list",
         "dependentProperties": {
-          "messaging/v1/phone_number": "{service_sid: sid}",
-          "messaging/v1/short_code": "{service_sid: sid}",
-          "messaging/v1/alpha_sender": "{service_sid: sid}",
+          "phone_number": "{service_sid: sid}",
+          "short_code": "{service_sid: sid}",
+          "alpha_sender": "{service_sid: sid}",
           "messaging/v1/message": "{messaging_service_sid: sid}",
-          "messaging/v1/us_app_to_person": "{messaging_service_sid: sid}",
-          "messaging/v1/us_app_to_person_usecase": "{messaging_service_sid: sid}"
+          "us_app_to_person": "{messaging_service_sid: sid}",
+          "us_app_to_person_usecase": "{messaging_service_sid: sid}"
         }
       },
       "post": {
@@ -3039,12 +3146,12 @@
         ],
         "pathType": "instance",
         "dependentProperties": {
-          "messaging/v1/phone_number": "{service_sid: sid}",
-          "messaging/v1/short_code": "{service_sid: sid}",
-          "messaging/v1/alpha_sender": "{service_sid: sid}",
+          "phone_number": "{service_sid: sid}",
+          "short_code": "{service_sid: sid}",
+          "alpha_sender": "{service_sid: sid}",
           "messaging/v1/message": "{messaging_service_sid: sid}",
-          "messaging/v1/us_app_to_person": "{messaging_service_sid: sid}",
-          "messaging/v1/us_app_to_person_usecase": "{messaging_service_sid: sid}"
+          "us_app_to_person": "{messaging_service_sid: sid}",
+          "us_app_to_person_usecase": "{messaging_service_sid: sid}"
         }
       },
       "post": {
