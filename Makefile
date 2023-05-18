@@ -4,12 +4,8 @@ install:
 	npm install
 
 spectral: install
-	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq
-
-spectral-ruleset:
-	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq --ruleset rulesets/twilio_open_api_ruleset.yaml --verbose
-
-test: spectral spectral-ruleset
+	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq --verbose
+test: spectral
 
 test-docker:
 	docker build -t twilio/twilio-oai .

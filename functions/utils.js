@@ -1,6 +1,6 @@
 
  export const containsPathInstance = (pathObj) => {
-    if (pathObj["x-twilio"]["pathType"] == "instance") {
+    if (pathObj["x-twilio"] && pathObj["x-twilio"]["pathType"] == "instance") {
       return true;
     }
     return false;
