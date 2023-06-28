@@ -1,6 +1,78 @@
 {
   "components": {
     "schemas": {
+      "numbers.v2.authorization_document": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies this AuthorizationDocument."
+          },
+          "address_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AD[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the Address resource that is associated with this AuthorizationDocument."
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/authorization_document_enum_status",
+            "nullable": true,
+            "description": "Status of an instance resource. It can hold one of the values: 1. opened 2. signing, 3. signed LOA, 4. canceled, 5. failed. See the section entitled [Status Values](https://www.twilio.com/docs/api/phone-numbers/hosted-number-authorization-documents#status-values) for more information on each of these statuses."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email that this AuthorizationDocument will be sent to for signing."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "Email recipients who will be informed when an Authorization Document has been sent and signed."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date this resource was created, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this resource was updated, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true
+          }
+        }
+      },
+      "authorization_document_enum_status": {
+        "type": "string",
+        "enum": [
+          "opened",
+          "signing",
+          "signed",
+          "canceled",
+          "failed"
+        ]
+      },
       "numbers.v2.regulatory_compliance.bundle": {
         "type": "object",
         "properties": {
@@ -201,6 +273,154 @@
           "business"
         ]
       },
+      "numbers.v2.authorization_document.dependent_hosted_number_order": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^HR[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies this Authorization Document"
+          },
+          "bulk_hosting_request_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BHR[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the bulk hosting request associated with this HostedNumberOrder."
+          },
+          "next_step": {
+            "type": "string",
+            "nullable": true,
+            "description": "The next step you need to take to complete the hosted number order and request it successfully."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Account."
+          },
+          "incoming_phone_number_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the IncomingPhoneNumber resource created by this HostedNumberOrder."
+          },
+          "address_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AD[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the Address resource that represents the address of the owner of this phone number."
+          },
+          "signing_document_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the LOA document associated with this HostedNumberOrder."
+          },
+          "phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "An E164 formatted phone number hosted by this HostedNumberOrder."
+          },
+          "capabilities": {
+            "type": "object",
+            "format": "phone-number-capabilities",
+            "properties": {
+              "mms": {
+                "type": "boolean"
+              },
+              "sms": {
+                "type": "boolean"
+              },
+              "voice": {
+                "type": "boolean"
+              },
+              "fax": {
+                "type": "boolean"
+              }
+            },
+            "nullable": true,
+            "description": "A mapping of capabilities this hosted phone number will have enabled on Twilio's platform."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "A human readable description of this resource, up to 64 characters."
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/dependent_hosted_number_order_enum_status",
+            "nullable": true,
+            "description": "Status of an instance resource. It can hold one of the values: 1. opened 2. signing, 3. signed LOA, 4. canceled, 5. failed. See the section entitled [Status Values](https://www.twilio.com/docs/api/phone-numbers/hosted-number-authorization-documents#status-values) for more information on each of these statuses."
+          },
+          "failure_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "A message that explains why a hosted_number_order went to status \"action-required\""
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date this resource was created, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this resource was updated, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of the owner of this phone number that is being hosted."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "Email recipients who will be informed when an Authorization Document has been sent and signed"
+          },
+          "contact_title": {
+            "type": "string",
+            "nullable": true,
+            "description": "The title of the person authorized to sign the Authorization Document for this phone number."
+          },
+          "contact_phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "The contact phone number of the person authorized to sign the Authorization Document."
+          }
+        }
+      },
+      "dependent_hosted_number_order_enum_status": {
+        "type": "string",
+        "enum": [
+          "received",
+          "verified",
+          "pending-loa",
+          "carrier-processing",
+          "completed",
+          "failed",
+          "action-required"
+        ]
+      },
       "numbers.v2.regulatory_compliance.end_user": {
         "type": "object",
         "properties": {
@@ -361,6 +581,165 @@
         "enum": [
           "compliant",
           "noncompliant"
+        ]
+      },
+      "numbers.v2.hosted_number_order": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^HR[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies this HostedNumberOrder."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the account."
+          },
+          "incoming_phone_number_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the [IncomingPhoneNumber](https://www.twilio.com/docs/api/rest/incoming-phone-numbers) resource that represents the phone number being hosted."
+          },
+          "address_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AD[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the Address resource that represents the address of the owner of this phone number."
+          },
+          "signing_document_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PX[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the [Authorization Document](https://www.twilio.com/docs/api/phone-numbers/hosted-number-authorization-documents) the user needs to sign."
+          },
+          "phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "Phone number to be hosted. This must be in [E.164](https://en.wikipedia.org/wiki/E.164) format, e.g., +16175551212"
+          },
+          "capabilities": {
+            "type": "object",
+            "format": "phone-number-capabilities",
+            "properties": {
+              "mms": {
+                "type": "boolean"
+              },
+              "sms": {
+                "type": "boolean"
+              },
+              "voice": {
+                "type": "boolean"
+              },
+              "fax": {
+                "type": "boolean"
+              }
+            },
+            "nullable": true,
+            "description": "Set of booleans describing the capabilities hosted on Twilio's platform. SMS is currently only supported."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "A 64 character string that is a human-readable text that describes this resource."
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/hosted_number_order_enum_status",
+            "nullable": true,
+            "description": "Status of this resource. It can hold one of the values: 1. Twilio Processing 2. Received, 3. Pending LOA, 4. Carrier Processing, 5. Completed, 6. Action Required, 7. Failed. See the [HostedNumberOrders Status Values](https://www.twilio.com/docs/api/phone-numbers/hosted-numbers#status-values) section for more information on each of these statuses."
+          },
+          "failure_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "A message that explains why a hosted_number_order went to status \"action-required\""
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date this resource was created, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "sms_capability": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the SMS capability will be hosted on our platform. Can be `true` of `false`."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this resource was updated, given as [GMT RFC 2822](http://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of the owner of this phone number that is being hosted."
+          },
+          "cc_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "A list of emails that LOA document for this HostedNumberOrder will be carbon copied to."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this HostedNumberOrder."
+          },
+          "contact_title": {
+            "type": "string",
+            "nullable": true,
+            "description": "The title of the person authorized to sign the Authorization Document for this phone number."
+          },
+          "contact_phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "The contact phone number of the person authorized to sign the Authorization Document."
+          },
+          "bulk_hosting_request_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BHR[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "A 34 character string that uniquely identifies the bulk hosting request associated with this HostedNumberOrder."
+          },
+          "next_step": {
+            "type": "string",
+            "nullable": true,
+            "description": "The next step you need to take to complete the hosted number order and request it successfully."
+          }
+        }
+      },
+      "hosted_number_order_enum_status": {
+        "type": "string",
+        "enum": [
+          "received",
+          "verified",
+          "pending-loa",
+          "carrier-processing",
+          "completed",
+          "failed",
+          "action-required"
         ]
       },
       "numbers.v2.regulatory_compliance.bundle.item_assignment": {
@@ -690,10 +1069,288 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.44.0"
+    "version": "1.45.0"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v2/HostedNumber/AuthorizationDocuments/{Sid}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance",
+        "dependentProperties": {
+          "dependent_hosted_number_order": "{signing_document_sid: sid}"
+        }
+      },
+      "get": {
+        "description": "Fetch a specific AuthorizationDocument.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this AuthorizationDocument.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.authorization_document"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchAuthorizationDocument",
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "delete": {
+        "description": "Cancel the AuthorizationDocument request.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this AuthorizationDocument.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteAuthorizationDocument",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
+    "/v2/HostedNumber/AuthorizationDocuments": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "list",
+        "dependentProperties": {
+          "dependent_hosted_number_order": "{signing_document_sid: sid}"
+        }
+      },
+      "get": {
+        "description": "Retrieve a list of AuthorizationDocuments belonging to the account initiating the request.",
+        "parameters": [
+          {
+            "name": "Email",
+            "in": "query",
+            "description": "Email that this AuthorizationDocument will be sent to for signing.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "Status of an instance resource. It can hold one of the values: 1. opened 2. signing, 3. signed LOA, 4. canceled, 5. failed. See the section entitled [Status Values](https://www.twilio.com/docs/api/phone-numbers/hosted-number-authorization-documents#status-values) for more information on each of these statuses.",
+            "schema": {
+              "type": "string",
+              "$ref": "#/components/schemas/authorization_document_enum_status"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListAuthorizationDocumentResponse",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/numbers.v2.authorization_document"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListAuthorizationDocument",
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "post": {
+        "description": "Create an AuthorizationDocument for authorizing the hosting of phone number capabilities on Twilio's platform.",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.authorization_document"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateAuthorizationDocument",
+        "x-maturity": [
+          "Beta"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateAuthorizationDocumentRequest",
+                "properties": {
+                  "AddressSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AD[0-9a-fA-F]{32}$",
+                    "description": "A 34 character string that uniquely identifies the Address resource that is associated with this AuthorizationDocument."
+                  },
+                  "Email": {
+                    "type": "string",
+                    "description": "Email that this AuthorizationDocument will be sent to for signing."
+                  },
+                  "ContactPhoneNumber": {
+                    "type": "string",
+                    "format": "phone-number",
+                    "description": "The contact phone number of the person authorized to sign the Authorization Document."
+                  },
+                  "ContactTitle": {
+                    "type": "string",
+                    "description": "The title of the person authorized to sign the Authorization Document for this phone number."
+                  },
+                  "CcEmails": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Email recipients who will be informed when an Authorization Document has been sent and signed."
+                  }
+                },
+                "required": [
+                  "AddressSid",
+                  "Email",
+                  "ContactPhoneNumber"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/v2/RegulatoryCompliance/Bundles": {
       "servers": [
         {
@@ -1310,6 +1967,162 @@
           }
         ],
         "operationId": "ListBundleCopy",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
+    "/v2/HostedNumber/AuthorizationDocuments/{SigningDocumentSid}/DependentHostedNumberOrders": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "list",
+        "parent": "/HostedNumber/AuthorizationDocuments/{Sid}"
+      },
+      "get": {
+        "description": "Retrieve a list of dependent HostedNumberOrders belonging to the AuthorizationDocument.",
+        "parameters": [
+          {
+            "name": "SigningDocumentSid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies the LOA document associated with this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "Status of an instance resource. It can hold one of the values: 1. opened 2. signing, 3. signed LOA, 4. canceled, 5. failed. See the section entitled [Status Values](https://www.twilio.com/docs/api/phone-numbers/hosted-number-authorization-documents#status-values) for more information on each of these statuses.",
+            "schema": {
+              "type": "string",
+              "$ref": "#/components/schemas/dependent_hosted_number_order_enum_status"
+            }
+          },
+          {
+            "name": "PhoneNumber",
+            "in": "query",
+            "description": "An E164 formatted phone number hosted by this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "format": "phone-number"
+            }
+          },
+          {
+            "name": "IncomingPhoneNumberSid",
+            "in": "query",
+            "description": "A 34 character string that uniquely identifies the IncomingPhoneNumber resource created by this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PN[0-9a-fA-F]{32}$"
+            }
+          },
+          {
+            "name": "FriendlyName",
+            "in": "query",
+            "description": "A human readable description of this resource, up to 64 characters.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListDependentHostedNumberOrderResponse",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/numbers.v2.authorization_document.dependent_hosted_number_order"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListDependentHostedNumberOrder",
         "x-maturity": [
           "Beta"
         ]
@@ -2002,6 +2815,390 @@
         "x-maturity": [
           "GA"
         ]
+      }
+    },
+    "/v2/HostedNumber/Orders/{Sid}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance",
+        "mountName": "hosted_number_orders"
+      },
+      "get": {
+        "description": "Fetch a specific HostedNumberOrder.",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HR[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.hosted_number_order"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchHostedNumberOrder",
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "delete": {
+        "description": "Cancel the HostedNumberOrder (only available when the status is in `received`).",
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "A 34 character string that uniquely identifies this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HR[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteHostedNumberOrder",
+        "x-maturity": [
+          "Beta"
+        ]
+      }
+    },
+    "/v2/HostedNumber/Orders": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "list",
+        "mountName": "hosted_number_orders"
+      },
+      "get": {
+        "description": "Retrieve a list of HostedNumberOrders belonging to the account initiating the request.",
+        "parameters": [
+          {
+            "name": "Status",
+            "in": "query",
+            "description": "The Status of this HostedNumberOrder. One of `received`, `pending-verification`, `verified`, `pending-loa`, `carrier-processing`, `testing`, `completed`, `failed`, or `action-required`.",
+            "schema": {
+              "type": "string",
+              "$ref": "#/components/schemas/hosted_number_order_enum_status"
+            }
+          },
+          {
+            "name": "SmsCapability",
+            "in": "query",
+            "description": "Whether the SMS capability will be hosted on our platform. Can be `true` of `false`.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "PhoneNumber",
+            "in": "query",
+            "description": "An E164 formatted phone number hosted by this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "format": "phone-number"
+            }
+          },
+          {
+            "name": "IncomingPhoneNumberSid",
+            "in": "query",
+            "description": "A 34 character string that uniquely identifies the IncomingPhoneNumber resource created by this HostedNumberOrder.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PN[0-9a-fA-F]{32}$"
+            }
+          },
+          {
+            "name": "FriendlyName",
+            "in": "query",
+            "description": "A human readable description of this resource, up to 64 characters.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListHostedNumberOrderResponse",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/numbers.v2.hosted_number_order"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "first_page_url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "next_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "type": "string",
+                          "format": "uri",
+                          "nullable": true
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListHostedNumberOrder",
+        "x-maturity": [
+          "Beta"
+        ]
+      },
+      "post": {
+        "description": "Host a phone number's capability on Twilio's platform.",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.hosted_number_order"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateHostedNumberOrder",
+        "x-maturity": [
+          "Beta"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateHostedNumberOrderRequest",
+                "properties": {
+                  "PhoneNumber": {
+                    "type": "string",
+                    "format": "phone-number",
+                    "description": "The number to host in [+E.164](https://en.wikipedia.org/wiki/E.164) format"
+                  },
+                  "ContactPhoneNumber": {
+                    "type": "string",
+                    "format": "phone-number",
+                    "description": "The contact phone number of the person authorized to sign the Authorization Document."
+                  },
+                  "AddressSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AD[0-9a-fA-F]{32}$",
+                    "description": "Optional. A 34 character string that uniquely identifies the Address resource that represents the address of the owner of this phone number."
+                  },
+                  "Email": {
+                    "type": "string",
+                    "description": "Optional. Email of the owner of this phone number that is being hosted."
+                  },
+                  "AccountSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AC[0-9a-fA-F]{32}$",
+                    "description": "This defaults to the AccountSid of the authorization the user is using. This can be provided to specify a subaccount to add the HostedNumberOrder to."
+                  },
+                  "FriendlyName": {
+                    "type": "string",
+                    "description": "A 64 character string that is a human readable text that describes this resource."
+                  },
+                  "CcEmails": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Optional. A list of emails that the LOA document for this HostedNumberOrder will be carbon copied to."
+                  },
+                  "SmsUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The URL that Twilio should request when somebody sends an SMS to the phone number. This will be copied onto the IncomingPhoneNumber resource."
+                  },
+                  "SmsMethod": {
+                    "type": "string",
+                    "format": "http-method",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "description": "The HTTP method that should be used to request the SmsUrl. Must be either `GET` or `POST`.  This will be copied onto the IncomingPhoneNumber resource."
+                  },
+                  "SmsFallbackUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "A URL that Twilio will request if an error occurs requesting or executing the TwiML defined by SmsUrl. This will be copied onto the IncomingPhoneNumber resource."
+                  },
+                  "SmsCapability": {
+                    "type": "boolean",
+                    "description": "Used to specify that the SMS capability will be hosted on Twilio's platform."
+                  },
+                  "SmsFallbackMethod": {
+                    "type": "string",
+                    "format": "http-method",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "description": "The HTTP method that should be used to request the SmsFallbackUrl. Must be either `GET` or `POST`. This will be copied onto the IncomingPhoneNumber resource."
+                  },
+                  "StatusCallbackUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Optional. The Status Callback URL attached to the IncomingPhoneNumber resource."
+                  },
+                  "StatusCallbackMethod": {
+                    "type": "string",
+                    "format": "http-method",
+                    "enum": [
+                      "HEAD",
+                      "GET",
+                      "POST",
+                      "PATCH",
+                      "PUT",
+                      "DELETE"
+                    ],
+                    "description": "Optional. The Status Callback Method attached to the IncomingPhoneNumber resource."
+                  },
+                  "SmsApplicationSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AP[0-9a-fA-F]{32}$",
+                    "description": "Optional. The 34 character sid of the application Twilio should use to handle SMS messages sent to this number. If a `SmsApplicationSid` is present, Twilio will ignore all of the SMS urls above and use those set on the application."
+                  },
+                  "ContactTitle": {
+                    "type": "string",
+                    "description": "The title of the person authorized to sign the Authorization Document for this phone number."
+                  }
+                },
+                "required": [
+                  "PhoneNumber",
+                  "ContactPhoneNumber",
+                  "AddressSid",
+                  "Email"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/v2/RegulatoryCompliance/Bundles/{BundleSid}/ItemAssignments": {
