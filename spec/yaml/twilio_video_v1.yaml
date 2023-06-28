@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     video.v1.composition:
       type: object
@@ -148,6 +152,11 @@ components:
           nullable: true
           description: 'The HTTP method used to call `status_callback`. Can be: `POST`
             or `GET`, defaults to `POST`.'
+        encryption_key:
+          type: string
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         url:
           type: string
           format: uri
@@ -298,6 +307,14 @@ components:
       enum:
       - mp4
       - webm
+    video.v1.composition.composition_media:
+      type: object
+      properties:
+        redirect_to:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the media file.
     video.v1.composition_settings:
       type: object
       properties:
@@ -342,11 +359,15 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Public Key resource used for encryption.
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         encryption_enabled:
           type: boolean
           nullable: true
           description: Whether all compositions are stored in an encrypted form. The
             default is `false`.
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         url:
           type: string
           format: uri
@@ -378,6 +399,18 @@ components:
           nullable: true
           description: The date and time in GMT when the resource was created specified
             in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_deleted:
+          type: string
+          format: date-time
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.recordings.show.internal.data
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.recordings.show.internal.data
         sid:
           type: string
           minLength: 34
@@ -470,6 +503,11 @@ components:
           nullable: true
           description: 'The HTTP method used to call `status_callback`. Can be: `POST`
             or `GET`, defaults to `POST`.'
+        encryption_key:
+          type: string
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         links:
           type: object
           format: uri-map
@@ -500,6 +538,14 @@ components:
       - H264
       - OPUS
       - PCMU
+    video.v1.recording.recording_media:
+      type: object
+      properties:
+        redirect_to:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the media file.
     video.v1.recording_settings:
       type: object
       properties:
@@ -544,11 +590,15 @@ components:
           pattern: ^CR[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the Public Key resource used for encryption.
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         encryption_enabled:
           type: boolean
           nullable: true
           description: Whether all recordings are stored in an encrypted form. The
             default is `false`.
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         url:
           type: string
           format: uri
@@ -1098,6 +1148,18 @@ components:
           nullable: true
           description: The date and time in GMT when the resource was created specified
             in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_deleted:
+          type: string
+          format: date-time
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.recordings.show.internal.data
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.recordings.show.internal.data
         sid:
           type: string
           minLength: 34
@@ -1170,6 +1232,11 @@ components:
           description: The URL of the media file associated with the recording when
             stored externally. See [External S3 Recordings](/docs/video/api/external-s3-recordings)
             for more details.
+        encryption_key:
+          type: string
+          nullable: true
+          x-twilio:
+            betaFeature: api.video.storage.encrypted
         room_sid:
           type: string
           minLength: 34
@@ -1207,6 +1274,14 @@ components:
       - H264
       - OPUS
       - PCMU
+    video.v1.room.room_recording.room_recording_media:
+      type: object
+      properties:
+        redirect_to:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the media file.
     video.v1.room.room_recording_rule:
       type: object
       properties:
@@ -1248,10 +1323,6 @@ components:
           nullable: true
           description: The date and time in GMT when the resource was last updated
             specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Video
   description: This is the public Twilio REST API.
@@ -1263,7 +1334,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.44.0
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Compositions/{Sid}:
@@ -1276,9 +1347,9 @@ paths:
       - status
       - resolution
       - format
-      pathType: instance
       dependentProperties:
-        video/v1/composition_media: '{composition_sid: sid}'
+        media: '{composition_sid: sid}'
+      pathType: instance
     get:
       description: Returns a single Composition resource identified by a Composition
         SID.
@@ -1298,12 +1369,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: completed
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_completed: '2015-07-30T20:01:33Z'
+                    date_deleted: null
+                    sid: CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    - user*
+                    audio_sources_excluded:
+                    - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    video_layout:
+                      grid:
+                        video_sources:
+                        - '*'
+                        video_sources_excluded:
+                        - MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        reuse: show_oldest
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 0
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded: []
+                      pip:
+                        video_sources:
+                        - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                        video_sources_excluded: []
+                        reuse: none
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 0
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded: []
+                    resolution: 1280x720
+                    format: webm
+                    bitrate: 64
+                    size: 4
+                    duration: 6
+                    trim: true
+                    media_external_location: null
+                    encryption_key: null
+                    url: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status_callback: https://mycallbackurl.com
+                    status_callback_method: POST
+                    links:
+                      media: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchComposition
-      x-maturity:
-      - GA
     delete:
       description: Delete a Recording Composition resource identified by a Composition
         SID.
@@ -1323,8 +1448,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteComposition
-      x-maturity:
-      - GA
   /v1/Compositions:
     servers:
     - url: https://video.twilio.com
@@ -1335,9 +1458,9 @@ paths:
       - status
       - resolution
       - format
-      pathType: list
       dependentProperties:
-        video/v1/composition_media: '{composition_sid: sid}'
+        media: '{composition_sid: sid}'
+      pathType: list
     get:
       description: List of all Recording compositions.
       parameters:
@@ -1348,6 +1471,13 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/composition_enum_status'
+        examples:
+          readEnqueued:
+            value: enqueued
+          readEmpty:
+            value: completed
+          readResults:
+            value: completed
       - name: DateCreatedAfter
         in: query
         description: Read only Composition resources created on or after this [ISO
@@ -1355,6 +1485,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-01-01T00:00:01Z'
       - name: DateCreatedBefore
         in: query
         description: Read only Composition resources created before this ISO 8601
@@ -1362,6 +1495,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-12-31T23:59:59Z'
       - name: RoomSid
         in: query
         description: Read only Composition resources with this Room SID.
@@ -1370,6 +1506,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
+        examples:
+          readResults:
+            value: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1402,34 +1541,117 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.composition'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEnqueued:
+                  value:
+                    compositions: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://video.twilio.com/v1/Compositions?Status=enqueued&PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Compositions?Status=enqueued&PageSize=10&Page=0
+                      next_page_url: null
+                      key: compositions
+                readEmpty:
+                  value:
+                    compositions: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Compositions?Status=completed&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Compositions?Status=completed&PageSize=50&Page=0
+                      next_page_url: null
+                      key: compositions
+                readResults:
+                  value:
+                    compositions:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: completed
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_completed: '2015-07-30T20:01:33Z'
+                      date_deleted: null
+                      sid: CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      audio_sources:
+                      - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      - user*
+                      audio_sources_excluded: []
+                      video_layout:
+                        grid:
+                          video_sources:
+                          - user*
+                          video_sources_excluded: []
+                          reuse: show_oldest
+                          x_pos: 100
+                          y_pos: 600
+                          z_pos: 10
+                          width: 0
+                          height: 0
+                          max_columns: 0
+                          max_rows: 0
+                          cells_excluded: []
+                        pip:
+                          video_sources:
+                          - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                          video_sources_excluded: []
+                          reuse: none
+                          x_pos: 100
+                          y_pos: 600
+                          z_pos: 10
+                          width: 0
+                          height: 0
+                          max_columns: 0
+                          max_rows: 0
+                          cells_excluded: []
+                      resolution: 1280x720
+                      format: webm
+                      bitrate: 64
+                      size: 4
+                      duration: 6
+                      trim: true
+                      media_external_location: null
+                      encryption_key: null
+                      url: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status_callback: https://mycallbackurl.com
+                      status_callback_method: POST
+                      links:
+                        media: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Compositions?Status=completed&RoomSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Compositions?Status=completed&RoomSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&PageSize=50&Page=0
+                      next_page_url: null
+                      key: compositions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListComposition
-      x-maturity:
-      - GA
     post:
       description: ''
       responses:
@@ -1438,12 +1660,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: processing
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_completed: null
+                    date_deleted: null
+                    sid: CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    - user*
+                    audio_sources_excluded:
+                    - RTbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    video_layout:
+                      custom:
+                        video_sources:
+                        - user*
+                        video_sources_excluded:
+                        - RTcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        reuse: show_oldest
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 800
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded:
+                        - 2
+                        - 3
+                    trim: true
+                    format: mp4
+                    resolution: 1920x1080
+                    bitrate: 0
+                    size: 0
+                    duration: 0
+                    media_external_location: null
+                    encryption_key: null
+                    url: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status_callback: https://mycallbackurl.com
+                    status_callback_method: POST
+                    links:
+                      media: https://video.twilio.com/v1/Compositions/CJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateComposition
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1537,6 +1802,19 @@ paths:
                     for more info.
               required:
               - RoomSid
+            examples:
+              create:
+                value:
+                  RoomSid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  AudioSources:
+                  - RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  - user*
+                  AudioSourcesExcluded:
+                  - RTbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  VideoLayout: '{}'
+                  Trim: true
+                  Format: mp4
+                  Resolution: 1920x1080
   /v1/CompositionHooks/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -1566,12 +1844,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition_hook'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: My composition hook
+                    enabled: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:01:33Z'
+                    sid: HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - user*
+                    audio_sources_excluded:
+                    - moderator*
+                    video_layout:
+                      grid:
+                        video_sources:
+                        - '*'
+                        video_sources_excluded:
+                        - moderator*
+                        reuse: show_oldest
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 0
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded: []
+                      pip:
+                        video_sources:
+                        - student*
+                        video_sources_excluded: []
+                        reuse: none
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 0
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded: []
+                    resolution: 1280x720
+                    format: webm
+                    trim: true
+                    status_callback: http://www.example.com
+                    status_callback_method: POST
+                    url: https://video.twilio.com/v1/CompositionHooks/HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchCompositionHook
-      x-maturity:
-      - GA
     delete:
       description: Delete a Recording CompositionHook resource identified by a `CompositionHook
         SID`.
@@ -1591,8 +1914,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteCompositionHook
-      x-maturity:
-      - GA
     post:
       description: ''
       parameters:
@@ -1611,12 +1932,67 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition_hook'
+              examples:
+                updateAllFields:
+                  value:
+                    friendly_name: My composition hook
+                    enabled: true
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    sid: HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - user*
+                    - moderator
+                    audio_sources_excluded:
+                    - admin
+                    video_layout:
+                      custom:
+                        video_sources:
+                        - user*
+                        video_sources_excluded:
+                        - moderator
+                        reuse: show_oldest
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 800
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded:
+                        - 2
+                        - 3
+                    trim: true
+                    format: mp4
+                    resolution: 1280x720
+                    status_callback: http://www.example.com
+                    status_callback_method: POST
+                    url: https://video.twilio.com/v1/CompositionHooks/HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                updateWithDefaults:
+                  value:
+                    friendly_name: My composition hook
+                    enabled: true
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    sid: HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - user*
+                    - moderator
+                    audio_sources_excluded:
+                    - admin
+                    video_layout: {}
+                    trim: true
+                    format: mp4
+                    resolution: 1280x720
+                    status_callback: null
+                    status_callback_method: POST
+                    url: https://video.twilio.com/v1/CompositionHooks/HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateCompositionHook
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1713,6 +2089,32 @@ paths:
                     Can be: `POST` or `GET` and the default is `POST`.'
               required:
               - FriendlyName
+            examples:
+              updateAllFields:
+                value:
+                  FriendlyName: My composition hook
+                  Enabled: true
+                  AudioSources:
+                  - user*
+                  - moderator
+                  AudioSourcesExcluded:
+                  - admin
+                  VideoLayout: '{}'
+                  Trim: true
+                  Format: mp4
+                  Resolution: 1280x720
+                  StatusCallback: http://www.example.com
+                  StatusCallbackMethod: POST
+              updateWithDefaults:
+                value:
+                  FriendlyName: My composition hook
+                  AudioSources:
+                  - user*
+                  - moderator
+                  AudioSourcesExcluded:
+                  - admin
+                  Format: mp4
+                  Resolution: 1280x720
   /v1/CompositionHooks:
     servers:
     - url: https://video.twilio.com
@@ -1732,6 +2134,11 @@ paths:
           matches this parameter.
         schema:
           type: boolean
+        examples:
+          readEmpty:
+            value: true
+          readResults:
+            value: true
       - name: DateCreatedAfter
         in: query
         description: Read only CompositionHook resources created on or after this
@@ -1739,6 +2146,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-01-01T00:00:01Z'
       - name: DateCreatedBefore
         in: query
         description: Read only CompositionHook resources created before this [ISO
@@ -1746,6 +2156,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-12-31T23:59:59Z'
       - name: FriendlyName
         in: query
         description: Read only CompositionHook resources with friendly names that
@@ -1753,6 +2166,9 @@ paths:
           `*` characters as wildcard match.
         schema:
           type: string
+        examples:
+          readResults:
+            value: '*Hook*'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1785,34 +2201,98 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.composition_hook'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    composition_hooks: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/CompositionHooks?Enabled=True&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/CompositionHooks?Enabled=True&PageSize=50&Page=0
+                      next_page_url: null
+                      key: composition_hooks
+                readResults:
+                  value:
+                    composition_hooks:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: My Special Hook1
+                      enabled: true
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:01:33Z'
+                      sid: HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      audio_sources:
+                      - '*'
+                      audio_sources_excluded: []
+                      video_layout:
+                        grid:
+                          video_sources:
+                          - '*'
+                          video_sources_excluded:
+                          - moderator*
+                          reuse: show_oldest
+                          x_pos: 100
+                          y_pos: 600
+                          z_pos: 10
+                          width: 0
+                          height: 0
+                          max_columns: 0
+                          max_rows: 0
+                          cells_excluded: []
+                        pip:
+                          video_sources:
+                          - student*
+                          video_sources_excluded: []
+                          reuse: none
+                          x_pos: 100
+                          y_pos: 600
+                          z_pos: 10
+                          width: 0
+                          height: 0
+                          max_columns: 0
+                          max_rows: 0
+                          cells_excluded: []
+                      resolution: 1280x720
+                      format: webm
+                      trim: true
+                      status_callback: http://www.example.com
+                      status_callback_method: POST
+                      url: https://video.twilio.com/v1/CompositionHooks/HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/CompositionHooks?FriendlyName=%2AHook%2A&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&Enabled=True&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/CompositionHooks?FriendlyName=%2AHook%2A&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&Enabled=True&PageSize=50&Page=0
+                      next_page_url: null
+                      key: composition_hooks
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListCompositionHook
-      x-maturity:
-      - GA
     post:
       description: ''
       responses:
@@ -1821,12 +2301,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition_hook'
+              examples:
+                create:
+                  value:
+                    friendly_name: My composition hook
+                    enabled: false
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: null
+                    sid: HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    audio_sources:
+                    - user*
+                    - moderator
+                    audio_sources_excluded:
+                    - admin
+                    video_layout:
+                      custom:
+                        video_sources:
+                        - user*
+                        video_sources_excluded:
+                        - moderator
+                        reuse: show_oldest
+                        x_pos: 100
+                        y_pos: 600
+                        z_pos: 10
+                        width: 800
+                        height: 0
+                        max_columns: 0
+                        max_rows: 0
+                        cells_excluded:
+                        - 2
+                        - 3
+                    trim: true
+                    format: mp4
+                    resolution: 1280x720
+                    status_callback: http://www.example.com
+                    status_callback_method: POST
+                    url: https://video.twilio.com/v1/CompositionHooks/HKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateCompositionHook
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1923,6 +2438,22 @@ paths:
                     for more info.
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: My composition hook
+                  Enabled: false
+                  AudioSources:
+                  - user*
+                  - moderator
+                  AudioSourcesExcluded:
+                  - admin
+                  VideoLayout: '{}'
+                  Trim: true
+                  Format: mp4
+                  Resolution: 1280x720
+                  StatusCallback: http://www.example.com
+                  StatusCallbackMethod: POST
   /v1/CompositionSettings/Default:
     servers:
     - url: https://video.twilio.com
@@ -1932,9 +2463,9 @@ paths:
       - friendly_name
       - aws_storage_enabled
       - encryption_enabled
-      pathType: instance
       mountName: composition_settings
       className: composition_settings
+      pathType: instance
     get:
       description: ''
       responses:
@@ -1943,12 +2474,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition_settings'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: string
+                    aws_credentials_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    encryption_key_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    aws_s3_url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    aws_storage_enabled: true
+                    encryption_enabled: true
+                    url: https://video.twilio.com/v1/CompositionSettings/Default
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchCompositionSettings
-      x-maturity:
-      - GA
     post:
       description: ''
       responses:
@@ -1957,12 +2497,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.composition_settings'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    aws_credentials_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    encryption_key_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    aws_s3_url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    aws_storage_enabled: true
+                    encryption_enabled: true
+                    url: https://video.twilio.com/v1/CompositionSettings/Default
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateCompositionSettings
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1986,6 +2535,8 @@ paths:
                   maxLength: 34
                   pattern: ^CR[0-9a-fA-F]{32}$
                   description: The SID of the Public Key resource to use for encryption.
+                  x-twilio:
+                    betaFeature: api.video.storage.encrypted
                 AwsS3Url:
                   type: string
                   format: uri
@@ -2003,8 +2554,19 @@ paths:
                   type: boolean
                   description: Whether all compositions should be stored in an encrypted
                     form. The default is `false`.
+                  x-twilio:
+                    betaFeature: api.video.storage.encrypted
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  AwsCredentialsSid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  EncryptionKeySid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                  AwsS3Url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                  AwsStorageEnabled: true
+                  EncryptionEnabled: true
   /v1/Recordings/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -2017,9 +2579,9 @@ paths:
       - type
       - duration
       - codec
-      pathType: instance
       dependentProperties:
-        video/v1/recording_media: '{recording_sid: sid}'
+        media: '{recording_sid: sid}'
+      pathType: instance
     get:
       description: Returns a single Recording resource identified by a Recording SID.
       parameters:
@@ -2038,12 +2600,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.recording'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: processing
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T21:00:00Z'
+                    date_deleted: '2015-07-30T22:00:00Z'
+                    sid: RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source_sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    size: 0
+                    url: https://video.twilio.com/v1/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: audio
+                    duration: 0
+                    container_format: mka
+                    codec: OPUS
+                    track_name: A name
+                    offset: 10
+                    status_callback: https://mycallbackurl.com
+                    status_callback_method: POST
+                    grouping_sids:
+                      room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    media_external_location: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    encryption_key: public_key
+                    links:
+                      media: https://video.twilio.com/v1/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRecording
-      x-maturity:
-      - GA
     delete:
       description: Delete a Recording resource identified by a Recording SID.
       parameters:
@@ -2062,8 +2648,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteRecording
-      x-maturity:
-      - GA
   /v1/Recordings:
     servers:
     - url: https://video.twilio.com
@@ -2076,9 +2660,9 @@ paths:
       - type
       - duration
       - codec
-      pathType: list
       dependentProperties:
-        video/v1/recording_media: '{recording_sid: sid}'
+        media: '{recording_sid: sid}'
+      pathType: list
     get:
       description: List of all Track recordings.
       parameters:
@@ -2089,6 +2673,11 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/recording_enum_status'
+        examples:
+          readEmpty:
+            value: completed
+          readResults:
+            value: completed
       - name: SourceSid
         in: query
         description: Read only the recordings that have this `source_sid`.
@@ -2097,6 +2686,11 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value: source_sid
+          readResults:
+            value: source_sid
       - name: GroupingSid
         in: query
         description: Read only recordings with this `grouping_sid`, which may include
@@ -2108,6 +2702,14 @@ paths:
             minLength: 34
             maxLength: 34
             pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value:
+            - RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+            - PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          readResults:
+            value:
+            - RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: DateCreatedAfter
         in: query
         description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -2115,6 +2717,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-01-01T00:00:01Z'
       - name: DateCreatedBefore
         in: query
         description: Read only recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -2122,6 +2727,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-12-31T23:59:59Z'
       - name: MediaType
         in: query
         description: Read only recordings that have this media type. Can be either
@@ -2129,6 +2737,11 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/recording_enum_type'
+        examples:
+          readEmpty:
+            value: audio
+          readResults:
+            value: audio
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2161,34 +2774,79 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.recording'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    recordings: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Recordings?Status=completed&SourceSid=source_sid&MediaType=audio&GroupingSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Recordings?Status=completed&SourceSid=source_sid&MediaType=audio&GroupingSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                      next_page_url: null
+                      key: recordings
+                readResults:
+                  value:
+                    recordings:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: completed
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T21:00:00Z'
+                      date_deleted: '2015-07-30T22:00:00Z'
+                      sid: RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      source_sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      size: 23
+                      type: audio
+                      duration: 10
+                      container_format: mka
+                      codec: OPUS
+                      track_name: A name
+                      offset: 10
+                      status_callback: https://mycallbackurl.com
+                      status_callback_method: POST
+                      grouping_sids:
+                        room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      media_external_location: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                      encryption_key: public_key
+                      url: https://video.twilio.com/v1/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        media: https://video.twilio.com/v1/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Recordings?Status=completed&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&SourceSid=source_sid&MediaType=audio&GroupingSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Recordings?Status=completed&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&SourceSid=source_sid&MediaType=audio&GroupingSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                      next_page_url: null
+                      key: recordings
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRecording
-      x-maturity:
-      - GA
   /v1/RecordingSettings/Default:
     servers:
     - url: https://video.twilio.com
@@ -2198,9 +2856,9 @@ paths:
       - friendly_name
       - aws_storage_enabled
       - encryption_enabled
-      pathType: instance
       mountName: recording_settings
       className: recording_settings
+      pathType: instance
     get:
       description: ''
       responses:
@@ -2209,12 +2867,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.recording_settings'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: string
+                    aws_credentials_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    encryption_key_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    aws_s3_url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    aws_storage_enabled: true
+                    encryption_enabled: true
+                    url: https://video.twilio.com/v1/RecordingSettings/Default
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRecordingSettings
-      x-maturity:
-      - GA
     post:
       description: ''
       responses:
@@ -2223,12 +2890,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.recording_settings'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    aws_credentials_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    encryption_key_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    aws_s3_url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    aws_storage_enabled: true
+                    encryption_enabled: true
+                    url: https://video.twilio.com/v1/RecordingSettings/Default
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateRecordingSettings
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2252,6 +2928,8 @@ paths:
                   maxLength: 34
                   pattern: ^CR[0-9a-fA-F]{32}$
                   description: The SID of the Public Key resource to use for encryption.
+                  x-twilio:
+                    betaFeature: api.video.storage.encrypted
                 AwsS3Url:
                   type: string
                   format: uri
@@ -2269,8 +2947,19 @@ paths:
                   type: boolean
                   description: Whether all recordings should be stored in an encrypted
                     form. The default is `false`.
+                  x-twilio:
+                    betaFeature: api.video.storage.encrypted
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  AwsCredentialsSid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  EncryptionKeySid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                  AwsS3Url: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                  AwsStorageEnabled: true
+                  EncryptionEnabled: true
   /v1/Rooms/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -2280,11 +2969,11 @@ paths:
       - sid
       - unique_name
       - status
-      pathType: instance
       dependentProperties:
         room_recording: '{room_sid: sid}'
         participant: '{room_sid: sid}'
         recording_rules: '{room_sid: sid}'
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2300,12 +2989,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: peer-to-peer
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: unique_name
+                    max_participants: 10
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 0
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    audio_only: false
+                    media_region: us1
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoom
-      x-maturity:
-      - GA
     post:
       description: ''
       parameters:
@@ -2321,12 +3039,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: completed
+                    type: peer-to-peer
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: unique_name
+                    max_participants: 10
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 10
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    duration: 10
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateRoom
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2341,6 +3088,10 @@ paths:
                     to end the room.
               required:
               - Status
+            examples:
+              update:
+                value:
+                  Status: completed
   /v1/Rooms:
     servers:
     - url: https://video.twilio.com
@@ -2350,11 +3101,11 @@ paths:
       - sid
       - unique_name
       - status
-      pathType: list
       dependentProperties:
         room_recording: '{room_sid: sid}'
         participant: '{room_sid: sid}'
         recording_rules: '{room_sid: sid}'
+      pathType: list
     post:
       description: ''
       responses:
@@ -2363,12 +3114,219 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: peer-to-peer
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    max_concurrent_published_tracks: 0
+                    max_participants: 10
+                    max_participant_duration: 86400
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createWebrtcGo:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: go
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: room1
+                    max_participants: 10
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 0
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createGroupRooms:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: group
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: grouproom
+                    max_participants: 50
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 170
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createGroupRoomsWithAudioOnlyEnabled:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: group
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: grouproom
+                    max_participants: 50
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 170
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs: []
+                    media_region: us1
+                    audio_only: true
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createSmallGroupRooms:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: group-small
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: SmallDailyStandup
+                    max_participants: 4
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 170
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createLargeGroupRooms:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: group
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: MyWebinar
+                    max_participants: 50
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 16
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs:
+                    - VP8
+                    media_region: us1
+                    audio_only: false
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
+                createLargeGroupRoomsWithAudioOnlyEnabled:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: in-progress
+                    type: group
+                    sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    enable_turn: true
+                    unique_name: MyWebinar
+                    max_participants: 50
+                    max_participant_duration: 86400
+                    max_concurrent_published_tracks: 16
+                    duration: 0
+                    status_callback_method: POST
+                    status_callback: null
+                    record_participants_on_connect: false
+                    video_codecs: []
+                    media_region: us1
+                    audio_only: true
+                    empty_room_timeout: 5
+                    unused_room_timeout: 5
+                    end_time: '2015-07-30T20:00:00Z'
+                    large_room: false
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      recordings: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings
+                      recording_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/RecordingRules
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateRoom
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2463,6 +3421,39 @@ paths:
                   type: boolean
                   description: When set to true, indicated that this is the large
                     room.
+            examples:
+              create:
+                value: {}
+              createWebrtcGo:
+                value:
+                  Type: go
+                  UniqueName: room1
+              createGroupRooms:
+                value:
+                  Type: group
+                  UniqueName: grouproom
+                  RecordingRules: '%5B%7B%22type%22%3A%22exclude%22%2C%22all%22%3A%20true%7D%5D'
+              createGroupRoomsWithAudioOnlyEnabled:
+                value:
+                  Type: group
+                  UniqueName: grouproom
+                  RecordingRules: '%5B%7B%22type%22%3A%22exclude%22%2C%22all%22%3A%20true%7D%5D'
+                  AudioOnly: true
+              createSmallGroupRooms:
+                value:
+                  Type: group-small
+                  UniqueName: SmallDailyStandup
+              createLargeGroupRooms:
+                value:
+                  Type: group
+                  UniqueName: MyWebinar
+                  MaxParticipants: 90
+              createLargeGroupRoomsWithAudioOnlyEnabled:
+                value:
+                  Type: group
+                  UniqueName: MyWebinar
+                  MaxParticipants: 90
+                  AudioOnly: true
     get:
       description: ''
       parameters:
@@ -2473,6 +3464,9 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/room_enum_room_status'
+        examples:
+          readWithStatus:
+            value: completed
       - name: UniqueName
         in: query
         description: Read only rooms with the this `unique_name`.
@@ -2523,34 +3517,83 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.room'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    rooms: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms?PageSize=50&Page=0
+                      next_page_url: null
+                      key: rooms
+                readWithStatus:
+                  value:
+                    rooms:
+                    - sid: RM4070b618362c1682b2385b1f9982833c
+                      status: completed
+                      date_created: '2017-04-03T22:21:49Z'
+                      date_updated: '2017-04-03T22:21:51Z'
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      type: peer-to-peer
+                      enable_turn: true
+                      unique_name: RM4070b618362c1682b2385b1f9982833c
+                      status_callback: null
+                      status_callback_method: POST
+                      end_time: '2017-04-03T22:21:51Z'
+                      duration: 2
+                      max_participants: 10
+                      max_participant_duration: 86400
+                      max_concurrent_published_tracks: 10
+                      record_participants_on_connect: false
+                      video_codecs:
+                      - VP8
+                      media_region: us1
+                      audio_only: false
+                      empty_room_timeout: 5
+                      unused_room_timeout: 5
+                      large_room: false
+                      url: https://video.twilio.com/v1/Rooms/RM4070b618362c1682b2385b1f9982833c
+                      links:
+                        participants: https://video.twilio.com/v1/Rooms/RM4070b618362c1682b2385b1f9982833c/Participants
+                        recordings: https://video.twilio.com/v1/Rooms/RM4070b618362c1682b2385b1f9982833c/Recordings
+                        recording_rules: https://video.twilio.com/v1/Rooms/RM4070b618362c1682b2385b1f9982833c/RecordingRules
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms?Status=completed&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms?Status=completed&PageSize=50&Page=0
+                      next_page_url: null
+                      key: rooms
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRoom
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -2560,13 +3603,13 @@ paths:
       - sid
       - identity
       - status
-      pathType: instance
       dependentProperties:
         published_track: '{room_sid: room_sid, participant_sid: sid}'
         subscribed_track: '{room_sid: room_sid, participant_sid: sid}'
         subscribe_rules: '{room_sid: room_sid, participant_sid: sid}'
         anonymize: '{room_sid: room_sid, sid: sid}'
       parent: /Rooms/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2588,12 +3631,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    start_time: '2015-07-30T20:00:00Z'
+                    end_time: null
+                    sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identity: bob
+                    status: connected
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    duration: null
+                    links:
+                      published_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks
+                      subscribed_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks
+                      subscribe_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribeRules
+                      anonymize: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Anonymize
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomParticipant
-      x-maturity:
-      - GA
     post:
       description: ''
       parameters:
@@ -2615,12 +3675,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2017-07-30T20:00:00Z'
+                    date_updated: '2017-07-30T20:00:00Z'
+                    start_time: '2017-07-30T20:00:00Z'
+                    end_time: '2017-07-30T20:00:01Z'
+                    sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identity: alice
+                    status: disconnected
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    duration: 1
+                    links:
+                      published_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks
+                      subscribed_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks
+                      subscribe_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribeRules
+                      anonymize: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Anonymize
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateRoomParticipant
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2635,6 +3712,10 @@ paths:
                     or `disconnected`. For `in-progress` Rooms the default Status
                     is `connected`, for `completed` Rooms only `disconnected` Participants
                     are returned.'
+            examples:
+              update:
+                value:
+                  Status: disconnected
   /v1/Rooms/{RoomSid}/Participants:
     servers:
     - url: https://video.twilio.com
@@ -2644,13 +3725,13 @@ paths:
       - sid
       - identity
       - status
-      pathType: list
       dependentProperties:
         published_track: '{room_sid: room_sid, participant_sid: sid}'
         subscribed_track: '{room_sid: room_sid, participant_sid: sid}'
         subscribe_rules: '{room_sid: room_sid, participant_sid: sid}'
         anonymize: '{room_sid: room_sid, sid: sid}'
       parent: /Rooms/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -2668,12 +3749,18 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/room_participant_enum_status'
+        examples:
+          readFilters:
+            value: disconnected
       - name: Identity
         in: query
         description: Read only the Participants with this [User](https://www.twilio.com/docs/chat/rest/user-resource)
           `identity` value.
         schema:
           type: string
+        examples:
+          readFilters:
+            value: alice
       - name: DateCreatedAfter
         in: query
         description: Read only Participants that started after this date in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601#UTC)
@@ -2681,6 +3768,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readFilters:
+            value: '2017-01-01T00:00:01Z'
       - name: DateCreatedBefore
         in: query
         description: Read only Participants that started before this date in [ISO
@@ -2688,6 +3778,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readFilters:
+            value: '2017-12-31T23:59:59Z'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2720,45 +3813,82 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.room.room_participant'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    participants: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
+                      next_page_url: null
+                      key: participants
+                readFilters:
+                  value:
+                    participants:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2017-07-30T20:00:00Z'
+                      date_updated: '2017-07-30T20:00:00Z'
+                      start_time: '2017-07-30T20:00:00Z'
+                      end_time: '2017-07-30T20:00:01Z'
+                      sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      identity: alice
+                      status: disconnected
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      duration: 1
+                      links:
+                        published_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks
+                        subscribed_tracks: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks
+                        subscribe_rules: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribeRules
+                        anonymize: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Anonymize
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Status=disconnected&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&Identity=alice&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Status=disconnected&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&Identity=alice&PageSize=50&Page=0
+                      next_page_url: null
+                      key: participants
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRoomParticipant
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{Sid}/Anonymize:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - identity
       - status
-      pathType: instance
       parent: /Rooms/{RoomSid}/Participants/{Sid}
+      pathType: instance
     post:
       description: ''
       parameters:
@@ -2780,24 +3910,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_anonymize'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    start_time: '2015-07-30T20:00:00Z'
+                    end_time: null
+                    sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identity: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: disconnected
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Anonymize
+                    duration: 1
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateRoomParticipantAnonymize
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/PublishedTracks/{Sid}:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - name
       - enabled
       - kind
-      pathType: instance
       parent: /Rooms/{RoomSid}/Participants/{Sid}
+      pathType: instance
     get:
       description: Returns a single Track resource represented by TrackName or SID.
       parameters:
@@ -2827,24 +3969,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_published_track'
+              examples:
+                fetch:
+                  value:
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    name: bob-track
+                    kind: data
+                    enabled: true
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks/MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomParticipantPublishedTrack
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/PublishedTracks:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - name
       - enabled
       - kind
-      pathType: list
       parent: /Rooms/{RoomSid}/Participants/{Sid}
+      pathType: list
     get:
       description: Returns a list of tracks associated with a given Participant. Only
         `currently` Published Tracks are in the list resource.
@@ -2895,46 +4047,56 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_published_track'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    published_tracks: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PublishedTracks?PageSize=50&Page=0
+                      next_page_url: null
+                      key: published_tracks
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRoomParticipantPublishedTrack
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribeRules:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - participant_sid
       - room_sid
       - rules
-      pathType: list
       parent: /Rooms/{RoomSid}/Participants/{Sid}
       className: subscribe_rules
+      pathType: list
     get:
       description: Returns a list of Subscribe Rules for the Participant.
       parameters:
@@ -2958,12 +4120,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_subscribe_rule'
+              examples:
+                readEmpty:
+                  value:
+                    participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: null
+                    date_updated: null
+                    rules:
+                    - type: include
+                      all: true
+                      publisher: null
+                      track: null
+                      kind: null
+                      priority: null
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomParticipantSubscribeRule
-      x-maturity:
-      - GA
     post:
       description: Update the Subscribe Rules for the Participant
       parameters:
@@ -2986,12 +4160,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_subscribe_rule'
+              examples:
+                updateFilters:
+                  value:
+                    participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: null
+                    date_updated: null
+                    rules:
+                    - type: exclude
+                      all: true
+                      publisher: null
+                      track: null
+                      kind: null
+                      priority: null
           description: Accepted
       security:
       - accountSid_authToken: []
       operationId: UpdateRoomParticipantSubscribeRule
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3003,18 +4189,22 @@ paths:
                   description: A JSON-encoded array of subscribe rules. See the [Specifying
                     Subscribe Rules](https://www.twilio.com/docs/video/api/track-subscriptions#specifying-sr)
                     section for further information.
+            examples:
+              updateFilters:
+                value:
+                  Rules: '%5B%7B%22type%22%3A%22exclude%22%2C%22all%22%3A%20true%7D%5D'
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribedTracks/{Sid}:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - name
       - enabled
       - kind
-      pathType: instance
       parent: /Rooms/{RoomSid}/Participants/{Sid}
+      pathType: instance
     get:
       description: 'Returns a single Track resource represented by `track_sid`.  Note:
         This is one resource with the Video API that requires a SID, be Track Name
@@ -3048,24 +4238,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_subscribed_track'
+              examples:
+                fetch:
+                  value:
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    publisher_sid: PAbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    name: bob-track
+                    kind: data
+                    enabled: true
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks/MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomParticipantSubscribedTrack
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Participants/{ParticipantSid}/SubscribedTracks:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - name
       - enabled
       - kind
-      pathType: list
       parent: /Rooms/{RoomSid}/Participants/{Sid}
+      pathType: list
     get:
       description: Returns a list of tracks that are subscribed for the participant.
       parameters:
@@ -3114,34 +4315,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.room.room_participant.room_participant_subscribed_track'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    subscribed_tracks: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedTracks?PageSize=50&Page=0
+                      next_page_url: null
+                      key: subscribed_tracks
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRoomParticipantSubscribedTrack
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Recordings/{Sid}:
     servers:
     - url: https://video.twilio.com
@@ -3154,11 +4365,11 @@ paths:
       - type
       - duration
       - codec
-      pathType: instance
       dependentProperties:
-        video/v1/room_recording_media: '{room_sid: room_sid, sid: sid}'
+        media: '{room_sid: room_sid, sid: sid}'
       parent: /Rooms/{Sid}
       className: room_recording
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -3186,12 +4397,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_recording'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: processing
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T21:00:00Z'
+                    date_deleted: '2015-07-30T22:00:00Z'
+                    sid: RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source_sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    size: 0
+                    type: audio
+                    duration: 0
+                    container_format: mka
+                    codec: OPUS
+                    track_name: A name
+                    offset: 10
+                    grouping_sids:
+                      room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    media_external_location: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                    encryption_key: public_key
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      media: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomRecording
-      x-maturity:
-      - GA
     delete:
       description: ''
       parameters:
@@ -3219,8 +4453,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteRoomRecording
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/Recordings:
     servers:
     - url: https://video.twilio.com
@@ -3233,11 +4465,11 @@ paths:
       - type
       - duration
       - codec
-      pathType: list
       dependentProperties:
-        video/v1/room_recording_media: '{room_sid: room_sid, sid: sid}'
+        media: '{room_sid: room_sid, sid: sid}'
       parent: /Rooms/{Sid}
       className: room_recording
+      pathType: list
     get:
       description: ''
       parameters:
@@ -3257,6 +4489,9 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/room_recording_enum_status'
+        examples:
+          readResults:
+            value: completed
       - name: SourceSid
         in: query
         description: Read only the recordings that have this `source_sid`.
@@ -3265,6 +4500,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
+        examples:
+          readResults:
+            value: source_sid
       - name: DateCreatedAfter
         in: query
         description: Read only recordings that started on or after this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -3272,6 +4510,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-01-01T00:00:01Z'
       - name: DateCreatedBefore
         in: query
         description: Read only Recordings that started before this [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
@@ -3279,6 +4520,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readResults:
+            value: '2017-12-31T23:59:59Z'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -3311,45 +4555,89 @@ paths:
                     items:
                       $ref: '#/components/schemas/video.v1.room.room_recording'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    recordings: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings?PageSize=50&Page=0
+                      next_page_url: null
+                      key: recordings
+                readResults:
+                  value:
+                    recordings:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: completed
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T21:00:00Z'
+                      date_deleted: '2015-07-30T22:00:00Z'
+                      sid: RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      source_sid: MTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      size: 23
+                      type: audio
+                      duration: 10
+                      container_format: mka
+                      codec: OPUS
+                      track_name: A name
+                      offset: 10
+                      grouping_sids:
+                        room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        participant_sid: PAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      media_external_location: https://my-super-duper-bucket.s3.amazonaws.com/my/path/
+                      encryption_key: public_key
+                      room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        media: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings/RTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings?Status=completed&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&SourceSid=source_sid&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings?Status=completed&DateCreatedBefore=2017-12-31T23%3A59%3A59Z&DateCreatedAfter=2017-01-01T00%3A00%3A01Z&SourceSid=source_sid&PageSize=50&Page=0
+                      next_page_url: null
+                      key: recordings
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRoomRecording
-      x-maturity:
-      - GA
   /v1/Rooms/{RoomSid}/RecordingRules:
     servers:
     - url: https://video.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - room_sid
       - rules
-      pathType: list
       parent: /Rooms/{Sid}
       className: recording_rules
+      pathType: list
     get:
       description: Returns a list of Recording Rules for the Room.
       parameters:
@@ -3366,12 +4654,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_recording_rule'
+              examples:
+                fetch:
+                  value:
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    rules:
+                    - type: include
+                      all: true
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRoomRecordingRule
-      x-maturity:
-      - GA
     post:
       description: Update the Recording Rules for the Room
       parameters:
@@ -3388,12 +4683,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/video.v1.room.room_recording_rule'
+              examples:
+                update:
+                  value:
+                    room_sid: RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    rules:
+                    - type: include
+                      all: true
           description: Accepted
       security:
       - accountSid_authToken: []
       operationId: UpdateRoomRecordingRule
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3403,8 +4705,9 @@ paths:
               properties:
                 Rules:
                   description: A JSON-encoded array of recording rules.
+            examples:
+              update:
+                value:
+                  Rules: '%5B%7B%22type%22%3A%22exclude%22%2C%22all%22%3A%20true%7D%5D'
 servers:
 - url: https://video.twilio.com
-x-maturity:
-- name: GA
-  description: This product is Generally Available.

@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "notify.v1.service.binding": {
         "type": "object",
@@ -294,6 +300,78 @@
           "low"
         ]
       },
+      "notify.v1.service.segment": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GS[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "unique_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "notify.v1.service.user.segment_membership": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "nullable": true
+          },
+          "segment": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "notify.v1.service": {
         "type": "object",
         "properties": {
@@ -409,6 +487,13 @@
             "nullable": true,
             "description": "Deprecated."
           },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "x-twilio": {
+              "betaFeature": "api.notify.enable.service-type"
+            }
+          },
           "delivery_callback_url": {
             "type": "string",
             "nullable": true,
@@ -420,12 +505,163 @@
             "description": "Callback configuration that enables delivery callbacks, default false"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
+      },
+      "notify.v1.service.user": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^NU[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the User resource."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the User resource."
+          },
+          "service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Service](https://www.twilio.com/docs/notify/api/service-resource) the resource is associated with."
+          },
+          "identity": {
+            "type": "string",
+            "nullable": true,
+            "description": "The application-defined string that uniquely identifies the resource's User within the Service. See [access tokens](https://www.twilio.com/docs/chat/create-tokens) for more info."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was created specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was last updated specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
+          },
+          "segments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "Deprecated."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the User resource."
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true,
+            "description": "The absolute URLs of related resources."
+          }
+        }
+      },
+      "notify.v1.service.user.user_binding": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BS[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^IS[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "credential_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CR[0-9a-fA-F]{32}$",
+            "nullable": true
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "notification_protocol_version": {
+            "type": "string",
+            "nullable": true
+          },
+          "endpoint": {
+            "type": "string",
+            "nullable": true
+          },
+          "identity": {
+            "type": "string",
+            "nullable": true
+          },
+          "binding_type": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "links": {
+            "type": "object",
+            "format": "uri-map",
+            "nullable": true
+          }
+        }
+      },
+      "user_binding_enum_binding_type": {
+        "type": "string",
+        "enum": [
+          "apn",
+          "gcm",
+          "sms",
+          "fcm",
+          "facebook-messenger",
+          "alexa"
+        ]
       }
     }
   },
@@ -442,7 +678,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.44.0"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -452,7 +688,7 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -461,8 +697,8 @@
           "binding_type",
           "address"
         ],
-        "pathType": "instance",
-        "parent": "/Services/{Sid}"
+        "parent": "/Services/{Sid}",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -498,6 +734,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service.binding"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "address": "a7c658f4111ec4ff5a1a647f9d0edd819025b9f20522d2fae897049f32873e73",
+                      "binding_type": "apn",
+                      "credential_sid": null,
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "endpoint": "26607274",
+                      "identity": "24987039",
+                      "notification_protocol_version": "3",
+                      "service_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "tags": [
+                        "26607274"
+                      ],
+                      "links": {
+                        "user": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users/24987039"
+                      },
+                      "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings/BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -509,10 +769,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchBinding",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchBinding"
       },
       "delete": {
         "description": "",
@@ -552,10 +809,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteBinding",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteBinding"
       }
     },
     "/v1/Services/{ServiceSid}/Bindings": {
@@ -564,7 +818,7 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -573,8 +827,8 @@
           "binding_type",
           "address"
         ],
-        "pathType": "list",
-        "parent": "/Services/{Sid}"
+        "parent": "/Services/{Sid}",
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -598,6 +852,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service.binding"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "address": "a7c658f4111ec4ff5a1a647f9d0edd819025b9f20522d2fae897049f32873e73",
+                      "binding_type": "apn",
+                      "credential_sid": null,
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "endpoint": "26607274",
+                      "identity": "24987039",
+                      "notification_protocol_version": "3",
+                      "service_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "tags": [
+                        "26607274"
+                      ],
+                      "links": {
+                        "user": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users/24987039"
+                      },
+                      "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings/BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -610,9 +888,6 @@
           }
         ],
         "operationId": "CreateBinding",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -661,6 +936,21 @@
                   "BindingType",
                   "Address"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "Address": "address",
+                    "BindingType": "apn",
+                    "CredentialSid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "Endpoint": "endpoint",
+                    "Identity": "24987039",
+                    "NotificationProtocolVersion": "notification_protocol_version",
+                    "Tag": [
+                      "tag"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -708,6 +998,18 @@
               "items": {
                 "type": "string"
               }
+            },
+            "examples": {
+              "readEmpty": {
+                "value": [
+                  "identity"
+                ]
+              },
+              "readFull": {
+                "value": [
+                  "identity"
+                ]
+              }
             }
           },
           {
@@ -718,6 +1020,18 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            },
+            "examples": {
+              "readEmpty": {
+                "value": [
+                  "tag"
+                ]
+              },
+              "readFull": {
+                "value": [
+                  "tag"
+                ]
               }
             }
           },
@@ -764,16 +1078,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -782,17 +1098,66 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "bindings": [],
+                      "meta": {
+                        "first_page_url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings?Tag=tag&Identity=identity&PageSize=50&Page=0",
+                        "key": "bindings",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings?Tag=tag&Identity=identity&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "bindings": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "address": "a7c658f4111ec4ff5a1a647f9d0edd819025b9f20522d2fae897049f32873e73",
+                          "binding_type": "apn",
+                          "credential_sid": null,
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:00:00Z",
+                          "endpoint": "26607274",
+                          "identity": "24987039",
+                          "notification_protocol_version": "3",
+                          "service_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "tags": [
+                            "26607274"
+                          ],
+                          "links": {
+                            "user": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users/24987039"
+                          },
+                          "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings/BSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings?Tag=tag&Identity=identity&PageSize=50&Page=0",
+                        "key": "bindings",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings?Tag=tag&Identity=identity&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -807,10 +1172,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListBinding",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListBinding"
       }
     },
     "/v1/Credentials": {
@@ -819,7 +1181,7 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -874,16 +1236,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -892,17 +1256,56 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "credentials": [
+                        {
+                          "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "Test slow create",
+                          "type": "apn",
+                          "sandbox": "False",
+                          "date_created": "2015-10-07T17:50:01Z",
+                          "date_updated": "2015-10-07T17:50:01Z",
+                          "url": "https://notify.twilio.com/v1/Credentials/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://notify.twilio.com/v1/Credentials?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Credentials?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "credentials"
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "credentials": [],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://notify.twilio.com/v1/Credentials?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Credentials?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "credentials"
                       }
                     }
                   }
@@ -917,10 +1320,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListCredential",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListCredential"
       },
       "post": {
         "description": "",
@@ -930,6 +1330,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.credential"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "Test slow create",
+                      "type": "apn",
+                      "sandbox": "False",
+                      "date_created": "2015-10-07T17:50:01Z",
+                      "date_updated": "2015-10-07T17:50:01Z",
+                      "url": "https://notify.twilio.com/v1/Credentials/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -942,9 +1356,6 @@
           }
         ],
         "operationId": "CreateCredential",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -985,6 +1396,13 @@
                 "required": [
                   "Type"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "Type": "apn"
+                  }
+                }
               }
             }
           }
@@ -997,7 +1415,7 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -1028,6 +1446,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.credential"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "Test slow create",
+                      "type": "apn",
+                      "sandbox": "False",
+                      "date_created": "2015-10-07T17:50:01Z",
+                      "date_updated": "2015-10-07T17:50:01Z",
+                      "url": "https://notify.twilio.com/v1/Credentials/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1039,10 +1471,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchCredential",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchCredential"
       },
       "post": {
         "description": "",
@@ -1066,6 +1495,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.credential"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "Test slow create",
+                      "type": "apn",
+                      "sandbox": "False",
+                      "date_created": "2015-10-07T17:50:01Z",
+                      "date_updated": "2015-10-07T17:50:01Z",
+                      "url": "https://notify.twilio.com/v1/Credentials/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1078,9 +1521,6 @@
           }
         ],
         "operationId": "UpdateCredential",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1111,6 +1551,13 @@
                   "Secret": {
                     "type": "string",
                     "description": "[FCM only] The `Server key` of your project from Firebase console under Settings / Cloud messaging."
+                  }
+                }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "Test slow create"
                   }
                 }
               }
@@ -1144,10 +1591,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteCredential",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteCredential"
       }
     },
     "/v1/Services/{ServiceSid}/Notifications": {
@@ -1156,15 +1600,15 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
           "priority",
           "title"
         ],
-        "pathType": "list",
-        "parent": "/Services/{Sid}"
+        "parent": "/Services/{Sid}",
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -1188,6 +1632,58 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service.notification"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "NTb8021351170b4e1286adaac3fdd6d082",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "IS699b53e02da45a1ba9d13b7d7d2766af",
+                      "date_created": "2016-03-24T23:42:28Z",
+                      "identities": [
+                        "jing"
+                      ],
+                      "tags": [],
+                      "segments": [],
+                      "priority": "high",
+                      "ttl": 2419200,
+                      "title": "test",
+                      "body": "body",
+                      "sound": null,
+                      "action": null,
+                      "data": null,
+                      "apn": null,
+                      "fcm": null,
+                      "gcm": null,
+                      "sms": null,
+                      "facebook_messenger": null,
+                      "alexa": null
+                    }
+                  },
+                  "createDirectNotification": {
+                    "value": {
+                      "sid": "NTb8021351170b4e1286adaac3fdd6d082",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "IS699b53e02da45a1ba9d13b7d7d2766af",
+                      "date_created": "2016-03-24T23:42:28Z",
+                      "identities": [],
+                      "tags": [],
+                      "segments": [],
+                      "priority": "high",
+                      "ttl": 2419200,
+                      "title": null,
+                      "body": "body",
+                      "sound": null,
+                      "action": null,
+                      "data": null,
+                      "apn": null,
+                      "fcm": null,
+                      "gcm": null,
+                      "sms": null,
+                      "facebook_messenger": null,
+                      "alexa": null
+                    }
+                  }
                 }
               }
             },
@@ -1200,9 +1696,6 @@
           }
         ],
         "operationId": "CreateNotification",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1289,17 +1782,26 @@
                     "description": "A tag that selects the Bindings to notify. Repeat this parameter to specify more than one tag, up to a total of 5 tags. The implicit tag `all` is available to notify all Bindings in a Service instance. Similarly, the implicit tags `apn`, `fcm`, `gcm`, `sms` and `facebook-messenger` are available to notify all Bindings in a specific channel."
                   }
                 }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "Identity": "jing",
+                    "Body": "body",
+                    "Priority": "high",
+                    "Title": "test",
+                    "DeliveryCallbackUrl": "hello"
+                  }
+                },
+                "createDirectNotification": {
+                  "value": {
+                    "ToBinding": "{\"binding_type\":\"apn\", \"address\":\"0efb85d06b3cc1bf290545fde4775a929d46b3541aaa4aa167e420b6c8b0ff15\"}",
+                    "Body": "body"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "conditional": [
-            [
-              "identity",
-              "tag"
-            ]
-          ]
         }
       }
     },
@@ -1309,20 +1811,20 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
           "friendly_name",
           "date_created"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "binding": "{service_sid: sid}",
           "notification": "{service_sid: sid}",
-          "notify/v1/user": "{service_sid: sid}",
-          "notify/v1/segment": "{service_sid: sid}"
-        }
+          "user": "{service_sid: sid}",
+          "segment": "{service_sid: sid}"
+        },
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -1332,6 +1834,38 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "733c7f0f-6541-42ec-84ce-e2ae1cac588c",
+                      "date_created": "2016-03-09T20:22:31Z",
+                      "date_updated": "2016-03-09T20:22:31Z",
+                      "apn_credential_sid": null,
+                      "gcm_credential_sid": null,
+                      "fcm_credential_sid": null,
+                      "messaging_service_sid": null,
+                      "facebook_messenger_page_id": "4",
+                      "alexa_skill_id": null,
+                      "default_apn_notification_protocol_version": "3",
+                      "default_gcm_notification_protocol_version": "3",
+                      "default_fcm_notification_protocol_version": "3",
+                      "default_alexa_notification_protocol_version": "3",
+                      "log_enabled": true,
+                      "type": "S",
+                      "delivery_callback_url": "Hello",
+                      "delivery_callback_enabled": true,
+                      "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "bindings": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings",
+                        "notifications": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications",
+                        "segments": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Segments",
+                        "users": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1344,9 +1878,6 @@
           }
         ],
         "operationId": "CreateService",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1414,6 +1945,13 @@
                     "type": "string",
                     "description": "Deprecated."
                   },
+                  "Type": {
+                    "type": "string",
+                    "description": "",
+                    "x-twilio": {
+                      "betaFeature": "api.notify.enable.service-type"
+                    }
+                  },
                   "DeliveryCallbackUrl": {
                     "type": "string",
                     "description": "URL to send delivery status callback."
@@ -1421,6 +1959,24 @@
                   "DeliveryCallbackEnabled": {
                     "type": "boolean",
                     "description": "Callback configuration that enables delivery callbacks, default false"
+                  }
+                }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "ApnCredentialSid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "GcmCredentialSid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "MessagingServiceSid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "FacebookMessengerPageId": "4",
+                    "DefaultApnNotificationProtocolVersion": "3",
+                    "DefaultGcmNotificationProtocolVersion": "3",
+                    "DefaultFcmNotificationProtocolVersion": "3",
+                    "LogEnabled": "True",
+                    "Type": "S",
+                    "DeliveryCallbackUrl": "Hello",
+                    "DeliveryCallbackEnabled": "True"
                   }
                 }
               }
@@ -1482,16 +2038,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1500,18 +2058,75 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://notify.twilio.com/v1/Services?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Services?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "services"
+                      },
+                      "services": [
+                        {
+                          "sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "733c7f0f-6541-42ec-84ce-e2ae1cac588c",
+                          "date_created": "2016-03-09T20:22:31Z",
+                          "date_updated": "2016-03-09T20:22:31Z",
+                          "apn_credential_sid": null,
+                          "gcm_credential_sid": null,
+                          "fcm_credential_sid": null,
+                          "messaging_service_sid": null,
+                          "facebook_messenger_page_id": "4",
+                          "alexa_skill_id": null,
+                          "default_apn_notification_protocol_version": "3",
+                          "default_gcm_notification_protocol_version": "3",
+                          "default_fcm_notification_protocol_version": "3",
+                          "default_alexa_notification_protocol_version": "3",
+                          "log_enabled": true,
+                          "type": "S",
+                          "delivery_callback_url": "Hello",
+                          "delivery_callback_enabled": true,
+                          "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "links": {
+                            "bindings": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings",
+                            "notifications": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications",
+                            "segments": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Segments",
+                            "users": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://notify.twilio.com/v1/Services?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://notify.twilio.com/v1/Services?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "services"
+                      },
+                      "services": []
                     }
                   }
                 }
@@ -1525,10 +2140,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListService"
       }
     },
     "/v1/Services/{Sid}": {
@@ -1537,20 +2149,20 @@
           "url": "https://notify.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
           "friendly_name",
           "date_created"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "binding": "{service_sid: sid}",
           "notification": "{service_sid: sid}",
-          "notify/v1/user": "{service_sid: sid}",
-          "notify/v1/segment": "{service_sid: sid}"
-        }
+          "user": "{service_sid: sid}",
+          "segment": "{service_sid: sid}"
+        },
+        "pathType": "instance"
       },
       "delete": {
         "description": "",
@@ -1578,10 +2190,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteService"
       },
       "get": {
         "description": "",
@@ -1605,6 +2214,38 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "733c7f0f-6541-42ec-84ce-e2ae1cac588c",
+                      "date_created": "2016-03-09T20:22:31Z",
+                      "date_updated": "2016-03-09T20:22:31Z",
+                      "apn_credential_sid": null,
+                      "gcm_credential_sid": null,
+                      "fcm_credential_sid": null,
+                      "messaging_service_sid": null,
+                      "facebook_messenger_page_id": "4",
+                      "alexa_skill_id": null,
+                      "default_apn_notification_protocol_version": "3",
+                      "default_gcm_notification_protocol_version": "3",
+                      "default_fcm_notification_protocol_version": "3",
+                      "default_alexa_notification_protocol_version": "3",
+                      "log_enabled": true,
+                      "type": "S",
+                      "delivery_callback_url": "Hello",
+                      "delivery_callback_enabled": true,
+                      "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "bindings": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings",
+                        "notifications": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications",
+                        "segments": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Segments",
+                        "users": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1616,10 +2257,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchService"
       },
       "post": {
         "description": "",
@@ -1643,6 +2281,38 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/notify.v1.service"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "733c7f0f-6541-42ec-84ce-e2ae1cac588c",
+                      "date_created": "2016-03-09T20:22:31Z",
+                      "date_updated": "2016-03-09T20:22:31Z",
+                      "apn_credential_sid": null,
+                      "gcm_credential_sid": null,
+                      "fcm_credential_sid": null,
+                      "default_apn_notification_protocol_version": "3",
+                      "default_gcm_notification_protocol_version": "3",
+                      "default_fcm_notification_protocol_version": "3",
+                      "default_alexa_notification_protocol_version": "3",
+                      "messaging_service_sid": null,
+                      "alexa_skill_id": null,
+                      "facebook_messenger_page_id": "4",
+                      "log_enabled": true,
+                      "type": "S",
+                      "delivery_callback_url": "Hello",
+                      "delivery_callback_enabled": true,
+                      "url": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "bindings": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Bindings",
+                        "notifications": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications",
+                        "segments": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Segments",
+                        "users": "https://notify.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1655,9 +2325,6 @@
           }
         ],
         "operationId": "UpdateService",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1725,6 +2392,13 @@
                     "type": "string",
                     "description": "Deprecated."
                   },
+                  "Type": {
+                    "type": "string",
+                    "description": "",
+                    "x-twilio": {
+                      "betaFeature": "api.notify.enable.service-type"
+                    }
+                  },
                   "DeliveryCallbackUrl": {
                     "type": "string",
                     "description": "URL to send delivery status callback."
@@ -1732,6 +2406,24 @@
                   "DeliveryCallbackEnabled": {
                     "type": "boolean",
                     "description": "Callback configuration that enables delivery callbacks, default false"
+                  }
+                }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "ApnCredentialSid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "GcmCredentialSid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "MessagingServiceSid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "FacebookMessengerPageId": "4",
+                    "DefaultApnNotificationProtocolVersion": "3",
+                    "DefaultGcmNotificationProtocolVersion": "3",
+                    "DefaultFcmNotificationProtocolVersion": "3",
+                    "LogEnabled": "True",
+                    "Type": "S",
+                    "DeliveryCallbackUrl": "Hello",
+                    "DeliveryCallbackEnabled": "True"
                   }
                 }
               }
@@ -1744,12 +2436,6 @@
   "servers": [
     {
       "url": "https://notify.twilio.com"
-    }
-  ],
-  "x-maturity": [
-    {
-      "name": "Beta",
-      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
     }
   ]
 }

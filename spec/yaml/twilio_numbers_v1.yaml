@@ -1,5 +1,78 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
+    numbers.v1.authorization_document:
+      type: object
+      properties:
+        address_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AD[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Address](https://www.twilio.com/docs/usage/api/address)
+            resource that is associated with the AuthorizationDocument resource.
+        cc_emails:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: The email addresses that the authorization document will be
+            copied to.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        email:
+          type: string
+          nullable: true
+          description: The email address that the authorization document will be sent
+            to for signing.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: A list of the URLs to the HostedNumberOrder resources that
+            the authorization document will authorize for hosting phone number capabilities
+            on our platform.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the AuthorizationDocument
+            resource.
+        status:
+          type: string
+          $ref: '#/components/schemas/authorization_document_enum_status'
+          nullable: true
+          description: 'The status of the authorization document. Can be: `opened`,
+            `signing`, `signed`, `canceled`, or `failed`.'
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the AuthorizationDocument resource.
+    authorization_document_enum_status:
+      type: string
+      enum:
+      - opened
+      - signing
+      - signed
+      - canceled
+      - failed
     numbers.v1.bulk_eligibility:
       type: object
       properties:
@@ -66,6 +139,270 @@ components:
       - invalid-hosting-account-sid
       - eligible
       - eligible-by-manual-process
+    numbers.v1.authorization_document.dependent_order:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the DependentOrder resource.
+        authorization_document_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the AuthorizationDocument resource associated with
+            the hosted number order.
+        capabilities:
+          type: object
+          format: phone-number-capabilities
+          properties:
+            mms:
+              type: boolean
+            sms:
+              type: boolean
+            voice:
+              type: boolean
+            fax:
+              type: boolean
+          nullable: true
+          description: The set of Boolean properties that describes the capabilities
+            that the hosted phone number will have on our platform.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        failure_reason:
+          type: string
+          nullable: true
+          description: The message that explains why the hosted number order `status`
+            became `action-required`.
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource.
+        incoming_phone_number_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the IncomingPhoneNumber resource created by the
+            hosted number order.
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            formatted phone number hosted by the hosted number order.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^HR[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the DependentOrder
+            resource.
+        status:
+          type: string
+          $ref: '#/components/schemas/dependent_order_enum_status'
+          nullable: true
+          description: 'The status of the hosted number order. Can be: `twilio-processing`,
+            `received`, `pending-verification`, `verified`, `pending-loa`, `carrier-processing`,
+            `testing`, `completed`, `failed`, or `action-required`.'
+        verification_attempts:
+          type: integer
+          nullable: true
+          description: The number of attempts made to verify ownership via a call
+            for the hosted phone number.
+        verification_call_delay:
+          type: integer
+          nullable: true
+          description: The number of seconds to wait before initiating the ownership
+            verification call. Can be a value between 0 and 60, inclusive.
+        verification_call_extension:
+          type: string
+          nullable: true
+          description: The numerical extension to dial when making the ownership verification
+            call.
+        verification_call_sids:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: The Call SIDs that identify the calls placed to verify ownership.
+        verification_code:
+          type: string
+          nullable: true
+          description: The digits the user must pass in the ownership verification
+            call.
+        verification_document_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the identity document resource that represents the
+            document used to verify ownership of the number to be hosted.
+        verification_type:
+          type: string
+          $ref: '#/components/schemas/dependent_order_enum_verification_type'
+          nullable: true
+          description: 'The method used to verify ownership of the number to be hosted.
+            Can be: `phone-call` or `phone-bill` and the default is `phone-call`.'
+    dependent_order_enum_status:
+      type: string
+      enum:
+      - twilio-processing
+      - received
+      - pending-verification
+      - verified
+      - pending-loa
+      - carrier-processing
+      - testing
+      - completed
+      - failed
+      - action-required
+    dependent_order_enum_verification_type:
+      type: string
+      enum:
+      - phone-call
+      - phone-bill
+    numbers.v1.identity.document:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the Document
+            resource.
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Document resource.
+        identity_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Identity resource this document supports.
+        first_name:
+          type: string
+          nullable: true
+          description: The first name of the end user or the business' legal representative
+            as shown on the document.
+        last_name:
+          type: string
+          nullable: true
+          description: The last name of the end user or the business' legal representative
+            as shown on the document.
+        company_name:
+          type: string
+          nullable: true
+          description: The name of the business.
+        birth_date:
+          type: string
+          format: date
+          nullable: true
+          description: The birth date of the end user or the business' legal representative
+            as shown on the document.
+        birth_place:
+          type: string
+          nullable: true
+          description: The birth place of the end user or the business' legal representative
+            as shown on the document.
+        nationality:
+          type: string
+          nullable: true
+          description: The nationality of the end user or the business' legal representative
+            as shown on the document.
+        vat:
+          type: string
+          nullable: true
+          description: The tax ID of the end user or the business' legal representative
+            as shown on the document.
+        title:
+          type: string
+          nullable: true
+          description: The title of the end user or the business' legal representative
+            as shown on the document.
+        number:
+          type: string
+          nullable: true
+          description: The ID number of the end user or the business' legal representative
+            as shown on the document.
+        issue_date:
+          type: string
+          format: date
+          nullable: true
+          description: The date the document was issued specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+            format
+        type:
+          type: string
+          nullable: true
+          description: The type of document.
+        expiration_date:
+          type: string
+          format: date
+          nullable: true
+          description: The date the document expires specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
+            format.
+        academic_degree:
+          type: string
+          nullable: true
+          description: The academic degree of the end user or the business' legal
+            representative.
+        profession:
+          type: string
+          nullable: true
+          description: The profession or occupation of the end user or the business'
+            legal representative as shown on the document.
+        address_proof:
+          type: boolean
+          nullable: true
+          description: The proof of address document provided.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the Document resource.
     numbers.v1.eligibility:
       type: object
       properties:
@@ -100,10 +437,399 @@ components:
       - invalid-phone-number
       - invalid-hosting-account-sid
       - eligible
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
+    numbers.v1.hosted_number_order:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the HostedNumberOrder resource.
+        authorization_document_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PX[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the AuthorizationDocument resource associated with
+            the hosted number order.
+        capabilities:
+          type: object
+          format: phone-number-capabilities
+          properties:
+            mms:
+              type: boolean
+            sms:
+              type: boolean
+            voice:
+              type: boolean
+            fax:
+              type: boolean
+          nullable: true
+          description: The set of Boolean properties that describes the capabilities
+            that the hosted phone number will have on our platform.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        failure_reason:
+          type: string
+          nullable: true
+          description: The message that explains why the hosted number order `status`
+            became `action-required`.
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource.
+        incoming_phone_number_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the IncomingPhoneNumber resource created by this
+            hosted number order.
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            formatted phone number hosted by the hosted number order.
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^HR[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the HostedNumberOrder
+            resource.
+        status:
+          type: string
+          $ref: '#/components/schemas/hosted_number_order_enum_status'
+          nullable: true
+          description: 'The status of the hosted number order. Can be: `twilio-processing`,
+            `received`, `pending-verification`, `verified`, `pending-loa`, `carrier-processing`,
+            `testing`, `completed`, `failed`, or `action-required`.'
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the HostedNumberOrder resource.
+        verification_attempts:
+          type: integer
+          nullable: true
+          description: The number of attempts made to verify ownership via a call
+            for the hosted phone number.
+        verification_call_delay:
+          type: integer
+          nullable: true
+          description: The number of seconds to wait before initiating the ownership
+            verification call. Can be a value between 0 and 60, inclusive.
+        verification_call_extension:
+          type: string
+          nullable: true
+          description: The numerical extension to dial when making the ownership verification
+            call.
+        verification_call_sids:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: The Call SIDs that identify the calls placed to verify ownership.
+        verification_code:
+          type: string
+          nullable: true
+          description: The digits the user must pass in the ownership verification
+            call.
+        verification_document_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the identity document resource that represents the
+            document used to verify ownership of the number to be hosted.
+        verification_type:
+          type: string
+          $ref: '#/components/schemas/hosted_number_order_enum_verification_type'
+          nullable: true
+          description: 'The method used to verify ownership of the number to be hosted.
+            Can be: `phone-call` or `phone-bill` and the default is `phone-call`.'
+    hosted_number_order_enum_status:
+      type: string
+      enum:
+      - twilio-processing
+      - received
+      - pending-verification
+      - verified
+      - pending-loa
+      - carrier-processing
+      - testing
+      - completed
+      - failed
+      - action-required
+    hosted_number_order_enum_verification_type:
+      type: string
+      enum:
+      - phone-call
+      - phone-bill
+    numbers.v1.identity:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the Identity
+            resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the Identity resource.
+        friendly_name:
+          type: string
+          nullable: true
+          description: The string that you assigned to describe the resource.
+        type:
+          type: string
+          nullable: true
+          description: The type of Identity resource.
+        email:
+          type: string
+          nullable: true
+          description: The email address.
+        status:
+          type: string
+          nullable: true
+          description: The verification status of the Identity resource.
+        status_callback_url:
+          type: string
+          nullable: true
+          description: The URL we call using the `status_callback_method` to inform
+            your application of status changes.
+        status_callback_method:
+          type: string
+          nullable: true
+          description: The HTTP method we use when calling `status_callback_url`.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the Identity resource.
+        purchase_intent_number_type:
+          type: string
+          nullable: true
+          description: The type of phone number.
+        purchase_intent_iso_country:
+          type: string
+          nullable: true
+          description: The ISO country code of the country.
+        links:
+          type: object
+          format: uri-map
+          nullable: true
+          description: The URLs of the documents associated with the Identity resource.
+    numbers.v1.porting_bulk_portability:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^KZ[0-9a-fA-F]{32}$
+          nullable: true
+          description: A 34 character string that uniquely identifies this Portability
+            check.
+        status:
+          type: string
+          $ref: '#/components/schemas/porting_bulk_portability_enum_status'
+          nullable: true
+          description: The Status of this Portability check. One of `in-progress`,
+            `completed` or `expired`.
+        datetime_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that the Portability check was created, given in ISO
+            8601 format.
+        phone_numbers:
+          type: array
+          items: {}
+          nullable: true
+          description: 'Contains a list with all the information of the requested
+            phone numbers. Each phone number contains the following properties: `phone_number`:
+            The phone number which portability is to be checked. `portable`: Boolean
+            flag specifying if phone number is portable or not. `not_portable_reason`:
+            Reason why the phone number cannot be ported into Twilio, `null` otherwise.
+            `not_portable_reason_code`: The Portability Reason Code for the phone
+            number if it cannot be ported in Twilio, `null` otherwise. `pin_and_account_number_required`:
+            Boolean flag specifying if PIN and account number is required for the
+            phone number. `number_type`: The type of the requested phone number. `country`
+            Country the phone number belongs to. `messaging_carrier` Current messaging
+            carrier of the phone number. `voice_carrier` Current voice carrier of
+            the phone number.'
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: This is the url of the request that you're trying to reach
+            out to locate the resource.
+    porting_bulk_portability_enum_status:
+      type: string
+      enum:
+      - in-progress
+      - completed
+      - expired
+    numbers.v1.porting_portability:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number which portability is to be checked. Phone
+            numbers are in E.164 format (e.g. +16175551212).
+        portable:
+          type: boolean
+          nullable: true
+          description: Boolean flag specifying if phone number is portable or not.
+        pin_and_account_number_required:
+          type: boolean
+          nullable: true
+          description: Boolean flag specifying if PIN and account number is required
+            for the phone number.
+        not_portable_reason:
+          type: string
+          nullable: true
+          description: Reason why the phone number cannot be ported into Twilio, `null`
+            otherwise.
+        not_portable_reason_code:
+          type: integer
+          nullable: true
+          description: The Portability Reason Code for the phone number if it cannot
+            be ported into Twilio, `null` otherwise. One of `22131`, `22132`, `22130`,
+            `22133`, `22102` or `22135`.
+        number_type:
+          type: string
+          $ref: '#/components/schemas/porting_portability_enum_number_type'
+          nullable: true
+          description: The type of the requested phone number. One of `LOCAL`, `UNKNOWN`,
+            `MOBILE`, `TOLL-FREE`.
+        country:
+          type: string
+          format: iso-country-code
+          nullable: true
+          description: Country the phone number belongs to.
+        messaging_carrier:
+          type: string
+          nullable: true
+          description: Current messaging carrier of the phone number
+        voice_carrier:
+          type: string
+          nullable: true
+          description: Current voice carrier of the phone number
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: This is the url of the request that you're trying to reach
+            out to locate the resource.
+    porting_portability_enum_number_type:
+      type: string
+      enum:
+      - LOCAL
+      - UNKNOWN
+      - MOBILE
+      - TOLL-FREE
+    numbers.v1.proof_of_address:
+      type: object
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PG[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that we created to identify the ProofOfAddress
+            resource.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that created the ProofOfAddress resource.
+        address_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AD[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Address](https://www.twilio.com/docs/usage/api/address)
+            resource that is associated with the ProofOfAddress resource.
+        identity_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^RI[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the Identity resource that is associated with the
+            ProofOfAddress resource.
+        status:
+          type: string
+          nullable: true
+          description: The verification status of the address.
+        failure_reason:
+          type: string
+          nullable: true
+          description: The reason the address verification failed.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the ProofOfAddress resource.
 info:
   title: Twilio - Numbers
   description: This is the public Twilio REST API.
@@ -115,25 +841,48 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.44.0
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/HostedNumber/Eligibility/Bulk:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: bulk_eligibilities
+      pathType: list
+    post:
+      description: Create a bulk eligibility check for a set of numbers that you want
+        to host in Twilio.
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.bulk_eligibility'
+              examples:
+                create:
+                  value:
+                    friendly_name: Test
+                    status: QUEUED
+                    date_created: '2023-05-03T03:12:30Z'
+                    date_completed: null
+                    request_id: ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results: []
+                    url: https://numbers.twilio.com/v1/HostedNumber/Eligibility/Bulk/ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          description: Accepted
+      security:
+      - accountSid_authToken: []
+      operationId: CreateBulkEligibility
   /v1/HostedNumber/Eligibility/Bulk/{RequestId}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       mountName: bulk_eligibilities
+      pathType: instance
     get:
       description: Fetch an eligibility bulk check that you requested to host in Twilio.
       parameters:
@@ -152,23 +901,243 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v1.bulk_eligibility'
+              examples:
+                fetch:
+                  value:
+                    friendly_name: Foo
+                    status: SUCCESSFUL
+                    date_created: '2023-04-24T14:47:04Z'
+                    date_completed: '2023-04-24T14:47:06Z'
+                    results:
+                    - phone_number: '+18778894546'
+                      account_sid: AC93b447ff5bd2abac37f1cbab2a871430
+                      eligibility_status: INELIGIBLE
+                      eligibility_sub_status: ALREADY_IN_TWILIO
+                      ineligibility_reason: ALREADY_IN_TWILIO_BUT_NOT_IN_USE
+                      next_step: CONTACT_SUPPORT_INELIGIBLE_INVENTORY_STATUS
+                      voice_provider: null
+                      messaging_provider: null
+                      phone_number_type: TOLL_FREE
+                      hosting_order_sid: null
+                      hosting_order_status: null
+                      iso_country_code: US
+                      inventory_status: in-testing
+                      inventory_account_sid: AC93b447ff5bd2abac37f1cbab2a871430
+                    url: https://numbers.twilio.com/v1/HostedNumber/Eligibility/Bulk/ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    request_id: ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBulkEligibility
-      x-maturity:
-      - Beta
   /v1/HostedNumber/Eligibility:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: eligibilities
+      pathType: list
+    post:
+      description: Create an eligibility check for a number that you want to host
+        in Twilio.
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.eligibility'
+              examples:
+                create:
+                  value:
+                    results:
+                    - phone_number: '+18778894546'
+                      account_sid: AC93b447ff5bd2abac37f1cbab2a871430
+                      eligibility_status: INELIGIBLE
+                      eligibility_sub_status: ALREADY_IN_TWILIO
+                      ineligibility_reason: ALREADY_IN_TWILIO_BUT_NOT_IN_USE
+                      next_step: CONTACT_SUPPORT_INELIGIBLE_INVENTORY_STATUS
+                      voice_provider: null
+                      messaging_provider: null
+                      phone_number_type: TOLL_FREE
+                      hosting_order_sid: null
+                      hosting_order_status: null
+                      iso_country_code: US
+                      inventory_status: in-testing
+                      inventory_account_sid: AC93b447ff5aa2abac37e3cbab2a871430
+                    - phone_number: '4565433456'
+                      account_sid: null
+                      eligibility_status: INELIGIBLE
+                      eligibility_sub_status: NUMBER_FORMAT_INELIGIBLE
+                      ineligibility_reason: NUMBER_FORMAT_INELIGIBLE
+                      next_step: EDIT_INELIGIBLE_NUMBER
+                      voice_provider: null
+                      messaging_provider: null
+                      phone_number_type: null
+                      hosting_order_sid: null
+                      hosting_order_status: null
+                      iso_country_code: null
+                      inventory_status: null
+                      inventory_account_sid: null
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateEligibility
+  /v1/Porting/Portability/{Sid}:
+    servers:
+    - url: https://numbers.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - status
+      mountName: porting_bulk_portabilities
+      pathType: instance
+    get:
+      description: Fetch a previous portability check. This should return the current
+        status of the validation and the result for all the numbers provided, given
+        that they have been validated (as this process is performed asynchronously).
+      parameters:
+      - name: Sid
+        in: path
+        description: A 34 character string that uniquely identifies the Portability
+          check.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^KZ[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.porting_bulk_portability'
+              examples:
+                fetch:
+                  value:
+                    sid: KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: completed
+                    datetime_created: '2015-07-30T20:00:00Z'
+                    phone_numbers:
+                    - phone_number: '+14153334440'
+                      portable: true
+                      pin_and_account_number_required: true
+                      not_portable_reason: null
+                      not_portable_reason_code: null
+                      number_type: LOCAL
+                      country: US
+                      messaging_carrier: string
+                      voice_carrier: string
+                    - phone_number: '+18002178781'
+                      portable: false
+                      pin_and_account_number_required: false
+                      not_portable_reason: MANUAL_PORTING_AVAILABLE
+                      not_portable_reason_code: 22133
+                      number_type: TOLL-FREE
+                      country: US
+                      messaging_carrier: Verizon
+                      voice_carrier: Verizon
+                    url: https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPortingBulkPortability
+  /v1/Porting/Portability:
+    servers:
+    - url: https://numbers.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - sid
+      - status
+      mountName: porting_bulk_portabilities
+      pathType: list
+    post:
+      description: Allows to check if a list of phone numbers can be ported to Twilio
+        or not. This is done asynchronous for each phone number.
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.porting_bulk_portability'
+              examples:
+                create:
+                  value:
+                    sid: KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: in-progress
+                    datetime_created: '2015-07-30T20:00:00Z'
+                    phone_numbers: []
+                    url: https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          description: Accepted
+      security:
+      - accountSid_authToken: []
+      operationId: CreatePortingBulkPortability
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreatePortingBulkPortabilityRequest
+              properties:
+                PhoneNumbers:
+                  type: array
+                  items:
+                    type: string
+                  description: The phone numbers which portability is to be checked.
+                    This should be a list of strings. Phone numbers are in E.164 format
+                    (e.g. +16175551212). .
+              required:
+              - PhoneNumbers
+            examples:
+              create:
+                value:
+                  PhoneNumbers:
+                  - '+14153334440'
+                  - '+18002178781'
+  /v1/Porting/Portability/PhoneNumber/{PhoneNumber}:
+    servers:
+    - url: https://numbers.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties: []
+      mountName: porting_portabilities
+      pathType: instance
+    get:
+      description: Allows to check if a single phone number can be ported to Twilio
+        or not.
+      parameters:
+      - name: PhoneNumber
+        in: path
+        description: The phone number which portability is to be checked. Phone numbers
+          are in E.164 format (e.g. +16175551212).
+        schema:
+          type: string
+          format: phone-number
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.porting_portability'
+              examples:
+                fetch:
+                  value:
+                    phone_number: '+18001234567'
+                    portable: false
+                    pin_and_account_number_required: false
+                    not_portable_reason: MANUAL_PORTING_AVAILABLE
+                    not_portable_reason_code: 22133
+                    number_type: TOLL-FREE
+                    country: US
+                    messaging_carrier: Verizon
+                    voice_carrier: Verizon
+                    url: https://numbers.twilio.com/v1/Porting/Portability/PhoneNumber/+18001234567
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchPortingPortability
 servers:
 - url: https://numbers.twilio.com
-x-maturity:
-- name: Beta
-  description: PLEASE NOTE that this is a Beta product that is subject to change.
-    Use it with caution.

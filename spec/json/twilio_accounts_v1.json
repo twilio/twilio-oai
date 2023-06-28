@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "accounts.v1.auth_token_promotion": {
         "type": "object",
@@ -165,12 +171,6 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -186,7 +186,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.44.0"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -203,8 +203,8 @@
           "auth_token",
           "date_created"
         ],
-        "pathType": "instance",
-        "mountName": "auth_token_promotion"
+        "mountName": "auth_token_promotion",
+        "pathType": "instance"
       },
       "post": {
         "description": "Promote the secondary Auth Token to primary. After promoting the new token, all requests to Twilio using your old primary Auth Token will result in an error.",
@@ -214,6 +214,17 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.auth_token_promotion"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "auth_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "url": "https://accounts.twilio.com/v1/AuthTokens/Promote"
+                    }
+                  }
                 }
               }
             },
@@ -225,10 +236,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "UpdateAuthTokenPromotion",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "UpdateAuthTokenPromotion"
       }
     },
     "/v1/Credentials": {
@@ -237,7 +245,7 @@
           "url": "https://accounts.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
         "pathType": "list"
@@ -256,8 +264,8 @@
           "friendly_name",
           "date_created"
         ],
-        "pathType": "list",
-        "parent": "/Credentials"
+        "parent": "/Credentials",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieves a collection of AWS Credentials belonging to the account used to make the request",
@@ -305,16 +313,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -323,17 +333,54 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "credentials": [],
+                      "meta": {
+                        "first_page_url": "https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0",
+                        "key": "credentials",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "credentials": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-31T04:00:00Z",
+                          "date_updated": "2015-07-31T04:00:00Z",
+                          "friendly_name": "friendly_name",
+                          "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "url": "https://accounts.twilio.com/v1/Credentials/AWS/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0",
+                        "key": "credentials",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0"
                       }
                     }
                   }
@@ -348,10 +395,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListCredentialAws",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListCredentialAws"
       },
       "post": {
         "description": "Create a new AWS Credential",
@@ -361,6 +405,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_aws"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/AWS/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -373,9 +429,6 @@
           }
         ],
         "operationId": "CreateCredentialAws",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -402,6 +455,15 @@
                 "required": [
                   "Credentials"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "AccountSid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "FriendlyName": "friendly_name",
+                    "Credentials": "aws_credentials"
+                  }
+                }
               }
             }
           }
@@ -421,8 +483,8 @@
           "friendly_name",
           "date_created"
         ],
-        "pathType": "instance",
-        "parent": "/Credentials"
+        "parent": "/Credentials",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch the AWS credentials specified by the provided Credential Sid",
@@ -446,6 +508,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_aws"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/AWS/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -457,10 +531,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchCredentialAws",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchCredentialAws"
       },
       "post": {
         "description": "Modify the properties of a given Account",
@@ -484,6 +555,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_aws"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/AWS/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -496,9 +579,6 @@
           }
         ],
         "operationId": "UpdateCredentialAws",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -509,6 +589,14 @@
                   "FriendlyName": {
                     "type": "string",
                     "description": "A descriptive string that you create to describe the resource. It can be up to 64 characters long."
+                  }
+                }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "Credentials": "aws_credentials"
                   }
                 }
               }
@@ -542,10 +630,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteCredentialAws",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteCredentialAws"
       }
     },
     "/v1/Credentials/PublicKeys": {
@@ -561,9 +646,9 @@
           "friendly_name",
           "date_created"
         ],
-        "pathType": "list",
         "parent": "/Credentials",
-        "mountName": "public_key"
+        "mountName": "public_key",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieves a collection of Public Key Credentials belonging to the account used to make the request",
@@ -611,16 +696,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -629,17 +716,54 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "credentials": [],
+                      "meta": {
+                        "first_page_url": "https://accounts.twilio.com/v1/Credentials/PublicKeys?PageSize=50&Page=0",
+                        "key": "credentials",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys?PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "credentials": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-31T04:00:00Z",
+                          "date_updated": "2015-07-31T04:00:00Z",
+                          "friendly_name": "friendly_name",
+                          "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://accounts.twilio.com/v1/Credentials/PublicKeys?PageSize=50&Page=0",
+                        "key": "credentials",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys?PageSize=50&Page=0"
                       }
                     }
                   }
@@ -654,10 +778,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListCredentialPublicKey",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListCredentialPublicKey"
       },
       "post": {
         "description": "Create a new Public Key Credential",
@@ -667,6 +788,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_public_key"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -679,9 +812,6 @@
           }
         ],
         "operationId": "CreateCredentialPublicKey",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -708,6 +838,15 @@
                 "required": [
                   "PublicKey"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "AccountSid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "FriendlyName": "friendly_name",
+                    "PublicKey": "public_key"
+                  }
+                }
               }
             }
           }
@@ -727,9 +866,9 @@
           "friendly_name",
           "date_created"
         ],
-        "pathType": "instance",
         "parent": "/Credentials",
-        "mountName": "public_key"
+        "mountName": "public_key",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch the public key specified by the provided Credential Sid",
@@ -753,6 +892,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_public_key"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -764,10 +915,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchCredentialPublicKey",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchCredentialPublicKey"
       },
       "post": {
         "description": "Modify the properties of a given Account",
@@ -791,6 +939,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.credential.credential_public_key"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sid": "CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://accounts.twilio.com/v1/Credentials/PublicKeys/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -803,9 +963,6 @@
           }
         ],
         "operationId": "UpdateCredentialPublicKey",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -816,6 +973,14 @@
                   "FriendlyName": {
                     "type": "string",
                     "description": "A descriptive string that you create to describe the resource. It can be up to 64 characters long."
+                  }
+                }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "PublicKey": "public_key"
                   }
                 }
               }
@@ -849,10 +1014,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteCredentialPublicKey",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteCredentialPublicKey"
       }
     },
     "/v1/AuthTokens/Secondary": {
@@ -868,8 +1030,8 @@
           "secondary_auth_token",
           "date_created"
         ],
-        "pathType": "instance",
-        "mountName": "secondary_auth_token"
+        "mountName": "secondary_auth_token",
+        "pathType": "instance"
       },
       "post": {
         "description": "Create a new secondary Auth Token",
@@ -879,6 +1041,17 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/accounts.v1.secondary_auth_token"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-31T04:00:00Z",
+                      "date_updated": "2015-07-31T04:00:00Z",
+                      "secondary_auth_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                      "url": "https://accounts.twilio.com/v1/AuthTokens/Secondary"
+                    }
+                  }
                 }
               }
             },
@@ -890,10 +1063,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "CreateSecondaryAuthToken",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "CreateSecondaryAuthToken"
       },
       "delete": {
         "description": "Delete the secondary Auth Token from your account",
@@ -907,22 +1077,13 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteSecondaryAuthToken",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteSecondaryAuthToken"
       }
     }
   },
   "servers": [
     {
       "url": "https://accounts.twilio.com"
-    }
-  ],
-  "x-maturity": [
-    {
-      "name": "GA",
-      "description": "This product is Generally Available."
     }
   ]
 }

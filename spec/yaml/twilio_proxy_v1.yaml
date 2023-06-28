@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     proxy.v1.service.session.interaction:
       type: object
@@ -796,10 +800,6 @@ components:
           description: Whether the short code should be reserved and not be assigned
             to a participant using proxy pool logic. See [Reserved Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
             for more information.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Proxy
   description: This is the public Twilio REST API.
@@ -811,20 +811,20 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.44.0
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Interactions/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - type
       - data
-      pathType: instance
       parent: /Services/{ServiceSid}/Sessions/{Sid}
+      pathType: instance
     get:
       description: Retrieve a list of Interactions for a given [Session](https://www.twilio.com/docs/proxy/api/session).
       parameters:
@@ -864,12 +864,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session.interaction'
+              examples:
+                fetch:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: '{"body":"some message"}'
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    inbound_participant_sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    inbound_resource_sid: SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    inbound_resource_status: sent
+                    inbound_resource_type: Message
+                    inbound_resource_url: null
+                    outbound_participant_sid: KPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    outbound_resource_sid: SMbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    outbound_resource_status: sent
+                    outbound_resource_type: Message
+                    outbound_resource_url: null
+                    sid: KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: message
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions/KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchInteraction
-      x-maturity:
-      - Beta
     delete:
       description: Delete a specific Interaction.
       parameters:
@@ -909,19 +929,17 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteInteraction
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Interactions:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - type
       - data
-      pathType: list
       parent: /Services/{ServiceSid}/Sessions/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Interactions for a Session. A maximum of
         100 records will be returned per page.
@@ -978,45 +996,55 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.session.interaction'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    interactions: []
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions?PageSize=50&Page=0
+                      page_size: 50
+                      key: interactions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListInteraction
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Participants/{ParticipantSid}/MessageInteractions:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - type
       - data
-      pathType: list
       parent: /Services/{ServiceSid}/Sessions/{SessionSid}/Participants/{Sid}
+      pathType: list
     post:
       description: Create a new message Interaction to send directly from your system
         to one [Participant](https://www.twilio.com/docs/proxy/api/participant).  The
@@ -1058,12 +1086,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session.participant.message_interaction'
+              examples:
+                create:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: '{"body":"some message"}'
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    participant_sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    inbound_participant_sid: null
+                    inbound_resource_sid: null
+                    inbound_resource_status: null
+                    inbound_resource_type: null
+                    inbound_resource_url: null
+                    outbound_participant_sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    outbound_resource_sid: SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    outbound_resource_status: sent
+                    outbound_resource_type: Message
+                    outbound_resource_url: null
+                    sid: KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: message
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions/KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateMessageInteraction
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1080,10 +1129,10 @@ paths:
                     type: string
                     format: uri
                   description: Reserved. Not currently supported.
-      x-twilio:
-        conditional:
-        - - body
-          - media_url
+            examples:
+              create:
+                value:
+                  Body: some message
     get:
       description: ''
       parameters:
@@ -1149,45 +1198,55 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.session.participant.message_interaction'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    interactions: []
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions?PageSize=50&Page=0
+                      page_size: 50
+                      key: interactions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListMessageInteraction
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Participants/{ParticipantSid}/MessageInteractions/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - type
       - data
-      pathType: instance
       parent: /Services/{ServiceSid}/Sessions/{SessionSid}/Participants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1237,27 +1296,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session.participant.message_interaction'
+              examples:
+                fetch:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: '{"body":"some message"}'
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    participant_sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    inbound_participant_sid: null
+                    inbound_resource_sid: null
+                    inbound_resource_status: null
+                    inbound_resource_type: null
+                    inbound_resource_url: null
+                    outbound_participant_sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    outbound_resource_sid: SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    outbound_resource_status: sent
+                    outbound_resource_type: Message
+                    outbound_resource_url: null
+                    sid: KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: message
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions/KIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchMessageInteraction
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Participants/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
       - identifier
       - proxy_identifier
-      pathType: instance
       dependentProperties:
         message_interaction: '{service_sid: service_sid, session_sid: session_sid,
           participant_sid: sid}'
       parent: /Services/{ServiceSid}/Sessions/{Sid}
+      pathType: instance
     get:
       description: Fetch a specific Participant.
       parameters:
@@ -1297,12 +1377,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session.participant'
+              examples:
+                fetch:
+                  value:
+                    sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identifier: '+14155551212'
+                    proxy_identifier: '+14155559999'
+                    proxy_identifier_sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    date_deleted: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      message_interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions
+                fetchChannel:
+                  value:
+                    sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identifier: messenger:14155551212
+                    proxy_identifier: messenger:14155559999
+                    proxy_identifier_sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: a facebook user
+                    date_deleted: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      message_interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchParticipant
-      x-maturity:
-      - Beta
     delete:
       description: Delete a specific Participant. This is a soft-delete. The participant
         remains associated with the session and cannot be re-added. Participants are
@@ -1345,23 +1456,21 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteParticipant
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Sessions/{SessionSid}/Participants:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
       - identifier
       - proxy_identifier
-      pathType: list
       dependentProperties:
         message_interaction: '{service_sid: service_sid, session_sid: session_sid,
           participant_sid: sid}'
       parent: /Services/{ServiceSid}/Sessions/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Participants in a Session.
       parameters:
@@ -1417,34 +1526,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.session.participant'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
+                      page_size: 50
+                      key: participants
+                    participants: []
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListParticipant
-      x-maturity:
-      - Beta
     post:
       description: Add a new Participant to the Session
       parameters:
@@ -1474,12 +1593,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session.participant'
+              examples:
+                create:
+                  value:
+                    sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identifier: '+14155551212'
+                    proxy_identifier: '+14155559999'
+                    proxy_identifier_sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    date_deleted: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      message_interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions
+                createChannel:
+                  value:
+                    sid: KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    session_sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identifier: messenger:123456
+                    proxy_identifier: messenger:987654532
+                    proxy_identifier_sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: a facebook user
+                    date_deleted: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      message_interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/KPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessageInteractions
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateParticipant
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1507,17 +1657,27 @@ paths:
                   description: The SID of the Proxy Identifier to assign to the Participant.
               required:
               - Identifier
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  Identifier: '+14155551212'
+              createChannel:
+                value:
+                  FriendlyName: a facebook user
+                  Identifier: messenger:123456
+                  ProxyIdentifier: messenger:987654532
   /v1/Services/{ServiceSid}/PhoneNumbers:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
       - phone_number
-      pathType: list
       parent: /Services/{Sid}
+      pathType: list
     post:
       description: Add a Phone Number to a Service's Proxy Number Pool.
       parameters:
@@ -1537,12 +1697,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.phone_number'
+              examples:
+                create:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    phone_number: '+1987654321'
+                    friendly_name: Friendly Name
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: false
+                    in_use: 0
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreatePhoneNumber
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1571,6 +1746,10 @@ paths:
                     not be assigned to a participant using proxy pool logic. See [Reserved
                     Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
                     for more information.
+            examples:
+              create:
+                value:
+                  Sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: Retrieve a list of all Phone Numbers in the Proxy Number Pool for
         a Service. A maximum of 100 records will be returned per page.
@@ -1617,45 +1796,69 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.phone_number'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: phone_numbers
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=50&Page=0
+                    phone_numbers:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:00:00Z'
+                      phone_number: '+1987654321'
+                      friendly_name: Friendly Name
+                      iso_country: US
+                      capabilities:
+                        sms_outbound: true
+                        voice_inbound: false
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      is_reserved: false
+                      in_use: 0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListPhoneNumber
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/PhoneNumbers/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
       - phone_number
-      pathType: instance
       parent: /Services/{Sid}
+      pathType: instance
     delete:
       description: Delete a specific Phone Number from a Service.
       parameters:
@@ -1685,8 +1888,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeletePhoneNumber
-      x-maturity:
-      - Beta
     get:
       description: Fetch a specific Phone Number.
       parameters:
@@ -1716,12 +1917,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.phone_number'
+              examples:
+                fetch:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    phone_number: '12345'
+                    friendly_name: Friendly Name
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: false
+                    in_use: 0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchPhoneNumber
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Proxy Number.
       parameters:
@@ -1751,12 +1967,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.phone_number'
+              examples:
+                update:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    phone_number: '12345'
+                    friendly_name: Friendly Name
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: true
+                    in_use: 0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdatePhoneNumber
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1770,20 +2001,24 @@ paths:
                     be assigned to a participant using proxy pool logic. See [Reserved
                     Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
                     for more information.
+            examples:
+              update:
+                value:
+                  IsReserved: true
   /v1/Services/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - date_created
-      pathType: instance
       dependentProperties:
         session: '{service_sid: sid}'
         phone_number: '{service_sid: sid}'
         short_code: '{service_sid: sid}'
+      pathType: instance
     get:
       description: Fetch a specific Service.
       parameters:
@@ -1800,12 +2035,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service'
+              examples:
+                fetch:
+                  value:
+                    sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    chat_instance_sid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: My Service
+                    default_ttl: 3600
+                    callback_url: http://www.example.com
+                    geo_match_level: country
+                    number_selection_behavior: prefer-sticky
+                    intercept_callback_url: http://www.example.com
+                    out_of_session_callback_url: http://www.example.com
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sessions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions
+                      phone_numbers: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchService
-      x-maturity:
-      - Beta
     delete:
       description: Delete a specific Service.
       parameters:
@@ -1825,8 +2078,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteService
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Service.
       parameters:
@@ -1846,12 +2097,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service'
+              examples:
+                update:
+                  value:
+                    sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    chat_instance_sid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: My Service
+                    default_ttl: 3600
+                    callback_url: http://www.example.com
+                    geo_match_level: country
+                    number_selection_behavior: prefer-sticky
+                    intercept_callback_url: http://www.example.com
+                    out_of_session_callback_url: http://www.example.com
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sessions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions
+                      phone_numbers: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1921,20 +2190,27 @@ paths:
                   description: The SID of the Chat Service Instance managed by Proxy
                     Service. The Chat Service enables Proxy to forward SMS and channel
                     messages to this chat instance. This is a one-to-one relationship.
+            examples:
+              update:
+                value:
+                  DefaultTtl: 3600
+                  CallbackUrl: http://www.example.com
+                  UniqueName: My Service
+                  ChatInstanceSid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/Services:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - date_created
-      pathType: list
       dependentProperties:
         session: '{service_sid: sid}'
         phone_number: '{service_sid: sid}'
         short_code: '{service_sid: sid}'
+      pathType: list
     get:
       description: Retrieve a list of all Services for Twilio Proxy. A maximum of
         100 records will be returned per page.
@@ -1971,34 +2247,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    services: []
+                    meta:
+                      first_page_url: https://proxy.twilio.com/v1/Services?PageSize=50&Page=0
+                      key: services
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://proxy.twilio.com/v1/Services?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListService
-      x-maturity:
-      - Beta
     post:
       description: Create a new Service for Twilio Proxy
       responses:
@@ -2007,12 +2293,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service'
+              examples:
+                create:
+                  value:
+                    sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    chat_instance_sid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: My Service
+                    default_ttl: 3600
+                    callback_url: http://www.example.com
+                    geo_match_level: country
+                    number_selection_behavior: prefer-sticky
+                    intercept_callback_url: http://www.example.com
+                    out_of_session_callback_url: http://www.example.com
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sessions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions
+                      phone_numbers: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2084,21 +2388,28 @@ paths:
                     messages to this chat instance. This is a one-to-one relationship.
               required:
               - UniqueName
+            examples:
+              create:
+                value:
+                  DefaultTtl: 3600
+                  CallbackUrl: http://www.example.com
+                  UniqueName: My Service
+                  ChatInstanceSid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/Services/{ServiceSid}/Sessions/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - date_started
       - date_ended
-      pathType: instance
       dependentProperties:
         interaction: '{service_sid: service_sid, session_sid: sid}'
         participant: '{service_sid: service_sid, session_sid: sid}'
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: Fetch a specific Session.
       parameters:
@@ -2125,12 +2436,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session'
+              examples:
+                fetch:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: open
+                    unique_name: 'Order #1234'
+                    date_started: '2015-07-30T20:00:00Z'
+                    date_ended: '2015-07-30T20:00:00Z'
+                    date_last_interaction: '2015-07-30T20:00:00Z'
+                    date_expiry: '2015-07-30T20:00:00Z'
+                    ttl: 3600
+                    mode: voice-and-message
+                    closed_reason: ''
+                    sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions
+                      participants: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSession
-      x-maturity:
-      - Beta
     delete:
       description: Delete a specific Session.
       parameters:
@@ -2160,8 +2490,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSession
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Session.
       parameters:
@@ -2191,12 +2519,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session'
+              examples:
+                update:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: in-progress
+                    unique_name: 'Order #1234'
+                    date_started: '2015-07-30T20:00:00Z'
+                    date_ended: '2015-07-30T20:00:00Z'
+                    date_last_interaction: '2015-07-30T20:00:00Z'
+                    date_expiry: '2015-07-30T20:00:00Z'
+                    ttl: 3600
+                    mode: voice-and-message
+                    closed_reason: ''
+                    sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions
+                      participants: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSession
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2220,21 +2567,26 @@ paths:
                   $ref: '#/components/schemas/session_enum_status'
                   description: 'The new status of the resource. Can be: `in-progress`
                     to re-open a session or `closed` to close a session.'
+            examples:
+              update:
+                value:
+                  Ttl: 3600
+                  Status: in-progress
   /v1/Services/{ServiceSid}/Sessions:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - date_started
       - date_ended
-      pathType: list
       dependentProperties:
         interaction: '{service_sid: service_sid, session_sid: sid}'
         participant: '{service_sid: service_sid, session_sid: sid}'
       parent: /Services/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Sessions for the Service. A maximum of 100
         records will be returned per page.
@@ -2281,34 +2633,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.session'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    sessions: []
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions?PageSize=50&Page=0
+                      page_size: 50
+                      key: sessions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSession
-      x-maturity:
-      - Beta
     post:
       description: Create a new Session
       parameters:
@@ -2328,12 +2690,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.session'
+              examples:
+                create:
+                  value:
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: open
+                    unique_name: 'Order #1234'
+                    date_started: '2015-07-30T20:00:00Z'
+                    date_ended: '2015-07-30T20:00:00Z'
+                    date_last_interaction: '2015-07-30T20:00:00Z'
+                    date_expiry: '2015-07-30T20:00:00Z'
+                    ttl: 3600
+                    mode: voice-and-message
+                    closed_reason: ''
+                    sid: KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      interactions: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Interactions
+                      participants: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sessions/KCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSession
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2372,17 +2753,22 @@ paths:
                   type: array
                   items: {}
                   description: The Participant objects to include in the new session.
+            examples:
+              create:
+                value:
+                  Ttl: 3600
+                  UniqueName: 'Order #1234'
   /v1/Services/{ServiceSid}/ShortCodes:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - short_code
       - iso_country
-      pathType: list
       parent: /Services/{Sid}
+      pathType: list
     post:
       description: Add a Short Code to the Proxy Number Pool for the Service.
       parameters:
@@ -2402,12 +2788,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.short_code'
+              examples:
+                create:
+                  value:
+                    sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    short_code: '12345'
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: false
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateShortCode
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2425,6 +2824,10 @@ paths:
                     to your Proxy Service.
               required:
               - Sid
+            examples:
+              create:
+                value:
+                  Sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: Retrieve a list of all Short Codes in the Proxy Number Pool for
         the Service. A maximum of 100 records will be returned per page.
@@ -2471,45 +2874,67 @@ paths:
                     items:
                       $ref: '#/components/schemas/proxy.v1.service.short_code'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: short_codes
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes?PageSize=50&Page=0
+                    short_codes:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:00:00Z'
+                      short_code: '12345'
+                      iso_country: US
+                      capabilities:
+                        sms_outbound: true
+                        voice_inbound: false
+                      url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      is_reserved: false
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListShortCode
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/ShortCodes/{Sid}:
     servers:
     - url: https://proxy.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - short_code
       - iso_country
-      pathType: instance
       parent: /Services/{Sid}
+      pathType: instance
     delete:
       description: Delete a specific Short Code from a Service.
       parameters:
@@ -2539,8 +2964,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteShortCode
-      x-maturity:
-      - Beta
     get:
       description: Fetch a specific Short Code.
       parameters:
@@ -2570,12 +2993,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.short_code'
+              examples:
+                fetch:
+                  value:
+                    sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    short_code: '12345'
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: false
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchShortCode
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Short Code.
       parameters:
@@ -2605,12 +3041,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/proxy.v1.service.short_code'
+              examples:
+                update:
+                  value:
+                    sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    short_code: '12345'
+                    iso_country: US
+                    capabilities:
+                      sms_outbound: true
+                      voice_inbound: false
+                    url: https://proxy.twilio.com/v1/Services/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    is_reserved: true
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateShortCode
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2624,9 +3073,9 @@ paths:
                     assigned to a participant using proxy pool logic. See [Reserved
                     Phone Numbers](https://www.twilio.com/docs/proxy/reserved-phone-numbers)
                     for more information.
+            examples:
+              update:
+                value:
+                  IsReserved: true
 servers:
 - url: https://proxy.twilio.com
-x-maturity:
-- name: Beta
-  description: PLEASE NOTE that this is a Beta product that is subject to change.
-    Use it with caution.
