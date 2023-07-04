@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     messaging.v1.service.alpha_sender:
       type: object
@@ -823,6 +827,21 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the ShortCode resource.
+    tollfree_verification_enum_status:
+      type: string
+      enum:
+      - PENDING_REVIEW
+      - IN_REVIEW
+      - TWILIO_APPROVED
+      - TWILIO_REJECTED
+    tollfree_verification_enum_opt_in_type:
+      type: string
+      enum:
+      - VERBAL
+      - WEB_FORM
+      - PAPER_FORM
+      - VIA_TEXT
+      - MOBILE_QR_CODE
     messaging.v1.service.us_app_to_person:
       type: object
       properties:
@@ -1017,10 +1036,33 @@ components:
           nullable: true
           description: Human readable use case details (usecase, description and purpose)
             of Messaging Service Use Cases.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
+    whatsapp_sender_enum_status:
+      type: string
+      enum:
+      - Configuring
+      - PendingVerification
+      - Configured
+      - ConfigurationError
+      - VerificationError
+    whatsapp_template_enum_category:
+      type: string
+      enum:
+      - ACCOUNT_UPDATE
+      - ALERT_UPDATE
+      - AUTO_REPLY
+      - APPOINTMENT_UPDATE
+      - ISSUE_RESOLUTION
+      - PAYMENT_UPDATE
+      - PERSONAL_FINANCE_UPDATE
+      - RESERVATION_UPDATE
+      - SHIPPING_UPDATE
+      - TICKET_UPDATE
+      - TRANSPORTATION_UPDATE
+      - MARKETING
+      - OTP
+      - TRANSACTIONAL
+      - AUTHENTICATION
+      - UTILITY
 info:
   title: Twilio - Messaging
   description: This is the public Twilio REST API.
@@ -1032,7 +1074,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Services/{ServiceSid}/AlphaSenders:
@@ -1044,8 +1086,8 @@ paths:
       defaultOutputProperties:
       - sid
       - alpha_sender
-      pathType: list
       parent: /Services/{Sid}
+      pathType: list
     post:
       description: ''
       parameters:
@@ -1065,12 +1107,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.alpha_sender'
+              examples:
+                create:
+                  value:
+                    sid: AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    alpha_sender: Twilio
+                    capabilities:
+                    - SMS
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAlphaSender
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1086,6 +1138,10 @@ paths:
                     contain only numbers.
               required:
               - AlphaSender
+            examples:
+              create:
+                value:
+                  AlphaSender: Twilio
     get:
       description: ''
       parameters:
@@ -1131,34 +1187,53 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.service.alpha_sender'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: alpha_senders
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders?PageSize=50&Page=0
+                    alpha_senders:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:12:31Z'
+                      date_updated: '2015-07-30T20:12:33Z'
+                      alpha_sender: Twilio
+                      capabilities:
+                      - SMS
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAlphaSender
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/AlphaSenders/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -1168,8 +1243,8 @@ paths:
       defaultOutputProperties:
       - sid
       - alpha_sender
-      pathType: instance
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1195,12 +1270,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.alpha_sender'
+              examples:
+                fetch:
+                  value:
+                    sid: AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    alpha_sender: Twilio
+                    capabilities:
+                    - SMS
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAlphaSender
-      x-maturity:
-      - Beta
     delete:
       description: ''
       parameters:
@@ -1226,8 +1311,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAlphaSender
-      x-maturity:
-      - Beta
   /v1/a2p/BrandRegistrations/{BrandRegistrationSid}/SmsOtp:
     servers:
     - url: https://messaging.twilio.com
@@ -1237,9 +1320,9 @@ paths:
       defaultOutputProperties:
       - account_sid
       - brand_registration_sid
-      pathType: list
       parent: /a2p/BrandRegistrations/{Sid}
       mountName: brand_registration_otps
+      pathType: list
     post:
       description: ''
       parameters:
@@ -1258,12 +1341,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations.brand_registration_otp'
+              examples:
+                create:
+                  value:
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    brand_registration_sid: BN0044409f7e067e279523808d267e2d85
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBrandRegistrationOtp
-      x-maturity:
-      - Beta
   /v1/a2p/BrandRegistrations/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -1272,10 +1358,10 @@ paths:
       defaultOutputProperties:
       - sid
       - date_created
-      pathType: instance
       dependentProperties:
         brand_vetting: '{brand_sid: sid}'
         brand_registration_otp: '{brand_registration_sid: sid}'
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1294,12 +1380,133 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations'
+              examples:
+                fetch:
+                  value:
+                    sid: BN0044409f7e067e279523808d267e2d85
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    customer_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    a2p_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    date_created: '2021-01-27T14:18:35Z'
+                    date_updated: '2021-01-27T14:18:36Z'
+                    brand_type: STANDARD
+                    status: PENDING
+                    tcr_id: BXXXXXX
+                    failure_reason: Registration error
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85
+                    brand_score: 42
+                    brand_feedback:
+                    - TAX_ID
+                    - NONPROFIT
+                    identity_status: VERIFIED
+                    russell_3000: true
+                    government_entity: false
+                    tax_exempt_status: 501c3
+                    skip_automatic_sec_vet: false
+                    mock: false
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/SmsOtp
+                fetchSoleProprietorPending:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    a2p_profile_bundle_sid: BUbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    customer_profile_bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: PENDING
+                    identity_status: null
+                    brand_type: SOLE_PROPRIETOR
+                    mock: false
+                    tcr_id: null
+                    brand_score: null
+                    russell_3000: null
+                    brand_feedback: null
+                    failure_reason: null
+                    government_entity: null
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    date_updated: '2023-03-15T14:21:42Z'
+                    date_created: '2023-03-15T14:21:42Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
+                fetchSoleProprietorRegisteredUnverified:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    a2p_profile_bundle_sid: BUbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    customer_profile_bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: APPROVED
+                    identity_status: UNVERIFIED
+                    brand_type: SOLE_PROPRIETOR
+                    mock: false
+                    tcr_id: null
+                    brand_score: null
+                    russell_3000: null
+                    brand_feedback: null
+                    failure_reason: null
+                    government_entity: null
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    date_updated: '2023-03-15T14:21:42Z'
+                    date_created: '2023-03-15T14:21:42Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
+                fetchSoleProprietorRegisteredSelfDeclared:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    a2p_profile_bundle_sid: BUbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    customer_profile_bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: APPROVED
+                    identity_status: SELF_DECLARED
+                    brand_type: SOLE_PROPRIETOR
+                    mock: false
+                    tcr_id: null
+                    brand_score: null
+                    russell_3000: null
+                    brand_feedback: null
+                    failure_reason: null
+                    government_entity: null
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    date_updated: '2023-03-15T14:21:42Z'
+                    date_created: '2023-03-15T14:21:42Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
+                fetchSoleProprietorRegisteredVerified:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    a2p_profile_bundle_sid: BUbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    customer_profile_bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: APPROVED
+                    identity_status: VERIFIED
+                    brand_type: SOLE_PROPRIETOR
+                    mock: false
+                    tcr_id: null
+                    brand_score: null
+                    russell_3000: null
+                    brand_feedback: null
+                    failure_reason: null
+                    government_entity: null
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    date_updated: '2023-03-15T14:21:42Z'
+                    date_created: '2023-03-15T14:21:42Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBrandRegistrations
-      x-maturity:
-      - Beta
     post:
       description: ''
       parameters:
@@ -1318,12 +1525,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations'
+              examples:
+                update:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    customer_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    a2p_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    date_created: '2021-01-27T14:18:35Z'
+                    date_updated: '2021-01-27T14:18:36Z'
+                    brand_type: STANDARD
+                    status: PENDING
+                    tcr_id: BXXXXXX
+                    failure_reason: Registration error
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_score: 42
+                    brand_feedback:
+                    - TAX_ID
+                    - NONPROFIT
+                    identity_status: VERIFIED
+                    russell_3000: false
+                    government_entity: false
+                    tax_exempt_status: 501c3
+                    skip_automatic_sec_vet: false
+                    mock: false
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
+                updateSoleProprietorBrand:
+                  value:
+                    sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    customer_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    a2p_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                    date_created: '2021-01-27T14:18:35Z'
+                    date_updated: '2021-01-27T14:18:36Z'
+                    brand_type: SOLE_PROPRIETOR
+                    status: PENDING
+                    tcr_id: BXXXXXX
+                    failure_reason: null
+                    brand_score: null
+                    brand_feedback: null
+                    identity_status: UNVERIFIED
+                    russell_3000: false
+                    government_entity: false
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    mock: false
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SmsOtp
           description: Accepted
       security:
       - accountSid_authToken: []
       operationId: UpdateBrandRegistrations
-      x-maturity:
-      - Beta
   /v1/a2p/BrandRegistrations:
     servers:
     - url: https://messaging.twilio.com
@@ -1332,10 +1588,10 @@ paths:
       defaultOutputProperties:
       - sid
       - date_created
-      pathType: list
       dependentProperties:
         brand_vetting: '{brand_sid: sid}'
         brand_registration_otp: '{brand_registration_sid: sid}'
+      pathType: list
     get:
       description: ''
       parameters:
@@ -1371,34 +1627,68 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.brand_registrations'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                read:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/a2p/BrandRegistrations?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: data
+                      url: https://messaging.twilio.com/v1/a2p/BrandRegistrations?PageSize=50&Page=0
+                    data:
+                    - sid: BN0044409f7e067e279523808d267e2d85
+                      account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                      customer_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                      a2p_profile_bundle_sid: BU3344409f7e067e279523808d267e2d85
+                      date_created: '2021-01-27T14:18:35Z'
+                      date_updated: '2021-01-27T14:18:36Z'
+                      brand_type: STANDARD
+                      status: APPROVED
+                      tcr_id: BXXXXXX
+                      failure_reason: Registration error
+                      url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85
+                      brand_score: 42
+                      brand_feedback:
+                      - TAX_ID
+                      - NONPROFIT
+                      identity_status: VERIFIED
+                      russell_3000: true
+                      tax_exempt_status: 501c3
+                      government_entity: false
+                      skip_automatic_sec_vet: false
+                      mock: false
+                      links:
+                        brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings
+                        brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/SmsOtp
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListBrandRegistrations
-      x-maturity:
-      - Beta
     post:
       description: ''
       responses:
@@ -1407,12 +1697,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations'
+              examples:
+                create:
+                  value:
+                    sid: BN0044409f7e067e279523808d267e2d85
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    customer_profile_bundle_sid: BU0000009f7e067e279523808d267e2d90
+                    a2p_profile_bundle_sid: BU1111109f7e067e279523808d267e2d85
+                    date_created: '2021-01-28T10:45:51Z'
+                    date_updated: '2021-01-28T10:45:51Z'
+                    brand_type: STANDARD
+                    status: PENDING
+                    tcr_id: BXXXXXX
+                    failure_reason: Registration error
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85
+                    brand_score: 42
+                    brand_feedback:
+                    - TAX_ID
+                    - NONPROFIT
+                    identity_status: VERIFIED
+                    russell_3000: true
+                    government_entity: false
+                    tax_exempt_status: 501c3
+                    skip_automatic_sec_vet: false
+                    mock: false
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/SmsOtp
+                createSoleProprietorBrand:
+                  value:
+                    sid: BN0044409f7e067e279523808d267e2d85
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    customer_profile_bundle_sid: BU0000009f7e067e279523808d267e2d90
+                    a2p_profile_bundle_sid: BU1111109f7e067e279523808d267e2d85
+                    date_created: '2021-01-28T10:45:51Z'
+                    date_updated: '2021-01-28T10:45:51Z'
+                    brand_type: SOLE_PROPRIETOR
+                    status: PENDING
+                    tcr_id: BXXXXXX
+                    failure_reason: null
+                    brand_score: null
+                    brand_feedback: null
+                    identity_status: UNVERIFIED
+                    russell_3000: false
+                    government_entity: false
+                    tax_exempt_status: null
+                    skip_automatic_sec_vet: false
+                    mock: false
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85
+                    links:
+                      brand_vettings: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings
+                      brand_registration_otps: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/SmsOtp
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBrandRegistrations
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1449,6 +1788,21 @@ paths:
               required:
               - CustomerProfileBundleSid
               - A2PProfileBundleSid
+            examples:
+              create:
+                value:
+                  CustomerProfileBundleSid: BU0000009f7e067e279523808d267e2d90
+                  A2PProfileBundleSid: BU1111109f7e067e279523808d267e2d85
+                  BrandType: STANDARD
+                  SkipAutomaticSecVet: false
+                  Mock: false
+              createSoleProprietorBrand:
+                value:
+                  CustomerProfileBundleSid: BU0000009f7e067e279523808d267e2d90
+                  A2PProfileBundleSid: BU1111109f7e067e279523808d267e2d85
+                  BrandType: STANDARD
+                  SkipAutomaticSecVet: false
+                  Mock: false
   /v1/a2p/BrandRegistrations/{BrandSid}/Vettings:
     servers:
     - url: https://messaging.twilio.com
@@ -1462,9 +1816,9 @@ paths:
       - date_updated
       - vetting_status
       - vetting_class
-      pathType: list
       parent: /a2p/BrandRegistrations/{Sid}
       mountName: brand_vettings
+      pathType: list
     post:
       description: ''
       parameters:
@@ -1484,12 +1838,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations.brand_vetting'
+              examples:
+                create:
+                  value:
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    brand_sid: BN0044409f7e067e279523808d267e2d85
+                    brand_vetting_sid: VT12445353
+                    vetting_provider: campaign-verify
+                    vetting_id: cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY
+                    vetting_class: POLITICAL
+                    vetting_status: IN_PROGRESS
+                    date_created: '2021-01-27T14:18:35Z'
+                    date_updated: '2021-01-27T14:18:35Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings/VT12445353
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBrandVetting
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1507,6 +1872,11 @@ paths:
                   description: The unique ID of the vetting
               required:
               - VettingProvider
+            examples:
+              create:
+                value:
+                  VettingProvider: campaign-verify
+                  VettingId: cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY
     get:
       description: ''
       parameters:
@@ -1558,34 +1928,54 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.brand_registrations.brand_vetting'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                read:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: data
+                      url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings?PageSize=50&Page=0
+                    data:
+                    - account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                      brand_sid: BN0044409f7e067e279523808d267e2d85
+                      brand_vetting_sid: VT12445353
+                      vetting_provider: campaign-verify
+                      vetting_id: cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY
+                      vetting_class: POLITICAL
+                      vetting_status: IN_PROGRESS
+                      date_created: '2021-01-27T14:18:35Z'
+                      date_updated: '2021-01-27T14:18:35Z'
+                      url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings/VT12445353
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListBrandVetting
-      x-maturity:
-      - Beta
   /v1/a2p/BrandRegistrations/{BrandSid}/Vettings/{BrandVettingSid}:
     servers:
     - url: https://messaging.twilio.com
@@ -1599,9 +1989,9 @@ paths:
       - date_updated
       - vetting_status
       - vetting_class
-      pathType: instance
       parent: /a2p/BrandRegistrations/{Sid}
       mountName: brand_vettings
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1630,12 +2020,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.brand_registrations.brand_vetting'
+              examples:
+                fetch:
+                  value:
+                    account_sid: AC78e8e67fc0246521490fb9907fd0c165
+                    brand_sid: BN0044409f7e067e279523808d267e2d85
+                    brand_vetting_sid: VT12445353
+                    vetting_provider: campaign-verify
+                    vetting_id: cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY
+                    vetting_class: POLITICAL
+                    vetting_status: IN_PROGRESS
+                    date_created: '2021-01-27T14:18:35Z'
+                    date_updated: '2021-01-27T14:18:35Z'
+                    url: https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings/VT12445353
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBrandVetting
-      x-maturity:
-      - Beta
   /v1/Deactivations:
     servers:
     - url: https://messaging.twilio.com
@@ -1644,8 +2045,8 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - redirect_to
-      pathType: instance
       className: deactivations
+      pathType: instance
     get:
       description: Fetch a list of all United States numbers that have been deactivated
         on a specific date.
@@ -1664,16 +2065,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.deactivation'
+              examples:
+                fetch:
+                  value:
+                    redirect_to: https://com-twilio-dev-messaging-deactivations.s3.amazonaws.com
           description: Temporary Redirect
       security:
       - accountSid_authToken: []
       operationId: FetchDeactivation
-      x-maturity:
-      - GA
   /v1/LinkShortening/Domains/{DomainSid}/Certificate:
     servers:
     - url: https://messaging.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - certificate_sid
@@ -1683,9 +2086,9 @@ paths:
       - date_created
       - date_updated
       - url
-      pathType: instance
       mountName: domain_certs
       className: domain_certs
+      pathType: instance
     post:
       description: ''
       parameters:
@@ -1705,18 +2108,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_cert_v4'
+              examples:
+                update:
+                  value:
+                    certificate_sid: CWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: https://api.example.com
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_expires: '2021-02-06T18:02:04Z'
+                    date_created: '2021-02-06T18:02:04Z'
+                    date_updated: '2021-02-06T18:02:04Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Certificate
+                    cert_in_validation:
+                      date_expires: '2021-02-06T18:02:04Z'
+                      status: pending
           description: OK
         '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_cert_v4'
+              examples:
+                create:
+                  value:
+                    certificate_sid: CWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: https://api.example.com
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_expires: null
+                    date_created: '2021-02-06T18:02:04Z'
+                    date_updated: '2021-02-06T18:02:04Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Certificate
+                    cert_in_validation:
+                      date_expires: '2021-02-06T18:02:04Z'
+                      status: pending
           description: Created
       security:
       - accountSid_authToken: []
       operationId: UpdateDomainCertV4
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1732,6 +2159,119 @@ paths:
                     your domain.'
               required:
               - TlsCert
+            examples:
+              update:
+                value:
+                  TlsCert: '-----BEGIN CERTIFICATE-----MIIDcDCCAlgCCQD0iHbJmcUyYDANBgkqhkiG9w0BAQsFADB6MQswCQYDVQQGEwJ1czELMAkGA1UECAwCdXMxCzAJBgNVBAcMAnVzMQswCQYDVQQKDAJ1czELMAkGA1UECwwCdXMxGDAWBgNVBAMMD2FwaS5leGFtcGxlLmNvbTEdMBsGCSqGSIb3DQEJARYOamRqZEBmamZkai5jb20wHhcNMjAwMjA3MTgwMjA0WhcNMjEwMjA2MTgwMjA0WjB6MQswCQYDVQQGEwJ1czELMAkGA1UECAwCdXMxCzAJBgNVBAcMAnVzMQswCQYDVQQKDAJ1czELMAkGA1UECwwCdXMxGDAWBgNVBAMMD2FwaS5leGFtcGxlLmNvbTEdMBsGCSqGSIb3DQEJARYOamRqZEBmamZkai5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCo6AAEeYlR6bFAnxRvx/0BsKfZVhOlB3ua+fQc3yvdDbpQ+zxpKl4bki0HU9q2flRSc52NV6m1XGtSknHSuTlTPj3eRTJpbVpSDfI55zSKsMOgo7JvjdYZXzzPQqhruWXw2exwK1wQjVko3AIW/G2vC4nSPa7C2cxhQe6lYDhJazwFi1/TN0nqKPDuU9DL2BohjX40NzXpJ3yFEHogPTrzHyADIDtXqJzWofzz4zbkNuLAfijmHQnudvDpJoGZzzVOLk8i4eIY8aQECBC+8E2hmlJGhUSONqIYrdy0MD800ervCor0WhAdPe1293fkMER9PjYgtpP2CeSf1umUzwZjAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAHjWBgL4K7BuYF50ocWm5nMk4X0wsLx6+Z4n3cQurFOPBH0lKzUgxp8s/CDDI9Qa5/WTk2C0bvarcQdf0pjX5foNc/WtHmr1wu0w5Ykjhbw/uBDXzdMy2Dnk6hvDJYuXP+0VVw4tykXIE4mBYNG/dk5vptY5OG/YBMMR995pXLn8a0FJNdnznx0ocWpCeLVP6ddzgRYsU0BdO7v9lQRhRnxBYpL52VQ4uNcW77WcirLFpbbbQTDRQcTAE8maVGgO2Q/mG572/OzQ3VryNbuc2/fYJvZuavawIQR1/H9SA6aT5+fruz1e0UuPpIkKDS4emuqIOKIRpB4lIJj97esKhX8=-----END
+                    CERTIFICATE----------BEGIN PRIVATE KEY-----
+
+                    MIIEpAIBAAKCAQEAu3589qzU1kyEjPJ8v3p7RGOaESNX4+hDw3Nv6nPNd1ysTVXV
+
+                    80+v2iTANVlCLK6bpqOVq8VMs+6BAcWrZvfgBwKnad+cqLbrgjSsMLOD5e+zNO7A
+
+                    p1ItO/dpecLbTN4HItbiywAk/HKVZ11/1mh4wPvKtpIUJpBwB2h4j3oGBIjhK3MP
+
+                    k0evPohP+kWIBHT73cK/IkcpSIptDEhzKfwnYbni7N4TrF84ba+ykFJn1N5/mD8R
+
+                    ZT4jFhRKOwVNtfW+b8svlVt2n9O8viaUHO4UaAmkSsGuLd7BbfUUaMCBhVZECDnX
+
+                    G2xmOWAj7DW/NMUFNZiKfsCuBo0l4EBH9V8plQIDAQABAoIBAQChHptIZ1EnLu4h
+
+                    KSgma5yOMoFtBNA8W5YP2Z1s/kKstgijFIYc5neZoEdEEQYa25mKY7z0tUGqxeQ6
+
+                    n6EhhRURMSiohK5dFYPgil8GIt3PtGJttFX981JH297Z8ab+sTW0rLCL/f3KqrTU
+
+                    9LYsi+5o+HdE2NdUJH8A/rfLo/KT5Yv5qWgR0F3R6iYBpsq1TAfuYTN0HZPURXUq
+
+                    3QkWwICdvKEvx/at92Q9a91Rkm+c+31CgmzSJBsNerSZLC3y/KOlVA3fNtq8Bzjh
+
+                    TOw4ReH1Bwze18mt+zOQ0t/2l7uIFGkhqDczqVlJUNKWDZ7s9o7CdOxwfVdUP9ft
+
+                    Btm1ZXeBAoGBAN2SracmzVLHOnQJLlPm2LAy8Y7Yl7VNL7bk9dN/+A7HXjIEUsFR
+
+                    /B6zfoYsVLmYbjhqFpMAzepj5HXdI2FRw30nB9SJguW9D4jPJrS635aD5+UM7sKY
+
+                    /77OKIv5gTRhaHP1gFPMsUQRZZ8RAfL4lXDlOGwKMYT9Hmx+s30runlFAoGBANig
+
+                    SIXbCNKM/vc+Xx9nyqfAHzEw444erVEoW7S/ZoL1z2+47Z+Cu9Il+i1bWKazvOEx
+
+                    4xN8aGEga0uCBEGB3g7o7LlxoMqexfZiMgWiLTXB1cpOVvV7oT8ZVm8sJXH/PwBG
+
+                    SLR7igcBuOF2888rPf1+slz/HqOSATgufXYCxGwRAoGAF9Tz+puQ0At/vQVTx1B4
+
+                    FBOWqb+gKa8Ap9Jeon4MJ0LIXebbI9H2pTK3NCVGg6PijwzSGsOmYkSWSRsc+BW8
+
+                    ShTNoc2cl6tLJXLqfdvvupe7dIZ8k8+zCknQUKXogMLNYlOQlvLYSjL41DAXHpQg
+
+                    NsFg3TYHd39mK1NBaQAwEWUCgYBuJVmazht3S3/c4VbmlhTCJPr3PR+HROvlZzrx
+
+                    9Zw/HJOEACi6wXOU0ACcDWVPJfb1HjOS1eAQ+rXzp8FYOZtaQ28Sf8c9H2wS8izz
+
+                    FlocilmVSy4GFf2QIucDEhRcGWfEUPho5KPzGhoScjRX82nKuiAhDwtaKkP6eBEM
+
+                    7y1GsQKBgQDYA+/CsjoDT//pc1AaetuBT0INviCGJKiRDJwvVJgwi/CHZYUZuXbv
+
+                    syI3EUey4OL7in0N4oxCuBMEs+PVz39PRfANFTqQ/j74jazUnmCRHlReJy5A8DvZ
+
+                    9tUKnGAnoUlrl7oz139om8ZW+DjLBRgr8ao1bC8UC8jX4SpB1IMP0Q==
+
+                    -----END PRIVATE KEY-----'
+              create:
+                value:
+                  TlsCert: '-----BEGIN CERTIFICATE-----MIIDcDCCAlgCCQD0iHbJmcUyYDANBgkqhkiG9w0BAQsFADB6MQswCQYDVQQGEwJ1czELMAkGA1UECAwCdXMxCzAJBgNVBAcMAnVzMQswCQYDVQQKDAJ1czELMAkGA1UECwwCdXMxGDAWBgNVBAMMD2FwaS5leGFtcGxlLmNvbTEdMBsGCSqGSIb3DQEJARYOamRqZEBmamZkai5jb20wHhcNMjAwMjA3MTgwMjA0WhcNMjEwMjA2MTgwMjA0WjB6MQswCQYDVQQGEwJ1czELMAkGA1UECAwCdXMxCzAJBgNVBAcMAnVzMQswCQYDVQQKDAJ1czELMAkGA1UECwwCdXMxGDAWBgNVBAMMD2FwaS5leGFtcGxlLmNvbTEdMBsGCSqGSIb3DQEJARYOamRqZEBmamZkai5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCo6AAEeYlR6bFAnxRvx/0BsKfZVhOlB3ua+fQc3yvdDbpQ+zxpKl4bki0HU9q2flRSc52NV6m1XGtSknHSuTlTPj3eRTJpbVpSDfI55zSKsMOgo7JvjdYZXzzPQqhruWXw2exwK1wQjVko3AIW/G2vC4nSPa7C2cxhQe6lYDhJazwFi1/TN0nqKPDuU9DL2BohjX40NzXpJ3yFEHogPTrzHyADIDtXqJzWofzz4zbkNuLAfijmHQnudvDpJoGZzzVOLk8i4eIY8aQECBC+8E2hmlJGhUSONqIYrdy0MD800ervCor0WhAdPe1293fkMER9PjYgtpP2CeSf1umUzwZjAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAHjWBgL4K7BuYF50ocWm5nMk4X0wsLx6+Z4n3cQurFOPBH0lKzUgxp8s/CDDI9Qa5/WTk2C0bvarcQdf0pjX5foNc/WtHmr1wu0w5Ykjhbw/uBDXzdMy2Dnk6hvDJYuXP+0VVw4tykXIE4mBYNG/dk5vptY5OG/YBMMR995pXLn8a0FJNdnznx0ocWpCeLVP6ddzgRYsU0BdO7v9lQRhRnxBYpL52VQ4uNcW77WcirLFpbbbQTDRQcTAE8maVGgO2Q/mG572/OzQ3VryNbuc2/fYJvZuavawIQR1/H9SA6aT5+fruz1e0UuPpIkKDS4emuqIOKIRpB4lIJj97esKhX8=-----END
+                    CERTIFICATE----------BEGIN PRIVATE KEY-----
+
+                    MIIEpAIBAAKCAQEAu3589qzU1kyEjPJ8v3p7RGOaESNX4+hDw3Nv6nPNd1ysTVXV
+
+                    80+v2iTANVlCLK6bpqOVq8VMs+6BAcWrZvfgBwKnad+cqLbrgjSsMLOD5e+zNO7A
+
+                    p1ItO/dpecLbTN4HItbiywAk/HKVZ11/1mh4wPvKtpIUJpBwB2h4j3oGBIjhK3MP
+
+                    k0evPohP+kWIBHT73cK/IkcpSIptDEhzKfwnYbni7N4TrF84ba+ykFJn1N5/mD8R
+
+                    ZT4jFhRKOwVNtfW+b8svlVt2n9O8viaUHO4UaAmkSsGuLd7BbfUUaMCBhVZECDnX
+
+                    G2xmOWAj7DW/NMUFNZiKfsCuBo0l4EBH9V8plQIDAQABAoIBAQChHptIZ1EnLu4h
+
+                    KSgma5yOMoFtBNA8W5YP2Z1s/kKstgijFIYc5neZoEdEEQYa25mKY7z0tUGqxeQ6
+
+                    n6EhhRURMSiohK5dFYPgil8GIt3PtGJttFX981JH297Z8ab+sTW0rLCL/f3KqrTU
+
+                    9LYsi+5o+HdE2NdUJH8A/rfLo/KT5Yv5qWgR0F3R6iYBpsq1TAfuYTN0HZPURXUq
+
+                    3QkWwICdvKEvx/at92Q9a91Rkm+c+31CgmzSJBsNerSZLC3y/KOlVA3fNtq8Bzjh
+
+                    TOw4ReH1Bwze18mt+zOQ0t/2l7uIFGkhqDczqVlJUNKWDZ7s9o7CdOxwfVdUP9ft
+
+                    Btm1ZXeBAoGBAN2SracmzVLHOnQJLlPm2LAy8Y7Yl7VNL7bk9dN/+A7HXjIEUsFR
+
+                    /B6zfoYsVLmYbjhqFpMAzepj5HXdI2FRw30nB9SJguW9D4jPJrS635aD5+UM7sKY
+
+                    /77OKIv5gTRhaHP1gFPMsUQRZZ8RAfL4lXDlOGwKMYT9Hmx+s30runlFAoGBANig
+
+                    SIXbCNKM/vc+Xx9nyqfAHzEw444erVEoW7S/ZoL1z2+47Z+Cu9Il+i1bWKazvOEx
+
+                    4xN8aGEga0uCBEGB3g7o7LlxoMqexfZiMgWiLTXB1cpOVvV7oT8ZVm8sJXH/PwBG
+
+                    SLR7igcBuOF2888rPf1+slz/HqOSATgufXYCxGwRAoGAF9Tz+puQ0At/vQVTx1B4
+
+                    FBOWqb+gKa8Ap9Jeon4MJ0LIXebbI9H2pTK3NCVGg6PijwzSGsOmYkSWSRsc+BW8
+
+                    ShTNoc2cl6tLJXLqfdvvupe7dIZ8k8+zCknQUKXogMLNYlOQlvLYSjL41DAXHpQg
+
+                    NsFg3TYHd39mK1NBaQAwEWUCgYBuJVmazht3S3/c4VbmlhTCJPr3PR+HROvlZzrx
+
+                    9Zw/HJOEACi6wXOU0ACcDWVPJfb1HjOS1eAQ+rXzp8FYOZtaQ28Sf8c9H2wS8izz
+
+                    FlocilmVSy4GFf2QIucDEhRcGWfEUPho5KPzGhoScjRX82nKuiAhDwtaKkP6eBEM
+
+                    7y1GsQKBgQDYA+/CsjoDT//pc1AaetuBT0INviCGJKiRDJwvVJgwi/CHZYUZuXbv
+
+                    syI3EUey4OL7in0N4oxCuBMEs+PVz39PRfANFTqQ/j74jazUnmCRHlReJy5A8DvZ
+
+                    9tUKnGAnoUlrl7oz139om8ZW+DjLBRgr8ao1bC8UC8jX4SpB1IMP0Q==
+
+                    -----END PRIVATE KEY-----'
     get:
       description: ''
       parameters:
@@ -1751,12 +2291,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_cert_v4'
+              examples:
+                fetch:
+                  value:
+                    certificate_sid: CWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: https://api.example.com
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_expires: '2021-02-06T18:02:04Z'
+                    date_created: '2021-02-06T18:02:04Z'
+                    date_updated: '2021-02-06T18:02:04Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Certificate
+                    cert_in_validation:
+                      date_expires: '2021-02-06T18:02:04Z'
+                      status: pending
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDomainCertV4
-      x-maturity:
-      - Beta
     delete:
       description: ''
       parameters:
@@ -1776,12 +2327,10 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteDomainCertV4
-      x-maturity:
-      - Beta
   /v1/LinkShortening/Domains/{DomainSid}/Config:
     servers:
     - url: https://messaging.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - config_sid
@@ -1792,8 +2341,8 @@ paths:
       - date_updated
       - url
       - disable_https
-      pathType: instance
       mountName: domain_config
+      pathType: instance
     post:
       description: ''
       parameters:
@@ -1813,18 +2362,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_config'
+              examples:
+                update:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    config_sid: ZKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    fallback_url: https://www.example.com
+                    callback_url: https://www.example.com
+                    continue_on_failure: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Config
+                    disable_https: false
           description: OK
         '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_config'
+              examples:
+                create:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    config_sid: ZKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    fallback_url: https://www.example.com
+                    callback_url: https://www.example.com
+                    continue_on_failure: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Config
+                    disable_https: false
           description: Created
       security:
       - accountSid_authToken: []
       operationId: UpdateDomainConfig
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1855,6 +2426,19 @@ paths:
                     with https:// at the beginning of the url. If false, messages
                     will be sent with https:// at the beginning of the url. False
                     is the default behavior if it is not specified.
+            examples:
+              update:
+                value:
+                  FallbackUrl: https://www.example.com
+                  CallbackUrl: https://www.example.com
+                  ContinueOnFailure: true
+                  DisableHttps: false
+              create:
+                value:
+                  FallbackUrl: https://www.example.com
+                  CallbackUrl: https://www.example.com
+                  DisableHttps: false
+                  ContinueOnFailure: true
     get:
       description: ''
       parameters:
@@ -1874,16 +2458,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_config'
+              examples:
+                fetch:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    config_sid: ZKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    fallback_url: https://www.example.com
+                    callback_url: https://www.example.com
+                    continue_on_failure: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Config
+                    disable_https: false
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDomainConfig
-      x-maturity:
-      - Beta
   /v1/LinkShortening/MessagingService/{MessagingServiceSid}/DomainConfig:
     servers:
     - url: https://messaging.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - domain_sid
@@ -1895,8 +2489,8 @@ paths:
       - date_updated
       - url
       - messaging_service_sid
-      pathType: instance
       mountName: domain_config_messaging_service
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1916,12 +2510,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.domain_config_messaging_service'
+              examples:
+                fetch:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    config_sid: ZKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    fallback_url: https://www.example.com
+                    callback_url: https://www.example.com
+                    continue_on_failure: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://messaging.twilio.com/v1/LinkShortening/MessagingService/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DomainConfig
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDomainConfigMessagingService
-      x-maturity:
-      - Beta
   /v1/Services/PreregisteredUsa2p:
     servers:
     - url: https://messaging.twilio.com
@@ -1930,8 +2534,8 @@ paths:
       defaultOutputProperties:
       - campaign_id
       - messaging_service_sid
-      pathType: list
       mountName: external_campaign
+      pathType: list
     post:
       description: ''
       responses:
@@ -1940,12 +2544,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.external_campaign'
+              examples:
+                create:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    campaign_id: CMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2021-03-21T21:31:00Z'
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateExternalCampaign
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1966,17 +2576,22 @@ paths:
               required:
               - CampaignId
               - MessagingServiceSid
+            examples:
+              create:
+                value:
+                  MessagingServiceSid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  CampaignId: CMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/LinkShortening/Domains/{DomainSid}/MessagingServices/{MessagingServiceSid}:
     servers:
     - url: https://messaging.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - messaging_service_sid
       - domain_sid
       - url
-      pathType: instance
       mountName: linkshortening_messaging_service
+      pathType: instance
     post:
       description: ''
       parameters:
@@ -2008,12 +2623,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.linkshortening_messaging_service'
+              examples:
+                create:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/MessagingServices/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateLinkshorteningMessagingService
-      x-maturity:
-      - Beta
     delete:
       description: ''
       parameters:
@@ -2045,19 +2664,17 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteLinkshorteningMessagingService
-      x-maturity:
-      - Beta
   /v1/LinkShortening/MessagingServices/{MessagingServiceSid}/Domain:
     servers:
     - url: https://messaging.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - domain_sid
       - messaging_service_sid
       - url
-      pathType: instance
       mountName: linkshortening_messaging_service_domain_association
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2077,12 +2694,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.linkshortening_messaging_service_domain_association'
+              examples:
+                fetch:
+                  value:
+                    domain_sid: DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://messaging.twilio.com/v1/LinkShortening/MessagingServices/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Domain
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchLinkshorteningMessagingServiceDomainAssociation
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/PhoneNumbers:
     servers:
     - url: https://messaging.twilio.com
@@ -2093,8 +2714,8 @@ paths:
       - sid
       - phone_number
       - country_code
-      pathType: list
       parent: /Services/{Sid}
+      pathType: list
     post:
       description: ''
       parameters:
@@ -2114,12 +2735,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.phone_number'
+              examples:
+                create:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    phone_number: '+987654321'
+                    country_code: US
+                    capabilities: []
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                createWithCapabilities:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    phone_number: '+987654321'
+                    country_code: US
+                    capabilities:
+                    - MMS
+                    - SMS
+                    - Voice
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreatePhoneNumber
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2135,6 +2780,13 @@ paths:
                   description: The SID of the Phone Number being added to the Service.
               required:
               - PhoneNumberSid
+            examples:
+              create:
+                value:
+                  PhoneNumberSid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              createWithCapabilities:
+                value:
+                  PhoneNumberSid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: ''
       parameters:
@@ -2180,34 +2832,53 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.service.phone_number'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: phone_numbers
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=50&Page=0
+                    phone_numbers:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:12:31Z'
+                      date_updated: '2015-07-30T20:12:33Z'
+                      phone_number: '+987654321'
+                      country_code: US
+                      capabilities: []
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListPhoneNumber
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/PhoneNumbers/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -2218,8 +2889,8 @@ paths:
       - sid
       - phone_number
       - country_code
-      pathType: instance
       parent: /Services/{Sid}
+      pathType: instance
     delete:
       description: ''
       parameters:
@@ -2245,8 +2916,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeletePhoneNumber
-      x-maturity:
-      - Beta
     get:
       description: ''
       parameters:
@@ -2272,12 +2941,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.phone_number'
+              examples:
+                fetch:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    phone_number: '12345'
+                    country_code: US
+                    capabilities: []
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchPhoneNumber
-      x-maturity:
-      - Beta
   /v1/Services:
     servers:
     - url: https://messaging.twilio.com
@@ -2288,14 +2967,14 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: list
       dependentProperties:
         phone_number: '{service_sid: sid}'
         short_code: '{service_sid: sid}'
         alpha_sender: '{service_sid: sid}'
-        messaging/v1/message: '{messaging_service_sid: sid}'
+        message: '{messaging_service_sid: sid}'
         us_app_to_person: '{messaging_service_sid: sid}'
         us_app_to_person_usecase: '{messaging_service_sid: sid}'
+      pathType: list
     post:
       description: ''
       responses:
@@ -2304,12 +2983,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    friendly_name: My Service!
+                    inbound_request_url: https://www.example.com/
+                    inbound_method: POST
+                    fallback_url: https://www.example.com
+                    fallback_method: GET
+                    status_callback: https://www.example.com
+                    sticky_sender: true
+                    smart_encoding: false
+                    mms_converter: true
+                    fallback_to_long_code: true
+                    scan_message_content: inherit
+                    area_code_geomatch: true
+                    validity_period: 600
+                    synchronous_validation: true
+                    usecase: marketing
+                    us_app_to_person_registered: false
+                    use_inbound_webhook_on_number: true
+                    links:
+                      phone_numbers: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
+                      alpha_senders: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders
+                      messages: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
+                      us_app_to_person: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p
+                      us_app_to_person_usecases: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2415,6 +3124,25 @@ paths:
                     defined for the Messaging Service.
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: My Service!
+                  StickySender: true
+                  MmsConverter: true
+                  SmartEncoding: false
+                  FallbackToLongCode: true
+                  InboundRequestUrl: https://www.example.com
+                  InboundMethod: POST
+                  FallbackMethod: GET
+                  FallbackUrl: https://www.example.com
+                  StatusCallback: https://www.example.com
+                  ScanMessageContent: inherit
+                  AreaCodeGeomatch: true
+                  ValidityPeriod: 600
+                  SynchronousValidation: true
+                  Usecase: marketing
+                  UseInboundWebhookOnNumber: true
     get:
       description: ''
       parameters:
@@ -2450,34 +3178,73 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.service'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: services
+                      url: https://messaging.twilio.com/v1/Services?PageSize=50&Page=0
+                    services:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: My Service!
+                      sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:12:31Z'
+                      date_updated: '2015-07-30T20:12:33Z'
+                      sticky_sender: true
+                      mms_converter: true
+                      smart_encoding: false
+                      fallback_to_long_code: true
+                      area_code_geomatch: true
+                      validity_period: 600
+                      scan_message_content: inherit
+                      synchronous_validation: true
+                      inbound_request_url: https://www.example.com/
+                      inbound_method: POST
+                      fallback_url: null
+                      fallback_method: POST
+                      status_callback: https://www.example.com
+                      usecase: marketing
+                      us_app_to_person_registered: false
+                      use_inbound_webhook_on_number: false
+                      links:
+                        phone_numbers: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                        short_codes: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
+                        alpha_senders: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders
+                        messages: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
+                        us_app_to_person: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p
+                        us_app_to_person_usecases: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListService
-      x-maturity:
-      - Beta
   /v1/Services/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -2488,14 +3255,14 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: instance
       dependentProperties:
         phone_number: '{service_sid: sid}'
         short_code: '{service_sid: sid}'
         alpha_sender: '{service_sid: sid}'
-        messaging/v1/message: '{messaging_service_sid: sid}'
+        message: '{messaging_service_sid: sid}'
         us_app_to_person: '{messaging_service_sid: sid}'
         us_app_to_person_usecase: '{messaging_service_sid: sid}'
+      pathType: instance
     post:
       description: ''
       parameters:
@@ -2514,12 +3281,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: My Service!
+                    sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    sticky_sender: false
+                    mms_converter: true
+                    smart_encoding: false
+                    fallback_to_long_code: true
+                    scan_message_content: inherit
+                    synchronous_validation: true
+                    area_code_geomatch: true
+                    validity_period: 600
+                    inbound_request_url: https://www.example.com
+                    inbound_method: POST
+                    fallback_url: null
+                    fallback_method: POST
+                    status_callback: https://www.example.com
+                    usecase: marketing
+                    us_app_to_person_registered: false
+                    use_inbound_webhook_on_number: true
+                    links:
+                      phone_numbers: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
+                      alpha_senders: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders
+                      messages: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
+                      us_app_to_person: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p
+                      us_app_to_person_usecases: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2623,6 +3420,10 @@ paths:
                     If this field is enabled then the webhook url defined on the phone
                     number will override the `inbound_request_url`/`fallback_url`
                     defined for the Messaging Service.
+            examples:
+              update:
+                value:
+                  StickySender: false
     get:
       description: ''
       parameters:
@@ -2641,12 +3442,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    friendly_name: My Service!
+                    inbound_request_url: https://www.example.com/
+                    inbound_method: POST
+                    fallback_url: null
+                    fallback_method: POST
+                    status_callback: https://www.example.com
+                    sticky_sender: true
+                    mms_converter: true
+                    smart_encoding: false
+                    fallback_to_long_code: true
+                    area_code_geomatch: true
+                    validity_period: 600
+                    scan_message_content: inherit
+                    synchronous_validation: true
+                    usecase: marketing
+                    us_app_to_person_registered: false
+                    use_inbound_webhook_on_number: true
+                    links:
+                      phone_numbers: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                      short_codes: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes
+                      alpha_senders: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders
+                      messages: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
+                      us_app_to_person: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p
+                      us_app_to_person_usecases: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchService
-      x-maturity:
-      - Beta
     delete:
       description: ''
       parameters:
@@ -2665,8 +3496,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteService
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/ShortCodes:
     servers:
     - url: https://messaging.twilio.com
@@ -2677,8 +3506,8 @@ paths:
       - sid
       - short_code
       - country_code
-      pathType: list
       parent: /Services/{Sid}
+      pathType: list
     post:
       description: ''
       parameters:
@@ -2698,12 +3527,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.short_code'
+              examples:
+                create:
+                  value:
+                    sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    short_code: '12345'
+                    country_code: US
+                    capabilities:
+                    - SMS
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateShortCode
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2720,6 +3560,10 @@ paths:
                     Service.
               required:
               - ShortCodeSid
+            examples:
+              create:
+                value:
+                  ShortCodeSid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: ''
       parameters:
@@ -2765,34 +3609,54 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.service.short_code'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: short_codes
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes?PageSize=50&Page=0
+                    short_codes:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:12:31Z'
+                      date_updated: '2015-07-30T20:12:33Z'
+                      short_code: '12345'
+                      country_code: US
+                      capabilities:
+                      - SMS
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListShortCode
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/ShortCodes/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -2803,8 +3667,8 @@ paths:
       - sid
       - short_code
       - country_code
-      pathType: instance
       parent: /Services/{Sid}
+      pathType: instance
     delete:
       description: ''
       parameters:
@@ -2830,8 +3694,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteShortCode
-      x-maturity:
-      - Beta
     get:
       description: ''
       parameters:
@@ -2857,12 +3719,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.short_code'
+              examples:
+                fetch:
+                  value:
+                    sid: SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:12:31Z'
+                    date_updated: '2015-07-30T20:12:33Z'
+                    short_code: '12345'
+                    country_code: US
+                    capabilities:
+                    - SMS
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ShortCodes/SCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchShortCode
-      x-maturity:
-      - Beta
   /v1/Services/{MessagingServiceSid}/Compliance/Usa2p:
     servers:
     - url: https://messaging.twilio.com
@@ -2873,9 +3746,9 @@ paths:
       - brand_registration_sid
       - campaign_status
       - date_created
-      pathType: list
       parent: /Services/{Sid}
       mountName: us_app_to_person
+      pathType: list
     post:
       description: ''
       parameters:
@@ -2895,12 +3768,156 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+              examples:
+                create:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: MARKETING
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      Acme Corporation. You will not receive any more messages from
+                      this number.
+                    help_message: 'Acme Corporation: Please visit www.example.com
+                      to get support. To opt-out, reply STOP.'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
+                createWithDefaults:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: MARKETING
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed. You
+                      will not receive any more messages from this number. Reply START
+                      to resubscribe.
+                    help_message: Reply STOP to unsubscribe. Msg&Data Rates May Apply.
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    - STOPALL
+                    - UNSUBSCRIBE
+                    - CANCEL
+                    - END
+                    - QUIT
+                    help_keywords:
+                    - HELP
+                    - INFO
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
+                createWithDefaultsSoleProprietor:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: SOLE_PROPRIETOR
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 0.25
+                        msg_class: A
+                      tmobile:
+                        brand_tier: LOW
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed. You
+                      will not receive any more messages from this number. Reply START
+                      to resubscribe.
+                    help_message: Reply STOP to unsubscribe. Msg&Data Rates May Apply.
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    - STOPALL
+                    - UNSUBSCRIBE
+                    - CANCEL
+                    - END
+                    - QUIT
+                    help_keywords:
+                    - HELP
+                    - INFO
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateUsAppToPerson
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3007,6 +4024,70 @@ paths:
               - UsAppToPersonUsecase
               - HasEmbeddedLinks
               - HasEmbeddedPhone
+            examples:
+              create:
+                value:
+                  BrandRegistrationSid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Description: Send marketing messages about sales to opted in customers.
+                  MessageSamples:
+                  - 'EXPRESS: Denim Days Event is ON'
+                  - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                  UsAppToPersonUsecase: MARKETING
+                  MessageFlow: End users opt-in by visiting www.example.com and adding
+                    their phone number. They then check a box agreeing to receive
+                    text messages from Example Brand. Additionally, end users can
+                    also opt-in by texting START to (111) 222-3333 to opt in.
+                  OptInMessage: 'Acme Corporation: You are now opted-in. For help,
+                    reply HELP. To opt-out, reply STOP'
+                  OptOutMessage: You have successfully been unsubscribed from Acme
+                    Corporation. You will not receive any more messages from this
+                    number.
+                  HelpMessage: 'Acme Corporation: Please visit www.example.com to
+                    get support. To opt-out, reply STOP.'
+                  OptInKeywords:
+                  - START
+                  OptOutKeywords:
+                  - STOP
+                  HelpKeywords:
+                  - HELP
+                  HasEmbeddedLinks: true
+                  HasEmbeddedPhone: false
+              createWithDefaults:
+                value:
+                  BrandRegistrationSid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Description: Send marketing messages about sales to opted in customers.
+                  MessageSamples:
+                  - 'EXPRESS: Denim Days Event is ON'
+                  - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                  UsAppToPersonUsecase: MARKETING
+                  MessageFlow: End users opt-in by visiting www.example.com and adding
+                    their phone number. They then check a box agreeing to receive
+                    text messages from Example Brand. Additionally, end users can
+                    also opt-in by texting START to (111) 222-3333 to opt in.
+                  OptInMessage: 'Acme Corporation: You are now opted-in. For help,
+                    reply HELP. To opt-out, reply STOP'
+                  OptInKeywords:
+                  - START
+                  HasEmbeddedLinks: true
+                  HasEmbeddedPhone: false
+              createWithDefaultsSoleProprietor:
+                value:
+                  BrandRegistrationSid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Description: Send marketing messages about sales to opted in customers.
+                  MessageSamples:
+                  - 'EXPRESS: Denim Days Event is ON'
+                  - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                  UsAppToPersonUsecase: SOLE_PROPRIETOR
+                  MessageFlow: End users opt-in by visiting www.example.com and adding
+                    their phone number. They then check a box agreeing to receive
+                    text messages from Example Brand. Additionally, end users can
+                    also opt-in by texting START to (111) 222-3333 to opt in.
+                  OptInMessage: 'Acme Corporation: You are now opted-in. For help,
+                    reply HELP. To opt-out, reply STOP'
+                  OptInKeywords:
+                  - START
+                  HasEmbeddedLinks: true
+                  HasEmbeddedPhone: false
     get:
       description: ''
       parameters:
@@ -3052,34 +4133,149 @@ paths:
                     items:
                       $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    compliance:
+                    - sid: QE2c6890da8086d771620e9b13fadeba0b
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: Send marketing messages about sales to opted in
+                        customers.
+                      message_samples:
+                      - 'EXPRESS: Denim Days Event is ON'
+                      - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                      us_app_to_person_usecase: MARKETING
+                      has_embedded_links: true
+                      has_embedded_phone: false
+                      campaign_status: PENDING
+                      campaign_id: CFOOBAR
+                      is_externally_registered: false
+                      rate_limits:
+                        att:
+                          mps: 600
+                          msg_class: A
+                        tmobile:
+                          brand_tier: TOP
+                      message_flow: End users opt-in by visiting www.example.com and
+                        adding their phone number. They then check a box agreeing
+                        to receive text messages from Example Brand. Additionally,
+                        end users can also opt-in by texting START to (111) 222-3333
+                        to opt in.
+                      opt_in_message: 'Acme Corporation: You are now opted-in. For
+                        help, reply HELP. To opt-out, reply STOP'
+                      opt_out_message: You have successfully been unsubscribed from
+                        Acme Corporation. You will not receive any more messages from
+                        this number.
+                      help_message: 'Acme Corporation: Please visit www.example.com
+                        to get support. To opt-out, reply STOP.'
+                      opt_in_keywords:
+                      - START
+                      opt_out_keywords:
+                      - STOP
+                      help_keywords:
+                      - HELP
+                      date_created: '2021-02-18T14:48:52Z'
+                      date_updated: '2021-02-18T14:48:52Z'
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                      mock: false
+                      errors: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=50&Page=0
+                      key: compliance
+                readFailed:
+                  value:
+                    compliance:
+                    - sid: QE2c6890da8086d771620e9b13fadeba0b
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: Send marketing messages about sales to opted in
+                        customers.
+                      message_samples:
+                      - 'EXPRESS: Denim Days Event is ON'
+                      - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                      us_app_to_person_usecase: MARKETING
+                      has_embedded_links: true
+                      has_embedded_phone: false
+                      campaign_status: PENDING
+                      campaign_id: CFOOBAR
+                      is_externally_registered: false
+                      rate_limits:
+                        att:
+                          mps: 600
+                          msg_class: A
+                        tmobile:
+                          brand_tier: TOP
+                      message_flow: End users opt-in by visiting www.example.com and
+                        adding their phone number. They then check a box agreeing
+                        to receive text messages from Example Brand. Additionally,
+                        end users can also opt-in by texting START to (111) 222-3333
+                        to opt in.
+                      opt_in_message: 'Acme Corporation: You are now opted-in. For
+                        help, reply HELP. To opt-out, reply STOP'
+                      opt_out_message: You have successfully been unsubscribed from
+                        Acme Corporation. You will not receive any more messages from
+                        this number.
+                      help_message: 'Acme Corporation: Please visit www.example.com
+                        to get support. To opt-out, reply STOP.'
+                      opt_in_keywords:
+                      - START
+                      opt_out_keywords:
+                      - STOP
+                      help_keywords:
+                      - HELP
+                      date_created: '2021-02-18T14:48:52Z'
+                      date_updated: '2021-02-18T14:48:52Z'
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                      mock: false
+                      errors:
+                      - error_code: 30897
+                        fields:
+                        - MESSAGE_FLOW
+                        url: https://www.twilio.com/docs/api/errors/30897
+                        description: The campaign submission has been reviewed and
+                          it was rejected due to Disallowed Content.
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=50&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=50&Page=0
+                      key: compliance
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListUsAppToPerson
-      x-maturity:
-      - Beta
   /v1/Services/{MessagingServiceSid}/Compliance/Usa2p/{Sid}:
     servers:
     - url: https://messaging.twilio.com
@@ -3090,9 +4286,9 @@ paths:
       - brand_registration_sid
       - campaign_status
       - date_created
-      pathType: instance
       parent: /Services/{Sid}
       mountName: us_app_to_person
+      pathType: instance
     delete:
       description: ''
       parameters:
@@ -3121,8 +4317,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteUsAppToPerson
-      x-maturity:
-      - Beta
     get:
       description: ''
       parameters:
@@ -3151,12 +4345,152 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+              examples:
+                fetch:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: MARKETING
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      Acme Corporation. You will not receive any more messages from
+                      this number.
+                    help_message: 'Acme Corporation: Please visit www.example.com
+                      to get support. To opt-out, reply STOP.'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
+                fetchSoleProprietorCampaign:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send confirmation messages about scheduled home repair
+                      services
+                    message_samples:
+                    - Hi! This is John Doe. I'm scheduled to come to your home at
+                      123 Example Street to repair your roof at 4pm tomorrow. Please
+                      let me know if this time does not work for you anymore
+                    us_app_to_person_usecase: SOLE_PROPRIETOR
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: 'End users call (111)-222-3333 to schedule appointments,
+                      where they''re also asked whether they would like to provide
+                      their phone numbers to receive appointment reminders '
+                    opt_in_message: 'John Doe''s Home Repair: You are now opted-in.
+                      For help, reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      John Doe's Home Repair. You will not receive any more messages
+                      from this number.
+                    help_message: 'John Doe''s Home Repair: Please call (111)-222-3333
+                      to get help. To opt-out, please reply STOP'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
+                fetchFailedWithErrors:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send confirmation messages about scheduled home repair
+                      services
+                    message_samples:
+                    - Hi! This is John Doe. I'm scheduled to come to your home at
+                      123 Example Street to repair your roof at 4pm tomorrow. Please
+                      let me know if this time does not work for you anymore
+                    us_app_to_person_usecase: SOLE_PROPRIETOR
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: 'End users call (111)-222-3333 to schedule appointments,
+                      where they''re also asked whether they would like to provide
+                      their phone numbers to receive appointment reminders '
+                    opt_in_message: 'John Doe''s Home Repair: You are now opted-in.
+                      For help, reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      John Doe's Home Repair. You will not receive any more messages
+                      from this number.
+                    help_message: 'John Doe''s Home Repair: Please call (111)-222-3333
+                      to get help. To opt-out, please reply STOP'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors:
+                    - error_code: 30897
+                      fields:
+                      - MESSAGE_FLOW
+                      url: https://www.twilio.com/docs/api/errors/30897
+                      description: The campaign submission has been reviewed and it
+                        was rejected due to Disallowed Content.
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchUsAppToPerson
-      x-maturity:
-      - Beta
   /v1/Services/{MessagingServiceSid}/Compliance/Usa2p/Usecases:
     servers:
     - url: https://messaging.twilio.com
@@ -3167,9 +4501,9 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - us_app_to_person_usecases
-      pathType: list
       parent: /Services/{Sid}
       mountName: us_app_to_person_usecases
+      pathType: list
     get:
       description: ''
       parameters:
@@ -3191,18 +4525,240 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^BN[0-9a-fA-F]{32}$
+        examples:
+          fetchWithBrandRegistrationSid:
+            value: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_usecase'
+              examples:
+                fetchWithBrandRegistrationSid:
+                  value:
+                    us_app_to_person_usecases:
+                    - code: 2FA
+                      name: Two-Factor authentication (2FA)
+                      description: Two-Factor authentication, one-time use password,
+                        password reset
+                      post_approval_required: false
+                    - code: ACCOUNT_NOTIFICATION
+                      name: Account Notification
+                      description: 'All reminders, alerts, and notifications. (Examples
+                        include: flight delayed, hotel booked, appointment reminders.)'
+                      post_approval_required: false
+                    - code: AGENTS_FRANCHISES
+                      name: Agents and Franchises
+                      description: For brands that have multiple agents, franchises
+                        or offices in the same brand vertical, but require individual
+                        localised numbers per agent/location/office.
+                      post_approval_required: true
+                    - code: CHARITY
+                      name: Charity
+                      description: 'Includes:  5013C Charity
+
+                        Does not include: Religious organizations'
+                      post_approval_required: false
+                    - code: PROXY
+                      name: Proxy
+                      description: 'Peer-to-peer app-based group messaging with proxy/pooled
+                        numbers (For example: GroupMe)
+
+                        Supporting personalized services and non-exposure of personal
+                        numbers for enterprise or A2P communications. (Examples include:
+                        Uber and AirBnb.)'
+                      post_approval_required: true
+                    - code: CUSTOMER_CARE
+                      name: Customer Care
+                      description: All customer care messaging, including account
+                        management and support
+                      post_approval_required: false
+                    - code: DELIVERY_NOTIFICATION
+                      name: Delivery Notification
+                      description: Information about the status of the delivery of
+                        a product or service
+                      post_approval_required: false
+                    - code: EMERGENCY
+                      name: Emergency
+                      description: Notification services designed to support public
+                        safety / health during natural disasters, armed conflicts,
+                        pandemics and other national or regional emergencies
+                      post_approval_required: true
+                    - code: FRAUD_ALERT
+                      name: Fraud Alert Messaging
+                      description: Fraud alert notification
+                      post_approval_required: false
+                    - code: HIGHER_EDUCATION
+                      name: Higher Education
+                      description: For campaigns created on behalf of Colleges or
+                        Universities and will also include School Districts etc that
+                        fall outside of any "free to the consumer" messaging model
+                      post_approval_required: false
+                    - code: K12_EDUCATION
+                      name: K-12 Education
+                      description: Campaigns created for messaging platforms that
+                        support schools from grades K-12 and distance learning centers.
+                        This is not for Post-Secondary schools.
+                      post_approval_required: true
+                    - code: LOW_VOLUME
+                      name: Low Volume Mixed
+                      description: 'Low throughput, any combination of use-cases.
+                        Examples include:  test, demo accounts'
+                      post_approval_required: false
+                    - code: MARKETING
+                      name: Marketing
+                      description: Any communication with marketing and/or promotional
+                        content
+                      post_approval_required: false
+                    - code: MIXED
+                      name: Mixed
+                      description: Mixed messaging reserved for specific consumer
+                        service industry
+                      post_approval_required: false
+                    - code: POLITICAL
+                      name: Political
+                      description: Part of organized effort to influence decision
+                        making of specific group. All campaigns to be verified
+                      post_approval_required: false
+                    - code: POLLING_VOTING
+                      name: Polling and voting
+                      description: Polling and voting
+                      post_approval_required: false
+                    - code: PUBLIC_SERVICE_ANNOUNCEMENT
+                      name: Public Service Announcement
+                      description: An informational message that is meant to raise
+                        the audience awareness about an important issue
+                      post_approval_required: false
+                    - code: SECURITY_ALERT
+                      name: Security Alert
+                      description: A notification that the security of a system, either
+                        software or hardware, has been compromised in some way and
+                        there is an action you need to take
+                      post_approval_required: false
+                    - code: SOCIAL
+                      name: Social
+                      description: 'Communication within or between closed communities
+                        (For example: influencers alerts)'
+                      post_approval_required: true
+                    - code: SWEEPSTAKE
+                      name: Sweepstake
+                      description: Sweepstake
+                      post_approval_required: true
+                fetchWithoutBrandRegistrationSid:
+                  value:
+                    us_app_to_person_usecases:
+                    - code: 2FA
+                      name: Two-Factor authentication (2FA)
+                      description: Two-Factor authentication, one-time use password,
+                        password reset
+                      post_approval_required: false
+                    - code: ACCOUNT_NOTIFICATION
+                      name: Account Notification
+                      description: 'All reminders, alerts, and notifications. (Examples
+                        include: flight delayed, hotel booked, appointment reminders.)'
+                      post_approval_required: false
+                    - code: AGENTS_FRANCHISES
+                      name: Agents and Franchises
+                      description: For brands that have multiple agents, franchises
+                        or offices in the same brand vertical, but require individual
+                        localised numbers per agent/location/office.
+                      post_approval_required: true
+                    - code: CHARITY
+                      name: Charity
+                      description: 'Includes:  5013C Charity
+
+                        Does not include: Religious organizations'
+                      post_approval_required: false
+                    - code: PROXY
+                      name: Proxy
+                      description: 'Peer-to-peer app-based group messaging with proxy/pooled
+                        numbers (For example: GroupMe)
+
+                        Supporting personalized services and non-exposure of personal
+                        numbers for enterprise or A2P communications. (Examples include:
+                        Uber and AirBnb.)'
+                      post_approval_required: true
+                    - code: CUSTOMER_CARE
+                      name: Customer Care
+                      description: All customer care messaging, including account
+                        management and support
+                      post_approval_required: false
+                    - code: DELIVERY_NOTIFICATION
+                      name: Delivery Notification
+                      description: Information about the status of the delivery of
+                        a product or service
+                      post_approval_required: false
+                    - code: EMERGENCY
+                      name: Emergency
+                      description: Notification services designed to support public
+                        safety / health during natural disasters, armed conflicts,
+                        pandemics and other national or regional emergencies
+                      post_approval_required: true
+                    - code: FRAUD_ALERT
+                      name: Fraud Alert Messaging
+                      description: Fraud alert notification
+                      post_approval_required: false
+                    - code: HIGHER_EDUCATION
+                      name: Higher Education
+                      description: For campaigns created on behalf of Colleges or
+                        Universities and will also include School Districts etc that
+                        fall outside of any "free to the consumer" messaging model
+                      post_approval_required: false
+                    - code: K12_EDUCATION
+                      name: K-12 Education
+                      description: Campaigns created for messaging platforms that
+                        support schools from grades K-12 and distance learning centers.
+                        This is not for Post-Secondary schools.
+                      post_approval_required: true
+                    - code: LOW_VOLUME
+                      name: Low Volume Mixed
+                      description: 'Low throughput, any combination of use-cases.
+                        Examples include:  test, demo accounts'
+                      post_approval_required: false
+                    - code: MARKETING
+                      name: Marketing
+                      description: Any communication with marketing and/or promotional
+                        content
+                      post_approval_required: false
+                    - code: MIXED
+                      name: Mixed
+                      description: Mixed messaging reserved for specific consumer
+                        service industry
+                      post_approval_required: false
+                    - code: POLITICAL
+                      name: Political
+                      description: Part of organized effort to influence decision
+                        making of specific group. All campaigns to be verified
+                      post_approval_required: false
+                    - code: POLLING_VOTING
+                      name: Polling and voting
+                      description: Polling and voting
+                      post_approval_required: false
+                    - code: PUBLIC_SERVICE_ANNOUNCEMENT
+                      name: Public Service Announcement
+                      description: An informational message that is meant to raise
+                        the audience awareness about an important issue
+                      post_approval_required: false
+                    - code: SECURITY_ALERT
+                      name: Security Alert
+                      description: A notification that the security of a system, either
+                        software or hardware, has been compromised in some way and
+                        there is an action you need to take
+                      post_approval_required: false
+                    - code: SOCIAL
+                      name: Social
+                      description: 'Communication within or between closed communities
+                        (For example: influencers alerts)'
+                      post_approval_required: true
+                    - code: SWEEPSTAKE
+                      name: Sweepstake
+                      description: Sweepstake
+                      post_approval_required: true
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchUsAppToPersonUsecase
-      x-maturity:
-      - Beta
   /v1/Services/Usecases:
     servers:
     - url: https://messaging.twilio.com
@@ -3219,17 +4775,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/messaging.v1.usecase'
+              examples:
+                fetch:
+                  value:
+                    usecases:
+                    - usecase: notifications
+                      description: Transactional notifications and Alerts for any
+                        Delivery, Account, Reminder, Order, Fraud, Security, Public
+                        Service, or Emergency announcements.
+                      purpose: Notify my users.
+                    - usecase: marketing
+                      description: Marketing messages may contain product information,
+                        offers, and calls to action to engage with your organization.
+                      purpose: Market my services.
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchUsecase
-      x-maturity:
-      - Beta
 servers:
 - url: https://messaging.twilio.com
-x-maturity:
-- name: GA
-  description: This product is Generally Available.
-- name: Beta
-  description: PLEASE NOTE that this is a Beta product that is subject to change.
-    Use it with caution.

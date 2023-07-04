@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     content.v1.content.approval_fetch:
       type: object
@@ -207,10 +211,6 @@ components:
           format: uri
           nullable: true
           description: The URL of the resource, relative to `https://content.twilio.com`.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Content
   description: This is the public Twilio REST API.
@@ -222,7 +222,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Content/{Sid}/ApprovalRequests:
@@ -235,9 +235,9 @@ paths:
       - sid
       - account_sid
       - whatsapp
-      pathType: instance
       parent: /Content/{Sid}
       mountName: approval_fetch
+      pathType: instance
     get:
       description: Fetch a Content resource's approval status by its unique Content
         Sid
@@ -258,12 +258,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/content.v1.content.approval_fetch'
+              examples:
+                getApproval:
+                  value:
+                    sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    whatsapp:
+                      type: whatsapp
+                      name: tree_fiddy
+                      category: ACCOUNT_UPDATE
+                      content_type: twilio/location
+                      status: approved
+                      rejection_reason: ''
+                      allow_category_change: true
+                    url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchApprovalFetch
-      x-maturity:
-      - Preview
   /v1/Content/{Sid}:
     servers:
     - url: https://content.twilio.com
@@ -278,11 +290,11 @@ paths:
       - language
       - variables
       - types
-      pathType: instance
       dependentProperties:
-        content/v1/approval_create: '{sid: sid}'
+        approval_create: '{sid: sid}'
         approval_fetch: '{sid: sid}'
       mountName: contents
+      pathType: instance
     get:
       description: Fetch a Content resource by its unique Content Sid
       parameters:
@@ -302,12 +314,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/content.v1.content'
+              examples:
+                fetch:
+                  value:
+                    sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: Some content
+                    language: en
+                    variables:
+                      name: foo
+                    types:
+                      twilio/text:
+                        body: Foo Bar Co is located at 39.7392, 104.9903
+                      twilio/location:
+                        longitude: 104.9903
+                        latitude: 39.7392
+                        label: Foo Bar Co
+                    url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T19:00:00Z'
+                    date_updated: '2015-07-30T19:00:00Z'
+                    links:
+                      approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
+                      approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchContent
-      x-maturity:
-      - Preview
     delete:
       description: Deletes a Content resource
       parameters:
@@ -327,8 +359,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteContent
-      x-maturity:
-      - Preview
   /v1/Content:
     servers:
     - url: https://content.twilio.com
@@ -343,11 +373,11 @@ paths:
       - language
       - variables
       - types
-      pathType: list
       dependentProperties:
-        content/v1/approval_create: '{sid: sid}'
+        approval_create: '{sid: sid}'
         approval_fetch: '{sid: sid}'
       mountName: contents
+      pathType: list
     get:
       description: Retrieve a list of Contents belonging to the account used to make
         the request
@@ -384,34 +414,112 @@ paths:
                     items:
                       $ref: '#/components/schemas/content.v1.content'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    contents: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://content.twilio.com/v1/Content?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://content.twilio.com/v1/Content?PageSize=10&Page=0
+                      next_page_url: null
+                      key: contents
+                readResults:
+                  value:
+                    contents:
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Some content
+                      language: en
+                      variables:
+                        name: foo
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                      links:
+                        approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
+                        approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Anotha content
+                      language: en
+                      variables:
+                        name: foo
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                      links:
+                        approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
+                        approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Third content
+                      language: en
+                      variables:
+                        name: foo
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                      links:
+                        approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
+                        approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://content.twilio.com/v1/Content?PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://content.twilio.com/v1/Content?PageSize=20&Page=0
+                      next_page_url: null
+                      key: contents
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListContent
-      x-maturity:
-      - Preview
   /v1/ContentAndApprovals:
     servers:
     - url: https://content.twilio.com
@@ -428,8 +536,8 @@ paths:
       - variables
       - types
       - approval_requests
-      pathType: list
       className: content_and_approvals
+      pathType: list
     get:
       description: Retrieve a list of Contents with approval statuses belonging to
         the account used to make the request
@@ -466,34 +574,127 @@ paths:
                     items:
                       $ref: '#/components/schemas/content.v1.content_and_approvals'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    contents: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://content.twilio.com/v1/ContentAndApprovals?PageSize=10&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://content.twilio.com/v1/ContentAndApprovals?PageSize=10&Page=0
+                      key: contents
+                readResults:
+                  value:
+                    contents:
+                    - date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                      sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Some content
+                      language: en
+                      variables:
+                        name: foo
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      approval_requests:
+                        name: ''
+                        category: ''
+                        content_type: ''
+                        status: unsubmitted
+                        rejection_reason: ''
+                        allow_category_change: true
+                    - language: en
+                      date_updated: '2023-01-13T23:33:46Z'
+                      variables:
+                        '1': name
+                        '2': typedocument
+                      friendly_name: Media Test
+                      account_sid: AC25c0d4b9093547216c460212e24e77ee
+                      sid: HX5fcd48a417c1cb59da349ad6d5da4607
+                      date_created: '2023-01-13T23:33:46Z'
+                      types:
+                        twilio/media:
+                          body: '{{1}}, Congratulations {{2}}! For additional assistance,
+                            please contact us at hello@twilio.com'
+                          media:
+                          - https://example.com/template
+                      approval_requests:
+                        category: TRANSACTIONAL
+                        status: approved
+                        rejection_reason: ''
+                        name: Media Test
+                        content_type: twilio/media
+                        allow_category_change: false
+                    - language: en
+                      date_updated: '2023-01-18T02:46:35Z'
+                      variables:
+                        '1': name
+                        '2': type_video
+                        '3': small.mp4
+                      friendly_name: Video Highlights
+                      account_sid: AC25c0d4b9093547216c460212e24e77ee
+                      sid: HX15c711fcc6d9ea5268d7ab77938a20ff
+                      date_created: '2023-01-18T02:46:35Z'
+                      types:
+                        twilio/media:
+                          body: Hi there, {{1}}, we have received your request to
+                            upload {{2}}, and should be uploaded shortly.
+                          media:
+                          - http://example.com/highlights/{{3}}
+                      approval_requests:
+                        category: TRANSACTIONAL
+                        status: rejected
+                        rejection_reason: 'INVALID_FORMAT. Facebook is not able to
+                          create template with templateName=Video Highlights_hx15c711fcc6d9ea5268d7ab77938a20ff
+                          due to the following error: Invalid parameter. More Details:
+                          Message template ''components'' param is missing expected
+                          field(s). component of type HEADER is missing expected field(s)
+                          (example)'
+                        name: Video Highlights
+                        content_type: twilio/media
+                        allow_category_change: true
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://content.twilio.com/v1/ContentAndApprovals?PageSize=20&Page=0
+                      url: https://content.twilio.com/v1/ContentAndApprovals?PageSize=20&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      key: contents
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListContentAndApprovals
-      x-maturity:
-      - Preview
   /v1/LegacyContent:
     servers:
     - url: https://content.twilio.com
@@ -510,8 +711,8 @@ paths:
       - types
       - legacy_template_name
       - legacy_body
-      pathType: list
       mountName: legacy_contents
+      pathType: list
     get:
       description: Retrieve a list of Legacy Contents belonging to the account used
         to make the request
@@ -548,38 +749,108 @@ paths:
                     items:
                       $ref: '#/components/schemas/content.v1.legacy_content'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    contents: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://content.twilio.com/v1/LegacyContent?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://content.twilio.com/v1/LegacyContent?PageSize=10&Page=0
+                      next_page_url: null
+                      key: contents
+                readResults:
+                  value:
+                    contents:
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Some content
+                      language: en
+                      variables:
+                        name: foo
+                      legacy_template_name: legacy_template_1
+                      legacy_body: a body
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/LegacyContent
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Anotha content
+                      language: en
+                      variables:
+                        name: foo
+                      legacy_template_name: legacy_template_2
+                      legacy_body: another body
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/LegacyContent
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                    - sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Third content
+                      language: en
+                      variables:
+                        name: foo
+                      legacy_template_name: legacy_template_3
+                      legacy_body: a third body
+                      types:
+                        twilio/text:
+                          body: Foo Bar Co is located at 39.7392, 104.9903
+                        twilio/location:
+                          longitude: 104.9903
+                          latitude: 39.7392
+                          label: Foo Bar Co
+                      url: https://content.twilio.com/v1/LegacyContent
+                      date_created: '2015-07-30T19:00:00Z'
+                      date_updated: '2015-07-30T19:00:00Z'
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://content.twilio.com/v1/LegacyContent?PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://content.twilio.com/v1/LegacyContent?PageSize=20&Page=0
+                      next_page_url: null
+                      key: contents
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListLegacyContent
-      x-maturity:
-      - Preview
 servers:
 - url: https://content.twilio.com
-x-maturity:
-- name: Preview
-  description: PLEASE NOTE that this is a Preview product that is subject to change.
-    Use it with caution. If you currently do not have developer preview access, please
-    contact help@twilio.com.

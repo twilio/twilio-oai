@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     serverless.v1.service.asset:
       type: object
@@ -769,10 +773,6 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the Variable resource.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Serverless
   description: This is the public Twilio REST API.
@@ -784,7 +784,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Services/{ServiceSid}/Assets:
@@ -797,10 +797,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: list
       dependentProperties:
         asset_version: '{service_sid: service_sid, asset_sid: sid}'
       parent: /Services/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Assets.
       parameters:
@@ -842,34 +842,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.asset'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    assets: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets?PageSize=50&Page=0
+                      key: assets
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAsset
-      x-maturity:
-      - Beta
     post:
       description: Create a new Asset resource.
       parameters:
@@ -885,12 +895,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.asset'
+              examples:
+                create:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: asset-friendly
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000
+                    links:
+                      asset_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAsset
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -904,6 +924,10 @@ paths:
                     Asset resource. It can be a maximum of 255 characters.
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: asset-friendly
   /v1/Services/{ServiceSid}/Assets/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -914,10 +938,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: instance
       dependentProperties:
         asset_version: '{service_sid: service_sid, asset_sid: sid}'
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific Asset resource.
       parameters:
@@ -942,12 +966,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.asset'
+              examples:
+                fetch:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: test-asset
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000
+                    links:
+                      asset_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAsset
-      x-maturity:
-      - Beta
     delete:
       description: Delete an Asset resource.
       parameters:
@@ -972,8 +1006,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAsset
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Asset resource.
       parameters:
@@ -998,12 +1030,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.asset'
+              examples:
+                update:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: asset-friendly-update
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000
+                    links:
+                      asset_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateAsset
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1017,6 +1059,10 @@ paths:
                     Asset resource. It can be a maximum of 255 characters.
               required:
               - FriendlyName
+            examples:
+              update:
+                value:
+                  FriendlyName: asset-friendly-update
   /v1/Services/{ServiceSid}/Assets/{AssetSid}/Versions:
     servers:
     - url: https://serverless.twilio.com
@@ -1027,9 +1073,9 @@ paths:
       - path
       - visibility
       - date_created
-      pathType: list
       parent: /Services/{ServiceSid}/Assets/{Sid}
       mountName: asset_versions
+      pathType: list
     get:
       description: Retrieve a list of all Asset Versions.
       parameters:
@@ -1081,34 +1127,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.asset.asset_version'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    asset_versions: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions?PageSize=50&Page=0
+                      key: asset_versions
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAssetVersion
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Assets/{AssetSid}/Versions/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -1119,9 +1175,9 @@ paths:
       - path
       - visibility
       - date_created
-      pathType: instance
       parent: /Services/{ServiceSid}/Assets/{Sid}
       mountName: asset_versions
+      pathType: instance
     get:
       description: Retrieve a specific Asset Version.
       parameters:
@@ -1156,12 +1212,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.asset.asset_version'
+              examples:
+                fetch:
+                  value:
+                    sid: ZN00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    asset_sid: ZH00000000000000000000000000000000
+                    path: /test-path
+                    visibility: public
+                    date_created: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets/ZH00000000000000000000000000000000/Versions/ZN00000000000000000000000000000000
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAssetVersion
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Builds:
     servers:
     - url: https://serverless.twilio.com
@@ -1172,10 +1237,10 @@ paths:
       - sid
       - status
       - date_created
-      pathType: list
       dependentProperties:
         build_status: '{service_sid: service_sid, sid: sid}'
       parent: /Services/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Builds.
       parameters:
@@ -1217,34 +1282,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.build'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    builds: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds?PageSize=50&Page=0
+                      key: builds
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListBuild
-      x-maturity:
-      - Beta
     post:
       description: Create a new Build resource. At least one function version or asset
         version is required.
@@ -1261,12 +1336,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.build'
+              examples:
+                create:
+                  value:
+                    sid: ZB00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    asset_versions:
+                    - sid: ZN00000000000000000000000000000000
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: ZS00000000000000000000000000000000
+                      asset_sid: ZH00000000000000000000000000000000
+                      date_created: '2018-11-10T20:00:00Z'
+                      path: /asset-path
+                      visibility: PUBLIC
+                    function_versions:
+                    - sid: ZN00000000000000000000000000000001
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: ZS00000000000000000000000000000000
+                      function_sid: ZH00000000000000000000000000000001
+                      date_created: '2018-11-10T20:00:00Z'
+                      path: /function-path
+                      visibility: PUBLIC
+                    dependencies:
+                    - name: twilio
+                      version: 3.29.2
+                    - name: '@twilio/runtime-handler'
+                      version: 1.0.1
+                    runtime: node16
+                    status: building
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds/ZB00000000000000000000000000000000
+                    links:
+                      build_status: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds/ZB00000000000000000000000000000000/Status
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBuild
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1301,6 +1408,15 @@ paths:
                   type: string
                   description: The Runtime version that will be used to run the Build
                     resource when it is deployed.
+            examples:
+              create:
+                value:
+                  AssetVersions:
+                  - ZN00000000000000000000000000000000
+                  FunctionVersions:
+                  - ZN00000000000000000000000000000001
+                  Dependencies: '[{"name":"twilio", "version":"3.29.2"}, {"name":"@twilio/runtime-handler",
+                    "version": "1.0.1"}]'
   /v1/Services/{ServiceSid}/Builds/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -1311,10 +1427,10 @@ paths:
       - sid
       - status
       - date_created
-      pathType: instance
       dependentProperties:
         build_status: '{service_sid: service_sid, sid: sid}'
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific Build resource.
       parameters:
@@ -1339,12 +1455,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.build'
+              examples:
+                fetch:
+                  value:
+                    sid: ZB00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    asset_versions:
+                    - sid: ZN00000000000000000000000000000000
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: ZS00000000000000000000000000000000
+                      asset_sid: ZH00000000000000000000000000000000
+                      date_created: '2018-11-10T20:00:00Z'
+                      path: /asset-path
+                      visibility: PUBLIC
+                    function_versions:
+                    - sid: ZN00000000000000000000000000000001
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: ZS00000000000000000000000000000000
+                      function_sid: ZH00000000000000000000000000000001
+                      date_created: '2018-11-10T20:00:00Z'
+                      path: /function-path
+                      visibility: PUBLIC
+                    dependencies:
+                    - name: twilio
+                      version: 3.29.2
+                    - name: '@twilio/runtime-handler'
+                      version: 1.0.1
+                    runtime: node16
+                    status: building
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds/ZB00000000000000000000000000000000
+                    links:
+                      build_status: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds/ZB00000000000000000000000000000000/Status
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBuild
-      x-maturity:
-      - Beta
     delete:
       description: Delete a Build resource.
       parameters:
@@ -1369,8 +1517,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteBuild
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Builds/{Sid}/Status:
     servers:
     - url: https://serverless.twilio.com
@@ -1379,9 +1525,9 @@ paths:
       defaultOutputProperties:
       - sid
       - status
-      pathType: instance
       parent: /Services/{ServiceSid}/Builds/{Sid}
       mountName: build_status
+      pathType: instance
     get:
       description: Retrieve a specific Build resource.
       parameters:
@@ -1406,12 +1552,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.build.build_status'
+              examples:
+                fetch:
+                  value:
+                    sid: ZB00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    status: completed
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds/ZB00000000000000000000000000000000/Status
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBuildStatus
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Deployments:
     servers:
     - url: https://serverless.twilio.com
@@ -1422,8 +1574,8 @@ paths:
       - sid
       - build_sid
       - date_created
-      pathType: list
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Deployments.
       parameters:
@@ -1475,34 +1627,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.environment.deployment'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    deployments: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments?PageSize=50&Page=0
+                      key: deployments
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListDeployment
-      x-maturity:
-      - Beta
     post:
       description: Create a new Deployment.
       parameters:
@@ -1527,12 +1689,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.deployment'
+              examples:
+                create:
+                  value:
+                    sid: ZD00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    build_sid: ZB00000000000000000000000000000000
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments/ZD00000000000000000000000000000000
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateDeployment
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1546,6 +1717,10 @@ paths:
                   maxLength: 34
                   pattern: ^ZB[0-9a-fA-F]{32}$
                   description: The SID of the Build for the Deployment.
+            examples:
+              create:
+                value:
+                  BuildSid: ZB00000000000000000000000000000000
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Deployments/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -1556,8 +1731,8 @@ paths:
       - sid
       - build_sid
       - date_created
-      pathType: instance
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific Deployment.
       parameters:
@@ -1591,12 +1766,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.deployment'
+              examples:
+                fetch:
+                  value:
+                    sid: ZD00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    build_sid: ZB00000000000000000000000000000000
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments/ZD00000000000000000000000000000000
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDeployment
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Environments:
     servers:
     - url: https://serverless.twilio.com
@@ -1608,12 +1792,12 @@ paths:
       - unique_name
       - domain_name
       - build_sid
-      pathType: list
       dependentProperties:
         variable: '{service_sid: service_sid, environment_sid: sid}'
         deployment: '{service_sid: service_sid, environment_sid: sid}'
         log: '{service_sid: service_sid, environment_sid: sid}'
       parent: /Services/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all environments.
       parameters:
@@ -1655,34 +1839,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.environment'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    environments: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments?PageSize=50&Page=0
+                      key: environments
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEnvironment
-      x-maturity:
-      - Beta
     post:
       description: Create a new environment.
       parameters:
@@ -1698,12 +1892,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment'
+              examples:
+                create:
+                  value:
+                    sid: ZE00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    build_sid: null
+                    unique_name: staging
+                    domain_suffix: stage
+                    domain_name: foobar-1234-stage.twil.io
+                    custom_domain_name: null
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000
+                    links:
+                      variables: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables
+                      deployments: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments
+                      logs: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Logs
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateEnvironment
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1721,6 +1931,11 @@ paths:
                     and forms part of the domain name. It can be a maximum of 16 characters.
               required:
               - UniqueName
+            examples:
+              create:
+                value:
+                  UniqueName: staging
+                  DomainSuffix: stage
   /v1/Services/{ServiceSid}/Environments/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -1732,12 +1947,12 @@ paths:
       - unique_name
       - domain_name
       - build_sid
-      pathType: instance
       dependentProperties:
         variable: '{service_sid: service_sid, environment_sid: sid}'
         deployment: '{service_sid: service_sid, environment_sid: sid}'
         log: '{service_sid: service_sid, environment_sid: sid}'
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific environment.
       parameters:
@@ -1762,12 +1977,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment'
+              examples:
+                fetch:
+                  value:
+                    sid: ZE00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    build_sid: ZB00000000000000000000000000000000
+                    unique_name: testing-environment
+                    domain_suffix: testing
+                    domain_name: foobar-1234-testing.twil.io
+                    custom_domain_name: null
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000
+                    links:
+                      variables: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables
+                      deployments: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Deployments
+                      logs: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Logs
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEnvironment
-      x-maturity:
-      - Beta
     delete:
       description: Delete a specific environment.
       parameters:
@@ -1792,8 +2023,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteEnvironment
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Functions:
     servers:
     - url: https://serverless.twilio.com
@@ -1804,10 +2033,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: list
       dependentProperties:
         function_version: '{service_sid: service_sid, function_sid: sid}'
       parent: /Services/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Functions.
       parameters:
@@ -1849,34 +2078,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.function'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    functions: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions?PageSize=50&Page=0
+                      key: functions
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListFunction
-      x-maturity:
-      - Beta
     post:
       description: Create a new Function resource.
       parameters:
@@ -1892,12 +2131,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.function'
+              examples:
+                create:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: function-friendly
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000
+                    links:
+                      function_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateFunction
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1911,6 +2160,10 @@ paths:
                     Function resource. It can be a maximum of 255 characters.
               required:
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: function-friendly
   /v1/Services/{ServiceSid}/Functions/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -1921,10 +2174,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: instance
       dependentProperties:
         function_version: '{service_sid: service_sid, function_sid: sid}'
       parent: /Services/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific Function resource.
       parameters:
@@ -1949,12 +2202,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.function'
+              examples:
+                fetch:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: test-function
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000
+                    links:
+                      function_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchFunction
-      x-maturity:
-      - Beta
     delete:
       description: Delete a Function resource.
       parameters:
@@ -1979,8 +2242,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteFunction
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Function resource.
       parameters:
@@ -2005,12 +2266,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.function'
+              examples:
+                update:
+                  value:
+                    sid: ZH00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    friendly_name: function-friendly-update
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000
+                    links:
+                      function_versions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateFunction
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2024,6 +2295,10 @@ paths:
                     Function resource. It can be a maximum of 255 characters.
               required:
               - FriendlyName
+            examples:
+              update:
+                value:
+                  FriendlyName: function-friendly-update
   /v1/Services/{ServiceSid}/Functions/{FunctionSid}/Versions:
     servers:
     - url: https://serverless.twilio.com
@@ -2034,12 +2309,12 @@ paths:
       - path
       - visibility
       - date_created
-      pathType: list
       dependentProperties:
         function_version_content: '{service_sid: service_sid, function_sid: function_sid,
           sid: sid}'
       parent: /Services/{ServiceSid}/Functions/{Sid}
       mountName: function_versions
+      pathType: list
     get:
       description: Retrieve a list of all Function Version resources.
       parameters:
@@ -2092,34 +2367,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.function.function_version'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    function_versions: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions?PageSize=50&Page=0
+                      key: function_versions
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListFunctionVersion
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Functions/{FunctionSid}/Versions/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -2130,12 +2415,12 @@ paths:
       - path
       - visibility
       - date_created
-      pathType: instance
       dependentProperties:
         function_version_content: '{service_sid: service_sid, function_sid: function_sid,
           sid: sid}'
       parent: /Services/{ServiceSid}/Functions/{Sid}
       mountName: function_versions
+      pathType: instance
     get:
       description: Retrieve a specific Function Version resource.
       parameters:
@@ -2171,12 +2456,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.function.function_version'
+              examples:
+                fetch:
+                  value:
+                    sid: ZN00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    function_sid: ZH00000000000000000000000000000000
+                    path: /test-path
+                    visibility: public
+                    date_created: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions/ZN00000000000000000000000000000000
+                    links:
+                      function_version_content: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions/ZN00000000000000000000000000000000/Content
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchFunctionVersion
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Functions/{FunctionSid}/Versions/{Sid}/Content:
     servers:
     - url: https://serverless.twilio.com
@@ -2185,9 +2481,9 @@ paths:
       defaultOutputProperties:
       - sid
       - content
-      pathType: instance
       parent: /Services/{ServiceSid}/Functions/{FunctionSid}/Versions/{Sid}
       mountName: function_version_content
+      pathType: instance
     get:
       description: Retrieve a the content of a specific Function Version resource.
       parameters:
@@ -2223,20 +2519,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.function.function_version.function_version_content'
+              examples:
+                fetch:
+                  value:
+                    sid: ZN00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    function_sid: ZH00000000000000000000000000000000
+                    content: "exports.handler = function (context, event, callback)\
+                      \ {\n    const request = require(\"request\");\n    return request(\"\
+                      http://www.google.com\", function (error, response, body) {\n\
+                      \        callback(null, response.statusCode);\n    });\n};"
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions/ZH00000000000000000000000000000000/Versions/ZN00000000000000000000000000000000/Content
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchFunctionVersionContent
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Logs:
     servers:
     - url: https://serverless.twilio.com
     description: A record of an event that occurred related to a function invocation.
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all logs.
       parameters:
@@ -2264,6 +2570,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^ZH[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value: ZH00000000000000000000000000000000
       - name: StartDate
         in: query
         description: The date/time (in GMT, ISO 8601) after which the Log resources
@@ -2271,6 +2580,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readEmpty:
+            value: '2018-11-10T20:00:00Z'
       - name: EndDate
         in: query
         description: The date/time (in GMT, ISO 8601) before which the Log resources
@@ -2278,6 +2590,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readEmpty:
+            value: '2018-12-10T20:00:00Z'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2310,42 +2625,52 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.environment.log'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    logs: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Logs?StartDate=2018-11-10T20%3A00%3A00Z&EndDate=2018-12-10T20%3A00%3A00Z&FunctionSid=ZH00000000000000000000000000000000&PageSize=50&Page=0
+                      key: logs
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Logs?StartDate=2018-11-10T20%3A00%3A00Z&EndDate=2018-12-10T20%3A00%3A00Z&FunctionSid=ZH00000000000000000000000000000000&PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListLog
-      x-maturity:
-      - Beta
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Logs/{Sid}:
     servers:
     - url: https://serverless.twilio.com
     description: A record of an event that occurred related to a function invocation.
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific log.
       parameters:
@@ -2379,12 +2704,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.log'
+              examples:
+                fetch:
+                  value:
+                    sid: NO00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    build_sid: ZB00000000000000000000000000000000
+                    deployment_sid: ZD00000000000000000000000000000000
+                    function_sid: ZH00000000000000000000000000000000
+                    request_sid: RQ00000000000000000000000000000000
+                    level: warn
+                    message: This is a warning
+                    date_created: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Logs/NO00000000000000000000000000000000
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchLog
-      x-maturity:
-      - Beta
   /v1/Services:
     servers:
     - url: https://serverless.twilio.com
@@ -2395,12 +2733,12 @@ paths:
       - sid
       - unique_name
       - friendly_name
-      pathType: list
       dependentProperties:
         environment: '{service_sid: sid}'
         function: '{service_sid: sid}'
         asset: '{service_sid: sid}'
         build: '{service_sid: sid}'
+      pathType: list
     get:
       description: Retrieve a list of all Services.
       parameters:
@@ -2436,34 +2774,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    services: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services?PageSize=50&Page=0
+                      key: services
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListService
-      x-maturity:
-      - Beta
     post:
       description: Create a new Service resource.
       responses:
@@ -2472,12 +2820,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service'
+              examples:
+                create:
+                  value:
+                    sid: ZS00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: service-friendly
+                    unique_name: service-unique
+                    include_credentials: true
+                    ui_editable: false
+                    domain_base: service-unique-1234
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000
+                    links:
+                      environments: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments
+                      functions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions
+                      assets: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets
+                      builds: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2506,6 +2870,11 @@ paths:
               required:
               - UniqueName
               - FriendlyName
+            examples:
+              create:
+                value:
+                  FriendlyName: service-friendly
+                  UniqueName: service-unique
   /v1/Services/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -2516,12 +2885,12 @@ paths:
       - sid
       - unique_name
       - friendly_name
-      pathType: instance
       dependentProperties:
         environment: '{service_sid: sid}'
         function: '{service_sid: sid}'
         asset: '{service_sid: sid}'
         build: '{service_sid: sid}'
+      pathType: instance
     get:
       description: Retrieve a specific Service resource.
       parameters:
@@ -2537,12 +2906,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service'
+              examples:
+                fetch:
+                  value:
+                    sid: ZS00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: test-service
+                    unique_name: test-service-1
+                    include_credentials: true
+                    ui_editable: false
+                    domain_base: test-service-1-1234
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000
+                    links:
+                      environments: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments
+                      functions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions
+                      assets: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets
+                      builds: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchService
-      x-maturity:
-      - Beta
     delete:
       description: Delete a Service resource.
       parameters:
@@ -2558,8 +2943,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteService
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Service resource.
       parameters:
@@ -2575,12 +2958,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service'
+              examples:
+                update:
+                  value:
+                    sid: ZS00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: service-friendly-update
+                    unique_name: service-unique-update
+                    include_credentials: true
+                    ui_editable: true
+                    domain_base: service-unique-update-1234
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000
+                    links:
+                      environments: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments
+                      functions: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Functions
+                      assets: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Assets
+                      builds: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Builds
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateService
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2600,6 +2999,12 @@ paths:
                   type: boolean
                   description: Whether the Service resource's properties and subresources
                     can be edited via the UI. The default value is `false`.
+            examples:
+              update:
+                value:
+                  FriendlyName: service-friendly-update
+                  IncludeCredentials: true
+                  UiEditable: true
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Variables:
     servers:
     - url: https://serverless.twilio.com
@@ -2609,8 +3014,8 @@ paths:
       - sid
       - key
       - date_created
-      pathType: list
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Variables.
       parameters:
@@ -2661,34 +3066,44 @@ paths:
                     items:
                       $ref: '#/components/schemas/serverless.v1.service.environment.variable'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    variables: []
+                    meta:
+                      first_page_url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables?PageSize=50&Page=0
+                      key: variables
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListVariable
-      x-maturity:
-      - Beta
     post:
       description: Create a new Variable.
       parameters:
@@ -2713,12 +3128,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.variable'
+              examples:
+                create:
+                  value:
+                    sid: ZV00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    key: new-key
+                    value: new-value
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables/ZV00000000000000000000000000000000
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateVariable
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2737,6 +3162,11 @@ paths:
               required:
               - Key
               - Value
+            examples:
+              create:
+                value:
+                  Key: new-key
+                  Value: new-value
   /v1/Services/{ServiceSid}/Environments/{EnvironmentSid}/Variables/{Sid}:
     servers:
     - url: https://serverless.twilio.com
@@ -2746,8 +3176,8 @@ paths:
       - sid
       - key
       - date_created
-      pathType: instance
       parent: /Services/{ServiceSid}/Environments/{Sid}
+      pathType: instance
     get:
       description: Retrieve a specific Variable.
       parameters:
@@ -2781,12 +3211,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.variable'
+              examples:
+                fetch:
+                  value:
+                    sid: ZV00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    key: test-key
+                    value: test-value
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-10T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables/ZV00000000000000000000000000000000
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchVariable
-      x-maturity:
-      - Beta
     post:
       description: Update a specific Variable.
       parameters:
@@ -2820,12 +3260,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/serverless.v1.service.environment.variable'
+              examples:
+                update:
+                  value:
+                    sid: ZV00000000000000000000000000000000
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: ZS00000000000000000000000000000000
+                    environment_sid: ZE00000000000000000000000000000000
+                    key: update-key
+                    value: update-value
+                    date_created: '2018-11-10T20:00:00Z'
+                    date_updated: '2018-11-11T20:00:00Z'
+                    url: https://serverless.twilio.com/v1/Services/ZS00000000000000000000000000000000/Environments/ZE00000000000000000000000000000000/Variables/ZV00000000000000000000000000000000
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateVariable
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2841,6 +3291,11 @@ paths:
                   type: string
                   description: A string that contains the actual value of the Variable.
                     It can be a maximum of 450 bytes in size.
+            examples:
+              update:
+                value:
+                  Key: update-key
+                  Value: update-value
     delete:
       description: Delete a specific Variable.
       parameters:
@@ -2874,11 +3329,5 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteVariable
-      x-maturity:
-      - Beta
 servers:
 - url: https://serverless.twilio.com
-x-maturity:
-- name: Beta
-  description: PLEASE NOTE that this is a Beta product that is subject to change.
-    Use it with caution.

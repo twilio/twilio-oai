@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "media.v1.media_processor": {
         "type": "object",
@@ -393,12 +399,31 @@
             "description": "The grant that authorizes the player sdk to connect to the livestream"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
+      },
+      "transcription_enum_status": {
+        "type": "string",
+        "enum": [
+          "completed",
+          "deleted",
+          "enqueued",
+          "failed",
+          "processing"
+        ]
+      },
+      "transcription_configuration_enum_method": {
+        "type": "string",
+        "enum": [
+          "get",
+          "post"
+        ]
+      },
+      "transcription_result_enum_format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "raw",
+          "txt"
+        ]
       }
     }
   },
@@ -415,7 +440,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.43.2"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -433,8 +458,8 @@
           "extension",
           "extension_context"
         ],
-        "pathType": "list",
-        "mountName": "media_processor"
+        "mountName": "media_processor",
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -444,6 +469,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.media_processor"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "extension": "video-composer-v2",
+                      "extension_context": "{}",
+                      "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "status": "started",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": null,
+                      "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "max_duration": 300
+                    }
+                  }
                 }
               }
             },
@@ -456,9 +499,6 @@
           }
         ],
         "operationId": "CreateMediaProcessor",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -504,6 +544,18 @@
                   "Extension",
                   "ExtensionContext"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "Extension": "video-composer-v2",
+                    "ExtensionContext": "{}",
+                    "ExtensionEnvironment": "{}",
+                    "StatusCallback": "http://www.example.com",
+                    "StatusCallbackMethod": "POST",
+                    "MaxDuration": 300
+                  }
+                }
               }
             }
           }
@@ -519,6 +571,20 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/media_processor_enum_order"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "asc"
+              },
+              "readItems": {
+                "value": "desc"
+              },
+              "readItemsUsingPageToken": {
+                "value": "desc"
+              },
+              "readItemsPageLargerThanMax": {
+                "value": "desc"
+              }
             }
           },
           {
@@ -528,6 +594,20 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/media_processor_enum_status"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "started"
+              },
+              "readItems": {
+                "value": "ended"
+              },
+              "readItemsUsingPageToken": {
+                "value": "ended"
+              },
+              "readItemsPageLargerThanMax": {
+                "value": "ended"
+              }
             }
           },
           {
@@ -573,16 +653,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -591,18 +673,119 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/MediaProcessors?Status=started&Order=asc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaProcessors?Status=started&Order=asc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "media_processors"
+                      },
+                      "media_processors": []
+                    }
+                  },
+                  "readItems": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "media_processors"
+                      },
+                      "media_processors": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:01:00Z",
+                          "extension": "video-composer-v2",
+                          "extension_context": "{}",
+                          "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "status": "ended",
+                          "status_callback": "http://www.example.com",
+                          "status_callback_method": "POST",
+                          "ended_reason": "ended-via-api",
+                          "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "max_duration": 300
+                        }
+                      ]
+                    }
+                  },
+                  "readItemsUsingPageToken": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=10&Page=0&PageToken=PTTUszYTgyOGFhNDIzZWExNzA0OTkwODNlMDlkZTg3M2NiNDoxOjI%253D",
+                        "next_page_url": null,
+                        "key": "media_processors"
+                      },
+                      "media_processors": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:01:00Z",
+                          "extension": "video-composer-v2",
+                          "extension_context": "{}",
+                          "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "status": "ended",
+                          "status_callback": "http://www.example.com",
+                          "status_callback_method": "POST",
+                          "ended_reason": "ended-via-api",
+                          "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "max_duration": 300
+                        }
+                      ]
+                    }
+                  },
+                  "readItemsPageLargerThanMax": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 100,
+                        "first_page_url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=100&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaProcessors?Status=ended&Order=desc&PageSize=100&Page=0",
+                        "next_page_url": null,
+                        "key": "media_processors"
+                      },
+                      "media_processors": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:01:00Z",
+                          "extension": "video-composer-v2",
+                          "extension_context": "{}",
+                          "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "status": "ended",
+                          "status_callback": "http://www.example.com",
+                          "status_callback_method": "POST",
+                          "ended_reason": "ended-via-api",
+                          "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                          "max_duration": 300
+                        }
+                      ]
                     }
                   }
                 }
@@ -616,10 +799,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListMediaProcessor",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListMediaProcessor"
       }
     },
     "/v1/MediaProcessors/{Sid}": {
@@ -636,8 +816,8 @@
           "extension",
           "extension_context"
         ],
-        "pathType": "instance",
-        "mountName": "media_processor"
+        "mountName": "media_processor",
+        "pathType": "instance"
       },
       "get": {
         "description": "Returns a single MediaProcessor resource identified by a SID.",
@@ -661,6 +841,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.media_processor"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "extension": "video-composer-v2",
+                      "extension_context": "{}",
+                      "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "status": "started",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": null,
+                      "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "max_duration": 300
+                    }
+                  }
                 }
               }
             },
@@ -672,10 +870,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchMediaProcessor",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchMediaProcessor"
       },
       "post": {
         "description": "Updates a MediaProcessor resource identified by a SID.",
@@ -699,6 +894,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.media_processor"
+                },
+                "examples": {
+                  "updateEnded": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:01:00Z",
+                      "extension": "video-composer-v2",
+                      "extension_context": "{}",
+                      "sid": "ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "status": "ended",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": "ended-via-api",
+                      "url": "https://media.twilio.com/v1/MediaProcessors/ZXdeadbeefdeadbeefdeadbeefdeadbeef",
+                      "max_duration": 300
+                    }
+                  }
                 }
               }
             },
@@ -711,9 +924,6 @@
           }
         ],
         "operationId": "UpdateMediaProcessor",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -730,6 +940,13 @@
                 "required": [
                   "Status"
                 ]
+              },
+              "examples": {
+                "updateEnded": {
+                  "value": {
+                    "Status": "ended"
+                  }
+                }
               }
             }
           }
@@ -748,12 +965,12 @@
           "sid",
           "status"
         ],
-        "pathType": "instance",
         "dependentProperties": {
-          "media/v1/media_recording_timed_metadata": "{media_recording_sid: sid}",
-          "media/v1/media_recording_media": "{media_recording_sid: sid}"
+          "recording_timed_metadata": "{media_recording_sid: sid}",
+          "media_recording_media": "{media_recording_sid: sid}"
         },
-        "mountName": "media_recording"
+        "mountName": "media_recording",
+        "pathType": "instance"
       },
       "delete": {
         "description": "Deletes a MediaRecording resource identified by a SID.",
@@ -781,10 +998,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteMediaRecording",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "DeleteMediaRecording"
       },
       "get": {
         "description": "Returns a single MediaRecording resource identified by a SID.",
@@ -808,6 +1022,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.media_recording"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "duration": 2147483647,
+                      "format": "mp4",
+                      "links": {
+                        "media": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe/Media",
+                        "timed_metadata": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe/TimedMetadata"
+                      },
+                      "processor_sid": "ZXcafebabecafebabecafebabecafebabe",
+                      "resolution": "640x480",
+                      "source_sid": "RMcafebabecafebabecafebabecafebabe",
+                      "sid": "KVcafebabecafebabecafebabecafebabe",
+                      "media_size": 2147483648,
+                      "status": "completed",
+                      "status_callback": "https://www.example.com",
+                      "status_callback_method": "POST",
+                      "url": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe"
+                    }
+                  }
                 }
               }
             },
@@ -819,10 +1057,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchMediaRecording",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "FetchMediaRecording"
       }
     },
     "/v1/MediaRecordings": {
@@ -837,12 +1072,12 @@
           "sid",
           "status"
         ],
-        "pathType": "list",
         "dependentProperties": {
-          "media/v1/media_recording_timed_metadata": "{media_recording_sid: sid}",
-          "media/v1/media_recording_media": "{media_recording_sid: sid}"
+          "recording_timed_metadata": "{media_recording_sid: sid}",
+          "media_recording_media": "{media_recording_sid: sid}"
         },
-        "mountName": "media_recording"
+        "mountName": "media_recording",
+        "pathType": "list"
       },
       "get": {
         "description": "Returns a list of MediaRecordings.",
@@ -854,6 +1089,14 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/media_recording_enum_order"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "asc"
+              },
+              "readItems": {
+                "value": "desc"
+              }
             }
           },
           {
@@ -863,6 +1106,14 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/media_recording_enum_status"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "processing"
+              },
+              "readItems": {
+                "value": "completed"
+              }
             }
           },
           {
@@ -874,6 +1125,14 @@
               "minLength": 34,
               "maxLength": 34,
               "pattern": "^ZX[0-9a-fA-F]{32}$"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "ZXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "readItems": {
+                "value": "ZXcafebabecafebabecafebabecafebabe"
+              }
             }
           },
           {
@@ -885,6 +1144,14 @@
               "minLength": 34,
               "maxLength": 34,
               "pattern": "^[a-zA-Z]{2}[0-9a-fA-F]{32}$"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "readItems": {
+                "value": "RMcafebabecafebabecafebabecafebabe"
+              }
             }
           },
           {
@@ -930,16 +1197,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -948,18 +1217,67 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/MediaRecordings?Status=processing&SourceSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&ProcessorSid=ZXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Order=asc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaRecordings?Status=processing&SourceSid=RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&ProcessorSid=ZXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Order=asc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "media_recordings"
+                      },
+                      "media_recordings": []
+                    }
+                  },
+                  "readItems": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/MediaRecordings?Status=completed&SourceSid=RMcafebabecafebabecafebabecafebabe&ProcessorSid=ZXcafebabecafebabecafebabecafebabe&Order=desc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/MediaRecordings?Status=completed&SourceSid=RMcafebabecafebabecafebabecafebabe&ProcessorSid=ZXcafebabecafebabecafebabecafebabe&Order=desc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "media_recordings"
+                      },
+                      "media_recordings": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:00:00Z",
+                          "duration": 1000,
+                          "format": "mp4",
+                          "links": {
+                            "media": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe/Media",
+                            "timed_metadata": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe/TimedMetadata"
+                          },
+                          "processor_sid": "ZXcafebabecafebabecafebabecafebabe",
+                          "resolution": "640x480",
+                          "source_sid": "RMcafebabecafebabecafebabecafebabe",
+                          "sid": "KVcafebabecafebabecafebabecafebabe",
+                          "media_size": 1000,
+                          "status": "completed",
+                          "status_callback": "https://www.example.com",
+                          "status_callback_method": "POST",
+                          "url": "https://media.twilio.com/v1/MediaRecordings/KVcafebabecafebabecafebabecafebabe"
+                        }
+                      ]
                     }
                   }
                 }
@@ -973,10 +1291,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListMediaRecording",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "ListMediaRecording"
       }
     },
     "/v1/PlayerStreamers/{Sid}": {
@@ -991,13 +1306,13 @@
           "sid",
           "status"
         ],
-        "pathType": "instance",
         "dependentProperties": {
-          "media/v1/player_streamer_timed_metadata": "{player_streamer_sid: sid}",
+          "timed_metadata": "{player_streamer_sid: sid}",
           "playback_grant": "{sid: sid}",
-          "media/v1/player_streamer_recording_playback_grant": "{sid: sid}"
+          "recording_playback_grant": "{sid: sid}"
         },
-        "mountName": "player_streamer"
+        "mountName": "player_streamer",
+        "pathType": "instance"
       },
       "get": {
         "description": "Returns a single PlayerStreamer resource identified by a SID.",
@@ -1021,6 +1336,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.player_streamer"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "status": "created",
+                      "video": true,
+                      "sid": "VJcafebabecafebabecafebabecafebabe",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": null,
+                      "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe",
+                      "max_duration": 300,
+                      "links": {
+                        "timed_metadata": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/TimedMetadata",
+                        "playback_grant": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1032,10 +1368,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPlayerStreamer",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchPlayerStreamer"
       },
       "post": {
         "description": "Updates a PlayerStreamer resource identified by a SID.",
@@ -1059,6 +1392,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.player_streamer"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:01:00Z",
+                      "status": "ended",
+                      "video": true,
+                      "sid": "VJcafebabecafebabecafebabecafebabe",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": "ended-via-api",
+                      "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe",
+                      "max_duration": 300,
+                      "links": {
+                        "timed_metadata": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/TimedMetadata",
+                        "playback_grant": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1071,9 +1425,6 @@
           }
         ],
         "operationId": "UpdatePlayerStreamer",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1090,6 +1441,13 @@
                 "required": [
                   "Status"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "Status": "ended"
+                  }
+                }
               }
             }
           }
@@ -1108,13 +1466,13 @@
           "sid",
           "status"
         ],
-        "pathType": "list",
         "dependentProperties": {
-          "media/v1/player_streamer_timed_metadata": "{player_streamer_sid: sid}",
+          "timed_metadata": "{player_streamer_sid: sid}",
           "playback_grant": "{sid: sid}",
-          "media/v1/player_streamer_recording_playback_grant": "{sid: sid}"
+          "recording_playback_grant": "{sid: sid}"
         },
-        "mountName": "player_streamer"
+        "mountName": "player_streamer",
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -1124,6 +1482,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.player_streamer"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "status": "created",
+                      "video": true,
+                      "sid": "VJcafebabecafebabecafebabecafebabe",
+                      "status_callback": "http://www.example.com",
+                      "status_callback_method": "POST",
+                      "ended_reason": null,
+                      "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe",
+                      "max_duration": 300,
+                      "links": {
+                        "timed_metadata": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/TimedMetadata",
+                        "playback_grant": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1136,9 +1515,6 @@
           }
         ],
         "operationId": "CreatePlayerStreamer",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1173,6 +1549,11 @@
                     "description": "The maximum time, in seconds, that the PlayerStreamer is active (`created` or `started`) before automatically ends. The default value is 300 seconds, and the maximum value is 90000 seconds. Once this maximum duration is reached, Twilio will end the PlayerStreamer, regardless of whether media is still streaming."
                   }
                 }
+              },
+              "examples": {
+                "create": {
+                  "value": {}
+                }
               }
             }
           }
@@ -1188,6 +1569,17 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/player_streamer_enum_order"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "asc"
+              },
+              "readItems": {
+                "value": "desc"
+              },
+              "readItemsPageLargerThanMax": {
+                "value": "desc"
+              }
             }
           },
           {
@@ -1197,6 +1589,17 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/player_streamer_enum_status"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "started"
+              },
+              "readItems": {
+                "value": "ended"
+              },
+              "readItemsPageLargerThanMax": {
+                "value": "ended"
+              }
             }
           },
           {
@@ -1242,16 +1645,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1260,18 +1665,96 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/PlayerStreamers?Status=started&Order=asc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/PlayerStreamers?Status=started&Order=asc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "player_streamers"
+                      },
+                      "player_streamers": []
+                    }
+                  },
+                  "readItems": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 10,
+                        "first_page_url": "https://media.twilio.com/v1/PlayerStreamers?Status=ended&Order=desc&PageSize=10&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/PlayerStreamers?Status=ended&Order=desc&PageSize=10&Page=0",
+                        "next_page_url": null,
+                        "key": "player_streamers"
+                      },
+                      "player_streamers": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:01:00Z",
+                          "status": "ended",
+                          "video": true,
+                          "sid": "VJcafebabecafebabecafebabecafebabe",
+                          "status_callback": "http://www.example.com",
+                          "status_callback_method": "POST",
+                          "ended_reason": "ended-via-api",
+                          "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe",
+                          "max_duration": 300,
+                          "links": {
+                            "timed_metadata": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/TimedMetadata",
+                            "playback_grant": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "readItemsPageLargerThanMax": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 100,
+                        "first_page_url": "https://media.twilio.com/v1/PlayerStreamers?Status=ended&Order=desc&PageSize=100&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://media.twilio.com/v1/PlayerStreamers?Status=ended&Order=desc&PageSize=100&Page=0",
+                        "next_page_url": null,
+                        "key": "player_streamers"
+                      },
+                      "player_streamers": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:01:00Z",
+                          "status": "ended",
+                          "video": true,
+                          "sid": "VJcafebabecafebabecafebabecafebabe",
+                          "status_callback": "http://www.example.com",
+                          "status_callback_method": "POST",
+                          "ended_reason": "ended-via-api",
+                          "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe",
+                          "max_duration": 300,
+                          "links": {
+                            "timed_metadata": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/TimedMetadata",
+                            "playback_grant": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant"
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -1285,10 +1768,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListPlayerStreamer",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListPlayerStreamer"
       }
     },
     "/v1/PlayerStreamers/{Sid}/PlaybackGrant": {
@@ -1300,8 +1780,8 @@
       "description": "A PlaybackGrant resource allows developers to generate a grant to initialize the Twilio Live Player SDK and connect to a livestream.",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "instance",
-        "parent": "/PlayerStreamers/{Sid}"
+        "parent": "/PlayerStreamers/{Sid}",
+        "pathType": "instance"
       },
       "post": {
         "description": "",
@@ -1325,6 +1805,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.player_streamer.player_streamer_playback_grant"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "VJcafebabecafebabecafebabecafebabe",
+                      "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "grant": {
+                        "playbackUrl": "http://video.net/123/blabla?token=123",
+                        "playerStreamerSid": "VJcafebabecafebabecafebabecafebabe",
+                        "requestCredentials": null
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1337,9 +1832,6 @@
           }
         ],
         "operationId": "CreatePlayerStreamerPlaybackGrant",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1354,6 +1846,14 @@
                   "AccessControlAllowOrigin": {
                     "type": "string",
                     "description": "The full origin URL where the livestream can be streamed. If this is not provided, it can be streamed from any domain."
+                  }
+                }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "Ttl": 100,
+                    "AccessControlAllowOrigin": "youraccess_control_allow_origin.com"
                   }
                 }
               }
@@ -1383,6 +1883,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/media.v1.player_streamer.player_streamer_playback_grant"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "url": "https://media.twilio.com/v1/PlayerStreamers/VJcafebabecafebabecafebabecafebabe/PlaybackGrant",
+                      "sid": "VJcafebabecafebabecafebabecafebabe",
+                      "grant": {
+                        "playbackUrl": "http://video.net/123/blabla?token=123",
+                        "playerStreamerSid": "VJcafebabecafebabecafebabecafebabe",
+                        "requestCredentials": null
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1394,26 +1909,13 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPlayerStreamerPlaybackGrant",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchPlayerStreamerPlaybackGrant"
       }
     }
   },
   "servers": [
     {
       "url": "https://media.twilio.com"
-    }
-  ],
-  "x-maturity": [
-    {
-      "name": "GA",
-      "description": "This product is Generally Available."
-    },
-    {
-      "name": "Preview",
-      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact help@twilio.com."
     }
   ]
 }

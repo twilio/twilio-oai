@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     monitor.v1.alert:
       type: object
@@ -325,10 +329,6 @@ components:
           format: uri-map
           nullable: true
           description: The absolute URLs of related resources.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Monitor
   description: This is the public Twilio REST API.
@@ -340,7 +340,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Alerts/{Sid}:
@@ -372,12 +372,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/monitor.v1.alert-instance'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    alert_text: alert_text
+                    api_version: '2010-04-01'
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_generated: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    error_code: error_code
+                    log_level: log_level
+                    more_info: more_info
+                    request_method: GET
+                    request_url: http://www.example.com
+                    request_variables: request_variables
+                    resource_sid: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    response_body: response_body
+                    response_headers: response_headers
+                    request_headers: request_headers
+                    sid: NOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://monitor.twilio.com/v1/Alerts/NOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    service_sid: PNe2cd757cd5257b0217a447933a0290d2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAlert
-      x-maturity:
-      - GA
   /v1/Alerts:
     servers:
     - url: https://monitor.twilio.com
@@ -398,6 +418,11 @@ paths:
           `notice`, or `debug`.'
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: log_level
+          readFull:
+            value: log_level
       - name: StartDate
         in: query
         description: Only include alerts that occurred on or after this date and time.
@@ -406,6 +431,11 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readEmpty:
+            value: '2016-01-01'
+          readFull:
+            value: '2016-01-01'
       - name: EndDate
         in: query
         description: Only include alerts that occurred on or before this date and
@@ -414,6 +444,11 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readEmpty:
+            value: '2016-01-01'
+          readFull:
+            value: '2016-01-01'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -446,34 +481,70 @@ paths:
                     items:
                       $ref: '#/components/schemas/monitor.v1.alert'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    alerts: []
+                    meta:
+                      first_page_url: https://monitor.twilio.com/v1/Alerts?LogLevel=log_level&StartDate=2016-01-01&EndDate=2016-01-01&PageSize=50&Page=0
+                      key: alerts
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://monitor.twilio.com/v1/Alerts?LogLevel=log_level&StartDate=2016-01-01&EndDate=2016-01-01&PageSize=50&Page=0
+                readFull:
+                  value:
+                    alerts:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      alert_text: alert_text
+                      api_version: '2010-04-01'
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_generated: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:00:00Z'
+                      error_code: error_code
+                      log_level: log_level
+                      more_info: more_info
+                      request_method: GET
+                      request_url: http://www.example.com
+                      resource_sid: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: NOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://monitor.twilio.com/v1/Alerts/NOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      service_sid: PNe2cd757cd5257b0217a447933a0290d2
+                    meta:
+                      first_page_url: https://monitor.twilio.com/v1/Alerts?LogLevel=log_level&StartDate=2016-01-01&EndDate=2016-01-01&PageSize=50&Page=0
+                      key: alerts
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://monitor.twilio.com/v1/Alerts?LogLevel=log_level&StartDate=2016-01-01&EndDate=2016-01-01&PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAlert
-      x-maturity:
-      - GA
   /v1/Events/{Sid}:
     servers:
     - url: https://monitor.twilio.com
@@ -503,12 +574,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/monitor.v1.event'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    actor_sid: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    actor_type: account
+                    description: null
+                    event_data:
+                      friendly_name:
+                        previous: SubAccount Created at 2014-10-03 09:48 am
+                        updated: Mr. Friendly
+                    event_date: '2014-10-03T16:48:25Z'
+                    event_type: account.updated
+                    links:
+                      actor: https://api.twilio.com/2010-04-01/Accounts/USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      resource: https://api.twilio.com/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    resource_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    resource_type: account
+                    sid: AEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source: api
+                    source_ip_address: 10.86.6.250
+                    url: https://monitor.twilio.com/v1/Events/AEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEvent
-      x-maturity:
-      - GA
   /v1/Events:
     servers:
     - url: https://monitor.twilio.com
@@ -532,11 +623,21 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^US[0-9a-fA-F]{32}$
+        examples:
+          readFull:
+            value: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          readEmpty:
+            value: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: EventType
         in: query
         description: Only include events of this [Event Type](https://www.twilio.com/docs/usage/monitor-events#event-types).
         schema:
           type: string
+        examples:
+          readFull:
+            value: event_type
+          readEmpty:
+            value: event_type
       - name: ResourceSid
         in: query
         description: Only include events that refer to this resource. Useful for discovering
@@ -546,6 +647,11 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^[a-zA-Z]{2}[0-9a-fA-F]{32}$
+        examples:
+          readFull:
+            value: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          readEmpty:
+            value: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: SourceIpAddress
         in: query
         description: Only include events that originated from this IP address. Useful
@@ -553,6 +659,11 @@ paths:
           Console.
         schema:
           type: string
+        examples:
+          readFull:
+            value: source_ip_address
+          readEmpty:
+            value: source_ip_address
       - name: StartDate
         in: query
         description: Only include events that occurred on or after this date. Specify
@@ -560,6 +671,11 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readFull:
+            value: '2008-01-02'
+          readEmpty:
+            value: '2008-01-02'
       - name: EndDate
         in: query
         description: Only include events that occurred on or before this date. Specify
@@ -567,6 +683,11 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readFull:
+            value: '2008-01-02'
+          readEmpty:
+            value: '2008-01-02'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -599,36 +720,73 @@ paths:
                     items:
                       $ref: '#/components/schemas/monitor.v1.event'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    events:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      actor_sid: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      actor_type: account
+                      description: null
+                      event_data:
+                        friendly_name:
+                          previous: SubAccount Created at 2014-10-03 09:48 am
+                          updated: Mr. Friendly
+                      event_date: '2014-10-03T16:48:25Z'
+                      event_type: account.updated
+                      links:
+                        actor: https://api.twilio.com/2010-04-01/Accounts/USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        resource: https://api.twilio.com/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      resource_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      resource_type: account
+                      sid: AEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      source: api
+                      source_ip_address: 10.86.6.250
+                      url: https://monitor.twilio.com/v1/Events/AEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      first_page_url: https://monitor.twilio.com/v1/Events?PageSize=50&Page=0
+                      key: events
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://monitor.twilio.com/v1/Events?PageSize=50&Page=0
+                readEmpty:
+                  value:
+                    events: []
+                    meta:
+                      first_page_url: https://monitor.twilio.com/v1/Events?PageSize=50&Page=0
+                      key: events
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://monitor.twilio.com/v1/Events?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEvent
-      x-maturity:
-      - GA
 servers:
 - url: https://monitor.twilio.com
-x-maturity:
-- name: GA
-  description: This product is Generally Available.

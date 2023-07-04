@@ -1,5 +1,24 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
+    conductor_flow_enum_flow_type:
+      type: string
+      enum:
+      - StartInboundMessaging
+      - StartOutboundVoice
+      - AcceptInvite
+      - EndInboundMessaging
+      - EndOutboundVoice
+    conductor_flow_enum_name:
+      type: string
+      enum:
+      - AcceptInviteFlow
+      - EndInboundMessagingFlow
+      - StartInboundMessagingFlow
+      - StartOutboundVoiceFlow
     flex.v2.web_channel:
       type: object
       properties:
@@ -17,10 +36,6 @@ components:
           description: The unique string representing the User created and should
             be authorized to participate in the Conversation. For more details, see
             [User Identity & Access Tokens](https://www.twilio.com/docs/conversations/identity).
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Flex
   description: This is the public Twilio REST API.
@@ -32,19 +47,19 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v2/WebChats:
     servers:
     - url: https://flex-api.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - conversation_sid
-      pathType: list
       mountName: web_channels
       className: web_channels
+      pathType: list
     post:
       description: ''
       responses:
@@ -53,12 +68,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/flex.v2.web_channel'
+              examples:
+                create:
+                  value:
+                    conversation_sid: CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    identity: seinfeld
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateWebChannel
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -88,8 +106,11 @@ paths:
                   description: The pre-engagement data.
               required:
               - AddressSid
+            examples:
+              create:
+                value:
+                  AddressSid: IGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  ChatFriendlyName: LoquaciousLarry
+                  CustomerFriendlyName: LarryDavid
 servers:
 - url: https://flex-api.twilio.com
-x-maturity:
-- name: GA
-  description: This product is Generally Available.

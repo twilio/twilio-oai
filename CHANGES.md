@@ -1,5 +1,32 @@
 twilio-oai changelog
 ====================
+[2023-07-04] Version 2.0.0-rc.1
+-------------------------------
+**Api**
+- Added `content_sid` as conditional parameter
+- Removed `content_sid` as optional field **(breaking change)**
+
+**Insights**
+- Added `annotation` to list summary output
+
+**Lookups**
+- Add `reassigned_number` package to the lookup response
+
+**Numbers**
+- Remove Sms capability property from HNO creation under version `/v2` of HNO API. **(breaking change)**
+- Update required properties in LOA creation under version `/v2` of Authorization document API. **(breaking change)**
+- Add hosted_number_order under version `/v2`.
+- Update properties in Porting and Bulk Porting APIs. **(breaking change)**
+- Added bulk Portability API under version `/v1`.
+- Added Portability API under version `/v1`.
+
+**Taskrouter**
+- Add api to fetch task queue statistics for multiple TaskQueues
+
+**Twiml**
+- Add Google Voices and languages
+
+
 [2023-07-04] Version 2.0.0-rc.0
 ---------------------------
 - rc changes
