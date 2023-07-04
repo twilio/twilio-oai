@@ -1,6 +1,6 @@
 twilio-oai changelog
 ====================
-[2023-07-04] Version 2.0.0-rc
+[2023-07-04] Version 2.0.0-rc.0
 ---------------------------
 - rc changes
 
