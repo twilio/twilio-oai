@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     autopilot.v1.assistant:
       type: object
@@ -869,10 +873,6 @@ components:
           type: string
           nullable: true
           description: The method used when calling the webhook's URL.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Autopilot
   description: This is the public Twilio REST API.
@@ -884,19 +884,18 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.43.2
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Assistants/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: instance
       dependentProperties:
         field_type: '{assistant_sid: sid}'
         task: '{assistant_sid: sid}'
@@ -906,6 +905,7 @@ paths:
         defaults: '{assistant_sid: sid}'
         dialogue: '{assistant_sid: sid}'
         webhook: '{assistant_sid: sid}'
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -922,12 +922,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2017-07-04T08:34:00Z'
+                    date_updated: '2017-07-04T08:34:00Z'
+                    friendly_name: so so friendly
+                    latest_model_build_sid: null
+                    log_queries: true
+                    development_stage: in-development
+                    needs_model_build: false
+                    sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: so-so-unique
+                    links:
+                      field_types: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes
+                      tasks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks
+                      model_builds: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds
+                      queries: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries
+                      style_sheet: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
+                      defaults: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
+                      dialogues: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Dialogues
+                      webhooks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    callback_url: https://example.com/callback_url
+                    callback_events: model_build_completed model_build_failed
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAssistant
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -944,12 +967,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2017-07-04T08:34:00Z'
+                    date_updated: '2017-07-04T08:34:00Z'
+                    friendly_name: so so friendly
+                    latest_model_build_sid: null
+                    log_queries: true
+                    development_stage: in-development
+                    needs_model_build: false
+                    sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: so-so-unique
+                    links:
+                      field_types: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes
+                      tasks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks
+                      model_builds: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds
+                      queries: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries
+                      style_sheet: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
+                      defaults: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
+                      dialogues: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Dialogues
+                      webhooks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    callback_url: https://example.com/callback_url
+                    callback_events: model_build_completed model_build_failed
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateAssistant
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -991,6 +1037,17 @@ paths:
                 DevelopmentStage:
                   type: string
                   description: A string describing the state of the assistant.
+            examples:
+              update:
+                value:
+                  FriendlyName: so so friendly
+                  UniqueName: so-so-unique
+                  LogQueries: true
+                  DevelopmentStage: in-development
+                  CallbackUrl: https://example.com/callback_url
+                  CallbackEvents: model_build_completed model_build_failed
+                  StyleSheet: '{}'
+                  Defaults: '{}'
     delete:
       description: ''
       parameters:
@@ -1007,18 +1064,15 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAssistant
-      x-maturity:
-      - Preview
   /v1/Assistants:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: list
       dependentProperties:
         field_type: '{assistant_sid: sid}'
         task: '{assistant_sid: sid}'
@@ -1028,6 +1082,7 @@ paths:
         defaults: '{assistant_sid: sid}'
         dialogue: '{assistant_sid: sid}'
         webhook: '{assistant_sid: sid}'
+      pathType: list
     get:
       description: ''
       parameters:
@@ -1063,34 +1118,77 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    assistants: []
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants?PageSize=50&Page=0
+                      key: assistants
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants?PageSize=50&Page=0
+                readFull:
+                  value:
+                    assistants:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2017-07-04T08:34:00Z'
+                      date_updated: '2017-07-04T08:34:00Z'
+                      friendly_name: so so friendly
+                      latest_model_build_sid: null
+                      log_queries: true
+                      development_stage: in-development
+                      needs_model_build: false
+                      sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      unique_name: so-so-unique
+                      links:
+                        field_types: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes
+                        tasks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks
+                        model_builds: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds
+                        queries: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries
+                        style_sheet: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
+                        defaults: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
+                        dialogues: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Dialogues
+                        webhooks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      callback_url: https://example.com/callback_url
+                      callback_events: model_build_completed model_build_failed
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants?PageSize=50&Page=0
+                      key: assistants
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAssistant
-      x-maturity:
-      - Preview
     post:
       description: ''
       responses:
@@ -1099,12 +1197,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2017-07-04T08:34:00Z'
+                    date_updated: '2017-07-04T08:34:00Z'
+                    friendly_name: so so friendly
+                    latest_model_build_sid: null
+                    log_queries: true
+                    development_stage: in-development
+                    needs_model_build: false
+                    sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: so-so-unique
+                    links:
+                      field_types: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes
+                      tasks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks
+                      model_builds: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds
+                      queries: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries
+                      style_sheet: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
+                      defaults: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
+                      dialogues: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Dialogues
+                      webhooks: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    callback_url: https://example.com/callback_url
+                    callback_events: model_build_completed model_build_failed
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAssistant
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1144,16 +1265,26 @@ paths:
                     tasks](https://www.twilio.com/docs/autopilot/api/assistant/defaults)
                     for various scenarios, including initiation actions and fallback
                     tasks.
+            examples:
+              create:
+                value:
+                  FriendlyName: so so friendly
+                  UniqueName: so-so-unique
+                  LogQueries: true
+                  CallbackUrl: https://example.com/callback_url
+                  CallbackEvents: model_build_completed model_build_failed
+                  StyleSheet: '{}'
+                  Defaults: '{}'
   /v1/Assistants/{AssistantSid}/Defaults:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - data
-      pathType: instance
       parent: /Assistants/{Sid}
       className: defaults
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1170,12 +1301,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.defaults'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: {}
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDefaults
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -1192,12 +1328,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.defaults'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Defaults
+                    data: {}
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateDefaults
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1208,16 +1349,20 @@ paths:
                 Defaults:
                   description: A JSON string that describes the default task links
                     for the `assistant_initiation`, `collect`, and `fallback` situations.
+            examples:
+              update:
+                value:
+                  Defaults: '{}'
   /v1/Assistants/{AssistantSid}/Dialogues/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - data
-      pathType: instance
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1241,33 +1386,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.dialogue'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Dialogues/UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: {}
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDialogue
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Dialogues:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - data
-      pathType: list
       parent: /Assistants/{Sid}
+      pathType: list
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - field_type
-      pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1298,12 +1449,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
+              examples:
+                fetch:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields/UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: unique_name
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    field_type: field_type
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchField
-      x-maturity:
-      - Preview
     delete:
       description: ''
       parameters:
@@ -1334,19 +1495,17 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteField
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Fields:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - field_type
-      pathType: list
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -1396,34 +1555,64 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    fields: []
+                    meta:
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields?PageSize=50&Page=0
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields?PageSize=50&Page=0
+                      key: fields
+                      next_page_url: null
+                      previous_page_url: null
+                      page_size: 50
+                readFull:
+                  value:
+                    fields:
+                    - url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields/UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      unique_name: unique_name
+                      date_updated: '2015-07-30T20:00:00Z'
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      sid: UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      field_type: field_type
+                    meta:
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields?PageSize=50&Page=0
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields?PageSize=50&Page=0
+                      key: fields
+                      next_page_url: null
+                      previous_page_url: null
+                      page_size: 50
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListField
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -1447,12 +1636,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.field'
+              examples:
+                create:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields/UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: unique_name
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    field_type: field_type
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateField
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1474,19 +1673,24 @@ paths:
               required:
               - FieldType
               - UniqueName
+            examples:
+              create:
+                value:
+                  UniqueName: unique_name
+                  FieldType: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/Assistants/{AssistantSid}/FieldTypes/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: instance
       dependentProperties:
         field_value: '{assistant_sid: assistant_sid, field_type_sid: sid}'
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1510,12 +1714,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+              examples:
+                fetch:
+                  value:
+                    unique_name: unique_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    links:
+                      field_values: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues
+                    sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchFieldType
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -1539,12 +1754,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+              examples:
+                update:
+                  value:
+                    unique_name: unique_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    links:
+                      field_values: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues
+                    sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateFieldType
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1562,6 +1788,11 @@ paths:
                     the resource. It can be used as an alternative to the `sid` in
                     the URL path to address the resource. The first 64 characters
                     must be unique.
+            examples:
+              update:
+                value:
+                  UniqueName: unique_name
+                  FriendlyName: friendly_name
     delete:
       description: ''
       parameters:
@@ -1585,21 +1816,19 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteFieldType
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/FieldTypes:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: list
       dependentProperties:
         field_value: '{assistant_sid: assistant_sid, field_type_sid: sid}'
       parent: /Assistants/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -1642,34 +1871,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes?PageSize=50&Page=0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      page: 0
+                      page_size: 50
+                      next_page_url: null
+                      key: field_types
+                    field_types: []
+                readFull:
+                  value:
+                    meta:
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes?PageSize=50&Page=0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      page: 0
+                      page_size: 50
+                      next_page_url: null
+                      key: field_types
+                    field_types:
+                    - unique_name: unique_name
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      friendly_name: friendly_name
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_updated: '2015-07-30T20:00:00Z'
+                      links:
+                        field_values: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues
+                      sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListFieldType
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -1686,12 +1946,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.field_type'
+              examples:
+                create:
+                  value:
+                    unique_name: unique_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    links:
+                      field_values: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues
+                    sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateFieldType
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1712,17 +1983,22 @@ paths:
                     long.
               required:
               - UniqueName
+            examples:
+              create:
+                value:
+                  UniqueName: unique_name
+                  FriendlyName: friendly_name
   /v1/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - value
       - language
-      pathType: instance
       parent: /Assistants/{AssistantSid}/FieldTypes/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1753,12 +2029,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues/UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    field_type_sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    language: language
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    value: value
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    synonym_of: null
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchFieldValue
-      x-maturity:
-      - Preview
     delete:
       description: ''
       parameters:
@@ -1789,19 +2076,17 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteFieldValue
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/FieldTypes/{FieldTypeSid}/FieldValues:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - value
       - language
-      pathType: list
       parent: /Assistants/{AssistantSid}/FieldTypes/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -1826,6 +2111,11 @@ paths:
           `en-US`'
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: language
+          readFull:
+            value: language
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1858,34 +2148,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    field_values: []
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues?Language=language&PageSize=50&Page=0
+                      page_size: 50
+                      previous_page_url: null
+                      key: field_values
+                      page: 0
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues?Language=language&PageSize=50&Page=0
+                readFull:
+                  value:
+                    field_values:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues/UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      field_type_sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      language: language
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      value: value
+                      date_updated: '2015-07-30T20:00:00Z'
+                      date_created: '2015-07-30T20:00:00Z'
+                      sid: UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      synonym_of: UCbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues?Language=language&PageSize=50&Page=0
+                      page_size: 50
+                      previous_page_url: null
+                      key: field_values
+                      page: 0
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues?Language=language&PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListFieldValue
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -1908,12 +2229,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.field_type.field_value'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldTypes/UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/FieldValues/UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    field_type_sid: UBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    language: language
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    value: value
+                    date_updated: '2015-07-30T20:00:00Z'
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    synonym_of: UCbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateFieldValue
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1936,18 +2268,24 @@ paths:
               required:
               - Language
               - Value
+            examples:
+              create:
+                value:
+                  Value: value
+                  Language: language
+                  SynonymOf: UCbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
   /v1/Assistants/{AssistantSid}/ModelBuilds/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - status
       - date_created
-      pathType: instance
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -1971,12 +2309,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds/UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: enqueued
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: unique_name
+                    build_duration: null
+                    error_code: null
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchModelBuild
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2000,12 +2349,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds/UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: completed
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: unique_name
+                    build_duration: 100
+                    error_code: null
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateModelBuild
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2019,6 +2379,10 @@ paths:
                     the resource. This value must be a unique string of no more than
                     64 characters. It can be used as an alternative to the `sid` in
                     the URL path to address the resource.
+            examples:
+              update:
+                value:
+                  UniqueName: unique_name
     delete:
       description: ''
       parameters:
@@ -2042,20 +2406,18 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteModelBuild
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/ModelBuilds:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - status
       - date_created
-      pathType: list
       parent: /Assistants/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -2098,34 +2460,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      page: 0
+                      key: model_builds
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds?PageSize=50&Page=0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds?PageSize=50&Page=0
+                      next_page_url: null
+                      previous_page_url: null
+                      page_size: 50
+                    model_builds: []
+                readFull:
+                  value:
+                    meta:
+                      page: 0
+                      key: model_builds
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds?PageSize=50&Page=0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds?PageSize=50&Page=0
+                      next_page_url: null
+                      previous_page_url: null
+                      page_size: 50
+                    model_builds:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_updated: '2015-07-30T20:00:00Z'
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds/UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: failed
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      unique_name: unique_name
+                      build_duration: null
+                      error_code: 23001
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListModelBuild
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2142,12 +2535,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.model_build'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ModelBuilds/UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: enqueued
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: unique_name
+                    build_duration: null
+                    error_code: null
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateModelBuild
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2166,18 +2570,23 @@ paths:
                     the new resource. This value must be a unique string of no more
                     than 64 characters. It can be used as an alternative to the `sid`
                     in the URL path to address the resource.
+            examples:
+              create:
+                value:
+                  UniqueName: unique_name
+                  StatusCallback: http://www.example.com
   /v1/Assistants/{AssistantSid}/Queries/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - query
       - status
       - language
-      pathType: instance
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2201,12 +2610,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.query'
+              examples:
+                fetch:
+                  value:
+                    language: language
+                    date_created: '2015-07-30T20:00:00Z'
+                    model_build_sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    query: query
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: status
+                    sample_sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results:
+                      task: name
+                      fields:
+                      - name: name
+                        value: value
+                        type: type
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries/UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source_channel: voice
+                    dialogue_sid: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchQuery
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2230,12 +2659,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.query'
+              examples:
+                update:
+                  value:
+                    language: language
+                    date_created: '2015-07-30T20:00:00Z'
+                    model_build_sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    query: query
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: status
+                    sample_sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results:
+                      task: name
+                      fields:
+                      - name: name
+                        value: value
+                        type: type
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries/UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source_channel: sms
+                    dialogue_sid: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateQuery
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2254,6 +2703,11 @@ paths:
                   type: string
                   description: 'The new status of the resource. Can be: `pending-review`,
                     `reviewed`, or `discarded`'
+            examples:
+              update:
+                value:
+                  Status: status
+                  SampleSid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     delete:
       description: ''
       parameters:
@@ -2277,20 +2731,18 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteQuery
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Queries:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - query
       - status
       - language
-      pathType: list
       parent: /Assistants/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -2308,18 +2760,33 @@ paths:
           For example: `en-US`.'
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: language
+          readFull:
+            value: language
       - name: ModelBuild
         in: query
         description: The SID or unique name of the [Model Build](https://www.twilio.com/docs/autopilot/api/model-build)
           to be queried.
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          readFull:
+            value: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: Status
         in: query
         description: 'The status of the resources to read. Can be: `pending-review`,
           `reviewed`, or `discarded`'
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: status
+          readFull:
+            value: status
       - name: DialogueSid
         in: query
         description: The SID of the [Dialogue](https://www.twilio.com/docs/autopilot/api/dialogue).
@@ -2328,6 +2795,11 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^UK[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          readFull:
+            value: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2360,34 +2832,74 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.query'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    queries: []
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries?Status=status&ModelBuild=UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DialogueSid=UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Language=language&PageSize=50&Page=0
+                      page: 0
+                      key: queries
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries?Status=status&ModelBuild=UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DialogueSid=UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Language=language&PageSize=50&Page=0
+                      page_size: 50
+                readFull:
+                  value:
+                    queries:
+                    - language: language
+                      date_created: '2015-07-30T20:00:00Z'
+                      model_build_sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      query: query
+                      date_updated: '2015-07-30T20:00:00Z'
+                      status: status
+                      sample_sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      results:
+                        task: name
+                        fields:
+                        - name: name
+                          value: value
+                          type: type
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries/UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      source_channel: null
+                      dialogue_sid: UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      previous_page_url: null
+                      next_page_url: null
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries?Status=status&ModelBuild=UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DialogueSid=UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Language=language&PageSize=50&Page=0
+                      page: 0
+                      key: queries
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries?Status=status&ModelBuild=UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&DialogueSid=UKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&Language=language&PageSize=50&Page=0
+                      page_size: 50
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListQuery
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2404,12 +2916,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.query'
+              examples:
+                create:
+                  value:
+                    language: language
+                    date_created: '2015-07-30T20:00:00Z'
+                    model_build_sid: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    query: query
+                    date_updated: '2015-07-30T20:00:00Z'
+                    status: status
+                    sample_sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results:
+                      task: name
+                      fields:
+                      - name: name
+                        value: value
+                        type: type
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Queries/UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    source_channel: voice
+                    dialogue_sid: null
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateQuery
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2440,18 +2972,25 @@ paths:
               required:
               - Language
               - Query
+            examples:
+              create:
+                value:
+                  Language: language
+                  Query: query
+                  Tasks: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,UDbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                  ModelBuild: UGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/Assistants/Restore:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - account_sid
       - sid
       - unique_name
       - friendly_name
-      pathType: list
       mountName: restore_assistant
+      pathType: list
     post:
       description: ''
       responses:
@@ -2460,12 +2999,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.restore_assistant'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2017-07-04T08:34:00Z'
+                    date_updated: '2017-07-04T08:34:00Z'
+                    unique_name: so-so-unique
+                    friendly_name: so so friendly
+                    needs_model_build: false
+                    latest_model_build_sid: null
+                    log_queries: true
+                    development_stage: in-development
+                    callback_url: https://example.com/callback_url
+                    callback_events: model_build_completed model_build_failed
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateRestoreAssistant
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2479,18 +3031,22 @@ paths:
                     the Assistant resource to restore.
               required:
               - Assistant
+            examples:
+              update:
+                value:
+                  Assistant: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - tagged_text
       - language
       - source_channel
-      pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2524,12 +3080,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+              examples:
+                fetch:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples/UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    language: language
+                    tagged_text: tagged_text
+                    date_updated: '2015-07-30T20:00:00Z'
+                    source_channel: null
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSample
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2563,12 +3130,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+              examples:
+                update:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples/UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    language: language
+                    tagged_text: tagged_text
+                    date_updated: '2015-07-30T20:00:00Z'
+                    source_channel: alexa
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSample
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2590,6 +3168,11 @@ paths:
                   description: 'The communication channel from which the sample was
                     captured. Can be: `voice`, `sms`, `chat`, `alexa`, `google-assistant`,
                     `slack`, or null if not included.'
+            examples:
+              update:
+                value:
+                  Language: language
+                  TaggedText: tagged_text
     delete:
       description: ''
       parameters:
@@ -2623,20 +3206,18 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSample
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Samples:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - tagged_text
       - language
       - source_channel
-      pathType: list
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -2660,6 +3241,11 @@ paths:
           string that specifies the language used for the sample. For example: `en-US`.'
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: language
+          readFull:
+            value: language
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2692,34 +3278,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    samples: []
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples?Language=language&PageSize=50&Page=0
+                      previous_page_url: null
+                      key: samples
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples?Language=language&PageSize=50&Page=0
+                      page: 0
+                      page_size: 50
+                readFull:
+                  value:
+                    samples:
+                    - url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples/UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      language: language
+                      tagged_text: tagged_text
+                      date_updated: '2015-07-30T20:00:00Z'
+                      source_channel: sms
+                    meta:
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples?Language=language&PageSize=50&Page=0
+                      previous_page_url: null
+                      key: samples
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples?Language=language&PageSize=50&Page=0
+                      page: 0
+                      page_size: 50
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSample
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2743,12 +3360,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.sample'
+              examples:
+                create:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples/UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    language: language
+                    tagged_text: tagged_text
+                    date_updated: '2015-07-30T20:00:00Z'
+                    source_channel: alexa
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSample
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2773,15 +3401,21 @@ paths:
               required:
               - Language
               - TaggedText
+            examples:
+              create:
+                value:
+                  Language: language
+                  TaggedText: tagged_text
+                  SourceChannel: alexa
   /v1/Assistants/{AssistantSid}/StyleSheet:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - data
-      pathType: instance
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: Returns Style sheet JSON object for the Assistant
       parameters:
@@ -2798,12 +3432,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.style_sheet'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    data: {}
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchStyleSheet
-      x-maturity:
-      - Preview
     post:
       description: Updates the style sheet for an Assistant identified by `assistant_sid`.
       parameters:
@@ -2820,12 +3459,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.style_sheet'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/StyleSheet
+                    data: {}
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateStyleSheet
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2835,22 +3479,26 @@ paths:
               properties:
                 StyleSheet:
                   description: The JSON string that describes the style sheet object.
+            examples:
+              update:
+                value:
+                  StyleSheet: '{}'
   /v1/Assistants/{AssistantSid}/Tasks/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: instance
       dependentProperties:
         field: '{assistant_sid: assistant_sid, task_sid: sid}'
         sample: '{assistant_sid: assistant_sid, task_sid: sid}'
         task_actions: '{assistant_sid: assistant_sid, task_sid: sid}'
         task_statistics: '{assistant_sid: assistant_sid, task_sid: sid}'
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -2874,12 +3522,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task'
+              examples:
+                fetch:
+                  value:
+                    unique_name: unique_name
+                    links:
+                      fields: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields
+                      samples: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples
+                      task_actions: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Actions
+                      statistics: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Statistics
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    actions_url: https://example.com/actions_url
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTask
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -2903,12 +3566,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task'
+              examples:
+                update:
+                  value:
+                    unique_name: unique_name
+                    links:
+                      fields: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields
+                      samples: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples
+                      task_actions: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Actions
+                      statistics: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Statistics
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    actions_url: https://example.com/actions_url
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateTask
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2933,6 +3611,13 @@ paths:
                   type: string
                   format: uri
                   description: The URL from which the Assistant can fetch actions.
+            examples:
+              update:
+                value:
+                  FriendlyName: friendly_name
+                  UniqueName: unique_name
+                  Actions: '{}'
+                  ActionsUrl: https://example.com/actions_url
     delete:
       description: ''
       parameters:
@@ -2956,24 +3641,22 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteTask
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Tasks:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
       - friendly_name
-      pathType: list
       dependentProperties:
         field: '{assistant_sid: assistant_sid, task_sid: sid}'
         sample: '{assistant_sid: assistant_sid, task_sid: sid}'
         task_actions: '{assistant_sid: assistant_sid, task_sid: sid}'
         task_statistics: '{assistant_sid: assistant_sid, task_sid: sid}'
       parent: /Assistants/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -3016,34 +3699,69 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.task'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      key: tasks
+                      page_size: 50
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks?PageSize=50&Page=0
+                      previous_page_url: null
+                    tasks: []
+                readFull:
+                  value:
+                    meta:
+                      key: tasks
+                      page_size: 50
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks?PageSize=50&Page=0
+                      previous_page_url: null
+                    tasks:
+                    - unique_name: unique_name
+                      links:
+                        fields: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields
+                        samples: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples
+                        task_actions: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Actions
+                        statistics: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Statistics
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_updated: '2015-07-30T20:00:00Z'
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      actions_url: https://example.com/actions_url
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListTask
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -3060,12 +3778,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task'
+              examples:
+                create:
+                  value:
+                    unique_name: unique_name
+                    links:
+                      fields: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Fields
+                      samples: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Samples
+                      task_actions: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Actions
+                      statistics: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Statistics
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    actions_url: https://example.com/actions_url
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateTask
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3094,17 +3827,24 @@ paths:
                   description: The URL from which the Assistant can fetch actions.
               required:
               - UniqueName
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  UniqueName: unique_name
+                  Actions: '{}'
+                  ActionsUrl: https://example.com/actions_url
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Actions:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - data
-      pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
       mountName: task_actions
       className: task_actions
+      pathType: instance
     get:
       description: Returns JSON actions for the Task.
       parameters:
@@ -3129,12 +3869,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.task_actions'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDdddddddddddddddddddddddddddddddd
+                    data: {}
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDdddddddddddddddddddddddddddddddd/Actions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTaskActions
-      x-maturity:
-      - Preview
     post:
       description: Updates the actions of an Task identified by {TaskSid} or {TaskUniqueName}.
       parameters:
@@ -3159,12 +3905,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.task_actions'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDdddddddddddddddddddddddddddddddd
+                    data: {}
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDdddddddddddddddddddddddddddddddd/Actions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateTaskActions
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3175,17 +3927,21 @@ paths:
                 Actions:
                   description: The JSON string that specifies the [actions](https://www.twilio.com/docs/autopilot/actions)
                     that instruct the Assistant on how to perform the task.
+            examples:
+              update:
+                value:
+                  Actions: '{"actions":[{}]}'
   /v1/Assistants/{AssistantSid}/Tasks/{TaskSid}/Statistics:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - samples_count
       - fields_count
-      pathType: instance
       parent: /Assistants/{AssistantSid}/Tasks/{Sid}
       className: task_statistics
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -3209,16 +3965,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.task.task_statistics'
+              examples:
+                fetch:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Tasks/UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Statistics
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    task_sid: UDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    samples_count: 0
+                    fields_count: 0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTaskStatistics
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Webhooks/{Sid}:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
@@ -3226,8 +3989,8 @@ paths:
       - events
       - wehbook_url
       - webhook_method
-      pathType: instance
       parent: /Assistants/{Sid}
+      pathType: instance
     get:
       description: ''
       parameters:
@@ -3251,12 +4014,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
+              examples:
+                fetch:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    unique_name: unique_name
+                    events: ondialogueend
+                    webhook_url: https://example.com/url
+                    webhook_method: POST
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchWebhook
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -3280,12 +4054,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
+              examples:
+                update:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    unique_name: unique_name
+                    events: ondialogueend
+                    webhook_url: https://example.com/url
+                    webhook_method: POST
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateWebhook
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3310,6 +4095,13 @@ paths:
                 WebhookMethod:
                   type: string
                   description: The method to be used when calling the webhook's URL.
+            examples:
+              update:
+                value:
+                  UniqueName: unique_name
+                  Events: ondialogueend
+                  WebhookUrl: https://example.com/url
+                  WebhookMethod: POST
     delete:
       description: ''
       parameters:
@@ -3333,12 +4125,10 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteWebhook
-      x-maturity:
-      - Preview
   /v1/Assistants/{AssistantSid}/Webhooks:
     servers:
     - url: https://autopilot.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
@@ -3346,8 +4136,8 @@ paths:
       - events
       - wehbook_url
       - webhook_method
-      pathType: list
       parent: /Assistants/{Sid}
+      pathType: list
     get:
       description: ''
       parameters:
@@ -3390,34 +4180,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      key: webhooks
+                      page_size: 50
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks?PageSize=50&Page=0
+                      previous_page_url: null
+                    webhooks: []
+                readFull:
+                  value:
+                    meta:
+                      key: webhooks
+                      page_size: 50
+                      next_page_url: null
+                      url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks?PageSize=50&Page=0
+                      page: 0
+                      first_page_url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks?PageSize=50&Page=0
+                      previous_page_url: null
+                    webhooks:
+                    - url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sid: UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_updated: '2015-07-30T20:00:00Z'
+                      assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      unique_name: unique_name
+                      events: ondialogueend
+                      webhook_url: https://example.com/url
+                      webhook_method: POST
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListWebhook
-      x-maturity:
-      - Preview
     post:
       description: ''
       parameters:
@@ -3434,12 +4255,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/autopilot.v1.assistant.webhook'
+              examples:
+                create:
+                  value:
+                    url: https://autopilot.twilio.com/v1/Assistants/UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: UMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_updated: '2015-07-30T20:00:00Z'
+                    assistant_sid: UAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    unique_name: unique_name
+                    events: ondialogueend
+                    webhook_url: https://example.com/url
+                    webhook_method: POST
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateWebhook
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3468,10 +4300,12 @@ paths:
               - UniqueName
               - Events
               - WebhookUrl
+            examples:
+              create:
+                value:
+                  UniqueName: unique_name
+                  Events: ondialogueend
+                  WebhookUrl: https://example.com/url
+                  WebhookMethod: POST
 servers:
 - url: https://autopilot.twilio.com
-x-maturity:
-- name: Preview
-  description: PLEASE NOTE that this is a Preview product that is subject to change.
-    Use it with caution. If you currently do not have developer preview access, please
-    contact help@twilio.com.

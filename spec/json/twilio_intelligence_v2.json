@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "intelligence.v2.transcript.media": {
         "type": "object",
@@ -382,12 +388,6 @@
           "unknown"
         ]
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -403,7 +403,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.43.2"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -413,15 +413,15 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "account_sid",
           "service_sid",
           "sid"
         ],
-        "pathType": "instance",
-        "parent": "/Transcripts/{Sid}"
+        "parent": "/Transcripts/{Sid}",
+        "pathType": "instance"
       },
       "get": {
         "description": "Get download URLs for media if possible",
@@ -444,6 +444,11 @@
             "description": "Grant access to PII Redacted/Unredacted Media. The default is `true` to access redacted media.",
             "schema": {
               "type": "boolean"
+            },
+            "examples": {
+              "fetchParams": {
+                "value": "True"
+              }
             }
           }
         ],
@@ -453,6 +458,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.transcript.media"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "media_url": "https://media.server.com/media.wav",
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media"
+                    }
+                  },
+                  "fetchParams": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "media_url": "https://media.server.com/media.wav",
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media"
+                    }
+                  }
                 }
               }
             },
@@ -464,10 +489,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchMedia",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchMedia"
       }
     },
     "/v2/Transcripts/{TranscriptSid}/OperatorResults": {
@@ -476,13 +498,13 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "operator_sid"
         ],
-        "pathType": "list",
-        "parent": "/Transcripts/{Sid}"
+        "parent": "/Transcripts/{Sid}",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of Operator Results for the given Transcript.",
@@ -505,6 +527,11 @@
             "description": "Grant access to PII redacted/unredacted Language Understanding operator. The default is True.",
             "schema": {
               "type": "boolean"
+            },
+            "examples": {
+              "readFull": {
+                "value": "True"
+              }
             }
           },
           {
@@ -550,16 +577,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -568,17 +597,64 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "operator_results": [],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "operator_results"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "operator_results": [
+                        {
+                          "operator_type": "conversation_classify",
+                          "name": "name",
+                          "operator_sid": "LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "extract_match": false,
+                          "match_probability": "0.05",
+                          "normalized_result": "normalized_result",
+                          "utterance_results": [
+                            {}
+                          ],
+                          "utterance_match": false,
+                          "predicted_label": "predicted_label",
+                          "predicted_probability": "0.05",
+                          "label_probabilities": {},
+                          "extract_results": {},
+                          "transcript_sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults/LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults?Redacted=True&PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults?Redacted=True&PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "operator_results"
                       }
                     }
                   }
@@ -593,10 +669,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListOperatorResult",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListOperatorResult"
       }
     },
     "/v2/Transcripts/{TranscriptSid}/OperatorResults/{OperatorSid}": {
@@ -605,13 +678,13 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "operator_sid"
         ],
-        "pathType": "instance",
-        "parent": "/Transcripts/{Sid}"
+        "parent": "/Transcripts/{Sid}",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a specific Operator Result for the given Transcript.",
@@ -646,6 +719,11 @@
             "description": "Grant access to PII redacted/unredacted Language Understanding operator. The default is True.",
             "schema": {
               "type": "boolean"
+            },
+            "examples": {
+              "fetch": {
+                "value": "False"
+              }
             }
           }
         ],
@@ -655,6 +733,28 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.transcript.operator_result"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "operator_type": "conversation_classify",
+                      "name": "name",
+                      "operator_sid": "LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "extract_match": false,
+                      "match_probability": "0.05",
+                      "normalized_result": "normalized_result",
+                      "utterance_results": [
+                        {}
+                      ],
+                      "utterance_match": false,
+                      "predicted_label": "predicted_label",
+                      "predicted_probability": "0.05",
+                      "label_probabilities": {},
+                      "extract_results": {},
+                      "transcript_sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults/LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -666,10 +766,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchOperatorResult",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchOperatorResult"
       }
     },
     "/v2/Transcripts/{TranscriptSid}/Sentences": {
@@ -678,7 +775,7 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -689,8 +786,8 @@
           "end_time",
           "confidence"
         ],
-        "pathType": "list",
-        "parent": "/Transcripts/{Sid}"
+        "parent": "/Transcripts/{Sid}",
+        "pathType": "list"
       },
       "get": {
         "description": "Get all Transcript Sentences by TranscriptSid",
@@ -713,6 +810,11 @@
             "description": "Grant access to PII Redacted/Unredacted Sentences. The default is `true` to access redacted sentences.",
             "schema": {
               "type": "boolean"
+            },
+            "examples": {
+              "readParams": {
+                "value": "True"
+              }
             }
           },
           {
@@ -758,16 +860,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -776,17 +880,65 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "sentences": [
+                        {
+                          "media_channel": 1,
+                          "sentence_index": 0,
+                          "start_time": null,
+                          "end_time": null,
+                          "transcript": "test test",
+                          "sid": "GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "confidence": null
+                        }
+                      ],
+                      "meta": {
+                        "key": "sentences",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?PageSize=50&Page=0",
+                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null
+                      }
+                    }
+                  },
+                  "readParams": {
+                    "value": {
+                      "sentences": [
+                        {
+                          "media_channel": 1,
+                          "sentence_index": 0,
+                          "start_time": null,
+                          "end_time": null,
+                          "transcript": "test test",
+                          "sid": "GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "confidence": null
+                        }
+                      ],
+                      "meta": {
+                        "key": "sentences",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0",
+                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null
                       }
                     }
                   }
@@ -801,10 +953,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListSentence",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListSentence"
       }
     },
     "/v2/Services": {
@@ -813,7 +962,7 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -833,6 +982,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.service"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "something",
+                      "friendly_name": "some friendly name",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "auto_redaction": false,
+                      "media_redaction": false,
+                      "auto_transcribe": true,
+                      "data_logging": true,
+                      "language_code": "en-US",
+                      "webhook_url": "https://www.twilio.com",
+                      "webhook_http_method": "POST",
+                      "version": 1,
+                      "url": "https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -845,9 +1015,6 @@
           }
         ],
         "operationId": "CreateService",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -896,6 +1063,17 @@
                 "required": [
                   "UniqueName"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "UniqueName": "something",
+                    "FriendlyName": "some friendly name",
+                    "LanguageCode": "en-US",
+                    "WebhookUrl": "https://www.twilio.com",
+                    "WebhookHttpMethod": "POST"
+                  }
+                }
               }
             }
           }
@@ -947,16 +1125,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -965,17 +1145,63 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "services": [
+                        {
+                          "sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "unique_name": "something",
+                          "friendly_name": "some friendly name",
+                          "date_created": "2010-08-31T20:36:28Z",
+                          "date_updated": "2010-08-31T20:36:28Z",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "auto_redaction": false,
+                          "media_redaction": false,
+                          "auto_transcribe": true,
+                          "data_logging": true,
+                          "language_code": "en-US",
+                          "webhook_url": "https://www.twilio.com",
+                          "webhook_http_method": "POST",
+                          "version": 1,
+                          "url": "https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "key": "services",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Services?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Services?PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "services": [],
+                      "meta": {
+                        "key": "services",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Services?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Services?PageSize=50&Page=0"
                       }
                     }
                   }
@@ -990,10 +1216,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListService"
       }
     },
     "/v2/Services/{Sid}": {
@@ -1002,7 +1225,7 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -1037,10 +1260,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteService"
       },
       "get": {
         "description": "Fetch a specific Service.",
@@ -1061,6 +1281,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.service"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "something",
+                      "friendly_name": "some friendly name",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "auto_redaction": false,
+                      "media_redaction": false,
+                      "auto_transcribe": true,
+                      "data_logging": true,
+                      "language_code": "en-US",
+                      "webhook_url": "https://www.twilio.com",
+                      "webhook_http_method": "POST",
+                      "version": 1,
+                      "url": "https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1072,10 +1313,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchService",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchService"
       },
       "post": {
         "description": "Update a specific Service.",
@@ -1104,6 +1342,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.service"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "something",
+                      "friendly_name": "some friendly name",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "auto_redaction": false,
+                      "media_redaction": false,
+                      "auto_transcribe": true,
+                      "data_logging": true,
+                      "webhook_url": "https://www.sendgrid.com",
+                      "webhook_http_method": "GET",
+                      "language_code": "en-US",
+                      "version": 2,
+                      "url": "https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1116,9 +1375,6 @@
           }
         ],
         "operationId": "UpdateService",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1164,6 +1420,16 @@
                     "description": "The HTTP method for the Webhook. One of `GET` or `POST`."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "UniqueName": "something",
+                    "FriendlyName": "some friendly name",
+                    "WebhookUrl": "https://www.sendgrid.com",
+                    "WebhookHttpMethod": "GET"
+                  }
+                }
               }
             }
           }
@@ -1176,7 +1442,7 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -1185,12 +1451,12 @@
           "duration",
           "status"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "sentence": "{transcript_sid: sid}",
           "media": "{sid: sid}",
           "operator_result": "{transcript_sid: sid}"
-        }
+        },
+        "pathType": "list"
       },
       "post": {
         "description": "Create a new Transcript for the service",
@@ -1200,6 +1466,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.transcript"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "status": "queued",
+                      "channel": {
+                        "media_properties": {
+                          "media_url": "http://foobar.test/ClusterTests/call1.wav"
+                        }
+                      },
+                      "data_logging": false,
+                      "language_code": "en-US",
+                      "media_start_time": null,
+                      "duration": 0,
+                      "customer_key": "aaaaaaaa",
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "redaction": true,
+                      "links": {
+                        "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                        "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                        "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                      }
+                    }
+                  },
+                  "createParams": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "status": "queued",
+                      "channel": {
+                        "media_properties": {
+                          "media_url": "http://foobar.test/ClusterTests/call1.wav"
+                        }
+                      },
+                      "data_logging": false,
+                      "language_code": "en-US",
+                      "media_start_time": null,
+                      "duration": 0,
+                      "customer_key": null,
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "redaction": true,
+                      "links": {
+                        "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                        "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                        "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1212,9 +1534,6 @@
           }
         ],
         "operationId": "CreateTranscript",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1246,6 +1565,22 @@
                   "ServiceSid",
                   "Channel"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "ServiceSid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "Channel": "{ \"media_properties\" : { \"media_url\": \"http://foobar.test/ClusterTests/call1.wav\"}}",
+                    "CustomerKey": "aaaaaaaa"
+                  }
+                },
+                "createParams": {
+                  "value": {
+                    "ServiceSid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "Channel": "{ \"media_properties\" : { \"media_url\": \"http://foobar.test/ClusterTests/call1.wav\"}}",
+                    "CustomerKey": "aaaaaaaa"
+                  }
+                }
               }
             }
           }
@@ -1263,6 +1598,17 @@
               "minLength": 34,
               "maxLength": 34,
               "pattern": "^GA[0-9a-fA-F]{32}$"
+            },
+            "examples": {
+              "readFull": {
+                "value": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "readEmpty": {
+                "value": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "readQuery": {
+                "value": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
             }
           },
           {
@@ -1295,6 +1641,11 @@
             "description": "Filter by after DateCreated.",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "readFull": {
+                "value": "2019-11-22T23:46:00Z"
+              }
             }
           },
           {
@@ -1311,6 +1662,11 @@
             "description": "Filter by Language Code.",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "readFull": {
+                "value": "en-US"
+              }
             }
           },
           {
@@ -1319,6 +1675,11 @@
             "description": "Filter by SourceSid.",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "readFull": {
+                "value": "REaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
             }
           },
           {
@@ -1364,16 +1725,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1382,17 +1745,103 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "transcripts": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2010-08-31T20:36:28Z",
+                          "date_updated": "2010-08-31T20:36:28Z",
+                          "status": "queued",
+                          "channel": {},
+                          "data_logging": false,
+                          "language_code": "en-US",
+                          "media_start_time": null,
+                          "duration": 0,
+                          "customer_key": null,
+                          "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "redaction": true,
+                          "links": {
+                            "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                            "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                            "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "key": "transcripts",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts?LanguageCode=en-US&SourceSid=REaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&AfterDateCreated=2019-11-22T23%3A46%3A00Z&PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Transcripts?LanguageCode=en-US&SourceSid=REaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&AfterDateCreated=2019-11-22T23%3A46%3A00Z&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "transcripts": [],
+                      "meta": {
+                        "key": "transcripts",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts?ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Transcripts?ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readQuery": {
+                    "value": {
+                      "transcripts": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2010-08-31T20:36:28Z",
+                          "date_updated": "2010-08-31T20:36:28Z",
+                          "status": "queued",
+                          "channel": {},
+                          "data_logging": false,
+                          "language_code": "en-US",
+                          "media_start_time": null,
+                          "duration": 0,
+                          "customer_key": null,
+                          "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "redaction": true,
+                          "links": {
+                            "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                            "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                            "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "key": "transcripts",
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts?ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "previous_page_url": null,
+                        "url": "https://intelligence.twilio.com/v2/Transcripts?ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -1407,10 +1856,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListTranscript",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "ListTranscript"
       }
     },
     "/v2/Transcripts/{Sid}": {
@@ -1419,7 +1865,7 @@
           "url": "https://intelligence.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -1428,12 +1874,12 @@
           "duration",
           "status"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "sentence": "{transcript_sid: sid}",
           "media": "{sid: sid}",
           "operator_result": "{transcript_sid: sid}"
-        }
+        },
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a specific Transcript.",
@@ -1456,6 +1902,11 @@
             "description": "Grant access to PII Redacted/Unredacted Transcript. The default is `true` to access redacted Transcript.",
             "schema": {
               "type": "boolean"
+            },
+            "examples": {
+              "fetchParam": {
+                "value": "True"
+              }
             }
           }
         ],
@@ -1465,6 +1916,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/intelligence.v2.transcript"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "status": "queued",
+                      "channel": {},
+                      "data_logging": false,
+                      "language_code": "en-US",
+                      "media_start_time": null,
+                      "duration": 0,
+                      "customer_key": null,
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "redaction": true,
+                      "links": {
+                        "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                        "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                        "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                      }
+                    }
+                  },
+                  "fetchParam": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2010-08-31T20:36:28Z",
+                      "date_updated": "2010-08-31T20:36:28Z",
+                      "status": "queued",
+                      "channel": {},
+                      "data_logging": false,
+                      "language_code": "en-US",
+                      "media_start_time": null,
+                      "duration": 0,
+                      "customer_key": null,
+                      "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "redaction": true,
+                      "links": {
+                        "sentences": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences",
+                        "media": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media",
+                        "operator_results": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -1476,10 +1975,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchTranscript",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchTranscript"
       },
       "delete": {
         "description": "Delete a specific Transcript.",
@@ -1507,22 +2003,13 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteTranscript",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteTranscript"
       }
     }
   },
   "servers": [
     {
       "url": "https://intelligence.twilio.com"
-    }
-  ],
-  "x-maturity": [
-    {
-      "name": "Beta",
-      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
     }
   ]
 }

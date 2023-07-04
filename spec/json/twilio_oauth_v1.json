@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "oauth.v1.certs": {
         "type": "object",
@@ -212,12 +218,6 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -233,7 +233,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.43.2"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -243,13 +243,13 @@
           "url": "https://oauth.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "keys"
         ],
-        "pathType": "instance",
-        "mountName": "oauth"
+        "mountName": "oauth",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetches public JWKs",
@@ -259,6 +259,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oauth.v1.certs"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "keys": [
+                        {
+                          "alg": "ES256",
+                          "kid": "IC10c8172f35dd36f20d9ed2fcc0b818c7",
+                          "key_ops": [],
+                          "use": "sig",
+                          "crv": "P-256",
+                          "x": "hrJ4NKauVYBiREgIY_EPPj10zHIiOHeIf3-LGODt_KM",
+                          "y": "c3IcyhpvfMIMpqd_ku9Q_4n20nMlelUF-zSmRXEIFEU",
+                          "kty": "EC"
+                        }
+                      ],
+                      "url": "https://oauth.twilio.com/v1/certs"
+                    }
+                  }
                 }
               }
             },
@@ -270,10 +289,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchCerts",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchCerts"
       }
     },
     "/v1/device/code": {
@@ -282,7 +298,7 @@
           "url": "https://oauth.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "device_code",
@@ -292,8 +308,8 @@
           "expires_in",
           "interval"
         ],
-        "pathType": "list",
-        "mountName": "device_code"
+        "mountName": "device_code",
+        "pathType": "list"
       },
       "post": {
         "description": "Issues a new Access token (optionally identity_token & refresh_token) in exchange of Oauth grant",
@@ -303,6 +319,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oauth.v1.device_code"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "device_code": "LiwuhE0bIhqemK6sd34tXfobVCR9yrk0",
+                      "user_code": "Hkf1WaID3",
+                      "verification_uri": "v1/oauth2/device/activate",
+                      "verification_uri_complete": "v1/oauth2/device/activate?user_code=Hkf1WaID3",
+                      "expires_in": 299,
+                      "interval": 5
+                    }
+                  }
                 }
               }
             },
@@ -315,9 +343,6 @@
           }
         ],
         "operationId": "CreateDeviceCode",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -348,6 +373,19 @@
                   "ClientSid",
                   "Scopes"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "ClientSid": "OQ693217fa7610373e7762f06645058bac",
+                    "Scopes": [
+                      "test-scope"
+                    ],
+                    "Audiences": [
+                      "http://dev.twilio.com/"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -360,7 +398,7 @@
           "url": "https://oauth.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "issuer",
@@ -376,8 +414,8 @@
           "scopes_supported",
           "claims_supported"
         ],
-        "pathType": "instance",
-        "mountName": "openid_discovery"
+        "mountName": "openid_discovery",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch configuration details about the OpenID Connect Authorization Server",
@@ -387,6 +425,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oauth.v1.openid_discovery"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "issuer": "https://iam.twilio.com",
+                      "authorization_endpoint": "https://oauth.twilio.com/oauth2/authorize",
+                      "device_authorization_endpoint": "https://oauth.twilio.com/oauth2/device/authorize",
+                      "token_endpoint": "https://oauth.twilio.com/oauth2/token",
+                      "userinfo_endpoint": "https://oauth.twilio.com/oauth2/userinfo",
+                      "revocation_endpoint": "https://oauth.twilio.com/oauth2/revoke",
+                      "jwk_uri": "https://oauth.twilio.com/oauth2/certs",
+                      "response_type_supported": [
+                        "code",
+                        "token"
+                      ],
+                      "subject_type_supported": [
+                        "account_sid",
+                        "user_sid"
+                      ],
+                      "id_token_signing_alg_values_supported": [
+                        "ECDSA",
+                        "RSA256"
+                      ],
+                      "scopes_supported": [
+                        "openid",
+                        "profile",
+                        "email"
+                      ],
+                      "claims_supported": [
+                        "act",
+                        "aud",
+                        "cid",
+                        "device_id",
+                        "exp",
+                        "jti",
+                        "iat",
+                        "iss",
+                        "nbf",
+                        "scp",
+                        "sub"
+                      ],
+                      "url": "https://oauth.twilio.com/v1/.well-known/openid-configuration"
+                    }
+                  }
                 }
               }
             },
@@ -398,10 +480,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchOpenidDiscovery",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchOpenidDiscovery"
       }
     },
     "/v1/token": {
@@ -410,7 +489,7 @@
           "url": "https://oauth.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "access_token",
@@ -426,6 +505,17 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oauth.v1.token"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                      "refresh_token": "ghjbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                      "id_token": "eyJhbdGciOiIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+                      "refresh_token_expires_at": "2015-07-31T04:00:00Z",
+                      "access_token_expires_at": "2015-07-31T04:00:00Z"
+                    }
+                  }
                 }
               }
             },
@@ -438,9 +528,6 @@
           }
         ],
         "operationId": "CreateToken",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -485,6 +572,20 @@
                   "GrantType",
                   "ClientSid"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "GrantType": "authorization_code",
+                    "ClientSid": "OQ09708361261756db8c0b555d36f55a65",
+                    "ClientSecret": "client_secret",
+                    "Code": "dfyguyhuijikokje456rt7y8uioklj",
+                    "CodeVerifier": "code_verifier",
+                    "DeviceCode": "device_code",
+                    "RefreshToken": "refresh_token",
+                    "DeviceId": "device_id"
+                  }
+                }
               }
             }
           }
@@ -497,13 +598,13 @@
           "url": "https://oauth.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "user_sid"
         ],
-        "pathType": "instance",
-        "mountName": "user_info"
+        "mountName": "user_info",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieves the consented UserInfo and other claims about the logged-in subject (end-user).",
@@ -513,6 +614,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oauth.v1.user_info"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "user_sid": "US57cc2449f1b38ed85cf1a43cd8166349",
+                      "first_name": "Mafalda",
+                      "last_name": "Rolfson",
+                      "friendly_name": "mafalda.rolfson+oBgz@ct.sink.twilio.com",
+                      "email": "mafalda.rolfson+oBgz@ct.sink.twilio.com",
+                      "url": "https://oauth.twilio.com/v1/userinfo"
+                    }
+                  }
                 }
               }
             },
@@ -524,22 +637,13 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchUserInfo",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchUserInfo"
       }
     }
   },
   "servers": [
     {
       "url": "https://oauth.twilio.com"
-    }
-  ],
-  "x-maturity": [
-    {
-      "name": "GA",
-      "description": "This product is Generally Available."
     }
   ]
 }

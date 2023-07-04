@@ -1,0 +1,265 @@
+openapi: 3.0.3
+info:
+  title: Bulk Messaging API
+  description: This is the public Twilio REST API for 1:Many Message creation.
+  termsOfService: https://www.twilio.com/legal/tos
+  version: 1.0.0-alpha.1
+  contact:
+    name: Twilio Support
+    url: https://support.twilio.com
+    email: support@twilio.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+- url: https://preview.messaging.twilio.com
+paths:
+  /v1/Messages:
+    post:
+      description: Send messages to multiple recipients
+      operationId: CreateMessages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: CreateMessagesRequest
+              properties:
+                Messages:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/messaging.v1.Message'
+                From:
+                  type: string
+                  format: phone-number
+                  description: A Twilio phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+                    format, an [alphanumeric sender ID](https://www.twilio.com/docs/sms/send-messages#use-an-alphanumeric-sender-id),
+                    or a [Channel Endpoint address](https://www.twilio.com/docs/sms/channels#channel-addresses)
+                    that is enabled for the type of message you want to send. Phone
+                    numbers or [short codes](https://www.twilio.com/docs/sms/api/short-code)
+                    purchased from Twilio also work here. You cannot, for example,
+                    spoof messages from a private cell phone number. If you are using
+                    `messaging_service_sid`, this parameter must be empty.
+                MessagingServiceSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^MG[0-9a-fA-F]{32}$
+                  description: The SID of the [Messaging Service](https://www.twilio.com/docs/sms/services#send-a-message-with-copilot)
+                    you want to associate with the Message. Set this parameter to
+                    use the [Messaging Service Settings and Copilot Features](https://www.twilio.com/console/sms/services)
+                    you have configured and leave the `from` parameter empty. When
+                    only this parameter is set, Twilio will use your enabled Copilot
+                    Features to select the `from` phone number for delivery.
+                Body:
+                  type: string
+                  description: The text of the message you want to send. Can be up
+                    to 1,600 characters in length.
+                ContentSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^HX[0-9a-fA-F]{32}$
+                  description: The SID of the preconfigured [Content Template](https://www.twilio.com/docs/content-api/create-and-send-your-first-content-api-template#create-a-template)
+                    you want to associate with the Message. Must be used in conjuction
+                    with a preconfigured [Messaging Service Settings and Copilot Features](https://www.twilio.com/console/sms/services)
+                    When this parameter is set, Twilio will use your configured content
+                    template and the provided `ContentVariables`. This Twilio product
+                    is currently in Private Beta.
+                MediaUrl:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  description: The URL of the media to send with the message. The
+                    media can be of type `gif`, `png`, and `jpeg` and will be formatted
+                    correctly on the recipient's device. The media size limit is 5MB
+                    for supported file types (JPEG, PNG, GIF) and 500KB for [other
+                    types](https://www.twilio.com/docs/sms/accepted-mime-types) of
+                    accepted media. To send more than one image in the message body,
+                    provide multiple `media_url` parameters in the POST request. You
+                    can include up to 10 `media_url` parameters per message. You can
+                    send images in an SMS message in only the US and Canada.
+                StatusCallback:
+                  type: string
+                  format: uri
+                  description: The URL we should call using the "status_callback_method"
+                    to send status information to your application. If specified,
+                    we POST these message status changes to the URL - queued, failed,
+                    sent, delivered, or undelivered. Twilio will POST its [standard
+                    request parameters](https://www.twilio.com/docs/messaging/twiml#request-parameters)
+                    as well as some additional parameters including "MessageSid",
+                    "MessageStatus", and "ErrorCode". If you include this parameter
+                    with the "messaging_service_sid", we use this URL instead of the
+                    Status Callback URL of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api).
+                    URLs must contain a valid hostname and underscores are not allowed.
+                ValidityPeriod:
+                  type: integer
+                  description: How long in seconds the message can remain in our outgoing
+                    message queue. After this period elapses, the message fails and
+                    we call your status callback. Can be between 1 and the default
+                    value of 14,400 seconds. After a message has been accepted by
+                    a carrier, however, we cannot guarantee that the message will
+                    not be queued after this period. We recommend that this value
+                    be at least 5 seconds.
+                SendAt:
+                  type: string
+                  description: The time at which Twilio will send the message. This
+                    parameter can be used to schedule a message to be sent at a particular
+                    time. Must be in ISO 8601 format.
+                ScheduleType:
+                  type: string
+                  description: This parameter indicates your intent to schedule a
+                    message. Pass the value `fixed` to schedule a message at a fixed
+                    time. This parameter works in conjuction with the `SendAt` parameter.
+                ShortenUrls:
+                  type: boolean
+                  description: Determines the usage of Click Tracking. Setting it
+                    to `true` will instruct Twilio to replace all links in the Message
+                    with a shortened version based on the associated Domain Sid and
+                    track clicks on them. If this parameter is not set on an API call,
+                    we will use the value set on the Messaging Service. If this parameter
+                    is not set and the value is not configured on the Messaging Service
+                    used this will default to `false`.
+                SendAsMms:
+                  type: boolean
+                  description: If set to True, Twilio will deliver the message as
+                    a single MMS message, regardless of the presence of media.
+                MaxPrice:
+                  type: number
+                  description: The maximum total price in US dollars that you will
+                    pay for the message to be delivered. Can be a decimal value that
+                    has up to 4 decimal places. All messages are queued for delivery
+                    and the message cost is checked before the message is sent. If
+                    the cost exceeds max_price, the message will fail and a status
+                    of Failed is sent to the status callback. If MaxPrice is not set,
+                    the message cost is not checked.
+                Attempt:
+                  type: integer
+                  description: Total number of attempts made ( including this ) to
+                    send out the message regardless of the provider used
+                SmartEncoded:
+                  type: boolean
+                  description: This parameter indicates whether to detect Unicode
+                    characters that have a similar GSM-7 character and replace them.
+                    Can be true or false.
+                ForceDelivery:
+                  type: boolean
+                  description: This parameter allows Twilio to send SMS traffic to
+                    carriers without checking/caring whether the destination number
+                    is a mobile or a landline.
+                ApplicationSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^AP[0-9a-fA-F]{32}$
+                  description: The SID of the application that should receive message
+                    status. We POST a message_sid parameter and a message_status parameter
+                    with a value of sent or failed to the application's message_status_callback.
+                    If a status_callback parameter is also passed, it will be ignored
+                    and the application's message_status_callback parameter will be
+                    used.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messaging.v1.CreateMessagesResult'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/messaging.v1.Error'
+      security:
+      - accountSid_authToken: []
+components:
+  schemas:
+    messaging.v1.Message:
+      type: object
+      properties:
+        To:
+          type: string
+          format: phone-number
+          description: The destination phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format for SMS/MMS or [Channel user address](https://www.twilio.com/docs/sms/channels#channel-addresses)
+            for other 3rd-party channels.
+        Body:
+          type: string
+          description: The text of the message you want to send. Can be up to 1,600
+            characters in length. Overrides the request-level body and content template
+            if provided.
+        ContentVariables:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value pairs of variable names to substitution values. Refer
+            to the [Twilio Content API Resources](https://www.twilio.com/docs/content-api/content-api-resources#send-a-message-with-preconfigured-content)
+            for more details.
+    messaging.v1.MessageReceipt:
+      type: object
+      properties:
+        to:
+          type: string
+          nullable: true
+          description: The recipient phone number
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies the resource
+    messaging.v1.FailedMessageReceipt:
+      type: object
+      properties:
+        to:
+          type: string
+          description: The recipient phone number
+        error_message:
+          type: string
+          description: The description of the error_code
+        error_code:
+          type: integer
+          description: The error code associated with the message creation attempt
+    messaging.v1.CreateMessagesResult:
+      properties:
+        total_message_count:
+          type: integer
+          description: The number of Messages processed in the request, equal to the
+            sum of success_count and error_count.
+        success_count:
+          type: integer
+          description: The number of Messages successfully created.
+        error_count:
+          type: integer
+          description: The number of Messages unsuccessfully processed in the request.
+        message_receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/messaging.v1.MessageReceipt'
+        failed_message_receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/messaging.v1.FailedMessageReceipt'
+    messaging.v1.Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The error message details
+        code:
+          type: integer
+          description: The Twilio error code
+        status:
+          type: integer
+          description: The HTTP status code
+        more_info:
+          type: string
+          description: More information on the error
+  securitySchemes:
+    accountSid_authToken:
+      type: http
+      scheme: basic
