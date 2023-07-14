@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2023-07-14] Version 2.0.0-rc.2
+-------------------------------
+**Flex**
+- Adding `interaction_context_sid` as optional parameter in Interactions API
+
+**Messaging**
+- Making visiblity public for tollfree_verification API
+
+**Verify**
+- Add `RiskCheck` optional parameter on Verification creation.
+
+
 [2023-07-04] Version 2.0.0-rc.1
 -------------------------------
 **Api**
