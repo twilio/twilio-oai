@@ -208,6 +208,13 @@ components:
           nullable: true
           description: The phone number which portability is to be checked. Phone
             numbers are in E.164 format (e.g. +16175551212).
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The target account sid to which the number will be ported
         portable:
           type: boolean
           nullable: true
@@ -285,6 +292,8 @@ paths:
     post:
       description: Create a bulk eligibility check for a set of numbers that you want
         to host in Twilio.
+      tags:
+      - NumbersV1BulkEligibility
       responses:
         '202':
           content:
@@ -315,6 +324,8 @@ paths:
       pathType: instance
     get:
       description: Fetch an eligibility bulk check that you requested to host in Twilio.
+      tags:
+      - NumbersV1BulkEligibility
       parameters:
       - name: RequestId
         in: path
@@ -370,6 +381,8 @@ paths:
     post:
       description: Create an eligibility check for a number that you want to host
         in Twilio.
+      tags:
+      - NumbersV1Eligibility
       responses:
         '201':
           content:
@@ -426,6 +439,8 @@ paths:
       description: Fetch a previous portability check. This should return the current
         status of the validation and the result for all the numbers provided, given
         that they have been validated (as this process is performed asynchronously).
+      tags:
+      - NumbersV1PortingBulkPortability
       parameters:
       - name: Sid
         in: path
@@ -486,6 +501,8 @@ paths:
     post:
       description: Allows to check if a list of phone numbers can be ported to Twilio
         or not. This is done asynchronous for each phone number.
+      tags:
+      - NumbersV1PortingBulkPortability
       responses:
         '202':
           content:
@@ -537,6 +554,8 @@ paths:
     get:
       description: Allows to check if a single phone number can be ported to Twilio
         or not.
+      tags:
+      - NumbersV1PortingPortability
       parameters:
       - name: PhoneNumber
         in: path
@@ -546,6 +565,17 @@ paths:
           type: string
           format: phone-number
         required: true
+      - name: TargetAccountSid
+        in: query
+        description: The SID of the account where the phone number(s) will be ported.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+        examples:
+          fetch:
+            value: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02
       responses:
         '200':
           content:
@@ -556,6 +586,7 @@ paths:
                 fetch:
                   value:
                     phone_number: '+18001234567'
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01
                     portable: false
                     pin_and_account_number_required: false
                     not_portable_reason: MANUAL_PORTING_AVAILABLE
@@ -571,3 +602,14 @@ paths:
       operationId: FetchPortingPortability
 servers:
 - url: https://numbers.twilio.com
+tags:
+- name: NumbersV1AuthorizationDocument
+- name: NumbersV1BulkEligibility
+- name: NumbersV1DependentOrder
+- name: NumbersV1Documents
+- name: NumbersV1Eligibility
+- name: NumbersV1HostedNumberOrder
+- name: NumbersV1Identity
+- name: NumbersV1PortingBulkPortability
+- name: NumbersV1PortingPortability
+- name: NumbersV1ProofOfAddress
