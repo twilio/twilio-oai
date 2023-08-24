@@ -317,6 +317,67 @@
           "campaign-verify"
         ]
       },
+      "messaging.v1.service.channel_sender": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the ChannelSender resource."
+          },
+          "messaging_service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Service](https://www.twilio.com/docs/messaging/services) the resource is associated with."
+          },
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^XE[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the ChannelSender resource."
+          },
+          "sender": {
+            "type": "string",
+            "nullable": true,
+            "description": "The unique string that identifies the sender e.g whatsapp:+123456XXXX."
+          },
+          "sender_type": {
+            "type": "string",
+            "nullable": true,
+            "description": "A string value that identifies the sender type e.g WhatsApp, Messenger."
+          },
+          "country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The 2-character [ISO Country Code](https://www.iso.org/iso-3166-country-codes.html) of the number."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was last updated specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "messaging.v1.deactivation": {
         "type": "object",
         "properties": {
@@ -2696,6 +2757,236 @@
         "operationId": "FetchBrandVetting"
       }
     },
+    "/v1/Services/{MessagingServiceSid}/ChannelSenders": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "A Messaging Service resource to read, fetch all Channel Senders associated with a Messaging Service.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "sender",
+          "sender_type"
+        ],
+        "parent": "/Services/{Sid}",
+        "pathType": "list"
+      },
+      "get": {
+        "description": "",
+        "tags": [
+          "MessagingV1ChannelSender"
+        ],
+        "parameters": [
+          {
+            "name": "MessagingServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to read the resources from.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListChannelSenderResponse",
+                  "properties": {
+                    "senders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/messaging.v1.service.channel_sender"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "key": "senders",
+                        "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders?PageSize=50&Page=0"
+                      },
+                      "senders": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "messaging_service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sender": "whatsapp:+12487960483",
+                          "sender_type": "WhatsApp",
+                          "country_code": "US",
+                          "date_created": "2023-07-30T20:12:31Z",
+                          "date_updated": "2023-07-30T20:12:33Z",
+                          "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders/XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListChannelSender"
+      }
+    },
+    "/v1/Services/{MessagingServiceSid}/ChannelSenders/{Sid}": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "A Messaging Service resource to read, fetch all Channel Senders associated with a Messaging Service.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "sender",
+          "sender_type"
+        ],
+        "parent": "/Services/{Sid}",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "",
+        "tags": [
+          "MessagingV1ChannelSender"
+        ],
+        "parameters": [
+          {
+            "name": "MessagingServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to fetch the resource from.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID of the ChannelSender resource to fetch.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.service.channel_sender"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "messaging_service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sender": "whatsapp:+12487960483",
+                      "sender_type": "WhatsApp",
+                      "country_code": "US",
+                      "date_created": "2023-07-30T20:12:31Z",
+                      "date_updated": "2023-07-30T20:12:33Z",
+                      "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders/XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchChannelSender"
+      }
+    },
     "/v1/Deactivations": {
       "servers": [
         {
@@ -3913,7 +4204,8 @@
           "alpha_sender": "{service_sid: sid}",
           "message": "{messaging_service_sid: sid}",
           "us_app_to_person": "{messaging_service_sid: sid}",
-          "us_app_to_person_usecase": "{messaging_service_sid: sid}"
+          "us_app_to_person_usecase": "{messaging_service_sid: sid}",
+          "channel_sender": "{messaging_service_sid: sid}"
         },
         "pathType": "list"
       },
@@ -3959,7 +4251,8 @@
                         "alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders",
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
-                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases"
+                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -4223,7 +4516,8 @@
                             "alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders",
                             "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                             "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
-                            "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases"
+                            "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
+                            "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
                           },
                           "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                         }
@@ -4263,7 +4557,8 @@
           "alpha_sender": "{service_sid: sid}",
           "message": "{messaging_service_sid: sid}",
           "us_app_to_person": "{messaging_service_sid: sid}",
-          "us_app_to_person_usecase": "{messaging_service_sid: sid}"
+          "us_app_to_person_usecase": "{messaging_service_sid: sid}",
+          "channel_sender": "{messaging_service_sid: sid}"
         },
         "pathType": "instance"
       },
@@ -4323,7 +4618,8 @@
                         "alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders",
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
-                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases"
+                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -4502,7 +4798,8 @@
                         "alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AlphaSenders",
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
-                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases"
+                        "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -4967,7 +5264,7 @@
                       "business_city": "Anytown",
                       "business_state_province_region": "AA",
                       "business_postal_code": "11111",
-                      "business_country": "USA",
+                      "business_country": "US",
                       "business_website": "http://www.company.com",
                       "business_contact_first_name": "firstname",
                       "business_contact_last_name": "lastname",
@@ -4981,8 +5278,8 @@
                       "use_case_summary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                       "production_message_sample": "lorem ipsum",
                       "opt_in_image_urls": [
-                        "https://zipwhiptestbusiness.com/images/image1.jpg",
-                        "https://zipwhiptestbusiness.com/images/image2.jpg"
+                        "https://testbusiness.com/images/image1.jpg",
+                        "https://testbusiness.com/images/image2.jpg"
                       ],
                       "opt_in_type": "VERBAL",
                       "message_volume": "2000",
@@ -5057,7 +5354,7 @@
                       "business_city": "Anytown",
                       "business_state_province_region": "AA",
                       "business_postal_code": "11111",
-                      "business_country": "USA",
+                      "business_country": "US",
                       "business_website": "http://www.company.com",
                       "business_contact_first_name": "firstname",
                       "business_contact_last_name": "lastname",
@@ -5071,8 +5368,8 @@
                       "use_case_summary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                       "production_message_sample": "lorem ipsum",
                       "opt_in_image_urls": [
-                        "https://zipwhiptestbusiness.com/images/image1.jpg",
-                        "https://zipwhiptestbusiness.com/images/image2.jpg"
+                        "https://testbusiness.com/images/image1.jpg",
+                        "https://testbusiness.com/images/image2.jpg"
                       ],
                       "opt_in_type": "VERBAL",
                       "message_volume": "1,000",
@@ -5204,7 +5501,7 @@
                     "BusinessCity": "Anytown",
                     "BusinessStateProvinceRegion": "AA",
                     "BusinessPostalCode": "11111",
-                    "BusinessCountry": "USA",
+                    "BusinessCountry": "US",
                     "BusinessWebsite": "http://www.company.com",
                     "BusinessContactFirstName": "firstname",
                     "BusinessContactLastName": "lastname",
@@ -5218,8 +5515,8 @@
                     "UseCaseSummary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                     "ProductionMessageSample": "lorem ipsum",
                     "OptInImageUrls": [
-                      "https://zipwhiptestbusiness.com/images/image1.jpg",
-                      "https://zipwhiptestbusiness.com/images/image2.jpg"
+                      "https://testbusiness.com/images/image1.jpg",
+                      "https://testbusiness.com/images/image2.jpg"
                     ],
                     "OptInType": "VERBAL",
                     "MessageVolume": "1,000",
@@ -5386,7 +5683,7 @@
                           "business_city": "Anytown",
                           "business_state_province_region": "AA",
                           "business_postal_code": "11111",
-                          "business_country": "USA",
+                          "business_country": "US",
                           "business_website": "http://www.company.com",
                           "business_contact_first_name": "firstname",
                           "business_contact_last_name": "lastname",
@@ -5400,8 +5697,8 @@
                           "use_case_summary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                           "production_message_sample": "lorem ipsum",
                           "opt_in_image_urls": [
-                            "https://zipwhiptestbusiness.com/images/image1.jpg",
-                            "https://zipwhiptestbusiness.com/images/image2.jpg"
+                            "https://testbusiness.com/images/image1.jpg",
+                            "https://testbusiness.com/images/image2.jpg"
                           ],
                           "opt_in_type": "VERBAL",
                           "message_volume": "1,000",
@@ -5464,7 +5761,7 @@
                       "business_city": "Anytown",
                       "business_state_province_region": "AA",
                       "business_postal_code": "11111",
-                      "business_country": "USA",
+                      "business_country": "US",
                       "business_website": "http://www.company.com",
                       "business_contact_first_name": "firstname",
                       "business_contact_last_name": "lastname",
@@ -5478,8 +5775,8 @@
                       "use_case_summary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                       "production_message_sample": "lorem ipsum",
                       "opt_in_image_urls": [
-                        "https://zipwhiptestbusiness.com/images/image1.jpg",
-                        "https://zipwhiptestbusiness.com/images/image2.jpg"
+                        "https://testbusiness.com/images/image1.jpg",
+                        "https://testbusiness.com/images/image2.jpg"
                       ],
                       "opt_in_type": "VERBAL",
                       "message_volume": "10",
@@ -5509,7 +5806,7 @@
                       "business_city": "Anytown",
                       "business_state_province_region": "AA",
                       "business_postal_code": "11111",
-                      "business_country": "USA",
+                      "business_country": "US",
                       "business_website": "http://www.company.com",
                       "business_contact_first_name": "firstname",
                       "business_contact_last_name": "lastname",
@@ -5523,8 +5820,8 @@
                       "use_case_summary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                       "production_message_sample": "lorem ipsum",
                       "opt_in_image_urls": [
-                        "https://zipwhiptestbusiness.com/images/image1.jpg",
-                        "https://zipwhiptestbusiness.com/images/image2.jpg"
+                        "https://testbusiness.com/images/image1.jpg",
+                        "https://testbusiness.com/images/image2.jpg"
                       ],
                       "opt_in_type": "VERBAL",
                       "message_volume": "10",
@@ -5686,7 +5983,7 @@
                     "BusinessCity": "Anytown",
                     "BusinessStateProvinceRegion": "AA",
                     "BusinessPostalCode": "11111",
-                    "BusinessCountry": "USA",
+                    "BusinessCountry": "US",
                     "BusinessWebsite": "http://www.company.com",
                     "BusinessContactFirstName": "firstname",
                     "BusinessContactLastName": "lastname",
@@ -5700,8 +5997,8 @@
                     "UseCaseSummary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                     "ProductionMessageSample": "lorem ipsum",
                     "OptInImageUrls": [
-                      "https://zipwhiptestbusiness.com/images/image1.jpg",
-                      "https://zipwhiptestbusiness.com/images/image2.jpg"
+                      "https://testbusiness.com/images/image1.jpg",
+                      "https://testbusiness.com/images/image2.jpg"
                     ],
                     "OptInType": "VERBAL",
                     "MessageVolume": "10",
@@ -5723,8 +6020,8 @@
                     "UseCaseSummary": "This number is used to send out promotional offers and coupons to the customers of John's Coffee Shop",
                     "ProductionMessageSample": "lorem ipsum",
                     "OptInImageUrls": [
-                      "https://zipwhiptestbusiness.com/images/image1.jpg",
-                      "https://zipwhiptestbusiness.com/images/image2.jpg"
+                      "https://testbusiness.com/images/image1.jpg",
+                      "https://testbusiness.com/images/image2.jpg"
                     ],
                     "OptInType": "VERBAL",
                     "MessageVolume": "10",
@@ -6990,6 +7287,9 @@
     },
     {
       "name": "MessagingV1BrandVetting"
+    },
+    {
+      "name": "MessagingV1ChannelSender"
     },
     {
       "name": "MessagingV1Deactivations"
