@@ -3948,6 +3948,10 @@
             "format": "uri-map",
             "nullable": true,
             "description": "A list of related resources identified by their URIs relative to `https://api.twilio.com`"
+          },
+          "tags": {
+            "nullable": true,
+            "description": "A string containing a JSON map of key value pairs of tags to be recorded as metadata for the message."
           }
         }
       },
@@ -4026,7 +4030,7 @@
             "maxLength": 34,
             "pattern": "^AC[0-9a-fA-F]{32}$",
             "nullable": true,
-            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the MessageFeedback resource."
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) associated with this MessageFeedback resource."
           },
           "message_sid": {
             "type": "string",
@@ -4034,25 +4038,25 @@
             "maxLength": 34,
             "pattern": "^(SM|MM)[0-9a-fA-F]{32}$",
             "nullable": true,
-            "description": "The SID of the Message resource for which the feedback was provided."
+            "description": "The SID of the Message resource associated with this MessageFeedback resource."
           },
           "outcome": {
             "type": "string",
             "$ref": "#/components/schemas/message_feedback_enum_outcome",
             "nullable": true,
-            "description": "Whether the feedback has arrived. Can be: `unconfirmed` or `confirmed`. If `provide_feedback`=`true` in [the initial HTTP POST](https://www.twilio.com/docs/sms/api/message-resource#create-a-message-resource), the initial value of this property is `unconfirmed`. After the message arrives, update the value to `confirmed`."
+            "description": "Reported outcome indicating whether there is confirmation that the Message recipient performed a tracked user action. Can be: `unconfirmed` or `confirmed`. For more details see [How to Optimize Message Deliverability with Message Feedback](https://www.twilio.com/docs/sms/send-message-feedback-to-twilio)."
           },
           "date_created": {
             "type": "string",
             "format": "date-time-rfc-2822",
             "nullable": true,
-            "description": "The date and time in GMT that the resource was created specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
+            "description": "The date and time in GMT when this MessageFeedback resource was created, specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
           },
           "date_updated": {
             "type": "string",
             "format": "date-time-rfc-2822",
             "nullable": true,
-            "description": "The date and time in GMT that the resource was last updated specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
+            "description": "The date and time in GMT when this MessageFeedback resource was last updated, specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format."
           },
           "uri": {
             "type": "string",
@@ -23598,7 +23602,7 @@
           "url": "https://api.twilio.com"
         }
       ],
-      "description": "The Media resource represents a piece of media, such as an image, that is associated with a Message.",
+      "description": "The Media subresource of a Message resource represents a piece of media, such as an image, that is associated with the Message.",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -23745,7 +23749,7 @@
           "url": "https://api.twilio.com"
         }
       ],
-      "description": "The Media resource represents a piece of media, such as an image, that is associated with a Message.",
+      "description": "The Media subresource of a Message resource represents a piece of media, such as an image, that is associated with the Message.",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
@@ -24724,6 +24728,10 @@
                     "type": "string",
                     "description": "For [Content Editor/API](https://www.twilio.com/docs/content) only: Key-value pairs of [Template variables](https://www.twilio.com/docs/content/using-variables-with-content-api) and their substitution values. `content_sid` parameter must also be provided. If values are not defined in the `content_variables` parameter, the [Template's default placeholder values](https://www.twilio.com/docs/content/content-api-resources#create-templates) are used."
                   },
+                  "Tags": {
+                    "type": "string",
+                    "description": "A string containing a JSON map of key value pairs of tags to be recorded as metadata for the message. The object may contain up to 10 tags. Keys and values can each be up to 128 characters in length."
+                  },
                   "RiskCheck": {
                     "type": "string",
                     "$ref": "#/components/schemas/message_enum_risk_check",
@@ -25543,7 +25551,7 @@
           "url": "https://api.twilio.com"
         }
       ],
-      "description": "Customer-provided feedback on delivery confirmation",
+      "description": "The MessageFeedback subresource of a Message resource. MessageFeedback contains the reported outcome of whether the Message recipient performed a tracked user action.",
       "x-twilio": {
         "defaultOutputProperties": [
           "message_sid",
@@ -25554,7 +25562,7 @@
         "pathType": "list"
       },
       "post": {
-        "description": "",
+        "description": "Create Message Feedback to confirm a tracked user action was performed by the recipient of the associated Message",
         "tags": [
           "Api20100401Feedback"
         ],
@@ -25562,7 +25570,7 @@
           {
             "name": "AccountSid",
             "in": "path",
-            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that will create the resource.",
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) associated with the Message resource for which to create MessageFeedback.",
             "schema": {
               "type": "string",
               "minLength": 34,
@@ -25574,7 +25582,7 @@
           {
             "name": "MessageSid",
             "in": "path",
-            "description": "The SID of the Message resource for which the feedback was provided.",
+            "description": "The SID of the Message resource for which to create MessageFeedback.",
             "schema": {
               "type": "string",
               "minLength": 34,
@@ -25624,7 +25632,7 @@
                   "Outcome": {
                     "type": "string",
                     "$ref": "#/components/schemas/message_feedback_enum_outcome",
-                    "description": "Whether the feedback has arrived. Can be: `unconfirmed` or `confirmed`. If `provide_feedback`=`true` in [the initial HTTP POST](https://www.twilio.com/docs/sms/api/message-resource#create-a-message-resource), the initial value of this property is `unconfirmed`. After the message arrives, update the value to `confirmed`."
+                    "description": "The outcome to report. Use `confirmed` to indicate that the Message recipient performed the tracked user action. Set `ProvideFeedback`=`true` when [creating a new Message](https://www.twilio.com/docs/sms/api/message-resource#create-a-message-resource) to track Message Feedback. Do not pass `unconfirmed` as the value of the `Outcome` parameter, since it is already the initial value for the MessageFeedback of a newly created Message."
                   }
                 }
               },
