@@ -80,6 +80,8 @@ components:
             - line_type_intelligence
             - identity_match
             - reassigned_number
+            - sms_pumping_risk
+            - disposable_phone_number_risk
         country_code:
           type: string
         identity_match:
@@ -130,6 +132,10 @@ components:
           $ref: '#/components/schemas/IdentityMatch'
         reassigned_number:
           $ref: '#/components/schemas/ReassignedNumberResponse'
+        sms_pumping_risk:
+          $ref: '#/components/schemas/SmsPumpingRisk'
+        disposable_phone_number_risk:
+          $ref: '#/components/schemas/DisposablePhoneNumberRisk'
     LookupResponseWithCorId:
       allOf:
       - $ref: '#/components/schemas/LookupResponse'
@@ -295,6 +301,7 @@ components:
       properties:
         last_verified_date:
           type: string
+          maxLength: 8
     ReassignedNumberResponse:
       title: ReassignedNumberResponse
       type: object
@@ -305,4 +312,63 @@ components:
           type: string
         error_code:
           type: string
+    SmsPumpingRiskCarrier:
+      title: SmsPumpingRiskCarrier
+      allOf:
+      - $ref: '#/components/schemas/Carrier'
+      properties:
+        name:
+          type: string
+        carrier_risk_score:
+          type: integer
+        carrier_risk_category:
+          type: string
+      type: object
+    SmsPumpingRisk:
+      title: SmsPumpingRisk
+      type: object
+      properties:
+        carrier:
+          $ref: '#/components/schemas/SmsPumpingRiskCarrier'
+        number_blocked:
+          type: boolean
+        number_blocked_date:
+          type: string
+          format: date-time
+        number_blocked_last_3_months:
+          type: boolean
+        sms_pumping_risk_score:
+          type: integer
+        error_code:
+          type: integer
+    DisposablePhoneNumberRiskCarrier:
+      title: DisposablePhoneNumberRiskCarrier
+      allOf:
+      - $ref: '#/components/schemas/Carrier'
+      properties:
+        name:
+          type: string
+        carrier_risk_score:
+          type: integer
+        carrier_risk_category:
+          type: string
+        line_type:
+          type: string
+      type: object
+    DisposablePhoneNumberRisk:
+      title: DisposablePhoneNumberRisk
+      type: object
+      properties:
+        carrier:
+          $ref: '#/components/schemas/DisposablePhoneNumberRiskCarrier'
+        disposable_phone_risk_category:
+          type: string
+        disposable_phone_risk_score:
+          type: integer
+        velocity_risk_category:
+          type: string
+        velocity_risk_score:
+          type: integer
+        error_code:
+          type: integer
   requestBodies: {}

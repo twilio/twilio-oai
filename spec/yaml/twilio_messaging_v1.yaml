@@ -550,7 +550,7 @@ components:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+          description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
             that the resource is associated with.
         date_created:
           type: string
@@ -801,9 +801,9 @@ components:
         usecase:
           type: string
           nullable: true
-          description: 'A string that describes the scenario in which the Messaging
-            Service will be used. Examples: [notification, marketing, verification,
-            poll ..]'
+          description: A string that describes the scenario in which the Messaging
+            Service will be used. Possible values are `notifications`, `marketing`,
+            `verification`, `discussion`, `poll`, `undeclared`.
         us_app_to_person_registered:
           type: boolean
           nullable: true
@@ -1126,7 +1126,7 @@ components:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+          description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
             that the resource is associated with.
         description:
           type: string
@@ -1621,8 +1621,14 @@ paths:
       - sid
       - date_created
       dependentProperties:
-        brand_vetting: '{brand_sid: sid}'
-        brand_registration_otp: '{brand_registration_sid: sid}'
+        brand_vetting:
+          mapping:
+            brand_sid: sid
+          resource_url: /v1/a2p/BrandRegistrations/{brand_sid}/Vettings
+        brand_registration_otp:
+          mapping:
+            brand_registration_sid: sid
+          resource_url: /v1/a2p/BrandRegistrations/{brand_registration_sid}/SmsOtp
       pathType: instance
     get:
       description: ''
@@ -1855,8 +1861,14 @@ paths:
       - sid
       - date_created
       dependentProperties:
-        brand_vetting: '{brand_sid: sid}'
-        brand_registration_otp: '{brand_registration_sid: sid}'
+        brand_vetting:
+          mapping:
+            brand_sid: sid
+          resource_url: /v1/a2p/BrandRegistrations/{brand_sid}/Vettings
+        brand_registration_otp:
+          mapping:
+            brand_registration_sid: sid
+          resource_url: /v1/a2p/BrandRegistrations/{brand_registration_sid}/SmsOtp
       pathType: list
     get:
       description: ''
@@ -3024,7 +3036,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     that the resource is associated with.
               required:
               - CampaignId
@@ -3435,13 +3447,34 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        phone_number: '{service_sid: sid}'
-        short_code: '{service_sid: sid}'
-        alpha_sender: '{service_sid: sid}'
-        message: '{messaging_service_sid: sid}'
-        us_app_to_person: '{messaging_service_sid: sid}'
-        us_app_to_person_usecase: '{messaging_service_sid: sid}'
-        channel_sender: '{messaging_service_sid: sid}'
+        phone_number:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/PhoneNumbers
+        short_code:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/ShortCodes
+        alpha_sender:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/AlphaSenders
+        message:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Messages
+        us_app_to_person:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Compliance/Usa2p
+        us_app_to_person_usecase:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Compliance/Usa2p/Usecases
+        channel_sender:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/ChannelSenders
       pathType: list
     post:
       description: ''
@@ -3582,9 +3615,9 @@ paths:
                   description: Reserved.
                 Usecase:
                   type: string
-                  description: 'A string that describes the scenario in which the
-                    Messaging Service will be used. Examples: [notification, marketing,
-                    verification, poll ..].'
+                  description: A string that describes the scenario in which the Messaging
+                    Service will be used. Possible values are `notifications`, `marketing`,
+                    `verification`, `discussion`, `poll`, `undeclared`.
                 UseInboundWebhookOnNumber:
                   type: boolean
                   description: A boolean value that indicates either the webhook url
@@ -3730,13 +3763,34 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        phone_number: '{service_sid: sid}'
-        short_code: '{service_sid: sid}'
-        alpha_sender: '{service_sid: sid}'
-        message: '{messaging_service_sid: sid}'
-        us_app_to_person: '{messaging_service_sid: sid}'
-        us_app_to_person_usecase: '{messaging_service_sid: sid}'
-        channel_sender: '{messaging_service_sid: sid}'
+        phone_number:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/PhoneNumbers
+        short_code:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/ShortCodes
+        alpha_sender:
+          mapping:
+            service_sid: sid
+          resource_url: /v1/Services/{service_sid}/AlphaSenders
+        message:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Messages
+        us_app_to_person:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Compliance/Usa2p
+        us_app_to_person_usecase:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/Compliance/Usa2p/Usecases
+        channel_sender:
+          mapping:
+            messaging_service_sid: sid
+          resource_url: /v1/Services/{messaging_service_sid}/ChannelSenders
       pathType: instance
     post:
       description: ''
@@ -3887,9 +3941,9 @@ paths:
                   description: Reserved.
                 Usecase:
                   type: string
-                  description: 'A string that describes the scenario in which the
-                    Messaging Service will be used. Examples: [notification, marketing,
-                    verification, poll ..]'
+                  description: A string that describes the scenario in which the Messaging
+                    Service will be used. Possible values are `notifications`, `marketing`,
+                    `verification`, `discussion`, `poll`, `undeclared`.
                 UseInboundWebhookOnNumber:
                   type: boolean
                   description: A boolean value that indicates either the webhook url
@@ -4927,7 +4981,7 @@ paths:
       parameters:
       - name: MessagingServiceSid
         in: path
-        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
           to create the resources from.
         schema:
           type: string
@@ -5268,7 +5322,7 @@ paths:
       parameters:
       - name: MessagingServiceSid
         in: path
-        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
           to fetch the resource from.
         schema:
           type: string
@@ -5471,7 +5525,7 @@ paths:
       parameters:
       - name: MessagingServiceSid
         in: path
-        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
           to delete the resource from.
         schema:
           type: string
@@ -5501,7 +5555,7 @@ paths:
       parameters:
       - name: MessagingServiceSid
         in: path
-        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
           to fetch the resource from.
         schema:
           type: string
@@ -5690,7 +5744,7 @@ paths:
       parameters:
       - name: MessagingServiceSid
         in: path
-        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+        description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
           to fetch the resource from.
         schema:
           type: string

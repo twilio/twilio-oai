@@ -29,7 +29,7 @@ components:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
           nullable: true
-          description: The SID of the default [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+          description: The SID of the default [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
             used when creating a conversation.
         default_inactive_timer:
           type: string
@@ -114,6 +114,7 @@ components:
       - whatsapp
       - messenger
       - gbm
+      - email
     configuration_address_enum_auto_creation_type:
       type: string
       enum:
@@ -206,7 +207,7 @@ components:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+          description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
             this conversation belongs to.
         sid:
           type: string
@@ -1055,7 +1056,7 @@ components:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+          description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
             this conversation belongs to.
         sid:
           type: string
@@ -2288,7 +2289,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The SID of the default [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The SID of the default [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     to use when creating a conversation.
                 DefaultInactiveTimer:
                   type: string
@@ -2547,6 +2548,20 @@ paths:
                     date_created: '2016-03-24T21:05:50Z'
                     date_updated: '2016-03-24T21:05:50Z'
                     url: https://conversations.twilio.com/v1/Configuration/Addresses/IGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                createEmail:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sid: IGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address: example@example.com
+                    type: email
+                    friendly_name: My Email Configuration
+                    auto_creation:
+                      enabled: true
+                      type: default
+                    address_country: null
+                    date_created: '2016-03-24T21:05:50Z'
+                    date_updated: '2016-03-24T21:05:50Z'
+                    url: https://conversations.twilio.com/v1/Configuration/Addresses/IGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           description: Created
       security:
       - accountSid_authToken: []
@@ -2638,6 +2653,13 @@ paths:
                   - onParticipantAdded
                   - onMessageAdded
                   AddressCountry: CA
+              createEmail:
+                value:
+                  Address: example@example.com
+                  Type: email
+                  FriendlyName: My Email Configuration
+                  AutoCreation.Enabled: true
+                  AutoCreation.Type: default
   /v1/Configuration/Addresses/{Sid}:
     servers:
     - url: https://conversations.twilio.com
@@ -2930,9 +2952,18 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        participant: '{conversation_sid: sid}'
-        message: '{conversation_sid: sid}'
-        webhook: '{conversation_sid: sid}'
+        participant:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Participants
+        message:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Messages
+        webhook:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Webhooks
       pathType: list
     post:
       description: Create a new conversation in your account's default service
@@ -2992,6 +3023,28 @@ paths:
                       participants: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
                       messages: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
                       webhooks: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
+                createEmailConversation:
+                  value:
+                    sid: CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    chat_service_sid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    unique_name: null
+                    attributes: '{}'
+                    date_created: '2020-07-01T22:18:37Z'
+                    date_updated: '2020-07-01T22:18:37Z'
+                    state: active
+                    timers: {}
+                    bindings:
+                      email:
+                        projected_address: example+123@example.com
+                        name: example
+                    url: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      participants: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants
+                      messages: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages
+                      webhooks: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks
           description: Created
       security:
       - accountSid_authToken: []
@@ -3025,7 +3078,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     this conversation belongs to.
                 Attributes:
                   type: string
@@ -3046,6 +3099,14 @@ paths:
                   type: string
                   description: ISO8601 duration when conversation will be switched
                     to `closed` state. Minimum value for this timer is 10 minutes.
+                Bindings.Email.Address:
+                  type: string
+                  description: The default email address that will be used when sending
+                    outbound emails in this conversation.
+                Bindings.Email.Name:
+                  type: string
+                  description: The default name that will be used when sending outbound
+                    emails in this conversation.
             examples:
               create:
                 value:
@@ -3065,6 +3126,13 @@ paths:
                   DateUpdated: '2020-07-01T22:18:37Z'
                   MessagingServiceSid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   State: active
+              createEmailConversation:
+                value:
+                  FriendlyName: friendly_name
+                  DateCreated: '2020-07-01T22:18:37Z'
+                  DateUpdated: '2020-07-01T22:18:37Z'
+                  Bindings.Email.Address: example@example.com
+                  Bindings.Email.Name: Example
     get:
       description: Retrieve a list of conversations in your account's default service
       tags:
@@ -3192,9 +3260,18 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        participant: '{conversation_sid: sid}'
-        message: '{conversation_sid: sid}'
-        webhook: '{conversation_sid: sid}'
+        participant:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Participants
+        message:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Messages
+        webhook:
+          mapping:
+            conversation_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Webhooks
       pathType: instance
     post:
       description: Update an existing conversation in your account's default service
@@ -3276,7 +3353,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     this conversation belongs to.
                 State:
                   type: string
@@ -3296,6 +3373,14 @@ paths:
                   description: An application-defined string that uniquely identifies
                     the resource. It can be used to address the resource in place
                     of the resource's `sid` in the URL.
+                Bindings.Email.Address:
+                  type: string
+                  description: The default email address that will be used when sending
+                    outbound emails in this conversation.
+                Bindings.Email.Name:
+                  type: string
+                  description: The default name that will be used when sending outbound
+                    emails in this conversation.
             examples:
               update:
                 value:
@@ -3387,8 +3472,16 @@ paths:
       - author
       - date_created
       dependentProperties:
-        delivery_receipt: '{conversation_sid: conversation_sid, message_sid: sid}'
-        channel_metadata: '{conversation_sid: conversation_sid, message_sid: sid}'
+        delivery_receipt:
+          mapping:
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Messages/{message_sid}/Receipts
+        channel_metadata:
+          mapping:
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1None
       parent: /Conversations/{Sid}
       pathType: list
     post:
@@ -3520,6 +3613,31 @@ paths:
                     links:
                       delivery_receipts: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Receipts
                       channel_metadata: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelMetadata
+                createWithSubject:
+                  value:
+                    sid: IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    conversation_sid: CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    body: message body
+                    media: null
+                    author: message author
+                    participant_sid: MBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    attributes: '{}'
+                    date_created: '2015-12-16T22:18:37Z'
+                    date_updated: '2015-12-16T22:18:38Z'
+                    index: 0
+                    delivery:
+                      total: 2
+                      sent: all
+                      delivered: some
+                      read: some
+                      failed: none
+                      undelivered: none
+                    content_sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      delivery_receipts: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Receipts
+                      channel_metadata: https://conversations.twilio.com/v1/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelMetadata
           description: Created
       security:
       - accountSid_authToken: []
@@ -3573,6 +3691,10 @@ paths:
                   type: string
                   description: A structurally valid JSON string that contains values
                     to resolve Rich Content template variables.
+                Subject:
+                  type: string
+                  description: The subject of the message, can be up to 256 characters
+                    long.
             examples:
               create:
                 value:
@@ -3601,6 +3723,13 @@ paths:
                   DateUpdated: '2015-12-16T22:18:38Z'
                   ContentSid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   ContentVariables: '{"name": "John"}'
+              createWithSubject:
+                value:
+                  Author: message author
+                  Body: message body
+                  DateCreated: '2015-12-16T22:18:37Z'
+                  DateUpdated: '2015-12-16T22:18:38Z'
+                  Subject: message subject
     get:
       description: Retrieve a list of all messages in the conversation
       tags:
@@ -3815,8 +3944,16 @@ paths:
       - author
       - date_created
       dependentProperties:
-        delivery_receipt: '{conversation_sid: conversation_sid, message_sid: sid}'
-        channel_metadata: '{conversation_sid: conversation_sid, message_sid: sid}'
+        delivery_receipt:
+          mapping:
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1/Conversations/{conversation_sid}/Messages/{message_sid}/Receipts
+        channel_metadata:
+          mapping:
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1None
       parent: /Conversations/{Sid}
       pathType: instance
     post:
@@ -3912,6 +4049,10 @@ paths:
                     you wish. The string value must contain structurally valid JSON
                     if specified.  **Note** that if the attributes are not set "{}"
                     will be returned.
+                Subject:
+                  type: string
+                  description: The subject of the message, can be up to 256 characters
+                    long.
             examples:
               update:
                 value:
@@ -5994,12 +6135,30 @@ paths:
       - sid
       - friendly_name
       dependentProperties:
-        conversation: '{chat_service_sid: sid}'
-        binding: '{chat_service_sid: sid}'
-        user: '{chat_service_sid: sid}'
-        role: '{chat_service_sid: sid}'
-        configuration: '{chat_service_sid: sid}'
-        participant_conversation: '{chat_service_sid: sid}'
+        conversation:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations
+        binding:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Bindings
+        user:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Users
+        role:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Roles
+        configuration:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1None
+        participant_conversation:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/ParticipantConversations
       pathType: list
     post:
       description: Create a new conversation service on your account
@@ -6146,12 +6305,30 @@ paths:
       - sid
       - friendly_name
       dependentProperties:
-        conversation: '{chat_service_sid: sid}'
-        binding: '{chat_service_sid: sid}'
-        user: '{chat_service_sid: sid}'
-        role: '{chat_service_sid: sid}'
-        configuration: '{chat_service_sid: sid}'
-        participant_conversation: '{chat_service_sid: sid}'
+        conversation:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations
+        binding:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Bindings
+        user:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Users
+        role:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Roles
+        configuration:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1None
+        participant_conversation:
+          mapping:
+            chat_service_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/ParticipantConversations
       pathType: instance
     delete:
       description: Remove a conversation service with all its nested resources from
@@ -6585,9 +6762,21 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        participant: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
-        message: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
-        webhook: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        participant:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Participants
+        message:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Messages
+        webhook:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Webhooks
       parent: /Services/{Sid}
       pathType: list
     post:
@@ -6689,7 +6878,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     this conversation belongs to.
                 DateCreated:
                   type: string
@@ -6712,6 +6901,14 @@ paths:
                   type: string
                   description: ISO8601 duration when conversation will be switched
                     to `closed` state. Minimum value for this timer is 10 minutes.
+                Bindings.Email.Address:
+                  type: string
+                  description: The default email address that will be used when sending
+                    outbound emails in this conversation.
+                Bindings.Email.Name:
+                  type: string
+                  description: The default name that will be used when sending outbound
+                    emails in this conversation.
             examples:
               create:
                 value:
@@ -6868,9 +7065,21 @@ paths:
       - friendly_name
       - date_created
       dependentProperties:
-        participant: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
-        message: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
-        webhook: '{chat_service_sid: chat_service_sid, conversation_sid: sid}'
+        participant:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Participants
+        message:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Messages
+        webhook:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Webhooks
       parent: /Services/{Sid}
       pathType: instance
     post:
@@ -6963,7 +7172,7 @@ paths:
                   minLength: 34
                   maxLength: 34
                   pattern: ^MG[0-9a-fA-F]{32}$
-                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/services/api)
+                  description: The unique ID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
                     this conversation belongs to.
                 State:
                   type: string
@@ -6983,6 +7192,14 @@ paths:
                   description: An application-defined string that uniquely identifies
                     the resource. It can be used to address the resource in place
                     of the resource's `sid` in the URL.
+                Bindings.Email.Address:
+                  type: string
+                  description: The default email address that will be used when sending
+                    outbound emails in this conversation.
+                Bindings.Email.Name:
+                  type: string
+                  description: The default name that will be used when sending outbound
+                    emails in this conversation.
             examples:
               update:
                 value:
@@ -7095,10 +7312,18 @@ paths:
       - author
       - date_created
       dependentProperties:
-        delivery_receipt: '{chat_service_sid: chat_service_sid, conversation_sid:
-          conversation_sid, message_sid: sid}'
-        channel_metadata: '{chat_service_sid: chat_service_sid, conversation_sid:
-          conversation_sid, message_sid: sid}'
+        delivery_receipt:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Messages/{message_sid}/Receipts
+        channel_metadata:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1None
       parent: /Services/{ChatServiceSid}/Conversations/{Sid}
       pathType: list
     post:
@@ -7244,6 +7469,32 @@ paths:
                     links:
                       delivery_receipts: https://conversations.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Receipts
                       channel_metadata: https://conversations.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelMetadata
+                createWithSubject:
+                  value:
+                    sid: IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    chat_service_sid: ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    conversation_sid: CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    body: message body
+                    media: null
+                    author: message author
+                    participant_sid: MBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    attributes: '{}'
+                    date_created: '2015-12-16T22:18:37Z'
+                    date_updated: '2015-12-16T22:18:38Z'
+                    index: 0
+                    delivery:
+                      total: 2
+                      sent: all
+                      delivered: some
+                      read: some
+                      failed: none
+                      undelivered: none
+                    content_sid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://conversations.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      delivery_receipts: https://conversations.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Receipts
+                      channel_metadata: https://conversations.twilio.com/v1/Services/ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conversations/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/IMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelMetadata
           description: Created
       security:
       - accountSid_authToken: []
@@ -7297,6 +7548,10 @@ paths:
                   type: string
                   description: A structurally valid JSON string that contains values
                     to resolve Rich Content template variables.
+                Subject:
+                  type: string
+                  description: The subject of the message, can be up to 256 characters
+                    long.
             examples:
               create:
                 value:
@@ -7325,6 +7580,13 @@ paths:
                   DateUpdated: '2015-12-16T22:18:38Z'
                   ContentSid: HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   ContentVariables: '{"name": "John"}'
+              createWithSubject:
+                value:
+                  Author: message author
+                  Body: message body
+                  DateCreated: '2015-12-16T22:18:37Z'
+                  DateUpdated: '2015-12-16T22:18:38Z'
+                  Subject: message subject
     get:
       description: Retrieve a list of all messages in the conversation
       tags:
@@ -7554,10 +7816,18 @@ paths:
       - author
       - date_created
       dependentProperties:
-        delivery_receipt: '{chat_service_sid: chat_service_sid, conversation_sid:
-          conversation_sid, message_sid: sid}'
-        channel_metadata: '{chat_service_sid: chat_service_sid, conversation_sid:
-          conversation_sid, message_sid: sid}'
+        delivery_receipt:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Conversations/{conversation_sid}/Messages/{message_sid}/Receipts
+        channel_metadata:
+          mapping:
+            chat_service_sid: chat_service_sid
+            conversation_sid: conversation_sid
+            message_sid: sid
+          resource_url: /v1None
       parent: /Services/{ChatServiceSid}/Conversations/{Sid}
       pathType: instance
     post:
@@ -7664,6 +7934,10 @@ paths:
                     you wish. The string value must contain structurally valid JSON
                     if specified.  **Note** that if the attributes are not set "{}"
                     will be returned.
+                Subject:
+                  type: string
+                  description: The subject of the message, can be up to 256 characters
+                    long.
             examples:
               update:
                 value:
@@ -9841,7 +10115,11 @@ paths:
       - sid
       - identity
       dependentProperties:
-        user_conversation: '{chat_service_sid: chat_service_sid, user_sid: sid}'
+        user_conversation:
+          mapping:
+            chat_service_sid: chat_service_sid
+            user_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Users/{user_sid}/Conversations
       parent: /Services/{Sid}
       pathType: list
     post:
@@ -10050,7 +10328,11 @@ paths:
       - sid
       - identity
       dependentProperties:
-        user_conversation: '{chat_service_sid: chat_service_sid, user_sid: sid}'
+        user_conversation:
+          mapping:
+            chat_service_sid: chat_service_sid
+            user_sid: sid
+          resource_url: /v1/Services/{chat_service_sid}/Users/{user_sid}/Conversations
       parent: /Services/{Sid}
       pathType: instance
     post:
@@ -10711,7 +10993,10 @@ paths:
       - sid
       - identity
       dependentProperties:
-        user_conversation: '{user_sid: sid}'
+        user_conversation:
+          mapping:
+            user_sid: sid
+          resource_url: /v1/Users/{user_sid}/Conversations
       pathType: list
     post:
       description: Add a new conversation user to your account's default service
@@ -10900,7 +11185,10 @@ paths:
       - sid
       - identity
       dependentProperties:
-        user_conversation: '{user_sid: sid}'
+        user_conversation:
+          mapping:
+            user_sid: sid
+          resource_url: /v1/Users/{user_sid}/Conversations
       pathType: instance
     post:
       description: Update an existing conversation user in your account's default

@@ -286,6 +286,9 @@ components:
         agent_conv_end_methods:
           nullable: true
           description: Agent conversation end methods.
+        citrix_voice_vdi:
+          nullable: true
+          description: Citrix voice vdi configuration and settings.
     configuration_enum_status:
       type: string
       enum:
@@ -925,6 +928,12 @@ components:
       - active
       - failed
       - closed
+      - inactive
+    interaction_channel_enum_update_channel_status:
+      type: string
+      enum:
+      - closed
+      - inactive
     flex.v1.interaction.interaction_channel.interaction_channel_invite:
       type: object
       properties:
@@ -1529,12 +1538,15 @@ paths:
                         - oga
                     debugger_integration:
                       enabled: false
+                      console_errors_included: false
                     flex_ui_status_report:
                       enabled: false
                     agent_conv_end_methods:
                       enabled:
                       - Leave
                       dateUpdated: '2023-08-16T12:22:06.787Z'
+                    citrix_voice_vdi:
+                      enabled: false
           description: OK
       security:
       - accountSid_authToken: []
@@ -1691,12 +1703,15 @@ paths:
                         - pdf
                     debugger_integration:
                       enabled: false
+                      console_errors_included: false
                     flex_ui_status_report:
                       enabled: false
                     agent_conv_end_methods:
                       enabled:
                       - Leave
                       dateUpdated: '2023-08-16T12:22:06.787Z'
+                    citrix_voice_vdi:
+                      enabled: false
           description: OK
       security:
       - accountSid_authToken: []
@@ -4408,7 +4423,10 @@ paths:
       defaultOutputProperties:
       - sid
       dependentProperties:
-        interaction_channel: '{interaction_sid: sid}'
+        interaction_channel:
+          mapping:
+            interaction_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels
       mountName: interaction
       pathType: instance
     get:
@@ -4461,7 +4479,10 @@ paths:
       defaultOutputProperties:
       - sid
       dependentProperties:
-        interaction_channel: '{interaction_sid: sid}'
+        interaction_channel:
+          mapping:
+            interaction_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels
       mountName: interaction
       pathType: list
     post:
@@ -4551,10 +4572,16 @@ paths:
       defaultOutputProperties:
       - sid
       dependentProperties:
-        interaction_channel_invite: '{interaction_sid: interaction_sid, channel_sid:
-          sid}'
-        interaction_channel_participant: '{interaction_sid: interaction_sid, channel_sid:
-          sid}'
+        interaction_channel_invite:
+          mapping:
+            interaction_sid: interaction_sid
+            channel_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Invites
+        interaction_channel_participant:
+          mapping:
+            interaction_sid: interaction_sid
+            channel_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Participants
       parent: /Interactions/{Sid}
       className: interaction_channel
       pathType: instance
@@ -4662,6 +4689,18 @@ paths:
                     links:
                       participants: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants
                       invites: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Invites
+                updateStatusInactive:
+                  value:
+                    sid: UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1
+                    interaction_sid: KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: email
+                    status: inactive
+                    error_code: null
+                    error_message: ''
+                    url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1
+                    links:
+                      participants: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants
+                      invites: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Invites
           description: OK
       security:
       - accountSid_authToken: []
@@ -4675,14 +4714,18 @@ paths:
               properties:
                 Status:
                   type: string
-                  $ref: '#/components/schemas/interaction_channel_enum_status'
+                  $ref: '#/components/schemas/interaction_channel_enum_update_channel_status'
                   description: 'Required. Indicates the Interaction channel''s status.
                     When a channel is set to `closed`, all tasks are put in the `wrapping`
                     state by default unless the Routing status is set to `closed`
-                    in which case the tasks will be `completed`. Value: `closed`.'
+                    in which case the tasks will be `completed`. When a channel is
+                    set to `inactive`, it is mandatory to set the Routing status as
+                    `closed` else the request will be invalid.  Value: `closed`, `inactive`'
                 Routing:
-                  description: Optional. The state of associated tasks. If not specified,
-                    all tasks will be set to `wrapping`.
+                  description: It changes the state of associated tasks. Routing status
+                    is required, When the channel status is set to `inactive`. Allowed
+                    Value for routing status is `closed`. Otherwise Optional, if not
+                    specified, all tasks will be set to `wrapping`.
               required:
               - Status
             examples:
@@ -4692,6 +4735,10 @@ paths:
               updateStatusClosed:
                 value:
                   Status: closed
+              updateStatusInactive:
+                value:
+                  Status: inactive
+                  Routing: '{"status":"closed"}'
   /v1/Interactions/{InteractionSid}/Channels:
     servers:
     - url: https://flex-api.twilio.com
@@ -4700,10 +4747,16 @@ paths:
       defaultOutputProperties:
       - sid
       dependentProperties:
-        interaction_channel_invite: '{interaction_sid: interaction_sid, channel_sid:
-          sid}'
-        interaction_channel_participant: '{interaction_sid: interaction_sid, channel_sid:
-          sid}'
+        interaction_channel_invite:
+          mapping:
+            interaction_sid: interaction_sid
+            channel_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Invites
+        interaction_channel_participant:
+          mapping:
+            interaction_sid: interaction_sid
+            channel_sid: sid
+          resource_url: /v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Participants
       parent: /Interactions/{Sid}
       className: interaction_channel
       pathType: list
