@@ -323,6 +323,10 @@
           "agent_conv_end_methods": {
             "nullable": true,
             "description": "Agent conversation end methods."
+          },
+          "citrix_voice_vdi": {
+            "nullable": true,
+            "description": "Citrix voice vdi configuration and settings."
           }
         }
       },
@@ -1080,7 +1084,15 @@
           "setup",
           "active",
           "failed",
-          "closed"
+          "closed",
+          "inactive"
+        ]
+      },
+      "interaction_channel_enum_update_channel_status": {
+        "type": "string",
+        "enum": [
+          "closed",
+          "inactive"
         ]
       },
       "flex.v1.interaction.interaction_channel.interaction_channel_invite": {
@@ -1265,7 +1277,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.49.0"
+    "version": "1.50.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -4227,7 +4239,12 @@
         ],
         "pathType": "instance",
         "dependentProperties": {
-          "interaction_channel": "{interaction_sid: sid}"
+          "interaction_channel": {
+            "mapping": {
+              "interaction_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels"
+          }
         },
         "mountName": "interaction"
       },
@@ -4286,7 +4303,12 @@
         ],
         "pathType": "list",
         "dependentProperties": {
-          "interaction_channel": "{interaction_sid: sid}"
+          "interaction_channel": {
+            "mapping": {
+              "interaction_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels"
+          }
         },
         "mountName": "interaction"
       },
@@ -4360,8 +4382,20 @@
         ],
         "pathType": "instance",
         "dependentProperties": {
-          "interaction_channel_invite": "{interaction_sid: interaction_sid, channel_sid: sid}",
-          "interaction_channel_participant": "{interaction_sid: interaction_sid, channel_sid: sid}"
+          "interaction_channel_invite": {
+            "mapping": {
+              "interaction_sid": "interaction_sid",
+              "channel_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Invites"
+          },
+          "interaction_channel_participant": {
+            "mapping": {
+              "interaction_sid": "interaction_sid",
+              "channel_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Participants"
+          }
         },
         "parent": "/Interactions/{Sid}",
         "className": "interaction_channel"
@@ -4480,11 +4514,11 @@
                 "properties": {
                   "Status": {
                     "type": "string",
-                    "$ref": "#/components/schemas/interaction_channel_enum_status",
-                    "description": "Required. Indicates the Interaction channel's status. When a channel is set to `closed`, all tasks are put in the `wrapping` state by default unless the Routing status is set to `closed` in which case the tasks will be `completed`. Value: `closed`."
+                    "$ref": "#/components/schemas/interaction_channel_enum_update_channel_status",
+                    "description": "Required. Indicates the Interaction channel's status. When a channel is set to `closed`, all tasks are put in the `wrapping` state by default unless the Routing status is set to `closed` in which case the tasks will be `completed`. When a channel is set to `inactive`, it is mandatory to set the Routing status as `closed` else the request will be invalid.  Value: `closed`, `inactive`"
                   },
                   "Routing": {
-                    "description": "Optional. The state of associated tasks. If not specified, all tasks will be set to `wrapping`."
+                    "description": "It changes the state of associated tasks. Routing status is required, When the channel status is set to `inactive`. Allowed Value for routing status is `closed`. Otherwise Optional, if not specified, all tasks will be set to `wrapping`."
                   }
                 },
                 "required": [
@@ -4509,8 +4543,20 @@
         ],
         "pathType": "list",
         "dependentProperties": {
-          "interaction_channel_invite": "{interaction_sid: interaction_sid, channel_sid: sid}",
-          "interaction_channel_participant": "{interaction_sid: interaction_sid, channel_sid: sid}"
+          "interaction_channel_invite": {
+            "mapping": {
+              "interaction_sid": "interaction_sid",
+              "channel_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Invites"
+          },
+          "interaction_channel_participant": {
+            "mapping": {
+              "interaction_sid": "interaction_sid",
+              "channel_sid": "sid"
+            },
+            "resource_url": "/v1/Interactions/{interaction_sid}/Channels/{channel_sid}/Participants"
+          }
         },
         "parent": "/Interactions/{Sid}",
         "className": "interaction_channel"
