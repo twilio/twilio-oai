@@ -7,6 +7,32 @@
       }
     },
     "schemas": {
+      "trusthub.v1.compliance_inquiry": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The unique ID used to start an embedded compliance registration session."
+          },
+          "inquiry_session_token": {
+            "type": "string",
+            "nullable": true,
+            "description": "The session token used to start an embedded compliance registration session."
+          },
+          "customer_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The CustomerID matching the Customer Profile that should be resumed or resubmitted for editing."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource."
+          }
+        }
+      },
       "trusthub.v1.customer_profile": {
         "type": "object",
         "properties": {
@@ -793,6 +819,179 @@
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v1/ComplianceInquiries/Customers/Initialize": {
+      "servers": [
+        {
+          "url": "https://trusthub.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "inquiry_id",
+          "session_token",
+          "customer_id"
+        ],
+        "mountName": "compliance_inquiries",
+        "className": "compliance_inquiries",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Create a new Compliance Inquiry for the authenticated account. This is necessary to start a new embedded session.",
+        "tags": [
+          "TrusthubV1ComplianceInquiries"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/trusthub.v1.compliance_inquiry"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "inquiry_id": "inq_aaaaaaaaaaaaaaaaaaaaaaaa",
+                      "inquiry_session_token": "new.session.token",
+                      "customer_id": "tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://trusthub.twilio.com/v1/ComplianceInquiries/Customers/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateComplianceInquiry",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateComplianceInquiryRequest",
+                "properties": {
+                  "PrimaryProfileSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^BU[0-9a-fA-F]{32}$",
+                    "description": "The unique SID identifier of the Primary Customer Profile that should be used as a parent. Only necessary when creating a secondary Customer Profile."
+                  }
+                },
+                "required": [
+                  "PrimaryProfileSid"
+                ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "PrimaryProfileSid": "BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ComplianceInquiries/Customers/{CustomerId}/Initialize": {
+      "servers": [
+        {
+          "url": "https://trusthub.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "inquiry_id",
+          "session_token",
+          "customer_id"
+        ],
+        "mountName": "compliance_inquiries",
+        "className": "compliance_inquiries",
+        "pathType": "instance"
+      },
+      "post": {
+        "description": "Resume a specific Compliance Inquiry that has expired, or re-open a rejected Compliance Inquiry for editing.",
+        "tags": [
+          "TrusthubV1ComplianceInquiries"
+        ],
+        "parameters": [
+          {
+            "name": "CustomerId",
+            "in": "path",
+            "description": "The unique CustomerId matching the Customer Profile/Compliance Inquiry that should be resumed or resubmitted. This value will have been returned by the initial Compliance Inquiry creation call.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/trusthub.v1.compliance_inquiry"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "inquiry_id": "inq_aaaaaaaaaaaaaaaaaaaaaaaa",
+                      "inquiry_session_token": "new.session.token",
+                      "customer_id": "tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://trusthub.twilio.com/v1/ComplianceInquiries/Customers/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateComplianceInquiry",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateComplianceInquiryRequest",
+                "properties": {
+                  "PrimaryProfileSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^BU[0-9a-fA-F]{32}$",
+                    "description": "The unique SID identifier of the Primary Customer Profile that should be used as a parent. Only necessary when creating a secondary Customer Profile."
+                  }
+                },
+                "required": [
+                  "PrimaryProfileSid"
+                ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "PrimaryProfileSid": "BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/CustomerProfiles": {
       "servers": [
         {
@@ -7057,6 +7256,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "TrusthubV1ComplianceInquiries"
+    },
     {
       "name": "TrusthubV1CustomerProfiles"
     },
