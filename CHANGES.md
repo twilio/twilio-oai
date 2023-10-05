@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2023-10-05] Version 1.50.1
+---------------------------
+**Lookups**
+- Add test api support for Lookup v2
+
+
 [2023-09-21] Version 1.50.0
 ---------------------------
 **Conversations**
