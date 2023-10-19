@@ -303,6 +303,12 @@
             "format": "uri-map",
             "nullable": true,
             "description": "The URLs of related resources."
+          },
+          "virtual_start_time": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT indicating the ordering for routing of the Task specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
           }
         }
       },
@@ -512,8 +518,10 @@
             "description": "The SID of the Workspace that contains the TaskQueue."
           },
           "task_queue_data": {
+            "type": "array",
+            "items": {},
             "nullable": true,
-            "description": "The TaskQueue RealTime Statistics for each requested TaskQueue SID, represented as a map of TaskQueue SID to the TaskQueue result, each result contains the following attributes: task_queue_sid: The SID of the TaskQueue from which these statistics were calculated, total_available_workers: The total number of Workers available for Tasks in the TaskQueue, total_eligible_workers: The total number of Workers eligible for Tasks in the TaskQueue, independent of their Activity state, total_tasks: The total number of Tasks, longest_task_waiting_age: The age of the longest waiting Task, longest_task_waiting_sid: The SID of the longest waiting Task, tasks_by_status: The number of Tasks by their current status, tasks_by_priority: The number of Tasks by priority, activity_statistics: The number of current Workers by Activity."
+            "description": "The TaskQueue RealTime Statistics for each requested TaskQueue SID, represented as an array of TaskQueue results corresponding to the requested TaskQueue SIDs, each result contains the following attributes: task_queue_sid: The SID of the TaskQueue from which these statistics were calculated, total_available_workers: The total number of Workers available for Tasks in the TaskQueue, total_eligible_workers: The total number of Workers eligible for Tasks in the TaskQueue, independent of their Activity state, total_tasks: The total number of Tasks, longest_task_waiting_age: The age of the longest waiting Task, longest_task_waiting_sid: The SID of the longest waiting Task, tasks_by_status: The number of Tasks by their current status, tasks_by_priority: The number of Tasks by priority, activity_statistics: The number of current Workers by Activity."
           },
           "task_queue_response_count": {
             "type": "integer",
@@ -2073,7 +2081,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.50.1"
+    "version": "1.51.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -2939,6 +2947,11 @@
                   "TaskChannel": {
                     "type": "string",
                     "description": "When MultiTasking is enabled, specify the TaskChannel with the task to update. Can be the TaskChannel's SID or its `unique_name`, such as `voice`, `sms`, or `default`."
+                  },
+                  "VirtualStartTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The task's new virtual start time value. When supplied, the Task takes on the specified virtual start time. Value can't be in the future."
                   }
                 }
               }
@@ -3114,7 +3127,7 @@
           {
             "name": "Ordering",
             "in": "query",
-            "description": "How to order the returned Task resources. y default, Tasks are sorted by ascending DateCreated. This value is specified as: `Attribute:Order`, where `Attribute` can be either `Priority` or `DateCreated` and `Order` can be either `asc` or `desc`. For example, `Priority:desc` returns Tasks ordered in descending order of their Priority. Multiple sort orders can be specified in a comma-separated list such as `Priority:desc,DateCreated:asc`, which returns the Tasks in descending Priority order and ascending DateCreated Order.",
+            "description": "How to order the returned Task resources. By default, Tasks are sorted by ascending DateCreated. This value is specified as: `Attribute:Order`, where `Attribute` can be either `DateCreated`, `Priority`, or `VirtualStartTime` and `Order` can be either `asc` or `desc`. For example, `Priority:desc` returns Tasks ordered in descending order of their Priority. Pairings of sort orders can be specified in a comma-separated list such as `Priority:desc,DateCreated:asc`, which returns the Tasks in descending Priority order and ascending DateCreated Order. The only ordering pairing not allowed is DateCreated and VirtualStartTime.",
             "schema": {
               "type": "string"
             }
@@ -3287,6 +3300,11 @@
                   "Attributes": {
                     "type": "string",
                     "description": "A URL-encoded JSON string with the attributes of the new task. This value is passed to the Workflow's `assignment_callback_url` when the Task is assigned to a Worker. For example: `{ \"task_type\": \"call\", \"twilio_call_sid\": \"CAxxx\", \"customer_ticket_number\": \"12345\" }`."
+                  },
+                  "VirtualStartTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The virtual start time to assign the new task and override the default. When supplied, the new task will have this virtual start time. When not supplied, the new task will have the virtual start time equal to `date_created`. Value can't be in the future."
                   }
                 }
               }
