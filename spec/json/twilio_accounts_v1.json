@@ -135,6 +135,24 @@
           }
         }
       },
+      "accounts.v1.safelist": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the SafeList resource."
+          },
+          "phone_number": {
+            "type": "string",
+            "nullable": true,
+            "description": "The phone number in SafeList."
+          }
+        }
+      },
       "accounts.v1.secondary_auth_token": {
         "type": "object",
         "properties": {
@@ -1050,6 +1068,159 @@
         "operationId": "DeleteCredentialPublicKey"
       }
     },
+    "/v1/SafeList/Numbers": {
+      "servers": [
+        {
+          "url": "https://accounts.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "phone_number"
+        ],
+        "mountName": "safelist",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Add a new phone number to SafeList.",
+        "tags": [
+          "AccountsV1Safelist"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.safelist"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "GNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "phone_number": "+18001234567"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateSafelist",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateSafelistRequest",
+                "properties": {
+                  "PhoneNumber": {
+                    "type": "string",
+                    "description": "The phone number to be added in SafeList. Phone numbers must be in [E.164 format](https://www.twilio.com/docs/glossary/what-e164)."
+                  }
+                },
+                "required": [
+                  "PhoneNumber"
+                ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "PhoneNumber": "+18001234567"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Check if a phone number exists in SafeList.",
+        "tags": [
+          "AccountsV1Safelist"
+        ],
+        "parameters": [
+          {
+            "name": "PhoneNumber",
+            "in": "query",
+            "description": "The phone number to be fetched from SafeList. Phone numbers must be in [E.164 format](https://www.twilio.com/docs/glossary/what-e164).",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "fetch": {
+                "value": "+18001234567"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.safelist"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "GNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "phone_number": "+18001234567"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchSafelist"
+      },
+      "delete": {
+        "description": "Remove a phone number from SafeList.",
+        "tags": [
+          "AccountsV1Safelist"
+        ],
+        "parameters": [
+          {
+            "name": "PhoneNumber",
+            "in": "query",
+            "description": "The phone number to be removed from SafeList. Phone numbers must be in [E.164 format](https://www.twilio.com/docs/glossary/what-e164).",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "delete": {
+                "value": "+18001234567"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteSafelist"
+      }
+    },
     "/v1/AuthTokens/Secondary": {
       "servers": [
         {
@@ -1134,6 +1305,9 @@
     },
     {
       "name": "AccountsV1PublicKey"
+    },
+    {
+      "name": "AccountsV1Safelist"
     },
     {
       "name": "AccountsV1SecondaryAuthToken"
