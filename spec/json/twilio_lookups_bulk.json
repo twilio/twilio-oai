@@ -66,18 +66,45 @@
       },
       "LookupRequestWithCorId": {
         "title": "LookupRequestWithCorId",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/LookupRequest"
-          }
-        ],
         "type": "object",
         "properties": {
           "correlation_id": {
             "type": "string",
             "description": "Unique identifier used to match request with response"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "caller_name",
+                "sim_swap",
+                "call_forwarding",
+                "live_activity",
+                "line_type_intelligence",
+                "identity_match",
+                "reassigned_number",
+                "sms_pumping_risk",
+                "phone_number_quality_score"
+              ]
+            }
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatchParameters"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberRequest"
           }
-        }
+        },
+        "required": [
+          "phone_number"
+        ]
       },
       "LookupResponse": {
         "title": "LookupResponse",
@@ -134,11 +161,6 @@
         }
       },
       "LookupResponseWithCorId": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/LookupResponse"
-          }
-        ],
         "type": "object",
         "properties": {
           "correlation_id": {
@@ -148,6 +170,54 @@
           "twilio_error_code": {
             "type": "integer",
             "description": "Twilio error conde in case that the request to downstream fails"
+          },
+          "calling_country_code": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "national_format": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caller_name": {
+            "$ref": "#/components/schemas/CallerName"
+          },
+          "sim_swap": {
+            "$ref": "#/components/schemas/SimSwap"
+          },
+          "call_forwarding": {
+            "$ref": "#/components/schemas/CallForwarding"
+          },
+          "live_activity": {
+            "$ref": "#/components/schemas/LiveActivity"
+          },
+          "line_type_intelligence": {
+            "$ref": "#/components/schemas/LineTypeIntelligence"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatch"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberResponse"
+          },
+          "sms_pumping_risk": {
+            "$ref": "#/components/schemas/SmsPumpingRisk"
+          },
+          "phone_number_quality_score": {
+            "$ref": "#/components/schemas/PhoneNumberQualityScore"
           }
         }
       },
@@ -168,14 +238,18 @@
       },
       "SimSwap": {
         "title": "SimSwap",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ATOCarrier"
-          }
-        ],
         "properties": {
           "last_sim_swap": {
             "$ref": "#/components/schemas/LastSimSwap"
+          },
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
           },
           "error_code": {
             "type": "integer"
@@ -201,14 +275,18 @@
       "CallForwarding": {
         "title": "CallForwarding",
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ATOCarrier"
-          }
-        ],
         "properties": {
           "call_forwarding_enabled": {
             "type": "boolean"
+          },
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
           },
           "error_code": {
             "type": "integer"
@@ -259,16 +337,17 @@
       },
       "LiveActivityCarrier": {
         "title": "LiveActivityCarrier",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Carrier"
-          }
-        ],
         "properties": {
           "name": {
             "type": "string"
           },
           "country": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
             "type": "string"
           }
         },
@@ -277,13 +356,17 @@
       "LineTypeIntelligence": {
         "title": "Packages/LineTypeIntelligence",
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ATOCarrier"
-          }
-        ],
         "properties": {
           "type": {
+            "type": "string"
+          },
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
             "type": "string"
           },
           "error_code": {
@@ -408,11 +491,6 @@
       },
       "SmsPumpingRiskCarrier": {
         "title": "SmsPumpingRiskCarrier",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Carrier"
-          }
-        ],
         "properties": {
           "name": {
             "type": "string"
@@ -421,6 +499,12 @@
             "type": "integer"
           },
           "carrier_risk_category": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
             "type": "string"
           }
         },
@@ -453,11 +537,6 @@
       },
       "PhoneNumberQualityScoreCarrier": {
         "title": "PhoneNumberQualityScoreCarrier",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Carrier"
-          }
-        ],
         "properties": {
           "name": {
             "type": "string"
@@ -469,6 +548,12 @@
             "type": "string"
           },
           "line_type": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
             "type": "string"
           }
         },

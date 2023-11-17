@@ -40,7 +40,7 @@ components:
           nullable: true
           description: The session token used to start an embedded compliance registration
             session.
-        tollfree_id:
+        registration_id:
           type: string
           nullable: true
           description: The TolfreeId matching the Tollfree Profile that should be
@@ -322,6 +322,10 @@ components:
           nullable: true
           description: The set of parameters that are the attributes of the End Users
             resource which are listed in the End User Types.
+          x-twilio:
+            pii:
+              handling: standard
+              deleteSla: 30
         date_created:
           type: string
           format: date-time
@@ -440,6 +444,10 @@ components:
           nullable: true
           description: The set of parameters that are the attributes of the Supporting
             Documents resource which are listed in the Supporting Document Types.
+          x-twilio:
+            pii:
+              handling: standard
+              deleteSla: 30
         date_created:
           type: string
           format: date-time
@@ -880,7 +888,7 @@ paths:
       defaultOutputProperties:
       - inquiry_id
       - session_token
-      - tollfree_id
+      - registration_id
       mountName: compliance_tollfree_inquiries
       className: compliance_tollfree_inquiries
       pathType: list
@@ -900,8 +908,8 @@ paths:
                   value:
                     inquiry_id: inq_aaaaaaaaaaaaaaaaaaaaaaaa
                     inquiry_session_token: new.session.token
-                    tollfree_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Tollfree/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize
+                    registration_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Tollfree/Initialize
           description: Created
       security:
       - accountSid_authToken: []
@@ -913,78 +921,22 @@ paths:
               type: object
               title: CreateComplianceTollfreeInquiryRequest
               properties:
-                Did:
+                TollfreePhoneNumber:
                   type: string
                   format: phone-number
                   description: The Tollfree phone number to be verified
+                NotificationEmail:
+                  type: string
+                  description: The notification email to be triggered when verification
+                    status is changed
               required:
-              - Did
+              - TollfreePhoneNumber
+              - NotificationEmail
             examples:
               create:
                 value:
-                  Did: '+123445566'
-  /v1/ComplianceInquiries/Tollfree/{TollfreeId}/Initialize:
-    servers:
-    - url: https://trusthub.twilio.com
-    description: ''
-    x-twilio:
-      defaultOutputProperties:
-      - inquiry_id
-      - session_token
-      - tollfree_id
-      mountName: compliance_tollfree_inquiries
-      className: compliance_tollfree_inquiries
-      pathType: instance
-    post:
-      description: Resume a specific Compliance Tollfree Verification Inquiry that
-        has expired, or re-open a rejected Compliance Tollfree Verification Inquiry
-        for editing.
-      tags:
-      - TrusthubV1ComplianceTollfreeInquiries
-      parameters:
-      - name: TollfreeId
-        in: path
-        description: The unique TolfreeId matching the Compliance Tollfree Verification
-          Inquiry that should be resumed or resubmitted. This value will have been
-          returned by the initial Compliance Tollfree Verification Inquiry creation
-          call.
-        schema:
-          type: string
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/trusthub.v1.compliance_tollfree_inquiry'
-              examples:
-                update:
-                  value:
-                    inquiry_id: inq_aaaaaaaaaaaaaaaaaaaaaaaa
-                    inquiry_session_token: new.session.token
-                    tollfree_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Tollfree/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize
-          description: OK
-      security:
-      - accountSid_authToken: []
-      operationId: UpdateComplianceTollfreeInquiry
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              title: UpdateComplianceTollfreeInquiryRequest
-              properties:
-                Did:
-                  type: string
-                  format: phone-number
-                  description: The Tollfree phone number to be verified
-              required:
-              - Did
-            examples:
-              update:
-                value:
-                  Did: '+123445566'
+                  TollfreePhoneNumber: '+123445566'
+                  NotificationEmail: jeff@twilio.com
   /v1/CustomerProfiles:
     servers:
     - url: https://trusthub.twilio.com
