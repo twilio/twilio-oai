@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2023-12-01] Version 2.0.0-rc.12
+--------------------------------
+**Verify**
+- Add `VerifyEventSubscriptionEnabled` parameter to service create and update endpoints.
+
+
 [2023-11-17] Version 2.0.0-rc.11
 --------------------------------
 **Library - Chore**
