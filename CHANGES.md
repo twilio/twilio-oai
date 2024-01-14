@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2024-01-14] Version 1.52.1
+---------------------------
+**Push**
+- Migrated to new Push API V4 with Resilient Notification Delivery.
+
+
 [2023-12-14] Version 1.52.0
 ---------------------------
 **Api**
