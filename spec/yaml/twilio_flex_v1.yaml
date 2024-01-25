@@ -289,9 +289,6 @@ components:
         citrix_voice_vdi:
           nullable: true
           description: Citrix voice vdi configuration and settings.
-        offline_config:
-          nullable: true
-          description: Presence and presence ttl configuration
     configuration_enum_status:
       type: string
       enum:
@@ -333,10 +330,6 @@ components:
           type: string
           nullable: true
           description: The string that you assigned to describe the resource.
-          x-twilio:
-            pii:
-              handling: standard
-              deleteSla: 30
         chat_service_sid:
           type: string
           minLength: 34
@@ -887,10 +880,10 @@ components:
           $ref: '#/components/schemas/interaction_channel_enum_type'
           nullable: true
           description: "The Interaction Channel's type. Can be: `sms`, `email`, `chat`,\
-            \ `whatsapp`, `web`, `messenger`, or `gbm`. \n **Note:** These can be\
-            \ different from the task channel type specified in the Routing attributes.\
-            \ Task channel type corresponds to channel capacity while this channel\
-            \ type is the actual media type"
+            \ `whatsapp`, `web`. \n **Note:** These can be different from the task\
+            \ channel type specified in the Routing attributes. Task channel type\
+            \ corresponds to channel capacity while this channel type is the actual\
+            \ media type"
         status:
           type: string
           $ref: '#/components/schemas/interaction_channel_enum_channel_status'
@@ -1036,26 +1029,6 @@ components:
       - external
       - agent
       - unknown
-    flex.v1.provisioning_status:
-      type: object
-      properties:
-        status:
-          type: string
-          $ref: '#/components/schemas/provisioning_status_enum_status'
-          nullable: true
-          description: Email Provisioning Status
-        url:
-          type: string
-          format: uri
-          nullable: true
-          description: The absolute URL of the resource.
-    provisioning_status_enum_status:
-      type: string
-      enum:
-      - active
-      - in-progress
-      - not-configured
-      - failed
     flex.v1.web_channel:
       type: object
       properties:
@@ -1574,9 +1547,6 @@ paths:
                       dateUpdated: '2023-08-16T12:22:06.787Z'
                     citrix_voice_vdi:
                       enabled: false
-                    offline_config:
-                      presence: true
-                      presence_ttl: 30
           description: OK
       security:
       - accountSid_authToken: []
@@ -1742,9 +1712,6 @@ paths:
                       dateUpdated: '2023-08-16T12:22:06.787Z'
                     citrix_voice_vdi:
                       enabled: false
-                    offline_config:
-                      presence: true
-                      presence_ttl: 30
           description: OK
       security:
       - accountSid_authToken: []
@@ -1771,10 +1738,6 @@ paths:
         description: The `friendly_name` of the Flex Flow resources to read.
         schema:
           type: string
-        x-twilio:
-          pii:
-            handling: standard
-            deleteSla: 30
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -5447,34 +5410,6 @@ paths:
               updateStatusClosed:
                 value:
                   Status: closed
-  /v1/account/provision/status:
-    servers:
-    - url: https://flex-api.twilio.com
-    description: Status for email provisioning
-    x-twilio:
-      defaultOutputProperties:
-      - status
-      mountName: provisioning_status
-      pathType: instance
-    get:
-      description: ''
-      tags:
-      - FlexV1ProvisioningStatus
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/flex.v1.provisioning_status'
-              examples:
-                fetch:
-                  value:
-                    status: active
-                    url: https://flex-api.twilio.com/v1/account/provision/status
-          description: OK
-      security:
-      - accountSid_authToken: []
-      operationId: FetchProvisioningStatus
   /v1/WebChannels:
     servers:
     - url: https://flex-api.twilio.com
@@ -5790,7 +5725,6 @@ tags:
 - name: FlexV1PluginConfiguration
 - name: FlexV1PluginRelease
 - name: FlexV1PluginVersion
-- name: FlexV1ProvisioningStatus
 - name: FlexV1PublicConfiguration
 - name: FlexV1VirtualAgentData
 - name: FlexV1WebChannel
