@@ -185,6 +185,14 @@
             "nullable": true,
             "description": "The SID of the Flex service instance."
           },
+          "flex_instance_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Flex instance."
+          },
           "ui_language": {
             "type": "string",
             "nullable": true,
@@ -333,6 +341,10 @@
           "citrix_voice_vdi": {
             "nullable": true,
             "description": "Citrix voice vdi configuration and settings."
+          },
+          "offline_config": {
+            "nullable": true,
+            "description": "Presence and presence ttl configuration"
           }
         }
       },
@@ -378,7 +390,13 @@
           "friendly_name": {
             "type": "string",
             "nullable": true,
-            "description": "The string that you assigned to describe the resource."
+            "description": "The string that you assigned to describe the resource.",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
           },
           "chat_service_sid": {
             "type": "string",
@@ -597,6 +615,128 @@
             "type": "string",
             "format": "uri",
             "nullable": true
+          }
+        }
+      },
+      "flex.v1.insights_conversational_ai": {
+        "type": "object",
+        "properties": {
+          "instance_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Sid of Flex Service Instance"
+          },
+          "report_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The type of report required to fetch.Like gauge,channel-metrics,queue-metrics"
+          },
+          "granularity": {
+            "type": "string",
+            "$ref": "#/components/schemas/insights_conversational_ai_enum_granularity",
+            "nullable": true,
+            "description": "The time period for which report is needed"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The start date from which report data is included"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The end date till report data is included"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Updated time of the report"
+          },
+          "total_pages": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Represents total number of pages fetched report has"
+          },
+          "page": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Page offset required for pagination"
+          },
+          "rows": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "List of report breakdown "
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource."
+          }
+        }
+      },
+      "insights_conversational_ai_enum_granularity": {
+        "type": "string",
+        "enum": [
+          "days",
+          "weeks",
+          "months",
+          "quarters",
+          "years"
+        ]
+      },
+      "flex.v1.insights_conversational_ai_report_insights": {
+        "type": "object",
+        "properties": {
+          "instance_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The Instance SID of the instance for which report insights is fetched"
+          },
+          "report_id": {
+            "type": "string",
+            "nullable": true,
+            "description": "The type of report insights required to fetch.Like gauge,channel-metrics,queue-metrics"
+          },
+          "period_start": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The start date from which report insights data is included"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The end date till report insights data is included"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Updated time of the report insights"
+          },
+          "insights": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "List of report insights breakdown"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource"
           }
         }
       },
@@ -1034,7 +1174,7 @@
             "type": "string",
             "$ref": "#/components/schemas/interaction_channel_enum_type",
             "nullable": true,
-            "description": "The Interaction Channel's type. Can be: `sms`, `email`, `chat`, `whatsapp`, `web`. \n **Note:** These can be different from the task channel type specified in the Routing attributes. Task channel type corresponds to channel capacity while this channel type is the actual media type"
+            "description": "The Interaction Channel's type. Can be: `sms`, `email`, `chat`, `whatsapp`, `web`, `messenger`, or `gbm`. \n **Note:** These can be different from the task channel type specified in the Routing attributes. Task channel type corresponds to channel capacity while this channel type is the actual media type"
           },
           "status": {
             "type": "string",
@@ -1207,6 +1347,48 @@
           "external",
           "agent",
           "unknown"
+        ]
+      },
+      "flex.v1.provisioning_status": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/provisioning_status_enum_status",
+            "nullable": true,
+            "description": "Email Provisioning Status"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the resource."
+          }
+        }
+      },
+      "provisioning_status_enum_status": {
+        "type": "string",
+        "enum": [
+          "active",
+          "in-progress",
+          "not-configured",
+          "failed"
+        ]
+      },
+      "transfer_enum_transfer_status": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "FAILED",
+          "COMPLETED"
+        ]
+      },
+      "transfer_enum_transfer_type": {
+        "type": "string",
+        "enum": [
+          "WARM",
+          "COLD",
+          "EXTERNAL"
         ]
       },
       "flex.v1.web_channel": {
@@ -1762,6 +1944,7 @@
                       "messaging_service_instance_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "chat_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "flex_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flex_instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "ui_language": "en",
                       "ui_attributes": {},
                       "ui_dependencies": {},
@@ -1925,6 +2108,10 @@
                       },
                       "citrix_voice_vdi": {
                         "enabled": false
+                      },
+                      "offline_config": {
+                        "presence": true,
+                        "presence_ttl": 30
                       }
                     }
                   }
@@ -2024,6 +2211,7 @@
                       "messaging_service_instance_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "chat_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "flex_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flex_instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "ui_language": "en",
                       "ui_attributes": {},
                       "ui_dependencies": {},
@@ -2167,6 +2355,10 @@
                       },
                       "citrix_voice_vdi": {
                         "enabled": false
+                      },
+                      "offline_config": {
+                        "presence": true,
+                        "presence_ttl": 30
                       }
                     }
                   }
@@ -2213,6 +2405,12 @@
             "description": "The `friendly_name` of the Flex Flow resources to read.",
             "schema": {
               "type": "string"
+            },
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
             }
           },
           {
@@ -3630,6 +3828,272 @@
           }
         ],
         "operationId": "ListInsightsAssessmentsComment"
+      }
+    },
+    "/v1/Insights/Instances/{InstanceSid}/AI/Reports": {
+      "servers": [
+        {
+          "url": "https://flex-api.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "report_id"
+        ],
+        "mountName": "insights_conversational_ai",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "Fetch Account Based Conversational AI Reports",
+        "tags": [
+          "FlexV1InsightsConversationalAi"
+        ],
+        "parameters": [
+          {
+            "name": "InstanceSid",
+            "in": "path",
+            "description": "Sid of Flex Service Instance",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^GO[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "MaxRows",
+            "in": "query",
+            "description": "Maximum number of rows to return",
+            "schema": {
+              "type": "integer"
+            },
+            "examples": {
+              "readReports": {
+                "value": 10
+              }
+            }
+          },
+          {
+            "name": "ReportId",
+            "in": "query",
+            "description": "The type of report required to fetch.Like gauge,channel-metrics,queue-metrics",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "readReports": {
+                "value": "gauge"
+              }
+            }
+          },
+          {
+            "name": "Granularity",
+            "in": "query",
+            "description": "The time period for which report is needed",
+            "schema": {
+              "type": "string",
+              "$ref": "#/components/schemas/insights_conversational_ai_enum_granularity"
+            },
+            "examples": {
+              "readReports": {
+                "value": "days"
+              }
+            }
+          },
+          {
+            "name": "IncludeDate",
+            "in": "query",
+            "description": "A reference date that should be included in the returned period",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "examples": {
+              "readReports": {
+                "value": "2015-07-30T20:00:00Z"
+              }
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "Page offset required for pagination",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flex.v1.insights_conversational_ai"
+                },
+                "examples": {
+                  "readReports": {
+                    "value": {
+                      "instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "report_id": "gauge",
+                      "granularity": "days",
+                      "period_start": "2015-07-30T20:00:00Z",
+                      "period_end": "2015-07-30T20:00:00Z",
+                      "updated": "2015-07-30T20:00:00Z",
+                      "total_pages": 1,
+                      "page": 1,
+                      "rows": [
+                        {}
+                      ],
+                      "url": "https://flex-api.twilio.com/v1/Insights/Instances/GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AI/Reports"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchInsightsConversationalAi"
+      }
+    },
+    "/v1/Insights/Instances/{InstanceSid}/AI/ReportInsights": {
+      "servers": [
+        {
+          "url": "https://flex-api.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "report_id"
+        ],
+        "mountName": "insights_conversational_ai_report_insights",
+        "className": "insights_conversational_ai_report_insights",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "Fetch Instance Based Conversational AI Report Insights",
+        "tags": [
+          "FlexV1InsightsConversationalAiReportInsights"
+        ],
+        "parameters": [
+          {
+            "name": "InstanceSid",
+            "in": "path",
+            "description": "The Instance SID of the instance for which report insights will be fetched",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^GO[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "MaxRows",
+            "in": "query",
+            "description": "Maximum number of rows to return",
+            "schema": {
+              "type": "integer"
+            },
+            "examples": {
+              "readReportinsights": {
+                "value": 10
+              }
+            }
+          },
+          {
+            "name": "ReportId",
+            "in": "query",
+            "description": "The type of report insights required to fetch.Like gauge,channel-metrics,queue-metrics",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "readReportinsights": {
+                "value": "gauges"
+              }
+            }
+          },
+          {
+            "name": "Granularity",
+            "in": "query",
+            "description": "The time period for which report insights is needed",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "readReportinsights": {
+                "value": "days"
+              }
+            }
+          },
+          {
+            "name": "IncludeDate",
+            "in": "query",
+            "description": "A reference date that should be included in the returned period",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "examples": {
+              "readReportinsights": {
+                "value": "2015-07-30T20:00:00Z"
+              }
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "Page offset required for pagination",
+            "schema": {
+              "type": "integer"
+            },
+            "examples": {
+              "readReportinsights": {
+                "value": 1
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flex.v1.insights_conversational_ai_report_insights"
+                },
+                "examples": {
+                  "readReportinsights": {
+                    "value": {
+                      "instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "report_id": "gauges",
+                      "period_start": "2015-07-30T20:00:00Z",
+                      "period_end": "2015-07-30T20:00:00Z",
+                      "updated": "2015-07-30T20:00:00Z",
+                      "insights": [],
+                      "url": "https://flex-api.twilio.com/v1/Insights/Instances/GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/AI/ReportInsights"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchInsightsConversationalAiReportInsights"
       }
     },
     "/v1/Insights/Conversations": {
@@ -7374,6 +7838,53 @@
         }
       }
     },
+    "/v1/account/provision/status": {
+      "servers": [
+        {
+          "url": "https://flex-api.twilio.com"
+        }
+      ],
+      "description": "Status for email provisioning",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "status"
+        ],
+        "mountName": "provisioning_status",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "",
+        "tags": [
+          "FlexV1ProvisioningStatus"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flex.v1.provisioning_status"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "status": "active",
+                      "url": "https://flex-api.twilio.com/v1/account/provision/status"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchProvisioningStatus"
+      }
+    },
     "/v1/WebChannels": {
       "servers": [
         {
@@ -7820,6 +8331,12 @@
       "name": "FlexV1InsightsAssessmentsComment"
     },
     {
+      "name": "FlexV1InsightsConversationalAi"
+    },
+    {
+      "name": "FlexV1InsightsConversationalAiReportInsights"
+    },
+    {
       "name": "FlexV1InsightsConversations"
     },
     {
@@ -7868,6 +8385,9 @@
       "name": "FlexV1InteractionContextLookupSid"
     },
     {
+      "name": "FlexV1InteractionContextUpdate"
+    },
+    {
       "name": "FlexV1LibraryPlugin"
     },
     {
@@ -7892,13 +8412,24 @@
       "name": "FlexV1PluginVersion"
     },
     {
+      "name": "FlexV1ProvisioningStatus"
+    },
+    {
       "name": "FlexV1PublicConfiguration"
+    },
+    {
+      "name": "FlexV1Transfer"
     },
     {
       "name": "FlexV1VirtualAgentData"
     },
     {
       "name": "FlexV1WebChannel"
+    }
+  ],
+  "security": [
+    {
+      "accountSid_authToken": []
     }
   ]
 }

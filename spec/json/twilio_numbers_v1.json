@@ -214,12 +214,81 @@
             "maxLength": 34,
             "pattern": "^KW[0-9a-fA-F]{32}$",
             "nullable": true,
-            "description": "The SID of the Port In request, It is the request identifier"
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request."
           },
           "url": {
             "type": "string",
             "format": "uri",
             "nullable": true
+          }
+        }
+      },
+      "numbers.v1.porting_port_in_fetch": {
+        "type": "object",
+        "properties": {
+          "port_in_request_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^KW[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this Port In request"
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The Account SID that the numbers will be added to after they are ported into Twilio."
+          },
+          "notification_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "List of emails for getting notifications about the LOA signing process. Allowed Max 10 emails."
+          },
+          "target_port_in_date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Minimum number of days in the future (at least 2 days) needs to be established with the Ops team for validation."
+          },
+          "target_port_in_time_range_start": {
+            "type": "string",
+            "nullable": true,
+            "description": "Minimum hour in the future needs to be established with the Ops team for validation."
+          },
+          "target_port_in_time_range_end": {
+            "type": "string",
+            "nullable": true,
+            "description": "Maximum hour in the future needs to be established with the Ops team for validation."
+          },
+          "losing_carrier_information": {
+            "nullable": true,
+            "description": "The information for the losing carrier. "
+          },
+          "phone_numbers": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "The list of phone numbers to Port in. Phone numbers are in E.164 format (e.g. +16175551212)."
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "The list of documents SID referencing a utility bills"
           }
         }
       },
@@ -712,7 +781,7 @@
         "pathType": "list"
       },
       "post": {
-        "description": "Allows to create a port in request ",
+        "description": "Allows to create a new port in request",
         "tags": [
           "NumbersV1PortingPortIn"
         ],
@@ -727,7 +796,7 @@
                   "create": {
                     "value": {
                       "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                      "url": "https://numbers.twilio.com/v1/Porting/PortIn"
+                      "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
                   }
                 }
@@ -742,6 +811,104 @@
           }
         ],
         "operationId": "CreatePortingPortIn"
+      }
+    },
+    "/v1/Porting/PortIn/{PortInRequestSid}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "port_in_request_sid"
+        ],
+        "mountName": "porting_port_ins",
+        "className": "porting_port_in_fetch",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "Fetch a port in request by SID",
+        "tags": [
+          "NumbersV1PortingPortInFetch"
+        ],
+        "parameters": [
+          {
+            "name": "PortInRequestSid",
+            "in": "path",
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^KW[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.porting_port_in_fetch"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "notification_emails": [
+                        "user@domain.com"
+                      ],
+                      "target_port_in_date": "2023-09-10",
+                      "target_port_in_time_range_start": "10:00:00+01:00",
+                      "target_port_in_time_range_end": "20:00:00+01:00",
+                      "losing_carrier_information": {
+                        "customer_type": "Business/Individual",
+                        "customer_name": "Customer name for carrier",
+                        "authorized_representative": "John Smith",
+                        "authorized_representative_email": "signer@domain.com",
+                        "account_number": "123456",
+                        "account_telephone_number": "+133232323",
+                        "address_sid": "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "address": {
+                          "street": "Your Street",
+                          "street_2": "Other Street or null",
+                          "city": "City",
+                          "state": "State",
+                          "zip": "000000",
+                          "country": "US"
+                        }
+                      },
+                      "phone_numbers": [
+                        {
+                          "phone_number": "+16175551212",
+                          "pin": "123456",
+                          "portable": true,
+                          "not_portability_reason": "string",
+                          "not_portability_reason_code": 0
+                        }
+                      ],
+                      "documents": [
+                        "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchPortingPortInFetch"
       }
     },
     "/v1/Porting/Portability/PhoneNumber/{PhoneNumber}": {
@@ -861,10 +1028,18 @@
       "name": "NumbersV1PortingPortIn"
     },
     {
+      "name": "NumbersV1PortingPortInFetch"
+    },
+    {
       "name": "NumbersV1PortingPortability"
     },
     {
       "name": "NumbersV1ProofOfAddress"
+    }
+  ],
+  "security": [
+    {
+      "accountSid_authToken": []
     }
   ]
 }
