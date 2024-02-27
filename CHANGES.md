@@ -1,5 +1,47 @@
 twilio-oai changelog
 ====================
+[2024-02-27] Version 2.0.0-rc.14
+--------------------------------
+**Library - Chore**
+- [PR #100](https://github.com/twilio/twilio-oai/pull/100): corrected spec file. Thanks to [@sbansla](https://github.com/sbansla)!
+- [PR #101](https://github.com/twilio/twilio-oai/pull/101): Corrected verify spec. Thanks to [@sbansla](https://github.com/sbansla)!
+
+**Api**
+- remove feedback and feedback summary from call resource
+
+**Flex**
+- Adding `routing_properties` to Interactions Channels Participant
+- Adding `flex_instance_sid` to Flex Configuration
+
+**Insights**
+- add flag to restrict access to unapid customers
+
+**Lookups**
+- Add new `line_status` package to the lookup response
+- Remove `live_activity` package from the lookup response **(breaking change)**
+- Remove `carrier` field from `sms_pumping_risk` and leave `carrier_risk_category` **(breaking change)**
+- Remove carrier information from call forwarding package **(breaking change)**
+
+**Messaging**
+- Add tollfree multiple rejection reasons response array
+- Add update instance endpoints to us_app_to_person api
+
+**Push**
+- Migrated to new Push API V4 with Resilient Notification Delivery.
+
+**Trusthub**
+- Add ENUM for businessRegistrationAuthority in compliance_registration. **(breaking change)**
+- Add new field in isIsvEmbed in compliance_registration.
+- Add additional optional fields in compliance_registration for Individual business type.
+- Add optional field NotificationEmail to the POST /v1/ComplianceInquiries/Customers/Initialize API
+
+**Verify**
+- `Tags` property added again to Public Docs **(breaking change)**
+
+**Twiml**
+- Add support for new Amazon Polly and Google voices (Q1 2024) for `Say` verb
+
+
 [2023-12-14] Version 2.0.0-rc.13
 --------------------------------
 **Api**

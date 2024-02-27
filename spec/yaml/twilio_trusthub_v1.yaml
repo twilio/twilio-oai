@@ -27,6 +27,55 @@ components:
           format: uri
           nullable: true
           description: The URL of this resource.
+    trusthub.v1.compliance_registration:
+      type: object
+      properties:
+        inquiry_id:
+          type: string
+          nullable: true
+          description: The unique ID used to start an embedded compliance registration
+            session.
+        inquiry_session_token:
+          type: string
+          nullable: true
+          description: The session token used to start an embedded compliance registration
+            session.
+        registration_id:
+          type: string
+          nullable: true
+          description: The RegistrationId matching the Registration Profile that should
+            be resumed or resubmitted for editing.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of this resource.
+    compliance_registration_enum_end_user_type:
+      type: string
+      enum:
+      - Individual
+      - Business
+    compliance_registration_enum_phone_number_type:
+      type: string
+      enum:
+      - local
+      - national
+      - mobile
+      - toll-free
+    compliance_registration_enum_business_identity_type:
+      type: string
+      enum:
+      - direct_customer
+      - isv_reseller_or_partner
+      - unknown
+    compliance_registration_enum_business_registration_authority:
+      type: string
+      enum:
+      - UK:CRN
+      - US:EIN
+      - CA:CBN
+      - AU:ACN
+      - Other
     trusthub.v1.compliance_tollfree_inquiry:
       type: object
       properties:
@@ -50,6 +99,21 @@ components:
           format: uri
           nullable: true
           description: The URL of this resource.
+    compliance_tollfree_inquiry_enum_status:
+      type: string
+      enum:
+      - PENDING_REVIEW
+      - IN_REVIEW
+      - TWILIO_APPROVED
+      - TWILIO_REJECTED
+    compliance_tollfree_inquiry_enum_opt_in_type:
+      type: string
+      enum:
+      - VERBAL
+      - WEB_FORM
+      - PAPER_FORM
+      - VIA_TEXT
+      - MOBILE_QR_CODE
     trusthub.v1.customer_profile:
       type: object
       properties:
@@ -791,6 +855,12 @@ paths:
                     inquiry_session_token: new.session.token
                     customer_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://trusthub.twilio.com/v1/ComplianceInquiries/Customers/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize
+                createWithNotificationEmail:
+                  value:
+                    inquiry_id: inq_aaaaaaaaaaaaaaaaaaaaaaaa
+                    inquiry_session_token: new.session.token
+                    customer_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Customers/tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.customer.BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Initialize
           description: Created
       security:
       - accountSid_authToken: []
@@ -810,12 +880,21 @@ paths:
                   description: The unique SID identifier of the Primary Customer Profile
                     that should be used as a parent. Only necessary when creating
                     a secondary Customer Profile.
+                NotificationEmail:
+                  type: string
+                  description: The email address that approval status updates will
+                    be sent to. If not specified, the email address associated with
+                    your primary customer profile will be used.
               required:
               - PrimaryProfileSid
             examples:
               create:
                 value:
                   PrimaryProfileSid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              createWithNotificationEmail:
+                value:
+                  PrimaryProfileSid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  NotificationEmail: pfarnsworth@twilio.com
   /v1/ComplianceInquiries/Customers/{CustomerId}/Initialize:
     servers:
     - url: https://trusthub.twilio.com
@@ -880,6 +959,207 @@ paths:
               update:
                 value:
                   PrimaryProfileSid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  /v1/ComplianceInquiries/Registration/RegulatoryCompliance/GB/Initialize:
+    servers:
+    - url: https://trusthub.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - inquiry_id
+      - session_token
+      - registration_id
+      mountName: compliance_registration_inquiries
+      className: compliance_registration_inquiries
+      pathType: list
+    post:
+      description: Create a new Compliance Registration Inquiry for the authenticated
+        account. This is necessary to start a new embedded session.
+      tags:
+      - TrusthubV1ComplianceRegistrationInquiries
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/trusthub.v1.compliance_registration'
+              examples:
+                create:
+                  value:
+                    inquiry_id: inq_aaaaaaaaaaaaaaaaaaaaaaaa
+                    inquiry_session_token: new.session.token
+                    registration_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.registartion.PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Registration/RegulatoryCompliance/GB/Initialize
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateComplianceRegistration
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateComplianceRegistrationRequest
+              properties:
+                EndUserType:
+                  type: string
+                  $ref: '#/components/schemas/compliance_registration_enum_end_user_type'
+                  description: The type of End User the regulation requires - can
+                    be `Individual` or `Business`.
+                PhoneNumberType:
+                  type: string
+                  $ref: '#/components/schemas/compliance_registration_enum_phone_number_type'
+                  description: The type of phone number of the Bundle's ownership
+                    request.  Can be `local`, `mobile`, `national`, or `toll-free`.
+                BusinessIdentityType:
+                  type: string
+                  $ref: '#/components/schemas/compliance_registration_enum_business_identity_type'
+                  description: The type of business identity.  Can be `direct customer`
+                    or `ISV`.
+                BusinessRegistrationAuthority:
+                  type: string
+                  $ref: '#/components/schemas/compliance_registration_enum_business_registration_authority'
+                  description: The authority that registered the business
+                BusinessLegalName:
+                  type: string
+                  description: he name of the business or organization using the Tollfree
+                    number.
+                NotificationEmail:
+                  type: string
+                  description: he email address to receive the notification about
+                    the verification result.
+                AcceptedNotificationReceipt:
+                  type: boolean
+                  description: The email address to receive the notification about
+                    the verification result.
+                BusinessRegistrationNumber:
+                  type: string
+                  description: Business registration number of the business
+                BusinessWebsiteUrl:
+                  type: string
+                  description: The URL of the business website
+                FriendlyName:
+                  type: string
+                  description: Friendly name for your business information
+                AuthorizedRepresentative1FirstName:
+                  type: string
+                  description: First name of the authorized representative
+                AuthorizedRepresentative1LastName:
+                  type: string
+                  description: Last name of the authorized representative
+                AuthorizedRepresentative1Phone:
+                  type: string
+                  description: Phone number of the authorized representative
+                AuthorizedRepresentative1Email:
+                  type: string
+                  description: Email address of the authorized representative
+                AuthorizedRepresentative1DateOfBirth:
+                  type: string
+                  description: Birthdate of the authorized representative
+                AddressStreet:
+                  type: string
+                  description: Street address of the business
+                AddressStreetSecondary:
+                  type: string
+                  description: Street address of the business
+                AddressCity:
+                  type: string
+                  description: City of the business
+                AddressSubdivision:
+                  type: string
+                  description: State or province of the business
+                AddressPostalCode:
+                  type: string
+                  description: Postal code of the business
+                AddressCountryCode:
+                  type: string
+                  description: Country code of the business
+                EmergencyAddressStreet:
+                  type: string
+                  description: Street address of the business
+                EmergencyAddressStreetSecondary:
+                  type: string
+                  description: Street address of the business
+                EmergencyAddressCity:
+                  type: string
+                  description: City of the business
+                EmergencyAddressSubdivision:
+                  type: string
+                  description: State or province of the business
+                EmergencyAddressPostalCode:
+                  type: string
+                  description: Postal code of the business
+                EmergencyAddressCountryCode:
+                  type: string
+                  description: Country code of the business
+                UseAddressAsEmergencyAddress:
+                  type: boolean
+                  description: Use the business address as the emergency address
+                FileName:
+                  type: string
+                  description: The name of the verification document to upload
+                File:
+                  type: string
+                  description: The verification document to upload
+                FirstName:
+                  type: string
+                  description: The first name of the Individual User.
+                LastName:
+                  type: string
+                  description: The last name of the Individual User.
+                DateOfBirth:
+                  type: string
+                  description: The date of birth of the Individual User.
+                IndividualEmail:
+                  type: string
+                  description: The email address of the Individual User.
+                IndividualPhone:
+                  type: string
+                  description: The phone number of the Individual User.
+                IsIsvEmbed:
+                  type: boolean
+                  description: Indicates if the inquiry is being started from an ISV
+                    embedded component.
+              required:
+              - EndUserType
+              - PhoneNumberType
+            examples:
+              create:
+                value:
+                  EndUserType: Individual
+                  FirstName: firstname
+                  LastName: lastname
+                  DateOfBirth: '1990-01-01'
+                  IndividualEmail: test@test.com
+                  IndividualPhone: '123456'
+                  PhoneNumberType: national
+                  BusinessLegalName: Owl, Inc.
+                  NotificationEmail: test@test.com
+                  AcceptedNotificationReceipt: true
+                  BusinessRegistrationNumber: '123456789'
+                  BusinessWebsiteUrl: https://twilio.co
+                  FriendlyName: Owl
+                  AuthorizedRepresentative1FirstName: firstname
+                  AuthorizedRepresentative1LastName: lastname
+                  AuthorizedRepresentative1Email: test@test.com
+                  AuthorizedRepresentative1DateOfBirth: '1990-01-01'
+                  AddressStreet: 123 Main St
+                  AddressStreetSecondary: Apt 1
+                  AddressCity: San Francisco
+                  AddressSubdivision: CA
+                  AddressPostalCode: '94107'
+                  AddressCountryCode: US
+                  UseAddressAsEmergencyAddress: true
+                  EmergencyAddressStreet: 123 Main St
+                  EmergencyAddressStreetSecondary: Apt 1
+                  EmergencyAddressCity: San Francisco
+                  EmergencyAddressSubdivision: CA
+                  EmergencyAddressPostalCode: '94107'
+                  EmergencyAddressCountryCode: US
+                  FileName: fileName
+                  File: file
+                  BusinessIdentityType: direct_customer
+                  BusinessRegistrationAuthority: UK:CRN
+                  IsIsvEmbed: true
   /v1/ComplianceInquiries/Tollfree/Initialize:
     servers:
     - url: https://trusthub.twilio.com
@@ -910,6 +1190,12 @@ paths:
                     inquiry_session_token: new.session.token
                     registration_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://trusthub.twilio.com/v1/ComplianceInquiries/Tollfree/Initialize
+                create2:
+                  value:
+                    inquiry_id: inq_aaaaaaaaaaaaaaaaaaaaaaaa
+                    inquiry_session_token: new.session.token
+                    registration_id: tri1.us1.trusthub.ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.tollfree.PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trusthub.twilio.com/v1/ComplianceInquiries/Tollfree/Initialize
           description: Created
       security:
       - accountSid_authToken: []
@@ -927,8 +1213,87 @@ paths:
                   description: The Tollfree phone number to be verified
                 NotificationEmail:
                   type: string
-                  description: The notification email to be triggered when verification
-                    status is changed
+                  description: The email address to receive the notification about
+                    the verification result.
+                BusinessName:
+                  type: string
+                  description: The name of the business or organization using the
+                    Tollfree number.
+                BusinessWebsite:
+                  type: string
+                  description: The website of the business or organization using the
+                    Tollfree number.
+                UseCaseCategories:
+                  type: array
+                  items:
+                    type: string
+                  description: The category of the use case for the Tollfree Number.
+                    List as many are applicable..
+                UseCaseSummary:
+                  type: string
+                  description: Use this to further explain how messaging is used by
+                    the business or organization.
+                ProductionMessageSample:
+                  type: string
+                  description: An example of message content, i.e. a sample message.
+                OptInImageUrls:
+                  type: array
+                  items:
+                    type: string
+                  description: Link to an image that shows the opt-in workflow. Multiple
+                    images allowed and must be a publicly hosted URL.
+                OptInType:
+                  type: string
+                  $ref: '#/components/schemas/compliance_tollfree_inquiry_enum_opt_in_type'
+                  description: Describe how a user opts-in to text messages.
+                MessageVolume:
+                  type: string
+                  description: Estimate monthly volume of messages from the Tollfree
+                    Number.
+                BusinessStreetAddress:
+                  type: string
+                  description: The address of the business or organization using the
+                    Tollfree number.
+                BusinessStreetAddress2:
+                  type: string
+                  description: The address of the business or organization using the
+                    Tollfree number.
+                BusinessCity:
+                  type: string
+                  description: The city of the business or organization using the
+                    Tollfree number.
+                BusinessStateProvinceRegion:
+                  type: string
+                  description: The state/province/region of the business or organization
+                    using the Tollfree number.
+                BusinessPostalCode:
+                  type: string
+                  description: The postal code of the business or organization using
+                    the Tollfree number.
+                BusinessCountry:
+                  type: string
+                  description: The country of the business or organization using the
+                    Tollfree number.
+                AdditionalInformation:
+                  type: string
+                  description: Additional information to be provided for verification.
+                BusinessContactFirstName:
+                  type: string
+                  description: The first name of the contact for the business or organization
+                    using the Tollfree number.
+                BusinessContactLastName:
+                  type: string
+                  description: The last name of the contact for the business or organization
+                    using the Tollfree number.
+                BusinessContactEmail:
+                  type: string
+                  description: The email address of the contact for the business or
+                    organization using the Tollfree number.
+                BusinessContactPhone:
+                  type: string
+                  format: phone-number
+                  description: The phone number of the contact for the business or
+                    organization using the Tollfree number.
               required:
               - TollfreePhoneNumber
               - NotificationEmail
@@ -937,6 +1302,34 @@ paths:
                 value:
                   TollfreePhoneNumber: '+123445566'
                   NotificationEmail: jeff@twilio.com
+              create2:
+                value:
+                  TollfreePhoneNumber: '+123445566'
+                  NotificationEmail: jeff@twilio.com
+                  BusinessName: Owl, Inc.
+                  BusinessStreetAddress: 123 Main Street
+                  BusinessStreetAddress2: Suite 101
+                  BusinessCity: Anytown
+                  BusinessStateProvinceRegion: AA
+                  BusinessPostalCode: '11111'
+                  BusinessCountry: US
+                  BusinessWebsite: http://www.company.com
+                  BusinessContactFirstName: firstname
+                  BusinessContactLastName: lastname
+                  BusinessContactEmail: email@company.com
+                  BusinessContactPhone: '+1231231234'
+                  UseCaseCategories:
+                  - TWO_FACTOR_AUTHENTICATION
+                  - MARKETING
+                  UseCaseSummary: This number is used to send out promotional offers
+                    and coupons to the customers of John's Coffee Shop
+                  ProductionMessageSample: lorem ipsum
+                  OptInImageUrls:
+                  - https://testbusiness.com/images/image1.jpg
+                  - https://testbusiness.com/images/image2.jpg
+                  OptInType: VERBAL
+                  MessageVolume: '10'
+                  AdditionalInformation: see our privacy policy here www.johnscoffeeshop.com/privacypolicy
   /v1/CustomerProfiles:
     servers:
     - url: https://trusthub.twilio.com
@@ -5516,6 +5909,7 @@ servers:
 - url: https://trusthub.twilio.com
 tags:
 - name: TrusthubV1ComplianceInquiries
+- name: TrusthubV1ComplianceRegistrationInquiries
 - name: TrusthubV1ComplianceTollfreeInquiries
 - name: TrusthubV1CustomerProfiles
 - name: TrusthubV1CustomerProfilesChannelEndpointAssignment
@@ -5530,3 +5924,5 @@ tags:
 - name: TrusthubV1TrustProductsChannelEndpointAssignment
 - name: TrusthubV1TrustProductsEntityAssignments
 - name: TrusthubV1TrustProductsEvaluations
+security:
+- accountSid_authToken: []

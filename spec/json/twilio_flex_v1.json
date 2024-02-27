@@ -185,6 +185,14 @@
             "nullable": true,
             "description": "The SID of the Flex service instance."
           },
+          "flex_instance_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Flex instance."
+          },
           "ui_language": {
             "type": "string",
             "nullable": true,
@@ -609,6 +617,16 @@
             "nullable": true
           }
         }
+      },
+      "insights_conversational_ai_enum_granularity": {
+        "type": "string",
+        "enum": [
+          "days",
+          "weeks",
+          "months",
+          "quarters",
+          "years"
+        ]
       },
       "flex.v1.insights_conversations": {
         "type": "object",
@@ -1199,6 +1217,10 @@
             "type": "string",
             "format": "uri",
             "nullable": true
+          },
+          "routing_properties": {
+            "nullable": true,
+            "description": "The Participant's routing properties."
           }
         }
       },
@@ -1243,6 +1265,22 @@
           "in-progress",
           "not-configured",
           "failed"
+        ]
+      },
+      "transfer_enum_transfer_status": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "FAILED",
+          "COMPLETED"
+        ]
+      },
+      "transfer_enum_transfer_type": {
+        "type": "string",
+        "enum": [
+          "WARM",
+          "COLD",
+          "EXTERNAL"
         ]
       },
       "flex.v1.web_channel": {
@@ -1798,6 +1836,7 @@
                       "messaging_service_instance_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "chat_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "flex_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flex_instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "ui_language": "en",
                       "ui_attributes": {},
                       "ui_dependencies": {},
@@ -2064,6 +2103,7 @@
                       "messaging_service_instance_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "chat_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "flex_service_instance_sid": "ISaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flex_instance_sid": "GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "ui_language": "en",
                       "ui_attributes": {},
                       "ui_dependencies": {},
@@ -2225,7 +2265,18 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "UpdateConfiguration"
+        "operationId": "UpdateConfiguration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateConfigurationRequest",
+                "properties": {}
+              }
+            }
+          }
+        }
       }
     },
     "/v1/FlexFlows": {
@@ -7096,6 +7147,11 @@
                       "channel_sid": "UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
                       "interaction_sid": "KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "type": "customer",
+                      "routing_properties": {
+                        "task_sid": "WTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "worker_sid": "WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "reservation_sid": "WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      },
                       "url": "https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
                     }
                   }
@@ -7125,6 +7181,9 @@
                   },
                   "MediaProperties": {
                     "description": "JSON representing the Media Properties for the new Participant."
+                  },
+                  "RoutingProperties": {
+                    "description": "Object representing the Routing Properties for the new Participant."
                   }
                 },
                 "required": [
@@ -7136,7 +7195,8 @@
                 "create": {
                   "value": {
                     "Type": "customer",
-                    "MediaProperties": "{\"level\": \"to\", \"name\": \"Random Person test\", \"address\":\"random@person.com\",  \"type\": \"email\"}"
+                    "MediaProperties": "{\"level\": \"to\", \"name\": \"Random Person test\", \"address\":\"random@person.com\",  \"type\": \"email\"}",
+                    "RoutingProperties": "{\"task_sid\": \"WTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"worker_sid\": \"WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\", \"reservation_sid\": \"WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"
                   }
                 }
               }
@@ -7259,6 +7319,7 @@
                           "channel_sid": "UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
                           "interaction_sid": "KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                           "type": "customer",
+                          "routing_properties": null,
                           "url": "https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
                         },
                         {
@@ -7266,6 +7327,11 @@
                           "channel_sid": "UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
                           "interaction_sid": "KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                           "type": "agent",
+                          "routing_properties": {
+                            "task_sid": "WTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "worker_sid": "WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "reservation_sid": "WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                          },
                           "url": "https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2"
                         }
                       ],
@@ -7366,6 +7432,11 @@
                       "channel_sid": "UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
                       "interaction_sid": "KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "type": "agent",
+                      "routing_properties": {
+                        "task_sid": "WTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "worker_sid": "WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "reservation_sid": "WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      },
                       "url": "https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
                     }
                   },
@@ -7375,6 +7446,11 @@
                       "channel_sid": "UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1",
                       "interaction_sid": "KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "type": "agent",
+                      "routing_properties": {
+                        "task_sid": "WTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "worker_sid": "WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "reservation_sid": "WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      },
                       "url": "https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
                     }
                   }
@@ -7914,7 +7990,16 @@
       "name": "FlexV1FlexFlow"
     },
     {
+      "name": "FlexV1FlexVideoOrchestration"
+    },
+    {
       "name": "FlexV1InsightsAssessmentsComment"
+    },
+    {
+      "name": "FlexV1InsightsConversationalAi"
+    },
+    {
+      "name": "FlexV1InsightsConversationalAiReportInsights"
     },
     {
       "name": "FlexV1InsightsConversations"
@@ -7962,7 +8047,13 @@
       "name": "FlexV1InteractionContextLookup"
     },
     {
+      "name": "FlexV1InteractionContextLookupId"
+    },
+    {
       "name": "FlexV1InteractionContextLookupSid"
+    },
+    {
+      "name": "FlexV1InteractionContextUpdate"
     },
     {
       "name": "FlexV1LibraryPlugin"
@@ -7995,10 +8086,18 @@
       "name": "FlexV1PublicConfiguration"
     },
     {
+      "name": "FlexV1Transfer"
+    },
+    {
       "name": "FlexV1VirtualAgentData"
     },
     {
       "name": "FlexV1WebChannel"
+    }
+  ],
+  "security": [
+    {
+      "accountSid_authToken": []
     }
   ]
 }
