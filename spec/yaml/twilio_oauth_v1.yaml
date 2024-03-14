@@ -1,0 +1,167 @@
+components:
+  schemas:
+    oauth.v1.authorize:
+      type: object
+      properties:
+        redirect_to:
+          type: string
+          format: uri
+          nullable: true
+          description: The callback URL
+    oauth.v1.token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          nullable: true
+          description: Token which carries the necessary information to access a Twilio
+            resource directly.
+        refresh_token:
+          type: string
+          nullable: true
+          description: Token which carries the information necessary to get a new
+            access token.
+        id_token:
+          type: string
+          nullable: true
+          description: Token which carries the information necessary of user profile.
+        token_type:
+          type: string
+          nullable: true
+          description: Token type
+        expires_in:
+          type: string
+          format: date-time
+          nullable: true
+  securitySchemes:
+    accountSid_authToken:
+      type: http
+      scheme: basic
+info:
+  title: Twilio - Oauth
+  description: This is the public Twilio REST API.
+  termsOfService: https://www.twilio.com/legal/tos
+  contact:
+    name: Twilio Support
+    url: https://support.twilio.com
+    email: support@twilio.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.55.2
+openapi: 3.0.1
+paths:
+  /v1/authorize:
+    servers:
+    - url: https://oauth.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - redirect_to
+      pathType: list
+    get:
+      description: Retrieves authorize uri
+      tags:
+      - OauthV1Authorize
+      parameters:
+      - name: ResponseType
+        in: query
+        description: Response Type
+        schema:
+          type: string
+      - name: ClientId
+        in: query
+        description: The Client Identifier
+        schema:
+          type: string
+      - name: RedirectUri
+        in: query
+        description: The url to which response will be redirected to
+        schema:
+          type: string
+      - name: Scope
+        in: query
+        description: The scope of the access request
+        schema:
+          type: string
+      - name: State
+        in: query
+        description: An opaque value which can be used to maintain state between the
+          request and callback
+        schema:
+          type: string
+      responses:
+        '302':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/oauth.v1.authorize'
+          description: Found
+      security:
+      - accountSid_authToken: []
+      operationId: FetchAuthorize
+      x-maturity:
+      - GA
+  /v1/token:
+    servers:
+    - url: https://oauth.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties: []
+      pathType: list
+    post:
+      description: Issues a new Access token (optionally identity_token & refresh_token)
+        in exchange of Oauth grant
+      tags:
+      - OauthV1Token
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/oauth.v1.token'
+          description: Created
+      security:
+      - accountSid_authToken: []
+      operationId: CreateToken
+      x-maturity:
+      - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateTokenRequest
+              properties:
+                GrantType:
+                  type: string
+                  description: Grant type is a credential representing resource owner's
+                    authorization which can be used by client to obtain access token.
+                ClientId:
+                  type: string
+                  description: A 34 character string that uniquely identifies this
+                    OAuth App.
+                ClientSecret:
+                  type: string
+                  description: The credential for confidential OAuth App.
+                Code:
+                  type: string
+                  description: JWT token related to the authorization code grant type.
+                RedirectUri:
+                  type: string
+                  description: The redirect uri
+                Audience:
+                  type: string
+                  description: The targeted audience uri
+              required:
+              - GrantType
+              - ClientId
+              - ClientSecret
+servers:
+- url: https://oauth.twilio.com
+tags:
+- name: OauthV1Authorize
+- name: OauthV1Token
+x-maturity:
+- name: GA
+  description: This product is Generally Available.
