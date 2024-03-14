@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2024-03-14] Version 2.0.0-rc.16
+--------------------------------
+**Oauth**
+- Add new APIs for vendor authorize and token endpoints
+
+
 [2024-03-12] Version 2.0.0-rc.15
 --------------------------------
 **Api**
