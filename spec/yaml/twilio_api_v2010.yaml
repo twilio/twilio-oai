@@ -1091,13 +1091,13 @@ components:
           type: string
           format: date-time-rfc-2822
           nullable: true
-          description: The date and time in GMT that this resource was created specified
+          description: The date and time in UTC that this resource was created specified
             in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format.
         date_updated:
           type: string
           format: date-time-rfc-2822
           nullable: true
-          description: The date and time in GMT that this resource was last updated,
+          description: The date and time in UTC that this resource was last updated,
             specified in [RFC 2822](https://www.ietf.org/rfc/rfc2822.txt) format.
         parent_call_sid:
           type: string
@@ -1180,13 +1180,13 @@ components:
           type: string
           format: date-time-rfc-2822
           nullable: true
-          description: The start time of the call, given as GMT in [RFC 2822](https://www.php.net/manual/en/class.datetime.php#datetime.constants.rfc2822)
+          description: The start time of the call, given as UTC in [RFC 2822](https://www.php.net/manual/en/class.datetime.php#datetime.constants.rfc2822)
             format. Empty if the call has not yet been dialed.
         end_time:
           type: string
           format: date-time-rfc-2822
           nullable: true
-          description: The time the call ended, given as GMT in [RFC 2822](https://www.php.net/manual/en/class.datetime.php#datetime.constants.rfc2822)
+          description: The time the call ended, given as UTC in [RFC 2822](https://www.php.net/manual/en/class.datetime.php#datetime.constants.rfc2822)
             format. Empty if the call did not complete successfully.
         duration:
           type: string
@@ -4321,6 +4321,11 @@ components:
           nullable: true
           description: 'The status of the participant''s call in a session. Can be:
             `queued`, `connecting`, `ringing`, `connected`, `complete`, or `failed`.'
+        queue_time:
+          type: string
+          nullable: true
+          description: The wait time in milliseconds before participant's call is
+            placed. Only available in the response to a create participant request.
         uri:
           type: string
           nullable: true
@@ -14289,7 +14294,7 @@ paths:
       - name: StartTime
         in: query
         description: 'Only include calls that started on this date. Specify a date
-          as `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          as `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           started on this date. You can also specify an inequality, such as `StartTime<=YYYY-MM-DD`,
           to read calls that started on or before midnight of this date, and `StartTime>=YYYY-MM-DD`
           to read calls that started on or after midnight of this date.'
@@ -14304,16 +14309,13 @@ paths:
       - name: StartTime<
         in: query
         description: 'Only include calls that started on this date. Specify a date
-          as `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          as `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           started on this date. You can also specify an inequality, such as `StartTime<=YYYY-MM-DD`,
           to read calls that started on or before midnight of this date, and `StartTime>=YYYY-MM-DD`
           to read calls that started on or after midnight of this date.'
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Only include calls that started on this date
-          ignoreFormat: true
         examples:
           readEmptyDatesLess:
             value: '2008-01-02'
@@ -14322,23 +14324,20 @@ paths:
       - name: StartTime>
         in: query
         description: 'Only include calls that started on this date. Specify a date
-          as `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          as `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           started on this date. You can also specify an inequality, such as `StartTime<=YYYY-MM-DD`,
           to read calls that started on or before midnight of this date, and `StartTime>=YYYY-MM-DD`
           to read calls that started on or after midnight of this date.'
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Only include calls that started on this date
-          ignoreFormat: true
         examples:
           readEmptyDatesGreater:
             value: '2008-01-02'
       - name: EndTime
         in: query
         description: 'Only include calls that ended on this date. Specify a date as
-          `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           ended on this date. You can also specify an inequality, such as `EndTime<=YYYY-MM-DD`,
           to read calls that ended on or before midnight of this date, and `EndTime>=YYYY-MM-DD`
           to read calls that ended on or after midnight of this date.'
@@ -14353,16 +14352,13 @@ paths:
       - name: EndTime<
         in: query
         description: 'Only include calls that ended on this date. Specify a date as
-          `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           ended on this date. You can also specify an inequality, such as `EndTime<=YYYY-MM-DD`,
           to read calls that ended on or before midnight of this date, and `EndTime>=YYYY-MM-DD`
           to read calls that ended on or after midnight of this date.'
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Only include calls that ended on this date
-          ignoreFormat: true
         examples:
           readEmptyDatesLess:
             value: '2009-01-02'
@@ -14371,16 +14367,13 @@ paths:
       - name: EndTime>
         in: query
         description: 'Only include calls that ended on this date. Specify a date as
-          `YYYY-MM-DD` in GMT, for example: `2009-07-06`, to read only calls that
+          `YYYY-MM-DD` in UTC, for example: `2009-07-06`, to read only calls that
           ended on this date. You can also specify an inequality, such as `EndTime<=YYYY-MM-DD`,
           to read calls that ended on or before midnight of this date, and `EndTime>=YYYY-MM-DD`
           to read calls that ended on or after midnight of this date.'
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Only include calls that ended on this date
-          ignoreFormat: true
         examples:
           readEmptyDatesGreater:
             value: '2009-01-02'
@@ -22399,9 +22392,8 @@ paths:
                 RiskCheck:
                   type: string
                   $ref: '#/components/schemas/message_enum_risk_check'
-                  description: 'For SMS pumping protection feature only: Include this
-                    parameter with a value of `disable` to skip any kind of risk check
-                    on the respective message request.'
+                  description: Include this parameter with a value of `disable` to
+                    skip any kind of risk check on the respective message request.
                 From:
                   type: string
                   format: phone-number
@@ -22633,9 +22625,6 @@ paths:
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Filter by Message `sent_date`
-          ignoreFormat: true
         examples:
           readEmptySentdateLess:
             value: '2008-01-02'
@@ -22649,9 +22638,6 @@ paths:
         schema:
           type: string
           format: date-time
-        x-twilio:
-          shortDescription: Filter by Message `sent_date`
-          ignoreFormat: true
         examples:
           readFullPage1:
             value: '2008-01-02'
@@ -24155,6 +24141,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: true
                     call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 fetchByLabel:
                   value:
@@ -24171,6 +24158,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: true
                     call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
           description: OK
       security:
@@ -24231,6 +24219,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 muteParticipantByLabel:
                   value:
@@ -24247,6 +24236,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 holdParticipantWithMusic:
                   value:
@@ -24263,6 +24253,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 announceToParticipant:
                   value:
@@ -24279,6 +24270,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 modifyParticipant:
                   value:
@@ -24295,6 +24287,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: true
                     call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 modifyParticipantByLabel:
                   value:
@@ -24311,6 +24304,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: true
                     call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    queue_time: null
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
           description: OK
       security:
@@ -24533,6 +24527,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyName:
                   value:
@@ -24549,6 +24544,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithSidAsCoach:
                   value:
@@ -24565,6 +24561,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithNonE164Number:
                   value:
@@ -24581,6 +24578,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyNameJitterBufferSize:
                   value:
@@ -24597,6 +24595,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyNameByoc:
                   value:
@@ -24613,6 +24612,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyNameCallerId:
                   value:
@@ -24629,6 +24629,7 @@ paths:
                     coaching: false
                     call_sid_to_coach: null
                     label: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyNameReason:
                   value:
@@ -24645,6 +24646,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFriendlyNameRecordingTrack:
                   value:
@@ -24661,6 +24663,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFromToClient:
                   value:
@@ -24677,6 +24680,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                 createWithFromToSip:
                   value:
@@ -24693,6 +24697,7 @@ paths:
                     start_conference_on_enter: true
                     coaching: false
                     call_sid_to_coach: null
+                    queue_time: '1000'
                     uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
           description: Created
       security:
@@ -25382,6 +25387,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: true
                       call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                     - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       call_sid: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -25396,6 +25402,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: false
                       call_sid_to_coach: null
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json
                     first_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=0
                     next_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=1&PageToken=PACPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -25421,6 +25428,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: false
                       call_sid_to_coach: null
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAcccccccccccccccccccccccccccccccc.json
                     - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       call_sid: CAdddddddddddddddddddddddddddddddd
@@ -25435,6 +25443,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: false
                       call_sid_to_coach: null
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAdddddddddddddddddddddddddddddddd.json
                     first_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=0
                     next_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=2&PageToken=PACPdddddddddddddddddddddddddddddddd
@@ -25460,6 +25469,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: true
                       call_sid_to_coach: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
                     - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       call_sid: CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
@@ -25474,6 +25484,7 @@ paths:
                       start_conference_on_enter: true
                       coaching: false
                       call_sid_to_coach: null
+                      queue_time: null
                       uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants/CAbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json
                     first_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=0
                     next_page_uri: /2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants.json?Muted=true&PageSize=2&Page=1&PageToken=PACPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
