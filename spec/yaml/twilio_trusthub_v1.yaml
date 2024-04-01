@@ -576,7 +576,7 @@ components:
           maxLength: 34
           pattern: ^BU[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that we created to identify the Customer-Profile
+          description: The unique string that we created to identify the Trust Product
             resource.
         account_sid:
           type: string
@@ -585,15 +585,15 @@ components:
           pattern: ^AC[0-9a-fA-F]{32}$
           nullable: true
           description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
-            that created the Customer-Profile resource.
+            that created the Trust Product resource.
         policy_sid:
           type: string
           minLength: 34
           maxLength: 34
           pattern: ^RN[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string of a policy that is associated to the Customer-Profile
-            resource.
+          description: The unique string of the policy that is associated with the
+            Trust Product resource.
         friendly_name:
           type: string
           nullable: true
@@ -602,18 +602,18 @@ components:
           type: string
           $ref: '#/components/schemas/trust_product_enum_status'
           nullable: true
-          description: The verification status of the Customer-Profile resource.
+          description: The verification status of the Trust Product resource.
         valid_until:
           type: string
           format: date-time
           nullable: true
           description: The date and time in GMT in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)
-            format when the resource will be valid until.
+            format until which the resource will be valid.
         email:
           type: string
           nullable: true
-          description: The email address that will receive updates when the Customer-Profile
-            resource changes status.
+          description: The email address that will receive updates when the Trust
+            Product resource changes status.
         status_callback:
           type: string
           format: uri
@@ -635,12 +635,12 @@ components:
           type: string
           format: uri
           nullable: true
-          description: The absolute URL of the Customer-Profile resource.
+          description: The absolute URL of the Trust Product resource.
         links:
           type: object
           format: uri-map
           nullable: true
-          description: The URLs of the Assigned Items of the Customer-Profile resource.
+          description: The URLs of the Assigned Items of the Trust Product resource.
     trust_product_enum_status:
       type: string
       enum:
@@ -822,7 +822,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.55.2
+  version: 1.55.3
 openapi: 3.0.1
 paths:
   /v1/ComplianceInquiries/Customers/Initialize:
@@ -1092,9 +1092,64 @@ paths:
                 StatusCallbackUrl:
                   type: string
                   description: The url we call to inform you of bundle changes.
+                ThemeSetId:
+                  type: string
+                  description: Theme id for styling the inquiry form.
               required:
               - EndUserType
               - PhoneNumberType
+  /v1/ComplianceInquiries/Registration/{RegistrationId}/RegulatoryCompliance/GB/Initialize:
+    servers:
+    - url: https://trusthub.twilio.com
+    description: 'TODO: Resource-level docs'
+    x-twilio:
+      defaultOutputProperties:
+      - inquiry_id
+      - session_token
+      - registration_id
+      pathType: instance
+      mountName: compliance_registration_inquiries
+      className: compliance_registration_inquiries
+    post:
+      description: Resume a specific Regulatory Compliance Inquiry that has expired,
+        or re-open a rejected Compliance Inquiry for editing.
+      tags:
+      - TrusthubV1ComplianceRegistrationInquiries
+      parameters:
+      - name: RegistrationId
+        in: path
+        description: The unique RegistrationId matching the Regulatory Compliance
+          Inquiry that should be resumed or resubmitted. This value will have been
+          returned by the initial Regulatory Compliance Inquiry creation call.
+        schema:
+          type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/trusthub.v1.compliance_registration'
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: UpdateComplianceRegistration
+      x-maturity:
+      - GA
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateComplianceRegistrationRequest
+              properties:
+                IsIsvEmbed:
+                  type: boolean
+                  description: Indicates if the inquiry is being started from an ISV
+                    embedded component.
+                ThemeSetId:
+                  type: string
+                  description: Theme id for styling the inquiry form.
   /v1/ComplianceInquiries/Tollfree/Initialize:
     servers:
     - url: https://trusthub.twilio.com
@@ -1465,6 +1520,11 @@ paths:
                   type: string
                   $ref: '#/components/schemas/customer_profile_enum_status'
                   description: The verification status of the Customer-Profile resource.
+                    If the current verification status of the Customer-Profile is
+                    `draft`, you may set the verification status to `pending-review`
+                    to submit the Customer-Profile for Twilio review. No other values
+                    for `status` are permissible when updating a resource via this
+                    API endpoint as the other states are maintained by Twilio.
                 StatusCallback:
                   type: string
                   format: uri
@@ -2882,7 +2942,7 @@ paths:
           resource_url: /v1/TrustProducts/{trust_product_sid}/ChannelEndpointAssignments
       className: trust_products
     post:
-      description: Create a new Customer-Profile.
+      description: Create a new Trust Product.
       tags:
       - TrusthubV1TrustProducts
       responses:
@@ -2910,14 +2970,14 @@ paths:
                 Email:
                   type: string
                   description: The email address that will receive updates when the
-                    Customer-Profile resource changes status.
+                    Trust Product resource changes status.
                 PolicySid:
                   type: string
                   minLength: 34
                   maxLength: 34
                   pattern: ^RN[0-9a-fA-F]{32}$
                   description: The unique string of a policy that is associated to
-                    the Customer-Profile resource.
+                    the Trust Product resource.
                 StatusCallback:
                   type: string
                   format: uri
@@ -2928,13 +2988,13 @@ paths:
               - Email
               - PolicySid
     get:
-      description: Retrieve a list of all Customer-Profiles for an account.
+      description: Retrieve a list of all Trust Products for an account.
       tags:
       - TrusthubV1TrustProducts
       parameters:
       - name: Status
         in: query
-        description: The verification status of the Customer-Profile resource.
+        description: The verification status of the Trust Product resource.
         schema:
           type: string
           $ref: '#/components/schemas/trust_product_enum_status'
@@ -2945,8 +3005,8 @@ paths:
           type: string
       - name: PolicySid
         in: query
-        description: The unique string of a policy that is associated to the Customer-Profile
-          resource.
+        description: The unique string of a policy that is associated to the Trust
+          Product resource.
         schema:
           type: string
           minLength: 34
@@ -3037,13 +3097,13 @@ paths:
           resource_url: /v1/TrustProducts/{trust_product_sid}/ChannelEndpointAssignments
       className: trust_products
     get:
-      description: Fetch a specific Customer-Profile instance.
+      description: Fetch a specific Trust Product instance.
       tags:
       - TrusthubV1TrustProducts
       parameters:
       - name: Sid
         in: path
-        description: The unique string that we created to identify the Customer-Profile
+        description: The unique string that we created to identify the Trust Product
           resource.
         schema:
           type: string
@@ -3064,13 +3124,13 @@ paths:
       x-maturity:
       - GA
     post:
-      description: Updates a Customer-Profile in an account.
+      description: Updates a Trust Product in an account.
       tags:
       - TrusthubV1TrustProducts
       parameters:
       - name: Sid
         in: path
-        description: The unique string that we created to identify the Customer-Profile
+        description: The unique string that we created to identify the Trust Product
           resource.
         schema:
           type: string
@@ -3100,7 +3160,12 @@ paths:
                 Status:
                   type: string
                   $ref: '#/components/schemas/trust_product_enum_status'
-                  description: The verification status of the Customer-Profile resource.
+                  description: The verification status of the Trust Product resource.
+                    If the current verification status of the Trust Product is `draft`,
+                    you may set the verification status to `pending-review` to submit
+                    the TrustProduct for Twilio review. No other values for `status`
+                    are permissible when updating a resource via this API endpoint
+                    as the other states are maintained by Twilio.
                 StatusCallback:
                   type: string
                   format: uri
@@ -3112,15 +3177,15 @@ paths:
                 Email:
                   type: string
                   description: The email address that will receive updates when the
-                    Customer-Profile resource changes status.
+                    Trust Product resource changes status.
     delete:
-      description: Delete a specific Customer-Profile.
+      description: Delete a specific Trust Product.
       tags:
       - TrusthubV1TrustProducts
       parameters:
       - name: Sid
         in: path
-        description: The unique string that we created to identify the Customer-Profile
+        description: The unique string that we created to identify the Trust Product
           resource.
         schema:
           type: string
