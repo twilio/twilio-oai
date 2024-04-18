@@ -1,6 +1,114 @@
 {
   "components": {
     "schemas": {
+      "flex.v2.flex_user": {
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID of the account that created the resource."
+          },
+          "instance_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^GO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique ID created by Twilio to identify a Flex instance."
+          },
+          "user_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^US[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Twilio Unified User."
+          },
+          "flex_user_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^FU[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Flex User."
+          },
+          "worker_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WK[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the worker."
+          },
+          "workspace_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WS[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the workspace."
+          },
+          "flex_team_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^QO[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique SID identifier of the Flex Team."
+          },
+          "first_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "First name of the User."
+          },
+          "last_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Last name of the User."
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "description": "Username of the User."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of the User."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Friendly name of the User."
+          },
+          "created_date": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this user was created, given in ISO 8601 format."
+          },
+          "updated_date": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date that this user was updated, given in ISO 8601 format."
+          },
+          "version": {
+            "type": "integer",
+            "nullable": true,
+            "description": "The current version of the user."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "flex.v2.web_channel": {
         "type": "object",
         "properties": {
@@ -40,10 +148,82 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.55.4"
+    "version": "1.55.5"
   },
   "openapi": "3.0.1",
   "paths": {
+    "/v2/Instances/{InstanceSid}/Users/{FlexUserSid}": {
+      "servers": [
+        {
+          "url": "https://flex-api.twilio.com"
+        }
+      ],
+      "description": "TODO: Resource-level docs",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "account_sid",
+          "instance_sid",
+          "flex_user_sid",
+          "user_sid",
+          "created_date"
+        ],
+        "pathType": "instance",
+        "mountName": "flex_user"
+      },
+      "get": {
+        "description": "Fetch flex user for the given flex user sid",
+        "tags": [
+          "FlexV2FlexUser"
+        ],
+        "parameters": [
+          {
+            "name": "InstanceSid",
+            "in": "path",
+            "description": "The unique ID created by Twilio to identify a Flex instance.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^GO[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "FlexUserSid",
+            "in": "path",
+            "description": "The unique id for the flex user to be retrieved.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^FU[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flex.v2.flex_user"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchFlexUser",
+        "x-maturity": [
+          "GA"
+        ]
+      }
+    },
     "/v2/WebChats": {
       "servers": [
         {
@@ -63,6 +243,16 @@
         "description": "",
         "tags": [
           "FlexV2WebChannels"
+        ],
+        "parameters": [
+          {
+            "name": "Ui-Version",
+            "in": "header",
+            "description": "The Ui-Version HTTP request header",
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "201": {
@@ -125,6 +315,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "FlexV2FlexUser"
+    },
     {
       "name": "FlexV2WebChannels"
     }
