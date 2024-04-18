@@ -19,6 +19,96 @@ components:
       - EndInboundMessagingFlow
       - StartInboundMessagingFlow
       - StartOutboundVoiceFlow
+    flex.v2.flex_user:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID of the account that created the resource.
+        instance_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GO[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique ID created by Twilio to identify a Flex instance.
+        user_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^US[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Twilio Unified User.
+        flex_user_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FU[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Flex User.
+        worker_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^WK[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the worker.
+        workspace_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^WS[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the workspace.
+        flex_team_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^QO[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Flex Team.
+        first_name:
+          type: string
+          nullable: true
+          description: First name of the User.
+        last_name:
+          type: string
+          nullable: true
+          description: Last name of the User.
+        username:
+          type: string
+          nullable: true
+          description: Username of the User.
+        email:
+          type: string
+          nullable: true
+          description: Email of the User.
+        friendly_name:
+          type: string
+          nullable: true
+          description: Friendly name of the User.
+        created_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this user was created, given in ISO 8601 format.
+        updated_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date that this user was updated, given in ISO 8601 format.
+        version:
+          type: integer
+          nullable: true
+          description: The current version of the user.
+        url:
+          type: string
+          format: uri
+          nullable: true
     flex.v2.web_channel:
       type: object
       properties:
@@ -50,6 +140,71 @@ info:
   version: 1.0.0
 openapi: 3.0.1
 paths:
+  /v2/Instances/{InstanceSid}/Users/{FlexUserSid}:
+    servers:
+    - url: https://flex-api.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - account_sid
+      - instance_sid
+      - flex_user_sid
+      - user_sid
+      - created_date
+      mountName: flex_user
+      pathType: instance
+    get:
+      description: Fetch flex user for the given flex user sid
+      tags:
+      - FlexV2FlexUser
+      parameters:
+      - name: InstanceSid
+        in: path
+        description: The unique ID created by Twilio to identify a Flex instance.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GO[0-9a-fA-F]{32}$
+        required: true
+      - name: FlexUserSid
+        in: path
+        description: The unique id for the flex user to be retrieved.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^FU[0-9a-fA-F]{32}$
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/flex.v2.flex_user'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    instance_sid: GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    flex_user_sid: FUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    user_sid: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    worker_sid: WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    workspace_sid: WSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    flex_team_sid: QOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    first_name: firstname
+                    last_name: lastname
+                    friendly_name: friendly_name
+                    username: username
+                    email: sample@example.com
+                    created_date: '2015-07-31T04:00:00Z'
+                    updated_date: '2015-07-31T04:00:00Z'
+                    version: 1
+                    url: https://flex-api.twilio.com/v2/Instances/GOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Users/FUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchFlexUser
   /v2/WebChats:
     servers:
     - url: https://flex-api.twilio.com
@@ -64,6 +219,12 @@ paths:
       description: ''
       tags:
       - FlexV2WebChannels
+      parameters:
+      - name: Ui-Version
+        in: header
+        description: The Ui-Version HTTP request header
+        schema:
+          type: string
       responses:
         '201':
           content:
@@ -118,6 +279,7 @@ servers:
 - url: https://flex-api.twilio.com
 tags:
 - name: FlexV2ConductorFlow
+- name: FlexV2FlexUser
 - name: FlexV2User
 - name: FlexV2WebChannels
 - name: FlexV2WebchatInitToken

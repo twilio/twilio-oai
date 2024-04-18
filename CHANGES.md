@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2024-04-18] Version 2.0.0-rc.19
+--------------------------------
+**Flex**
+- Add header `ui_version` to `web_channels` API
+
+**Messaging**
+- Redeploy after failed pipeline
+
+**Numbers**
+- Add Delete Port In request phone number api and Add Delete Port In request api
+
+
 [2024-04-04] Version 2.0.0-rc.18
 --------------------------------
 **Api**

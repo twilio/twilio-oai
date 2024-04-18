@@ -297,6 +297,32 @@
           }
         }
       },
+      "numbers.v1.porting_port_in_phone_number": {
+        "type": "object",
+        "properties": {
+          "port_in_request_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^KW[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request."
+          },
+          "phone_number_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PU[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the Port In request phone number. This is a unique identifier of the phone number."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "numbers.v1.porting_portability": {
         "type": "object",
         "properties": {
@@ -862,9 +888,39 @@
         "defaultOutputProperties": [
           "port_in_request_sid"
         ],
-        "mountName": "porting_port_ins_fetch",
-        "className": "porting_port_in_fetch",
+        "mountName": "porting_port_ins",
         "pathType": "instance"
+      },
+      "delete": {
+        "description": "Allows to cancel a port in request by SID",
+        "tags": [
+          "NumbersV1PortingPortIn"
+        ],
+        "parameters": [
+          {
+            "name": "PortInRequestSid",
+            "in": "path",
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^KW[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeletePortingPortIn"
       },
       "get": {
         "description": "Fetch a port in request by SID",
@@ -949,7 +1005,70 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPortingPortInFetch"
+        "operationId": "FetchPortingPortInFetch",
+        "x-twilio": {
+          "mountName": "porting_port_ins_fetch",
+          "className": "porting_port_in_fetch"
+        }
+      }
+    },
+    "/v1/Porting/PortIn/{PortInRequestSid}/PhoneNumber/{PhoneNumberSid}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "port_in_request_sid",
+          "phone_number_sid"
+        ],
+        "mountName": "porting_port_in_phone_number",
+        "pathType": "instance"
+      },
+      "delete": {
+        "description": "Allows to cancel a port in request phone number by SID",
+        "tags": [
+          "NumbersV1PortingPortInPhoneNumber"
+        ],
+        "parameters": [
+          {
+            "name": "PortInRequestSid",
+            "in": "path",
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^KW[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "PhoneNumberSid",
+            "in": "path",
+            "description": "The SID of the Port In request phone number. This is a unique identifier of the phone number.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PU[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeletePortingPortInPhoneNumber"
       }
     },
     "/v1/Porting/Portability/PhoneNumber/{PhoneNumber}": {
@@ -1070,6 +1189,9 @@
     },
     {
       "name": "NumbersV1PortingPortInFetch"
+    },
+    {
+      "name": "NumbersV1PortingPortInPhoneNumber"
     },
     {
       "name": "NumbersV1PortingPortability"
