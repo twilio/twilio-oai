@@ -1,6 +1,22 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
+      "authorization_document_enum_status": {
+        "type": "string",
+        "enum": [
+          "opened",
+          "signing",
+          "signed",
+          "canceled",
+          "failed"
+        ]
+      },
       "numbers.v1.bulk_eligibility": {
         "type": "object",
         "properties": {
@@ -68,6 +84,28 @@
           "eligible-by-manual-process"
         ]
       },
+      "dependent_order_enum_status": {
+        "type": "string",
+        "enum": [
+          "twilio-processing",
+          "received",
+          "pending-verification",
+          "verified",
+          "pending-loa",
+          "carrier-processing",
+          "testing",
+          "completed",
+          "failed",
+          "action-required"
+        ]
+      },
+      "dependent_order_enum_verification_type": {
+        "type": "string",
+        "enum": [
+          "phone-call",
+          "phone-bill"
+        ]
+      },
       "numbers.v1.eligibility": {
         "type": "object",
         "properties": {
@@ -98,6 +136,28 @@
           "invalid-phone-number",
           "invalid-hosting-account-sid",
           "eligible"
+        ]
+      },
+      "hosted_number_order_enum_status": {
+        "type": "string",
+        "enum": [
+          "twilio-processing",
+          "received",
+          "pending-verification",
+          "verified",
+          "pending-loa",
+          "carrier-processing",
+          "testing",
+          "completed",
+          "failed",
+          "action-required"
+        ]
+      },
+      "hosted_number_order_enum_verification_type": {
+        "type": "string",
+        "enum": [
+          "phone-call",
+          "phone-bill"
         ]
       },
       "numbers.v1.porting_bulk_portability": {
@@ -339,12 +399,6 @@
           "TOLL-FREE"
         ]
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -360,7 +414,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.55.5"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -370,11 +424,59 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "list",
-        "mountName": "bulk_eligibilities"
+        "mountName": "bulk_eligibilities",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Create a bulk eligibility check for a set of numbers that you want to host in Twilio.",
+        "tags": [
+          "NumbersV1BulkEligibility"
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.bulk_eligibility"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "friendly_name": "Test",
+                      "status": "QUEUED",
+                      "date_created": "2023-05-03T03:12:30Z",
+                      "date_completed": null,
+                      "request_id": "ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "results": [],
+                      "url": "https://numbers.twilio.com/v1/HostedNumber/Eligibility/Bulk/ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Accepted"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateBulkEligibility",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "CreateBulkEligibilityRequest",
+                "properties": {}
+              }
+            }
+          }
+        }
       }
     },
     "/v1/HostedNumber/Eligibility/Bulk/{RequestId}": {
@@ -383,11 +485,11 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "instance",
-        "mountName": "bulk_eligibilities"
+        "mountName": "bulk_eligibilities",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch an eligibility bulk check that you requested to host in Twilio.",
@@ -414,6 +516,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/numbers.v1.bulk_eligibility"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "friendly_name": "Foo",
+                      "status": "SUCCESSFUL",
+                      "date_created": "2023-04-24T14:47:04Z",
+                      "date_completed": "2023-04-24T14:47:06Z",
+                      "results": [
+                        {
+                          "phone_number": "+18778894546",
+                          "account_sid": "AC93b447ff5bd2abac37f1cbab2a871430",
+                          "eligibility_status": "INELIGIBLE",
+                          "eligibility_sub_status": "ALREADY_IN_TWILIO",
+                          "ineligibility_reason": "ALREADY_IN_TWILIO_BUT_NOT_IN_USE",
+                          "next_step": "CONTACT_SUPPORT_INELIGIBLE_INVENTORY_STATUS",
+                          "voice_provider": null,
+                          "messaging_provider": null,
+                          "phone_number_type": "TOLL_FREE",
+                          "hosting_order_sid": null,
+                          "hosting_order_status": null,
+                          "iso_country_code": "US",
+                          "inventory_status": "in-testing",
+                          "inventory_account_sid": "AC93b447ff5bd2abac37f1cbab2a871430"
+                        }
+                      ],
+                      "url": "https://numbers.twilio.com/v1/HostedNumber/Eligibility/Bulk/ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "request_id": "ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -425,10 +557,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchBulkEligibility",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchBulkEligibility"
       }
     },
     "/v1/HostedNumber/Eligibility": {
@@ -437,11 +566,86 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "list",
-        "mountName": "eligibilities"
+        "mountName": "eligibilities",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Create an eligibility check for a number that you want to host in Twilio.",
+        "tags": [
+          "NumbersV1Eligibility"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.eligibility"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "results": [
+                        {
+                          "phone_number": "+18778894546",
+                          "account_sid": "AC93b447ff5bd2abac37f1cbab2a871430",
+                          "eligibility_status": "INELIGIBLE",
+                          "eligibility_sub_status": "ALREADY_IN_TWILIO",
+                          "ineligibility_reason": "ALREADY_IN_TWILIO_BUT_NOT_IN_USE",
+                          "next_step": "CONTACT_SUPPORT_INELIGIBLE_INVENTORY_STATUS",
+                          "voice_provider": null,
+                          "messaging_provider": null,
+                          "phone_number_type": "TOLL_FREE",
+                          "hosting_order_sid": null,
+                          "hosting_order_status": null,
+                          "iso_country_code": "US",
+                          "inventory_status": "in-testing",
+                          "inventory_account_sid": "AC93b447ff5aa2abac37e3cbab2a871430"
+                        },
+                        {
+                          "phone_number": "4565433456",
+                          "account_sid": null,
+                          "eligibility_status": "INELIGIBLE",
+                          "eligibility_sub_status": "NUMBER_FORMAT_INELIGIBLE",
+                          "ineligibility_reason": "NUMBER_FORMAT_INELIGIBLE",
+                          "next_step": "EDIT_INELIGIBLE_NUMBER",
+                          "voice_provider": null,
+                          "messaging_provider": null,
+                          "phone_number_type": null,
+                          "hosting_order_sid": null,
+                          "hosting_order_status": null,
+                          "iso_country_code": null,
+                          "inventory_status": null,
+                          "inventory_account_sid": null
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateEligibility",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "CreateEligibilityRequest",
+                "properties": {}
+              }
+            }
+          }
+        }
       }
     },
     "/v1/Porting/Portability/{Sid}": {
@@ -450,14 +654,14 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
           "status"
         ],
-        "pathType": "instance",
-        "mountName": "porting_bulk_portabilities"
+        "mountName": "porting_bulk_portabilities",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a previous portability check. This should return the current status of the validation and the result for all the numbers provided, given that they have been validated (as this process is performed asynchronously).",
@@ -484,6 +688,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/numbers.v1.porting_bulk_portability"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "completed",
+                      "datetime_created": "2015-07-30T20:00:00Z",
+                      "phone_numbers": [
+                        {
+                          "phone_number": "+14153334440",
+                          "portable": true,
+                          "pin_and_account_number_required": true,
+                          "not_portable_reason": null,
+                          "not_portable_reason_code": null,
+                          "number_type": "LOCAL",
+                          "country": "US",
+                          "messaging_carrier": "string",
+                          "voice_carrier": "string"
+                        },
+                        {
+                          "phone_number": "+18002178781",
+                          "portable": false,
+                          "pin_and_account_number_required": false,
+                          "not_portable_reason": "MANUAL_PORTING_AVAILABLE",
+                          "not_portable_reason_code": 22133,
+                          "number_type": "TOLL-FREE",
+                          "country": "US",
+                          "messaging_carrier": "Verizon",
+                          "voice_carrier": "Verizon"
+                        }
+                      ],
+                      "url": "https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -495,10 +733,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPortingBulkPortability",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchPortingBulkPortability"
       }
     },
     "/v1/Porting/Portability": {
@@ -507,14 +742,14 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "sid",
           "status"
         ],
-        "pathType": "list",
-        "mountName": "porting_bulk_portabilities"
+        "mountName": "porting_bulk_portabilities",
+        "pathType": "list"
       },
       "post": {
         "description": "Allows to check if a list of phone numbers can be ported to Twilio or not. This is done asynchronous for each phone number.",
@@ -527,6 +762,17 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/numbers.v1.porting_bulk_portability"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "in-progress",
+                      "datetime_created": "2015-07-30T20:00:00Z",
+                      "phone_numbers": [],
+                      "url": "https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -539,9 +785,6 @@
           }
         ],
         "operationId": "CreatePortingBulkPortability",
-        "x-maturity": [
-          "Beta"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -560,6 +803,16 @@
                 "required": [
                   "PhoneNumbers"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "PhoneNumbers": [
+                      "+14153334440",
+                      "+18002178781"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -572,13 +825,56 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "port_in_request_sid"
         ],
-        "pathType": "list",
-        "mountName": "porting_port_ins"
+        "mountName": "porting_port_ins",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Allows to create a new port in request",
+        "tags": [
+          "NumbersV1PortingPortIn"
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.porting_port_in"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Accepted"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreatePortingPortIn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "CreatePortingPortInRequest",
+                "properties": {}
+              }
+            }
+          }
+        }
       }
     },
     "/v1/Porting/PortIn/{PortInRequestSid}": {
@@ -587,13 +883,13 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "port_in_request_sid"
         ],
-        "pathType": "instance",
-        "mountName": "porting_port_ins"
+        "mountName": "porting_port_ins",
+        "pathType": "instance"
       },
       "delete": {
         "description": "Allows to cancel a port in request by SID",
@@ -624,10 +920,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeletePortingPortIn",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeletePortingPortIn"
       },
       "get": {
         "description": "Fetch a port in request by SID",
@@ -654,6 +947,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/numbers.v1.porting_port_in_fetch"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "notification_emails": [
+                        "user@domain.com"
+                      ],
+                      "target_port_in_date": "2023-09-10",
+                      "target_port_in_time_range_start": "10:00:00+01:00",
+                      "target_port_in_time_range_end": "20:00:00+01:00",
+                      "port_in_request_status": "pending",
+                      "losing_carrier_information": {
+                        "customer_type": "Business/Individual",
+                        "customer_name": "Customer name for carrier",
+                        "authorized_representative": "John Smith",
+                        "authorized_representative_email": "signer@domain.com",
+                        "account_number": "123456",
+                        "account_telephone_number": "+133232323",
+                        "address_sid": "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "address": {
+                          "street": "Your Street",
+                          "street_2": "Other Street or null",
+                          "city": "City",
+                          "state": "State",
+                          "zip": "000000",
+                          "country": "US"
+                        }
+                      },
+                      "phone_numbers": [
+                        {
+                          "phone_number": "+16175551212",
+                          "pin": "123456",
+                          "portable": true,
+                          "not_portability_reason": "string",
+                          "not_portability_reason_code": 0,
+                          "port_in_phone_number_sid": "PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "port_in_phone_number_status": "In Review"
+                        }
+                      ],
+                      "documents": [
+                        "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      ]
+                    }
+                  }
                 }
               }
             },
@@ -666,9 +1006,6 @@
           }
         ],
         "operationId": "FetchPortingPortInFetch",
-        "x-maturity": [
-          "Beta"
-        ],
         "x-twilio": {
           "mountName": "porting_port_ins_fetch",
           "className": "porting_port_in_fetch"
@@ -681,14 +1018,14 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "port_in_request_sid",
           "phone_number_sid"
         ],
-        "pathType": "instance",
-        "mountName": "porting_port_in_phone_number"
+        "mountName": "porting_port_in_phone_number",
+        "pathType": "instance"
       },
       "delete": {
         "description": "Allows to cancel a port in request phone number by SID",
@@ -731,10 +1068,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeletePortingPortInPhoneNumber",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeletePortingPortInPhoneNumber"
       }
     },
     "/v1/Porting/Portability/PhoneNumber/{PhoneNumber}": {
@@ -743,11 +1077,11 @@
           "url": "https://numbers.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "instance",
-        "mountName": "porting_portabilities"
+        "mountName": "porting_portabilities",
+        "pathType": "instance"
       },
       "get": {
         "description": "Allows to check if a single phone number can be ported to Twilio or not.",
@@ -774,6 +1108,11 @@
               "minLength": 34,
               "maxLength": 34,
               "pattern": "^AC[0-9a-fA-F]{32}$"
+            },
+            "examples": {
+              "fetch": {
+                "value": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02"
+              }
             }
           }
         ],
@@ -783,6 +1122,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/numbers.v1.porting_portability"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "phone_number": "+18001234567",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01",
+                      "portable": false,
+                      "pin_and_account_number_required": false,
+                      "not_portable_reason": "MANUAL_PORTING_AVAILABLE",
+                      "not_portable_reason_code": 22133,
+                      "number_type": "TOLL-FREE",
+                      "country": "US",
+                      "messaging_carrier": "Verizon",
+                      "voice_carrier": "Verizon",
+                      "url": "https://numbers.twilio.com/v1/Porting/Portability/PhoneNumber/+18001234567"
+                    }
+                  }
                 }
               }
             },
@@ -794,10 +1150,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPortingPortability",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "FetchPortingPortability"
       }
     }
   },
@@ -808,7 +1161,25 @@
   ],
   "tags": [
     {
+      "name": "NumbersV1AuthorizationDocument"
+    },
+    {
       "name": "NumbersV1BulkEligibility"
+    },
+    {
+      "name": "NumbersV1DependentOrder"
+    },
+    {
+      "name": "NumbersV1Documents"
+    },
+    {
+      "name": "NumbersV1Eligibility"
+    },
+    {
+      "name": "NumbersV1HostedNumberOrder"
+    },
+    {
+      "name": "NumbersV1Identity"
     },
     {
       "name": "NumbersV1PortingBulkPortability"
@@ -824,12 +1195,14 @@
     },
     {
       "name": "NumbersV1PortingPortability"
+    },
+    {
+      "name": "NumbersV1ProofOfAddress"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "Beta",
-      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
+      "accountSid_authToken": []
     }
   ]
 }

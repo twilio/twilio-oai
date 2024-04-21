@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     pricing.v2.trunking_country:
       type: object
@@ -315,10 +319,6 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the resource.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Pricing
   description: This is the public Twilio REST API.
@@ -330,7 +330,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.55.5
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v2/Trunking/Countries:
@@ -379,34 +379,58 @@ paths:
                     items:
                       $ref: '#/components/schemas/pricing.v2.trunking_country'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    countries:
+                    - country: Andorra
+                      iso_country: AD
+                      url: https://pricing.twilio.com/v2/Trunking/Countries/AD
+                    meta:
+                      first_page_url: https://pricing.twilio.com/v2/Trunking/Countries?PageSize=50&Page=0
+                      key: countries
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://pricing.twilio.com/v2/Trunking/Countries?PageSize=50&Page=0
+                readEmpty:
+                  value:
+                    countries: []
+                    meta:
+                      first_page_url: https://pricing.twilio.com/v2/Trunking/Countries?PageSize=50&Page=0
+                      key: countries
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://pricing.twilio.com/v2/Trunking/Countries?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListTrunkingCountry
-      x-maturity:
-      - GA
   /v2/Trunking/Countries/{IsoCountry}:
     servers:
     - url: https://pricing.twilio.com
@@ -435,12 +459,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/pricing.v2.trunking_country-instance'
+              examples:
+                fetch:
+                  value:
+                    country: United States
+                    originating_call_prices:
+                    - base_price: null
+                      current_price: '0.0085'
+                      number_type: local
+                    - base_price: null
+                      current_price: '0.022'
+                      number_type: toll free
+                    iso_country: US
+                    terminating_prefix_prices:
+                    - base_price: null
+                      current_price: '0.090'
+                      destination_prefixes:
+                      - '1907'
+                      friendly_name: Outbound Trunking Minute - United States - Alaska
+                      origination_prefixes:
+                      - ALL
+                    - base_price: null
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1808'
+                      friendly_name: Outbound Trunking Minute - United States - Hawaii
+                      origination_prefixes:
+                      - ALL
+                    - base_price: null
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1800'
+                      - '1844'
+                      - '1855'
+                      - '1866'
+                      - '1877'
+                      - '1888'
+                      friendly_name: Outbound Trunking Minute - United States & Canada
+                        - Toll Free
+                      origination_prefixes:
+                      - ALL
+                    - base_price: null
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1'
+                      friendly_name: Outbound Trunking Minute - United States & Canada
+                      origination_prefixes:
+                      - ALL
+                    price_unit: USD
+                    url: https://pricing.twilio.com/v2/Trunking/Countries/US
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTrunkingCountry
-      x-maturity:
-      - GA
   /v2/Trunking/Numbers/{DestinationNumber}:
     servers:
     - url: https://pricing.twilio.com
@@ -474,18 +545,62 @@ paths:
         schema:
           type: string
           format: phone-number
+        examples:
+          fetchWithOrigination:
+            value: '+15105556789'
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/pricing.v2.trunking_number'
+              examples:
+                fetch:
+                  value:
+                    country: United States
+                    destination_number: '+18001234567'
+                    originating_call_price:
+                      base_price: null
+                      current_price: null
+                      number_type: null
+                    iso_country: US
+                    origination_number: null
+                    terminating_prefix_prices:
+                    - base_price: null
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1800'
+                      friendly_name: Trunking Outbound Minute - United States Zone
+                        1b
+                      origination_prefixes:
+                      - ALL
+                    price_unit: USD
+                    url: https://pricing.twilio.com/v2/Trunking/Numbers/+18001234567
+                fetchWithOrigination:
+                  value:
+                    country: United States
+                    destination_number: '+18001234567'
+                    originating_call_price:
+                      base_price: null
+                      current_price: '0.013'
+                      number_type: tollfree
+                    iso_country: US
+                    origination_number: '+15105556789'
+                    terminating_prefix_prices:
+                    - base_price: null
+                      current_price: '0.001'
+                      destination_prefixes:
+                      - '1800'
+                      friendly_name: Trunking Outbound Minute - United States - Toll
+                        Free
+                      origination_prefixes:
+                      - ALL
+                    price_unit: USD
+                    url: https://pricing.twilio.com/v2/Trunking/Numbers/+18001234567
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTrunkingNumber
-      x-maturity:
-      - GA
   /v2/Trunking/Numbers:
     servers:
     - url: https://pricing.twilio.com
@@ -512,8 +627,8 @@ paths:
       defaultOutputProperties:
       - country
       - price_unit
-      pathType: list
       parent: /Voice
+      pathType: list
     get:
       description: ''
       tags:
@@ -551,34 +666,58 @@ paths:
                     items:
                       $ref: '#/components/schemas/pricing.v2.voice.voice_country'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readFull:
+                  value:
+                    countries:
+                    - country: Andorra
+                      iso_country: AD
+                      url: https://pricing.twilio.com/v2/Voice/Countries/AD
+                    meta:
+                      first_page_url: https://pricing.twilio.com/v2/Voice/Countries?PageSize=50&Page=0
+                      key: countries
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://pricing.twilio.com/v2/Voice/Countries?PageSize=50&Page=0
+                readEmpty:
+                  value:
+                    countries: []
+                    meta:
+                      first_page_url: https://pricing.twilio.com/v2/Voice/Countries?PageSize=50&Page=0
+                      key: countries
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://pricing.twilio.com/v2/Voice/Countries?PageSize=50&Page=0
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListVoiceCountry
-      x-maturity:
-      - GA
   /v2/Voice/Countries/{IsoCountry}:
     servers:
     - url: https://pricing.twilio.com
@@ -587,8 +726,8 @@ paths:
       defaultOutputProperties:
       - country
       - price_unit
-      pathType: instance
       parent: /Voice
+      pathType: instance
     get:
       description: Fetch a specific Country.
       tags:
@@ -608,12 +747,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/pricing.v2.voice.voice_country-instance'
+              examples:
+                fetch:
+                  value:
+                    country: United States
+                    inbound_call_prices:
+                    - base_price: '0.0085'
+                      current_price: '0.0085'
+                      number_type: local
+                    - base_price: '0.022'
+                      current_price: '0.022'
+                      number_type: toll free
+                    iso_country: US
+                    outbound_prefix_prices:
+                    - base_price: '0.090'
+                      current_price: '0.090'
+                      destination_prefixes:
+                      - '1907'
+                      friendly_name: Programmable Outbound Minute - United States
+                        - Alaska
+                      origination_prefixes:
+                      - ALL
+                    - base_price: '0.013'
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1808'
+                      friendly_name: Programmable Outbound Minute - United States
+                        - Hawaii
+                      origination_prefixes:
+                      - ALL
+                    - base_price: '0.013'
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1800'
+                      - '1844'
+                      - '1855'
+                      - '1866'
+                      - '1877'
+                      - '1888'
+                      friendly_name: Programmable Outbound Minute - United States
+                        & Canada - Toll Free
+                      origination_prefixes:
+                      - ALL
+                    - base_price: '0.013'
+                      current_price: '0.013'
+                      destination_prefixes:
+                      - '1'
+                      friendly_name: Programmable Outbound Minute - United States
+                        & Canada
+                      origination_prefixes:
+                      - ALL
+                    price_unit: USD
+                    url: https://pricing.twilio.com/v2/Voice/Countries/US
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchVoiceCountry
-      x-maturity:
-      - GA
   /v2/Voice/Numbers/{DestinationNumber}:
     servers:
     - url: https://pricing.twilio.com
@@ -623,8 +812,8 @@ paths:
       - country
       - inbound_call_price
       - price_unit
-      pathType: instance
       parent: /Voice
+      pathType: instance
     get:
       description: Fetch pricing information for a specific destination and, optionally,
         origination phone number.
@@ -648,18 +837,37 @@ paths:
         schema:
           type: string
           format: phone-number
+        examples:
+          fetch:
+            value: '+18001234567'
       responses:
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/pricing.v2.voice.voice_number'
+              examples:
+                fetch:
+                  value:
+                    country: United States
+                    destination_number: '+18001234567'
+                    inbound_call_price:
+                      base_price: null
+                      current_price: null
+                      number_type: null
+                    iso_country: US
+                    origination_number: '+987654321'
+                    outbound_call_prices:
+                    - base_price: '0.013'
+                      current_price: '0.013'
+                      origination_prefixes:
+                      - ALL
+                    price_unit: USD
+                    url: https://pricing.twilio.com/v2/Voice/Numbers/+18001234567
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchVoiceNumber
-      x-maturity:
-      - GA
   /v2/Voice/Numbers:
     servers:
     - url: https://pricing.twilio.com
@@ -669,13 +877,12 @@ paths:
       - country
       - inbound_call_price
       - price_unit
-      pathType: list
       parent: /Voice
+      pathType: list
 servers:
 - url: https://pricing.twilio.com
 tags:
 - name: PricingV2Country
 - name: PricingV2Number
-x-maturity:
-- name: GA
-  description: This product is Generally Available.
+security:
+- accountSid_authToken: []

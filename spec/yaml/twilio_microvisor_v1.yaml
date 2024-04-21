@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     microvisor.v1.account_config:
       type: object
@@ -214,10 +218,6 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the Secret.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Microvisor
   description: This is the public Twilio REST API.
@@ -229,17 +229,17 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.55.5
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Configs:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: account_configs
+      pathType: list
     get:
       description: Retrieve a list of all Configs for an Account.
       tags:
@@ -277,34 +277,63 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.account_config'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    configs: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Configs?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Configs?PageSize=50&Page=0
+                      next_page_url: null
+                      key: configs
+                readFull:
+                  value:
+                    configs:
+                    - key: first
+                      value: something
+                      date_updated: '2021-01-01T12:34:56Z'
+                      url: https://microvisor.twilio.com/v1/Configs/first
+                    - key: second
+                      value: or other
+                      date_updated: '2021-01-01T12:34:57Z'
+                      url: https://microvisor.twilio.com/v1/Configs/second
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Configs?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Configs?PageSize=50&Page=0
+                      next_page_url: null
+                      key: configs
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAccountConfig
-      x-maturity:
-      - Preview
     post:
       description: Create a config for an Account.
       tags:
@@ -315,12 +344,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_config'
+              examples:
+                createAccountConfig:
+                  value:
+                    key: first
+                    value: place
+                    date_updated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Configs/first
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAccountConfig
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -337,14 +371,19 @@ paths:
               required:
               - Key
               - Value
+            examples:
+              createAccountConfig:
+                value:
+                  Key: first,
+                  Value: first val
   /v1/Configs/{Key}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       mountName: account_configs
+      pathType: instance
     get:
       description: Retrieve a Config for an Account.
       tags:
@@ -362,12 +401,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_config'
+              examples:
+                fetch:
+                  value:
+                    key: first
+                    value: place
+                    date_updated: '2021-01-01T12:34:57Z'
+                    url: https://microvisor.twilio.com/v1/Configs/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAccountConfig
-      x-maturity:
-      - Preview
     post:
       description: Update a config for an Account.
       tags:
@@ -385,12 +429,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_config'
+              examples:
+                update:
+                  value:
+                    key: first
+                    value: place
+                    date_updated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Configs/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateAccountConfig
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -403,6 +452,10 @@ paths:
                   description: The config value; up to 4096 characters.
               required:
               - Value
+            examples:
+              update:
+                value:
+                  Value: place
     delete:
       description: Delete a config for an Account.
       tags:
@@ -420,16 +473,14 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAccountConfig
-      x-maturity:
-      - Preview
   /v1/Secrets:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: account_secrets
+      pathType: list
     get:
       description: Retrieve a list of all Secrets for an Account.
       tags:
@@ -467,34 +518,61 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.account_secret'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    secrets: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Secrets?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Secrets?PageSize=50&Page=0
+                      next_page_url: null
+                      key: secrets
+                readFull:
+                  value:
+                    secrets:
+                    - key: first
+                      date_rotated: '2021-01-01T12:34:56Z'
+                      url: https://microvisor.twilio.com/v1/Secrets/first
+                    - key: second
+                      date_rotated: '2021-01-01T12:34:57Z'
+                      url: https://microvisor.twilio.com/v1/Secrets/second
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Secrets?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Secrets?PageSize=50&Page=0
+                      next_page_url: null
+                      key: secrets
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAccountSecret
-      x-maturity:
-      - Preview
     post:
       description: Create a secret for an Account.
       tags:
@@ -505,12 +583,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_secret'
+              examples:
+                createAccountSecret:
+                  value:
+                    key: first
+                    date_rotated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Secrets/first
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAccountSecret
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -527,14 +609,19 @@ paths:
               required:
               - Key
               - Value
+            examples:
+              createAccountSecret:
+                value:
+                  Key: first,
+                  Value: first val
   /v1/Secrets/{Key}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       mountName: account_secrets
+      pathType: instance
     get:
       description: Retrieve a Secret for an Account.
       tags:
@@ -552,12 +639,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_secret'
+              examples:
+                fetch:
+                  value:
+                    key: first
+                    date_rotated: '2021-01-01T12:34:57Z'
+                    url: https://microvisor.twilio.com/v1/Secrets/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAccountSecret
-      x-maturity:
-      - Preview
     post:
       description: Update a secret for an Account.
       tags:
@@ -575,12 +666,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.account_secret'
+              examples:
+                update:
+                  value:
+                    key: first
+                    date_rotated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Secrets/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateAccountSecret
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -593,6 +688,10 @@ paths:
                   description: The secret value; up to 4096 characters.
               required:
               - Value
+            examples:
+              update:
+                value:
+                  Value: place
     delete:
       description: Delete a secret for an Account.
       tags:
@@ -610,22 +709,20 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAccountSecret
-      x-maturity:
-      - Preview
   /v1/Apps:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
-      pathType: list
       dependentProperties:
         app_manifests:
           mapping:
             app_sid: sid
           resource_url: /v1/Apps/{app_sid}/Manifest
+      pathType: list
     get:
       description: Retrieve a list of all Apps for an Account.
       tags:
@@ -663,48 +760,78 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.app'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    apps: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Apps?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Apps?PageSize=50&Page=0
+                      next_page_url: null
+                      key: apps
+                readFull:
+                  value:
+                    apps:
+                    - sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      hash: hash
+                      unique_name: unique name
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:00:00Z'
+                      url: https://microvisor.twilio.com/v1/Apps/KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        app_manifests: https://microvisor.twilio.com/v1/Apps/KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Manifest
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Apps?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Apps?PageSize=50&Page=0
+                      next_page_url: null
+                      key: apps
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListApp
-      x-maturity:
-      - Preview
   /v1/Apps/{Sid}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
-      pathType: instance
       dependentProperties:
         app_manifests:
           mapping:
             app_sid: sid
           resource_url: /v1/Apps/{app_sid}/Manifest
+      pathType: instance
     get:
       description: Fetch a specific App.
       tags:
@@ -722,12 +849,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.app'
+              examples:
+                fetch:
+                  value:
+                    sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    hash: hash
+                    unique_name: look at this crazy app
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://microvisor.twilio.com/v1/Apps/KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      app_manifests: https://microvisor.twilio.com/v1/Apps/KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Manifest
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchApp
-      x-maturity:
-      - Preview
     delete:
       description: Delete a specific App.
       tags:
@@ -745,17 +882,15 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteApp
-      x-maturity:
-      - Preview
   /v1/Apps/{AppSid}/Manifest:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       parent: /Apps/{Sid}
       mountName: app_manifests
+      pathType: instance
     get:
       description: Retrieve the Manifest for an App.
       tags:
@@ -773,21 +908,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.app.app_manifest'
+              examples:
+                fetch:
+                  value:
+                    app_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    hash: some hash
+                    encoded_bytes: some value
+                    url: https://microvisor.twilio.com/v1/Apps/KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Manifest
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAppManifest
-      x-maturity:
-      - Preview
   /v1/Devices:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
-      pathType: list
       dependentProperties:
         device_configs:
           mapping:
@@ -797,6 +936,7 @@ paths:
           mapping:
             device_sid: sid
           resource_url: /v1/Devices/{device_sid}/Secrets
+      pathType: list
     get:
       description: Retrieve a list of all Devices registered with the Account.
       tags:
@@ -834,43 +974,83 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.device'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    devices: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices?PageSize=50&Page=0
+                      next_page_url: null
+                      key: devices
+                readFull:
+                  value:
+                    devices:
+                    - sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      unique_name: This is my device; there are many like it.
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      app:
+                        target_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        target_hash: null
+                        date_targeted: '2021-01-01T12:34:56Z'
+                        update_status: up-to-date
+                        update_error_code: 0
+                        reported_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        date_reported: '2021-01-01T12:34:56Z'
+                      logging:
+                        enabled: true
+                        date_expires: '2021-01-01T12:34:56Z'
+                      date_created: '2021-01-01T12:34:56Z'
+                      date_updated: '2021-01-01T12:34:56Z'
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        device_configs: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs
+                        device_secrets: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices?PageSize=50&Page=0
+                      next_page_url: null
+                      key: devices
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListDevice
-      x-maturity:
-      - Preview
   /v1/Devices/{Sid}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - unique_name
-      pathType: instance
       dependentProperties:
         device_configs:
           mapping:
@@ -880,6 +1060,7 @@ paths:
           mapping:
             device_sid: sid
           resource_url: /v1/Devices/{device_sid}/Secrets
+      pathType: instance
     get:
       description: Fetch a specific Device.
       tags:
@@ -897,12 +1078,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device'
+              examples:
+                fetch:
+                  value:
+                    sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: This is my device; there are many like it.
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    app:
+                      target_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      target_hash: null
+                      date_targeted: '2021-01-01T12:34:56Z'
+                      update_status: up-to-date
+                      update_error_code: 0
+                      reported_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_reported: '2021-01-01T12:34:56Z'
+                    logging:
+                      enabled: true
+                      date_expires: '2021-01-01T12:34:56Z'
+                    date_created: '2021-01-01T12:34:56Z'
+                    date_updated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      device_configs: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs
+                      device_secrets: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDevice
-      x-maturity:
-      - Preview
     post:
       description: Update a specific Device.
       tags:
@@ -920,12 +1122,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device'
+              examples:
+                update:
+                  value:
+                    sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: UniqueName
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    app:
+                      target_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      target_hash: null
+                      date_targeted: '2021-01-01T12:34:56Z'
+                      update_status: pending
+                      update_error_code: 0
+                      reported_sid: null
+                      date_reported: '2021-01-01T12:34:56Z'
+                    logging:
+                      enabled: false
+                      date_expires: null
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      device_configs: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs
+                      device_secrets: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets
+                restartApp:
+                  value:
+                    sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    unique_name: UniqueName
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    app:
+                      target_sid: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      target_hash: null
+                      date_targeted: '2021-01-01T12:34:56Z'
+                      update_status: pending
+                      update_error_code: 0
+                      reported_sid: null
+                      date_reported: '2021-01-01T12:34:56Z'
+                    logging:
+                      enabled: false
+                      date_expires: null
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      device_configs: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs
+                      device_secrets: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateDevice
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -949,17 +1194,24 @@ paths:
                 RestartApp:
                   type: boolean
                   description: Set to true to restart the App running on the Device.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  UniqueName: unique_name
+                  TargetApp: KAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  LoggingEnabled: false
+              restartApp:
+                value:
+                  RestartApp: true
   /v1/Devices/{DeviceSid}/Configs:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /Devices/{Sid}
       mountName: device_configs
+      pathType: list
     get:
       description: Retrieve a list of all Configs for a Device.
       tags:
@@ -1003,34 +1255,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.device.device_config'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    configs: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs?PageSize=50&Page=0
+                      next_page_url: null
+                      key: configs
+                readFull:
+                  value:
+                    configs:
+                    - device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      key: first
+                      value: some value
+                      date_updated: '2021-01-01T12:34:56Z'
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs/first
+                    - device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      key: second
+                      value: some value
+                      date_updated: '2021-01-01T12:34:57Z'
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs/second
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs?PageSize=50&Page=0
+                      next_page_url: null
+                      key: configs
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListDeviceConfig
-      x-maturity:
-      - Preview
     post:
       description: Create a config for a Microvisor Device.
       tags:
@@ -1048,12 +1331,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_config'
+              examples:
+                createAccountConfig:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    value: some value
+                    date_updated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs/first
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateDeviceConfig
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1070,15 +1359,20 @@ paths:
               required:
               - Key
               - Value
+            examples:
+              createAccountConfig:
+                value:
+                  Key: first,
+                  Value: first val
   /v1/Devices/{DeviceSid}/Configs/{Key}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       parent: /Devices/{Sid}
       mountName: device_configs
+      pathType: instance
     get:
       description: Retrieve a Config for a Device.
       tags:
@@ -1102,12 +1396,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_config'
+              examples:
+                fetch:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    value: some value
+                    date_updated: '2021-01-01T12:34:57Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDeviceConfig
-      x-maturity:
-      - Preview
     post:
       description: Update a config for a Microvisor Device.
       tags:
@@ -1131,12 +1431,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_config'
+              examples:
+                update:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    value: place
+                    date_updated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Configs/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateDeviceConfig
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1149,6 +1455,10 @@ paths:
                   description: The config value; up to 4096 characters.
               required:
               - Value
+            examples:
+              update:
+                value:
+                  Value: place
     delete:
       description: Delete a config for a Microvisor Device.
       tags:
@@ -1172,17 +1482,15 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteDeviceConfig
-      x-maturity:
-      - Preview
   /v1/Devices/{DeviceSid}/Secrets:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /Devices/{Sid}
       mountName: device_secrets
+      pathType: list
     get:
       description: Retrieve a list of all Secrets for a Device.
       tags:
@@ -1226,34 +1534,63 @@ paths:
                     items:
                       $ref: '#/components/schemas/microvisor.v1.device.device_secret'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    secrets: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets?PageSize=50&Page=0
+                      next_page_url: null
+                      key: secrets
+                readFull:
+                  value:
+                    secrets:
+                    - device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      key: first
+                      date_rotated: '2021-01-01T12:34:56Z'
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets/first
+                    - device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      key: second
+                      date_rotated: '2021-01-01T12:34:57Z'
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets/second
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets?PageSize=50&Page=0
+                      next_page_url: null
+                      key: secrets
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListDeviceSecret
-      x-maturity:
-      - Preview
     post:
       description: Create a secret for a Microvisor Device.
       tags:
@@ -1271,12 +1608,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_secret'
+              examples:
+                createAccountSecret:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    date_rotated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets/first
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateDeviceSecret
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1293,15 +1635,20 @@ paths:
               required:
               - Key
               - Value
+            examples:
+              createAccountSecret:
+                value:
+                  Key: first,
+                  Value: first val
   /v1/Devices/{DeviceSid}/Secrets/{Key}:
     servers:
     - url: https://microvisor.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       parent: /Devices/{Sid}
       mountName: device_secrets
+      pathType: instance
     get:
       description: Retrieve a Secret for a Device.
       tags:
@@ -1325,12 +1672,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_secret'
+              examples:
+                fetch:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    date_rotated: '2021-01-01T12:34:57Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchDeviceSecret
-      x-maturity:
-      - Preview
     post:
       description: Update a secret for a Microvisor Device.
       tags:
@@ -1354,12 +1706,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/microvisor.v1.device.device_secret'
+              examples:
+                update:
+                  value:
+                    device_sid: UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    key: first
+                    date_rotated: '2021-01-01T12:34:56Z'
+                    url: https://microvisor.twilio.com/v1/Devices/UVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Secrets/first
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateDeviceSecret
-      x-maturity:
-      - Preview
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1372,6 +1729,10 @@ paths:
                   description: The secret value; up to 4096 characters.
               required:
               - Value
+            examples:
+              update:
+                value:
+                  Value: place
     delete:
       description: Delete a secret for a Microvisor Device.
       tags:
@@ -1395,8 +1756,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteDeviceSecret
-      x-maturity:
-      - Preview
 servers:
 - url: https://microvisor.twilio.com
 tags:
@@ -1404,11 +1763,11 @@ tags:
 - name: MicrovisorV1AccountSecret
 - name: MicrovisorV1App
 - name: MicrovisorV1AppManifest
+- name: MicrovisorV1DebugToken
 - name: MicrovisorV1Device
+- name: MicrovisorV1DeviceCert
 - name: MicrovisorV1DeviceConfig
 - name: MicrovisorV1DeviceSecret
-x-maturity:
-- name: Preview
-  description: PLEASE NOTE that this is a Preview product that is subject to change.
-    Use it with caution. If you currently do not have developer preview access, please
-    contact https://www.twilio.com/help/contact.
+- name: MicrovisorV1LoggingToken
+security:
+- accountSid_authToken: []

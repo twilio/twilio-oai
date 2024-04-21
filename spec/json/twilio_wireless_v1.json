@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "wireless.v1.account_usage_record": {
         "type": "object",
@@ -591,12 +597,6 @@
           "all"
         ]
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -612,7 +612,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.55.5"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -642,6 +642,11 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            },
+            "examples": {
+              "fetch": {
+                "value": "2015-07-30T20:00:00Z"
+              }
             }
           },
           {
@@ -651,6 +656,11 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            },
+            "examples": {
+              "fetch": {
+                "value": "2015-07-30T20:00:00Z"
+              }
             }
           },
           {
@@ -705,16 +715,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -723,17 +735,92 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "usage_records": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "commands": {
+                            "billing_units": "USD",
+                            "billed": 0,
+                            "total": 3,
+                            "from_sim": 1,
+                            "to_sim": 2,
+                            "home": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 3,
+                              "from_sim": 1,
+                              "to_sim": 2
+                            },
+                            "national_roaming": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 0,
+                              "from_sim": 0,
+                              "to_sim": 0
+                            },
+                            "international_roaming": []
+                          },
+                          "data": {
+                            "billing_units": "USD",
+                            "billed": 0.35,
+                            "total": 3494609,
+                            "upload": 731560,
+                            "download": 2763049,
+                            "units": "bytes",
+                            "home": {
+                              "billing_units": "USD",
+                              "billed": 0.35,
+                              "total": 3494609,
+                              "upload": 731560,
+                              "download": 2763049,
+                              "units": "bytes"
+                            },
+                            "national_roaming": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 0,
+                              "upload": 0,
+                              "download": 0,
+                              "units": "bytes"
+                            },
+                            "international_roaming": []
+                          },
+                          "period": {
+                            "start": "2015-07-30T20:00:00Z",
+                            "end": "2015-07-30T20:00:00Z"
+                          }
+                        },
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "commands": {},
+                          "data": {},
+                          "period": {}
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/UsageRecords?Start=2015-07-30T20%3A00%3A00Z&End=2015-07-30T20%3A00%3A00Z&PageSize=50&Page=0",
+                        "key": "usage_records",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/UsageRecords?Start=2015-07-30T20%3A00%3A00Z&End=2015-07-30T20%3A00%3A00Z&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -748,10 +835,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListAccountUsageRecord",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListAccountUsageRecord"
       }
     },
     "/v1/Commands/{Sid}": {
@@ -797,6 +881,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.command"
+                },
+                "examples": {
+                  "fetchCommandSms": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "command": "command",
+                      "command_mode": "text",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "delivery_receipt_requested": true,
+                      "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "direction": "from_sim",
+                      "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "queued",
+                      "transport": "sms",
+                      "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  },
+                  "fetchCommandIp": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "command": "command",
+                      "command_mode": "text",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "delivery_receipt_requested": false,
+                      "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "direction": "to_sim",
+                      "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "queued",
+                      "transport": "ip",
+                      "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -808,10 +926,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchCommand",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchCommand"
       },
       "delete": {
         "description": "Delete a Command instance from your account.",
@@ -842,10 +957,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteCommand",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteCommand"
       }
     },
     "/v1/Commands": {
@@ -878,6 +990,17 @@
             "description": "The `sid` or `unique_name` of the [Sim resources](https://www.twilio.com/docs/iot/wireless/api/sim-resource) to read.",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "sim"
+              },
+              "readFull": {
+                "value": "sim"
+              },
+              "readIp": {
+                "value": "sim"
+              }
             }
           },
           {
@@ -887,6 +1010,17 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/command_enum_status"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "queued"
+              },
+              "readFull": {
+                "value": "queued"
+              },
+              "readIp": {
+                "value": "queued"
+              }
             }
           },
           {
@@ -896,6 +1030,17 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/command_enum_direction"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "from_sim"
+              },
+              "readFull": {
+                "value": "from_sim"
+              },
+              "readIp": {
+                "value": "to_sim"
+              }
             }
           },
           {
@@ -905,6 +1050,11 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/command_enum_transport"
+            },
+            "examples": {
+              "readIp": {
+                "value": "ip"
+              }
             }
           },
           {
@@ -950,16 +1100,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -968,17 +1120,89 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "commands": [],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=from_sim&Sim=sim&PageSize=50&Page=0",
+                        "key": "commands",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=from_sim&Sim=sim&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "commands": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "command": "command",
+                          "command_mode": "text",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:00:00Z",
+                          "delivery_receipt_requested": true,
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "direction": "from_sim",
+                          "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "status": "queued",
+                          "transport": "sms",
+                          "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=from_sim&Sim=sim&PageSize=50&Page=0",
+                        "key": "commands",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=from_sim&Sim=sim&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readIp": {
+                    "value": {
+                      "commands": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "command": "command",
+                          "command_mode": "binary",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:00:00Z",
+                          "delivery_receipt_requested": true,
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "direction": "to_sim",
+                          "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "status": "queued",
+                          "transport": "ip",
+                          "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=to_sim&Transport=ip&Sim=sim&PageSize=50&Page=0",
+                        "key": "commands",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Commands?Status=queued&Direction=to_sim&Transport=ip&Sim=sim&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -993,10 +1217,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListCommand",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListCommand"
       },
       "post": {
         "description": "Send a Command to a Sim.",
@@ -1009,6 +1230,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.command"
+                },
+                "examples": {
+                  "createCommandSms": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "command": "command",
+                      "command_mode": "text",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "delivery_receipt_requested": true,
+                      "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "direction": "from_sim",
+                      "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "queued",
+                      "transport": "sms",
+                      "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  },
+                  "createCommandIp": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "command": "command",
+                      "command_mode": "binary",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "delivery_receipt_requested": true,
+                      "direction": "to_sim",
+                      "sid": "DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "status": "queued",
+                      "transport": "ip",
+                      "url": "https://wireless.twilio.com/v1/Commands/DCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1021,9 +1276,6 @@
           }
         ],
         "operationId": "CreateCommand",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1070,6 +1322,29 @@
                 "required": [
                   "Command"
                 ]
+              },
+              "examples": {
+                "createCommandSms": {
+                  "value": {
+                    "CallbackMethod": "callback_method",
+                    "CallbackUrl": "http://www.example.com",
+                    "Command": "command",
+                    "CommandMode": "text",
+                    "Sim": "sim",
+                    "IncludeSid": "include_sid"
+                  }
+                },
+                "createCommandIp": {
+                  "value": {
+                    "CallbackMethod": "callback_method",
+                    "CallbackUrl": "http://www.example.com",
+                    "Command": "command",
+                    "CommandMode": "binary",
+                    "DeliveryReceiptRequested": true,
+                    "Sim": "sim",
+                    "IncludeSid": "include_sid"
+                  }
+                }
               }
             }
           }
@@ -1091,8 +1366,8 @@
           "start",
           "end"
         ],
-        "pathType": "list",
-        "parent": "/Sims/{Sid}"
+        "parent": "/Sims/{Sid}",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -1152,16 +1427,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1170,17 +1447,68 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "data_sessions": [
+                        {
+                          "sid": "WNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "radio_link": "LTE",
+                          "operator_mcc": "",
+                          "operator_mnc": "",
+                          "operator_country": "",
+                          "operator_name": "",
+                          "cell_id": "",
+                          "cell_location_estimate": {},
+                          "packets_uploaded": 0,
+                          "packets_downloaded": 0,
+                          "last_updated": "2015-07-30T20:00:00Z",
+                          "start": "2015-07-30T20:00:00Z",
+                          "end": null,
+                          "imei": null
+                        },
+                        {
+                          "sid": "WNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "radio_link": "3G",
+                          "operator_mcc": "",
+                          "operator_mnc": "",
+                          "operator_country": "",
+                          "operator_name": "",
+                          "cell_id": "",
+                          "cell_location_estimate": {},
+                          "packets_uploaded": 0,
+                          "packets_downloaded": 0,
+                          "last_updated": "2015-07-30T20:00:00Z",
+                          "start": "2015-07-30T20:00:00Z",
+                          "end": "2015-07-30T20:00:00Z",
+                          "imei": "014931000129700"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions?PageSize=50&Page=0",
+                        "key": "data_sessions",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions?PageSize=50&Page=0"
                       }
                     }
                   }
@@ -1195,10 +1523,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListDataSession",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListDataSession"
       }
     },
     "/v1/RatePlans": {
@@ -1266,16 +1591,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1284,18 +1611,72 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/RatePlans?PageSize=50&Page=0",
+                        "key": "rate_plans",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/RatePlans?PageSize=50&Page=0"
+                      },
+                      "rate_plans": []
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/RatePlans?PageSize=50&Page=0",
+                        "key": "rate_plans",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/RatePlans?PageSize=50&Page=0"
+                      },
+                      "rate_plans": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "unique_name": "unique_name",
+                          "data_enabled": true,
+                          "data_limit": 1000,
+                          "data_metering": "payg",
+                          "date_created": "2019-07-30T20:00:00Z",
+                          "date_updated": "2019-07-30T20:00:00Z",
+                          "friendly_name": "friendly_name",
+                          "messaging_enabled": true,
+                          "voice_enabled": true,
+                          "national_roaming_enabled": true,
+                          "national_roaming_data_limit": 1000,
+                          "international_roaming": [
+                            "data",
+                            "messaging",
+                            "voice"
+                          ],
+                          "international_roaming_data_limit": 1000,
+                          "sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "usage_notification_method": "POST",
+                          "usage_notification_url": "https://callback.com",
+                          "data_limit_strategy": "block",
+                          "url": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
                     }
                   }
                 }
@@ -1309,10 +1690,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListRatePlan",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListRatePlan"
       },
       "post": {
         "description": "",
@@ -1325,6 +1703,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.rate_plan"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "data_enabled": true,
+                      "data_limit": 1000,
+                      "data_limit_strategy": "block",
+                      "data_metering": "payg",
+                      "date_created": "2019-07-30T20:00:00Z",
+                      "date_updated": "2019-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "messaging_enabled": true,
+                      "voice_enabled": true,
+                      "national_roaming_enabled": true,
+                      "national_roaming_data_limit": 1000,
+                      "international_roaming": [
+                        "data",
+                        "messaging",
+                        "voice"
+                      ],
+                      "international_roaming_data_limit": 1000,
+                      "sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "usage_notification_method": "POST",
+                      "usage_notification_url": "https://callback.com",
+                      "url": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1337,9 +1744,6 @@
           }
         ],
         "operationId": "CreateRatePlan",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1395,12 +1799,31 @@
                     "description": "The total data usage (download and upload combined) in Megabytes that the Network allows during one month when roaming outside the United States. Can be up to 2TB."
                   }
                 }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "UniqueName": "unique_name",
+                    "DataEnabled": true,
+                    "DataLimit": 1000,
+                    "DataMetering": "payg",
+                    "MessagingEnabled": true,
+                    "VoiceEnabled": true,
+                    "FriendlyName": "friendly_name",
+                    "NationalRoamingEnabled": true,
+                    "InternationalRoaming": [
+                      "data",
+                      "voice",
+                      "messaging"
+                    ],
+                    "NationalRoamingDataLimit": 1000,
+                    "InternationalRoamingDataLimit": 1000,
+                    "Status": "status"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       }
     },
@@ -1442,6 +1865,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.rate_plan"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "data_enabled": true,
+                      "data_limit": 1000,
+                      "data_metering": "payg",
+                      "date_created": "2019-07-30T20:00:00Z",
+                      "date_updated": "2019-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "messaging_enabled": true,
+                      "voice_enabled": true,
+                      "national_roaming_enabled": true,
+                      "national_roaming_data_limit": 1000,
+                      "international_roaming": [
+                        "data",
+                        "messaging",
+                        "voice"
+                      ],
+                      "international_roaming_data_limit": 1000,
+                      "sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "usage_notification_method": "POST",
+                      "usage_notification_url": "https://callback.com",
+                      "data_limit_strategy": "block",
+                      "url": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1453,10 +1905,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchRatePlan",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchRatePlan"
       },
       "post": {
         "description": "",
@@ -1480,6 +1929,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.rate_plan"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "data_enabled": true,
+                      "data_limit": 1000,
+                      "data_metering": "payg",
+                      "date_created": "2019-07-30T20:00:00Z",
+                      "date_updated": "2019-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "messaging_enabled": true,
+                      "voice_enabled": true,
+                      "national_roaming_enabled": true,
+                      "national_roaming_data_limit": 1000,
+                      "international_roaming": [
+                        "data",
+                        "messaging",
+                        "voice"
+                      ],
+                      "international_roaming_data_limit": 1000,
+                      "sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "usage_notification_method": "POST",
+                      "usage_notification_url": "https://callback.com",
+                      "data_limit_strategy": "block",
+                      "url": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
                 }
               }
             },
@@ -1492,9 +1970,6 @@
           }
         ],
         "operationId": "UpdateRatePlan",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1511,12 +1986,19 @@
                     "description": "A descriptive string that you create to describe the resource. It does not have to be unique."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "UniqueName": "unique_name",
+                    "FriendlyName": "friendly_name",
+                    "UsageNotificationMethod": "POST",
+                    "UsageNotificationUrl": "https://callback.com"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -1545,10 +2027,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteRatePlan",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteRatePlan"
       }
     },
     "/v1/Sims/{Sid}": {
@@ -1565,7 +2044,6 @@
           "friendly_name",
           "status"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "usage_records": {
             "mapping": {
@@ -1579,7 +2057,8 @@
             },
             "resource_url": "/v1/Sims/{sim_sid}/DataSessions"
           }
-        }
+        },
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a Sim resource on your Account.",
@@ -1603,6 +2082,40 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.sim"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "commands_callback_method": "POST",
+                      "commands_callback_url": "http://www.example.com",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "sms_fallback_method": "POST",
+                      "sms_fallback_url": "http://www.example.com",
+                      "sms_method": "POST",
+                      "sms_url": "http://www.example.com",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "http://www.example.com",
+                      "voice_method": "POST",
+                      "voice_url": "http://www.example.com",
+                      "links": {
+                        "data_sessions": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions",
+                        "rate_plan": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "usage_records": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords"
+                      },
+                      "rate_plan_sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "iccid": "iccid",
+                      "e_id": "e_id",
+                      "status": "new",
+                      "reset_status": null,
+                      "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_address": "192.168.1.1"
+                    }
+                  }
                 }
               }
             },
@@ -1614,10 +2127,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchSim",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchSim"
       },
       "post": {
         "description": "Updates the given properties of a Sim resource on your Account.",
@@ -1641,6 +2151,104 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/wireless.v1.sim"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "commands_callback_method": "POST",
+                      "commands_callback_url": "http://www.example.com",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "links": {
+                        "data_sessions": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions",
+                        "rate_plan": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "usage_records": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords"
+                      },
+                      "rate_plan_sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "iccid": "iccid",
+                      "e_id": "e_id",
+                      "status": "new",
+                      "reset_status": null,
+                      "sms_fallback_method": "POST",
+                      "sms_fallback_url": "http://www.example.com",
+                      "sms_method": "POST",
+                      "sms_url": "http://www.example.com",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "http://www.example.com",
+                      "voice_method": "POST",
+                      "voice_url": "http://www.example.com",
+                      "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_address": "192.168.1.30"
+                    }
+                  },
+                  "updateMoveToSubaccount": {
+                    "value": {
+                      "account_sid": "ACbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                      "unique_name": "unique_name",
+                      "commands_callback_method": "POST",
+                      "commands_callback_url": "http://www.example.com",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "links": {
+                        "data_sessions": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions",
+                        "rate_plan": "https://wireless.twilio.com/v1/RatePlans/WPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                        "usage_records": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords"
+                      },
+                      "rate_plan_sid": "WPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                      "sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "iccid": "iccid",
+                      "e_id": "e_id",
+                      "status": "new",
+                      "reset_status": null,
+                      "sms_fallback_method": "POST",
+                      "sms_fallback_url": "http://www.example.com",
+                      "sms_method": "POST",
+                      "sms_url": "http://www.example.com",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "http://www.example.com",
+                      "voice_method": "POST",
+                      "voice_url": "http://www.example.com",
+                      "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_address": "192.168.1.30"
+                    }
+                  },
+                  "updateResetConnectivity": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "unique_name": "unique_name",
+                      "commands_callback_method": "GET",
+                      "commands_callback_url": "http://www.example.com",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "links": {
+                        "data_sessions": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions",
+                        "rate_plan": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "usage_records": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords"
+                      },
+                      "rate_plan_sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "iccid": "iccid",
+                      "e_id": "e_id",
+                      "status": "active",
+                      "reset_status": "resetting",
+                      "sms_fallback_method": "POST",
+                      "sms_fallback_url": "http://www.example.com",
+                      "sms_method": "POST",
+                      "sms_url": "http://www.example.com",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "http://www.example.com",
+                      "voice_method": "POST",
+                      "voice_url": "http://www.example.com",
+                      "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_address": "192.168.1.30"
+                    }
+                  }
                 }
               }
             },
@@ -1653,9 +2261,6 @@
           }
         ],
         "operationId": "UpdateSim",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1774,12 +2379,44 @@
                     "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) to which the Sim resource should belong. The Account SID can only be that of the requesting Account or that of a [Subaccount](https://www.twilio.com/docs/iam/api/subaccounts) of the requesting Account. Only valid when the Sim resource's status is `new`. For more information, see the [Move SIMs between Subaccounts documentation](https://www.twilio.com/docs/iot/wireless/api/sim-resource#move-sims-between-subaccounts)."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "UniqueName": "unique_name",
+                    "CallbackMethod": "callback_method",
+                    "CallbackUrl": "http://www.example.com",
+                    "CommandsCallbackMethod": "POST",
+                    "CommandsCallbackUrl": "http://www.example.com",
+                    "VoiceMethod": "POST",
+                    "VoiceUrl": "http://www.example.com",
+                    "VoiceFallbackMethod": "POST",
+                    "VoiceFallbackUrl": "http://www.example.com",
+                    "SmsMethod": "POST",
+                    "SmsUrl": "http://www.example.com",
+                    "SmsFallbackMethod": "POST",
+                    "SmsFallbackUrl": "http://www.example.com",
+                    "FriendlyName": "friendly_name",
+                    "RatePlan": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "Status": "new"
+                  }
+                },
+                "updateMoveToSubaccount": {
+                  "value": {
+                    "AccountSid": "ACbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "UniqueName": "unique_name",
+                    "RatePlan": "WPbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    "Status": "new"
+                  }
+                },
+                "updateResetConnectivity": {
+                  "value": {
+                    "ResetStatus": "resetting"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -1808,10 +2445,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteSim",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteSim"
       }
     },
     "/v1/Sims": {
@@ -1828,7 +2462,6 @@
           "friendly_name",
           "status"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "usage_records": {
             "mapping": {
@@ -1842,7 +2475,8 @@
             },
             "resource_url": "/v1/Sims/{sim_sid}/DataSessions"
           }
-        }
+        },
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of Sim resources on your Account.",
@@ -1857,6 +2491,14 @@
             "schema": {
               "type": "string",
               "$ref": "#/components/schemas/sim_enum_status"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "new"
+              },
+              "readFull": {
+                "value": "new"
+              }
             }
           },
           {
@@ -1871,6 +2513,14 @@
                 "handling": "standard",
                 "deleteSla": 30
               }
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "iccid"
+              },
+              "readFull": {
+                "value": "iccid"
+              }
             }
           },
           {
@@ -1879,6 +2529,14 @@
             "description": "The SID or unique name of a [RatePlan resource](https://www.twilio.com/docs/iot/wireless/api/rateplan-resource). Only return Sim resources assigned to this RatePlan resource.",
             "schema": {
               "type": "string"
+            },
+            "examples": {
+              "readEmpty": {
+                "value": "rate_plan"
+              },
+              "readFull": {
+                "value": "rate_plan"
+              }
             }
           },
           {
@@ -1940,16 +2598,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1958,17 +2618,76 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "sims": [],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Sims?Status=new&Iccid=iccid&RatePlan=rate_plan&PageSize=50&Page=0",
+                        "key": "sims",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Sims?Status=new&Iccid=iccid&RatePlan=rate_plan&PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "sims": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "unique_name": "unique_name",
+                          "commands_callback_method": "POST",
+                          "commands_callback_url": "http://www.example.com",
+                          "date_created": "2015-07-30T20:00:00Z",
+                          "date_updated": "2015-07-30T20:00:00Z",
+                          "friendly_name": "friendly_name",
+                          "links": {
+                            "data_sessions": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DataSessions",
+                            "rate_plan": "https://wireless.twilio.com/v1/RatePlans/WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "usage_records": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords"
+                          },
+                          "rate_plan_sid": "WPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "iccid": "iccid",
+                          "e_id": "e_id",
+                          "status": "new",
+                          "reset_status": "resetting",
+                          "sms_fallback_method": "POST",
+                          "sms_fallback_url": "http://www.example.com",
+                          "sms_method": "POST",
+                          "sms_url": "http://www.example.com",
+                          "voice_fallback_method": "POST",
+                          "voice_fallback_url": "http://www.example.com",
+                          "voice_method": "POST",
+                          "voice_url": "http://www.example.com",
+                          "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "ip_address": "192.168.1.30"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Sims?Status=new&Iccid=iccid&RatePlan=rate_plan&PageSize=50&Page=0",
+                        "key": "sims",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Sims?Status=new&Iccid=iccid&RatePlan=rate_plan&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -1983,10 +2702,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListSim",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListSim"
       }
     },
     "/v1/Sims/{SimSid}/UsageRecords": {
@@ -2000,8 +2716,8 @@
         "defaultOutputProperties": [
           "period"
         ],
-        "pathType": "list",
-        "parent": "/Sims/{Sid}"
+        "parent": "/Sims/{Sid}",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -2025,6 +2741,11 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            },
+            "examples": {
+              "fetch": {
+                "value": "2015-07-30T20:00:00Z"
+              }
             }
           },
           {
@@ -2034,6 +2755,11 @@
             "schema": {
               "type": "string",
               "format": "date-time"
+            },
+            "examples": {
+              "fetch": {
+                "value": "2015-07-30T20:00:00Z"
+              }
             }
           },
           {
@@ -2088,16 +2814,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -2106,17 +2834,94 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "usage_records": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "commands": {
+                            "billing_units": "USD",
+                            "billed": 0,
+                            "total": 3,
+                            "from_sim": 1,
+                            "to_sim": 2,
+                            "home": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 3,
+                              "from_sim": 1,
+                              "to_sim": 2
+                            },
+                            "national_roaming": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 0,
+                              "from_sim": 0,
+                              "to_sim": 0
+                            },
+                            "international_roaming": []
+                          },
+                          "data": {
+                            "billing_units": "USD",
+                            "billed": 0.35,
+                            "total": 3494609,
+                            "upload": 731560,
+                            "download": 2763049,
+                            "units": "bytes",
+                            "home": {
+                              "billing_units": "USD",
+                              "billed": 0.35,
+                              "total": 3494609,
+                              "upload": 731560,
+                              "download": 2763049,
+                              "units": "bytes"
+                            },
+                            "national_roaming": {
+                              "billing_units": "USD",
+                              "billed": 0,
+                              "total": 0,
+                              "upload": 0,
+                              "download": 0,
+                              "units": "bytes"
+                            },
+                            "international_roaming": []
+                          },
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "period": {
+                            "start": "2015-07-30T20:00:00Z",
+                            "end": "2015-07-30T20:00:00Z"
+                          }
+                        },
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "commands": {},
+                          "data": {},
+                          "sim_sid": "DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "period": {}
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords?Start=2015-07-30T20%3A00%3A00Z&End=2015-07-30T20%3A00%3A00Z&PageSize=50&Page=0",
+                        "key": "usage_records",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://wireless.twilio.com/v1/Sims/DEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UsageRecords?Start=2015-07-30T20%3A00%3A00Z&End=2015-07-30T20%3A00%3A00Z&PageSize=50&Page=0"
                       }
                     }
                   }
@@ -2131,10 +2936,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListUsageRecord",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListUsageRecord"
       }
     }
   },
@@ -2160,10 +2962,9 @@
       "name": "WirelessV1UsageRecord"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "GA",
-      "description": "This product is Generally Available."
+      "accountSid_authToken": []
     }
   ]
 }

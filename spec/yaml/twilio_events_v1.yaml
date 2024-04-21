@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     events.v1.event_type:
       type: object
@@ -252,10 +256,6 @@ components:
           nullable: true
           description: Contains a dictionary of URL links to nested resources of this
             Subscription.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Events
   description: This is the public Twilio REST API.
@@ -267,7 +267,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.55.5
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Types:
@@ -279,8 +279,8 @@ paths:
       - type
       - schema_id
       - description
-      pathType: list
       mountName: event_types
+      pathType: list
     get:
       description: Retrieve a paginated list of all the available Event Types.
       tags:
@@ -292,6 +292,9 @@ paths:
           Types using a given schema.
         schema:
           type: string
+        examples:
+          readResultsWithSchemaId:
+            value: Messaging.MessageStatus
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -324,34 +327,102 @@ paths:
                     items:
                       $ref: '#/components/schemas/events.v1.event_type'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    types: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Types?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Types?PageSize=10&Page=0
+                      next_page_url: null
+                      key: types
+                readResults:
+                  value:
+                    types:
+                    - date_created: '2020-08-13T13:28:20Z'
+                      date_updated: '2020-08-13T13:28:20Z'
+                      type: com.twilio.messaging.message.delivered
+                      schema_id: Messaging.MessageStatus
+                      public: true
+                      description: Messaging- delivered message
+                      url: https://events.twilio.com/v1/Types/com.twilio.messaging.message.delivered
+                      links:
+                        schema: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
+                    - date_created: '2020-08-13T13:28:19Z'
+                      date_updated: '2020-08-13T13:28:19Z'
+                      type: com.twilio.messaging.message.failed
+                      schema_id: Messaging.MessageStatus
+                      public: true
+                      description: Messaging- failed message
+                      url: https://events.twilio.com/v1/Types/com.twilio.messaging.message.failed
+                      links:
+                        schema: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Types?PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Types?PageSize=20&Page=0
+                      next_page_url: null
+                      key: types
+                readResultsWithSchemaId:
+                  value:
+                    types:
+                    - date_created: '2020-08-13T13:28:20Z'
+                      date_updated: '2020-08-13T13:28:20Z'
+                      type: com.twilio.messaging.message.delivered
+                      schema_id: Messaging.MessageStatus
+                      public: true
+                      description: Messaging- delivered message
+                      url: https://events.twilio.com/v1/Types/com.twilio.messaging.message.delivered
+                      links:
+                        schema: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
+                    - date_created: '2020-08-13T13:28:19Z'
+                      date_updated: '2020-08-13T13:28:19Z'
+                      type: com.twilio.messaging.message.failed
+                      schema_id: Messaging.MessageStatus
+                      public: true
+                      description: Messaging- failed message
+                      url: https://events.twilio.com/v1/Types/com.twilio.messaging.message.failed
+                      links:
+                        schema: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Types?SchemaId=Messaging.MessageStatus&PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Types?SchemaId=Messaging.MessageStatus&PageSize=20&Page=0
+                      next_page_url: null
+                      key: types
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEventType
-      x-maturity:
-      - GA
   /v1/Types/{Type}:
     servers:
     - url: https://events.twilio.com
@@ -361,8 +432,8 @@ paths:
       - type
       - schema_id
       - description
-      pathType: instance
       mountName: event_types
+      pathType: instance
     get:
       description: Fetch a specific Event Type.
       tags:
@@ -380,12 +451,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.event_type'
+              examples:
+                fetch:
+                  value:
+                    date_created: '2020-08-13T13:28:20Z'
+                    date_updated: '2020-08-13T13:28:20Z'
+                    type: com.twilio.messaging.message.delivered
+                    schema_id: Messaging.MessageStatus
+                    public: true
+                    description: Messaging- delivered message
+                    url: https://events.twilio.com/v1/Types/com.twilio.messaging.message.delivered
+                    links:
+                      schema: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEventType
-      x-maturity:
-      - GA
   /v1/Schemas/{Id}:
     servers:
     - url: https://events.twilio.com
@@ -393,12 +474,12 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - id
-      pathType: instance
       dependentProperties:
         versions:
           mapping:
             id: id
           resource_url: /v1/Schemas/{id}/Versions
+      pathType: instance
     get:
       description: Fetch a specific schema with its nested versions.
       tags:
@@ -417,12 +498,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.schema'
+              examples:
+                fetch:
+                  value:
+                    id: Messaging.MessageStatus
+                    url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus
+                    latest_version_date_created: '2020-07-30T20:00:00Z'
+                    latest_version: 1
+                    links:
+                      versions: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSchema
-      x-maturity:
-      - GA
   /v1/Schemas:
     servers:
     - url: https://events.twilio.com
@@ -430,12 +518,12 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - id
-      pathType: list
       dependentProperties:
         versions:
           mapping:
             id: id
           resource_url: /v1/Schemas/{id}/Versions
+      pathType: list
   /v1/Schemas/{Id}/Versions:
     servers:
     - url: https://events.twilio.com
@@ -445,9 +533,9 @@ paths:
       - id
       - schema_version
       - date_created
-      pathType: list
       parent: /Schemas/{Id}
       className: schema_version
+      pathType: list
     get:
       description: Retrieve a paginated list of versions of the schema.
       tags:
@@ -492,34 +580,67 @@ paths:
                     items:
                       $ref: '#/components/schemas/events.v1.schema.schema_version'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    schema_versions: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions?PageSize=10&Page=0
+                      next_page_url: null
+                      key: schema_versions
+                readResults:
+                  value:
+                    schema_versions:
+                    - id: Messaging.MessageStatus
+                      schema_version: 1
+                      public: true
+                      date_created: '2015-07-30T20:00:00Z'
+                      url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions/1
+                      raw: https://events-schemas.twilio.com/Messaging.MessageStatus/1
+                    - id: Messaging.MessageStatus
+                      schema_version: 2
+                      public: true
+                      date_created: '2015-07-30T20:00:00Z'
+                      url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions/2
+                      raw: https://events-schemas.twilio.com/Messaging.MessageStatus/2
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions?PageSize=50&Page=0
+                      next_page_url: null
+                      key: schema_versions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSchemaVersion
-      x-maturity:
-      - GA
   /v1/Schemas/{Id}/Versions/{SchemaVersion}:
     servers:
     - url: https://events.twilio.com
@@ -529,9 +650,9 @@ paths:
       - id
       - schema_version
       - date_created
-      pathType: instance
       parent: /Schemas/{Id}
       className: schema_version
+      pathType: instance
     get:
       description: Fetch a specific schema and version.
       tags:
@@ -556,12 +677,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.schema.schema_version'
+              examples:
+                fetch:
+                  value:
+                    id: Messaging.MessageStatus
+                    schema_version: 1
+                    public: true
+                    date_created: '2015-07-30T20:00:00Z'
+                    url: https://events.twilio.com/v1/Schemas/Messaging.MessageStatus/Versions/1
+                    raw: https://events-schemas.twilio.com/Messaging.MessageStatus/1
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSchemaVersion
-      x-maturity:
-      - GA
   /v1/Sinks/{Sid}:
     servers:
     - url: https://events.twilio.com
@@ -575,7 +703,6 @@ paths:
       - sink_configuration
       - sink_type
       - status
-      pathType: instance
       dependentProperties:
         sink_test:
           mapping:
@@ -585,6 +712,7 @@ paths:
           mapping:
             sid: sid
           resource_url: /v1/Sinks/{sid}/Validate
+      pathType: instance
     get:
       description: Fetch a specific Sink.
       tags:
@@ -605,12 +733,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.sink'
+              examples:
+                fetch:
+                  value:
+                    status: initialized
+                    sink_configuration:
+                      arn: arn:aws:kinesis:us-east-1:111111111:stream/test
+                      role_arn: arn:aws:iam::111111111:role/Role
+                      external_id: '1234567890'
+                    description: A Sink
+                    sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sink_type: kinesis
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                      sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSink
-      x-maturity:
-      - GA
     delete:
       description: Delete a specific Sink.
       tags:
@@ -631,8 +774,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSink
-      x-maturity:
-      - GA
     post:
       description: Update a specific Sink
       tags:
@@ -653,12 +794,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.sink'
+              examples:
+                update:
+                  value:
+                    status: initialized
+                    sink_configuration:
+                      arn: arn:aws:kinesis:us-east-1:111111111:stream/test
+                      role_arn: arn:aws:iam::111111111:role/Role
+                      external_id: '1234567890'
+                    description: My Kinesis Sink
+                    sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sink_type: kinesis
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                      sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSink
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -672,6 +828,10 @@ paths:
                     should not contain PII.**
               required:
               - Description
+            examples:
+              update:
+                value:
+                  Description: My Kinesis Sink
   /v1/Sinks:
     servers:
     - url: https://events.twilio.com
@@ -685,7 +845,6 @@ paths:
       - sink_configuration
       - sink_type
       - status
-      pathType: list
       dependentProperties:
         sink_test:
           mapping:
@@ -695,6 +854,7 @@ paths:
           mapping:
             sid: sid
           resource_url: /v1/Sinks/{sid}/Validate
+      pathType: list
     post:
       description: Create a new Sink
       tags:
@@ -705,12 +865,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.sink'
+              examples:
+                create:
+                  value:
+                    status: initialized
+                    sink_configuration:
+                      arn: arn:aws:kinesis:us-east-1:111111111:stream/test
+                      role_arn: arn:aws:iam::111111111:role/Role
+                      external_id: '1234567890'
+                    description: My Kinesis Sink
+                    sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sink_type: kinesis
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                      sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
+                createSegment:
+                  value:
+                    status: initialized
+                    sink_configuration:
+                      write_key: MY_WRITEKEY
+                    description: My segment Sink
+                    sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    sink_type: segment
+                    date_updated: '2015-07-30T20:00:00Z'
+                    url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                      sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSink
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -733,6 +922,18 @@ paths:
               - Description
               - SinkConfiguration
               - SinkType
+            examples:
+              create:
+                value:
+                  Description: My Kinesis Sink
+                  SinkType: kinesis
+                  SinkConfiguration: '{"arn": "arn:aws:kinesis:us-east-1:111111111:stream/test","role_arn":
+                    "arn:aws:iam::111111111:role/Role","external_id": "1234567890"}'
+              createSegment:
+                value:
+                  Description: My segment Sink
+                  SinkType: segment
+                  SinkConfiguration: '{"write_key": "MY_WRITEKEY"}'
     get:
       description: Retrieve a paginated list of Sinks belonging to the account used
         to make the request.
@@ -745,12 +946,18 @@ paths:
           used/not used by a subscription.
         schema:
           type: boolean
+        examples:
+          readResultsInUse:
+            value: true
       - name: Status
         in: query
         description: A String query parameter filtering the results by status `initialized`,
           `validating`, `active` or `failed`.
         schema:
           type: string
+        examples:
+          readResultsStatus:
+            value: active
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -783,34 +990,175 @@ paths:
                     items:
                       $ref: '#/components/schemas/events.v1.sink'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    sinks: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Sinks?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Sinks?PageSize=10&Page=0
+                      next_page_url: null
+                      key: sinks
+                readResults:
+                  value:
+                    sinks:
+                    - status: initialized
+                      sink_configuration:
+                        arn: arn:aws:kinesis:us-east-1:111111111:stream/test
+                        role_arn: arn:aws:iam::111111111:role/Role
+                        external_id: '1234567890'
+                      description: A Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T19:00:00Z'
+                      sink_type: kinesis
+                      date_updated: '2015-07-30T19:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
+                    - status: initialized
+                      sink_configuration:
+                        arn: arn:aws:kinesis:us-east-1:222222222:stream/test
+                        role_arn: arn:aws:iam::111111111:role/Role
+                        external_id: '1234567890'
+                      description: ANOTHER Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      date_created: '2015-07-30T20:00:00Z'
+                      sink_type: kinesis
+                      date_updated: '2015-07-30T20:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/Validate
+                    - status: active
+                      sink_configuration:
+                        destination: http://example.org/webhook
+                        method: POST
+                        batch_events: true
+                      description: A webhook Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      date_created: '2015-07-30T21:00:00Z'
+                      sink_type: webhook
+                      date_updated: '2015-07-30T21:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Validate
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Sinks?PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Sinks?PageSize=20&Page=0
+                      next_page_url: null
+                      key: sinks
+                readResultsInUse:
+                  value:
+                    sinks:
+                    - status: initialized
+                      sink_configuration:
+                        arn: arn:aws:kinesis:us-east-1:111111111:stream/test
+                        role_arn: arn:aws:iam::111111111:role/Role
+                        external_id: '1234567890'
+                      description: A Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T19:00:00Z'
+                      sink_type: kinesis
+                      date_updated: '2015-07-30T19:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Validate
+                    - status: initialized
+                      sink_configuration:
+                        arn: arn:aws:kinesis:us-east-1:222222222:stream/test
+                        role_arn: arn:aws:iam::111111111:role/Role
+                        external_id: '1234567890'
+                      description: ANOTHER Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      date_created: '2015-07-30T20:00:00Z'
+                      sink_type: kinesis
+                      date_updated: '2015-07-30T20:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/Validate
+                    - status: active
+                      sink_configuration:
+                        destination: http://example.org/webhook
+                        method: POST
+                        batch_events: true
+                      description: A webhook Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      date_created: '2015-07-30T21:00:00Z'
+                      sink_type: webhook
+                      date_updated: '2015-07-30T21:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Validate
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Sinks?InUse=True&PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Sinks?InUse=True&PageSize=20&Page=0
+                      next_page_url: null
+                      key: sinks
+                readResultsStatus:
+                  value:
+                    sinks:
+                    - status: active
+                      sink_configuration:
+                        destination: http://example.org/webhook
+                        method: POST
+                        batch_events: true
+                      description: A webhook Sink
+                      sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      date_created: '2015-07-30T21:00:00Z'
+                      sink_type: webhook
+                      date_updated: '2015-07-30T21:00:00Z'
+                      url: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac
+                      links:
+                        sink_test: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Test
+                        sink_validate: https://events.twilio.com/v1/Sinks/DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaac/Validate
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Sinks?Status=active&PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Sinks?Status=active&PageSize=20&Page=0
+                      next_page_url: null
+                      key: sinks
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSink
-      x-maturity:
-      - GA
   /v1/Sinks/{Sid}/Test:
     servers:
     - url: https://events.twilio.com
@@ -818,9 +1166,9 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - result
-      pathType: list
       parent: /Sinks/{Sid}
       mountName: sink_test
+      pathType: list
     post:
       description: Create a new Sink Test Event for the given Sink.
       tags:
@@ -842,12 +1190,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.sink.sink_test'
+              examples:
+                create:
+                  value:
+                    result: submitted
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSinkTest
-      x-maturity:
-      - GA
   /v1/Sinks/{Sid}/Validate:
     servers:
     - url: https://events.twilio.com
@@ -855,9 +1205,9 @@ paths:
     x-twilio:
       defaultOutputProperties:
       - result
-      pathType: list
       parent: /Sinks/{Sid}
       mountName: sink_validate
+      pathType: list
     post:
       description: Validate that a test event for a Sink was received.
       tags:
@@ -879,12 +1229,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.sink.sink_validate'
+              examples:
+                create:
+                  value:
+                    result: valid
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSinkValidate
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -898,6 +1250,10 @@ paths:
                     test event for a Sink being validated.
               required:
               - TestId
+            examples:
+              create:
+                value:
+                  TestId: TestID
   /v1/Subscriptions/{SubscriptionSid}/SubscribedEvents:
     servers:
     - url: https://events.twilio.com
@@ -908,8 +1264,8 @@ paths:
       - schema_version
       - account_sid
       - subscription_sid
-      pathType: list
       parent: /Subscriptions/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of all Subscribed Event types for a Subscription.
       tags:
@@ -956,34 +1312,65 @@ paths:
                     items:
                       $ref: '#/components/schemas/events.v1.subscription.subscribed_event'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    types: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents?PageSize=10&Page=0
+                      next_page_url: null
+                      key: types
+                readResults:
+                  value:
+                    types:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      type: com.twilio.messaging.message.delivered
+                      schema_version: 2
+                      subscription_sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents/com.twilio.messaging.message.delivered
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      type: com.twilio.messaging.message.failed
+                      schema_version: 15
+                      subscription_sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents/com.twilio.messaging.message.failed
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents?PageSize=50&Page=0
+                      next_page_url: null
+                      key: types
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSubscribedEvent
-      x-maturity:
-      - GA
     post:
       description: Add an event type to a Subscription.
       tags:
@@ -1004,12 +1391,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription.subscribed_event'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    subscription_sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: com.twilio.messaging.message.delivered
+                    schema_version: 2
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents/com.twilio.messaging.message.delivered
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSubscribedEvent
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1025,6 +1418,11 @@ paths:
                   description: The schema version that the Subscription should use.
               required:
               - Type
+            examples:
+              create:
+                value:
+                  Type: com.twilio.messaging.message.delivered
+                  SchemaVersion: 2
   /v1/Subscriptions/{SubscriptionSid}/SubscribedEvents/{Type}:
     servers:
     - url: https://events.twilio.com
@@ -1035,8 +1433,8 @@ paths:
       - schema_version
       - account_sid
       - subscription_sid
-      pathType: instance
       parent: /Subscriptions/{Sid}
+      pathType: instance
     get:
       description: Read an Event for a Subscription.
       tags:
@@ -1063,12 +1461,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription.subscribed_event'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    subscription_sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: com.twilio.messaging.message.delivered
+                    schema_version: 2
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents/com.twilio.messaging.message.delivered
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSubscribedEvent
-      x-maturity:
-      - GA
     post:
       description: Update an Event for a Subscription.
       tags:
@@ -1095,12 +1499,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription.subscribed_event'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    subscription_sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    type: com.twilio.messaging.message.delivered
+                    schema_version: 2
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents/com.twilio.messaging.message.delivered
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSubscribedEvent
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1111,8 +1521,10 @@ paths:
                 SchemaVersion:
                   type: integer
                   description: The schema version that the Subscription should use.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  SchemaVersion: 2
     delete:
       description: Remove an event type from a Subscription.
       tags:
@@ -1139,8 +1551,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSubscribedEvent
-      x-maturity:
-      - GA
   /v1/Subscriptions:
     servers:
     - url: https://events.twilio.com
@@ -1152,12 +1562,12 @@ paths:
       - sink_sid
       - date_created
       - date_updated
-      pathType: list
       dependentProperties:
         subscribed_events:
           mapping:
             subscription_sid: sid
           resource_url: /v1/Subscriptions/{subscription_sid}/SubscribedEvents
+      pathType: list
     get:
       description: Retrieve a paginated list of Subscriptions belonging to the account
         used to make the request.
@@ -1173,6 +1583,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^DG[0-9a-fA-F]{32}$
+        examples:
+          readResultsFilteredBySinkSid:
+            value: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1205,50 +1618,129 @@ paths:
                     items:
                       $ref: '#/components/schemas/events.v1.subscription'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
+              examples:
+                readEmpty:
+                  value:
+                    subscriptions: []
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Subscriptions?PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Subscriptions?PageSize=10&Page=0
+                      next_page_url: null
+                      key: subscriptions
+                readResults:
+                  value:
+                    subscriptions:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:01:33Z'
+                      sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: A subscription
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:01:33Z'
+                      sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: Another subscription
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      links:
+                        subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/SubscribedEvents
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://events.twilio.com/v1/Subscriptions?PageSize=20&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Subscriptions?PageSize=20&Page=0
+                      next_page_url: null
+                      key: subscriptions
+                readResultsFilteredBySinkSid:
+                  value:
+                    subscriptions:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:01:33Z'
+                      sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: A subscription
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2015-07-30T20:00:00Z'
+                      date_updated: '2015-07-30T20:01:33Z'
+                      sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: Another subscription
+                      url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                      links:
+                        subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/SubscribedEvents
+                    meta:
+                      page: 0
+                      page_size: 10
+                      first_page_url: https://events.twilio.com/v1/Subscriptions?SinkSid=DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=10&Page=0
+                      previous_page_url: null
+                      url: https://events.twilio.com/v1/Subscriptions?SinkSid=DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=10&Page=0
+                      next_page_url: null
+                      key: subscriptions
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSubscription
-      x-maturity:
-      - GA
     post:
       description: Create a new Subscription.
       tags:
       - EventsV1Subscription
+      parameters: []
       responses:
         '201':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:01:33Z'
+                    sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: A subscription
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSubscription
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1277,6 +1769,16 @@ paths:
               - Description
               - SinkSid
               - Types
+            examples:
+              create:
+                value:
+                  SinkSid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Description: A subscription
+                  Types:
+                  - '{"type": "com.twilio.messaging.message.delivered","schema_version":
+                    1}'
+                  - '{"type": "com.twilio.messaging.message.failed","schema_version":
+                    12}'
   /v1/Subscriptions/{Sid}:
     servers:
     - url: https://events.twilio.com
@@ -1288,12 +1790,12 @@ paths:
       - sink_sid
       - date_created
       - date_updated
-      pathType: instance
       dependentProperties:
         subscribed_events:
           mapping:
             subscription_sid: sid
           resource_url: /v1/Subscriptions/{subscription_sid}/SubscribedEvents
+      pathType: instance
     get:
       description: Fetch a specific Subscription.
       tags:
@@ -1314,12 +1816,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:01:33Z'
+                    sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: A subscription
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSubscription
-      x-maturity:
-      - GA
     post:
       description: Update a Subscription.
       tags:
@@ -1340,12 +1852,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events.v1.subscription'
+              examples:
+                update:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2020-07-30T20:01:33Z'
+                    sid: DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sink_sid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                    description: Updated description
+                    url: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      subscribed_events: https://events.twilio.com/v1/Subscriptions/DFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/SubscribedEvents
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSubscription
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1364,8 +1886,11 @@ paths:
                   description: The SID of the sink that events selected by this subscription
                     should be sent to. Sink must be active for the subscription to
                     be created.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  SinkSid: DGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
+                  Description: Updated description
     delete:
       description: Delete a specific Subscription.
       tags:
@@ -1386,8 +1911,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSubscription
-      x-maturity:
-      - GA
 servers:
 - url: https://events.twilio.com
 tags:
@@ -1399,6 +1922,5 @@ tags:
 - name: EventsV1SinkValidate
 - name: EventsV1SubscribedEvent
 - name: EventsV1Subscription
-x-maturity:
-- name: GA
-  description: This product is Generally Available.
+security:
+- accountSid_authToken: []
