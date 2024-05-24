@@ -4,6 +4,10 @@ components:
       scheme: basic
       type: http
   schemas:
+    ai_insights_enum_tag_group:
+      type: string
+      enum:
+      - topics
     flex.v1.channel:
       type: object
       properties:
@@ -142,7 +146,6 @@ components:
           description: The TaskRouter SID of the offline activity.
         runtime_domain:
           type: string
-          format: uri
           nullable: true
           description: The URL where the Flex instance is hosted.
         messaging_service_instance_sid:
@@ -198,7 +201,6 @@ components:
           description: Whether call recording is enabled.
         call_recording_webhook_url:
           type: string
-          format: uri
           nullable: true
           description: The call recording webhook URL.
         crm_enabled:
@@ -211,12 +213,10 @@ components:
           description: The CRM type.
         crm_callback_url:
           type: string
-          format: uri
           nullable: true
           description: The CRM Callback URL.
         crm_fallback_url:
           type: string
-          format: uri
           nullable: true
           description: The CRM Fallback URL.
         crm_attributes:
@@ -275,7 +275,6 @@ components:
             flex_url
         flex_url:
           type: string
-          format: uri
           nullable: true
           description: URL to redirect to in case drilldown is enabled.
         channel_configs:
@@ -645,11 +644,15 @@ components:
       - agent_metrics
       - queue_metrics
       - agents_csat_summary
+      - topic_metrics
+      - conversation_metrics
+      - trend_metrics
     insights_conversational_ai_enum_type:
       type: string
       enum:
       - metrics
       - summary
+      - trend
     insights_conversational_ai_enum_sort_direction:
       type: string
       enum:
@@ -663,9 +666,20 @@ components:
       - total
       - mean
       - scored_mean
-      - mean_trend
-      - scored_mean_trend
-      - total_trend
+      - score
+    insights_conversational_ai_enum_score_id:
+      type: string
+      enum:
+      - ~predicted-csat
+      - ~agent-experience
+      - ~customer-effort
+      - ~multitouch-risk
+    insights_conversational_ai_enum_tier:
+      type: string
+      enum:
+      - Low
+      - High
+      - Neutral
     flex.v1.insights_conversations:
       type: object
       properties:
@@ -1520,13 +1534,16 @@ components:
         private:
           type: boolean
           nullable: true
-          description: Whether to inject credentials while accessing this Plugin Version.
-            The default value is false.
+          description: Whether the Flex Plugin Version is validated. The default value
+            is false.
         archived:
           type: boolean
           nullable: true
           description: Whether the Flex Plugin Version is archived. The default value
             is false.
+        validated:
+          type: boolean
+          nullable: true
         date_created:
           type: string
           format: date-time
@@ -1744,7 +1761,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListChannelResponse
                 properties:
                   flex_chat_channels:
                     type: array
@@ -1773,6 +1789,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListChannelResponse
               examples:
                 readFull:
                   value:
@@ -1804,6 +1821,31 @@ paths:
                       next_page_url: null
                       key: flex_chat_channels
                     flex_chat_channels: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -1829,6 +1871,31 @@ paths:
                     date_created: '2016-08-01T22:10:40Z'
                     date_updated: '2016-08-01T22:10:40Z'
                     url: https://flex-api.twilio.com/v1/Channels/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -1941,6 +2008,31 @@ paths:
                     date_created: '2016-08-01T22:10:40Z'
                     date_updated: '2016-08-01T22:10:40Z'
                     url: https://flex-api.twilio.com/v1/Channels/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2163,6 +2255,31 @@ paths:
                     offline_config:
                       presence: true
                       presence_ttl: 30
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2332,6 +2449,31 @@ paths:
                     offline_config:
                       presence: true
                       presence_ttl: 30
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2398,7 +2540,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListConfiguredPluginResponse
                 properties:
                   plugins:
                     type: array
@@ -2427,6 +2568,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListConfiguredPluginResponse
               examples:
                 readEmpty:
                   value:
@@ -2466,6 +2608,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Plugins?PageSize=50&Page=0
                       next_page_url: null
                       key: plugins
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2532,6 +2699,31 @@ paths:
                     private: true
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2587,7 +2779,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListFlexFlowResponse
                 properties:
                   flex_flows:
                     type: array
@@ -2616,6 +2807,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListFlexFlowResponse
               examples:
                 readFull:
                   value:
@@ -2655,6 +2847,31 @@ paths:
                       next_page_url: null
                       key: flex_flows
                     flex_flows: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2688,6 +2905,31 @@ paths:
                     long_lived: true
                     janitor_enabled: true
                     url: https://flex-api.twilio.com/v1/FlexFlows/FOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -2866,6 +3108,31 @@ paths:
                     long_lived: true
                     janitor_enabled: true
                     url: https://flex-api.twilio.com/v1/FlexFlows/FOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -2909,6 +3176,31 @@ paths:
                     long_lived: true
                     janitor_enabled: true
                     url: https://flex-api.twilio.com/v1/FlexFlows/FOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -3107,6 +3399,31 @@ paths:
                             category_sid: FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                             name: Good for Training
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Assessments/FMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -3226,7 +3543,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsAssessmentsResponse
                 properties:
                   assessments:
                     type: array
@@ -3255,6 +3571,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsAssessmentsResponse
               examples:
                 readBySegmentId:
                   value:
@@ -3301,6 +3618,31 @@ paths:
                       page_size: 50
                       previous_page_url: null
                       url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Assessments?SegmentId=dbdf1f7b-c776-5e78-9676-98a397fb3cdc&PageSize=50&Page=0
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -3367,6 +3709,31 @@ paths:
                             category_sid: FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                             name: Good for Training
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Assessments/FMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -3443,6 +3810,31 @@ paths:
                         category_id: c9ba34ca-7174-4dcd-ab3e-91fbb1932f1e
                         name: Good for Training
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Assessments/Comments/FMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -3541,7 +3933,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsAssessmentsCommentResponse
                 properties:
                   comments:
                     type: array
@@ -3570,6 +3961,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsAssessmentsCommentResponse
               examples:
                 readBySegmentId:
                   value:
@@ -3636,6 +4028,31 @@ paths:
                       page_size: 50
                       previous_page_url: null
                       url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Assessments/Comments?SegmentId=0105be7a-9b87-51f1-8df8-aa74ddb9c4a7&PageSize=50&Page=0
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -3699,7 +4116,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsConversationsResponse
                 properties:
                   conversations:
                     type: array
@@ -3728,6 +4144,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsConversationsResponse
               examples:
                 readEmpty:
                   value:
@@ -3767,6 +4184,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Insights/Conversations?SegmentId=02dd8a65-c9e3-550b-9e98-5b11abb9b3a4&PageSize=50&Page=0
                       next_page_url: null
                       key: conversations
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -3827,6 +4269,31 @@ paths:
                       allow_na: false
                       usage: 0
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questionnaires/GMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -3912,7 +4379,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsQuestionnairesResponse
                 properties:
                   questionnaires:
                     type: array
@@ -3941,6 +4407,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsQuestionnairesResponse
               examples:
                 readEmpty:
                   value:
@@ -4050,6 +4517,31 @@ paths:
                       page_size: 50
                       previous_page_url: null
                       url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questionnaires?PageSize=50&Page=0
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4119,6 +4611,31 @@ paths:
                       allow_na: false
                       usage: 0
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questionnaires/GMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4236,6 +4753,31 @@ paths:
                       allow_na: false
                       usage: 0
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questionnaires/GMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4274,6 +4816,31 @@ paths:
                     category_sid: FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     name: abc
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Categories/FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -4329,7 +4896,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsQuestionnairesCategoryResponse
                 properties:
                   categories:
                     type: array
@@ -4358,6 +4924,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsQuestionnairesCategoryResponse
               examples:
                 readEmpty:
                   value:
@@ -4385,6 +4952,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Categories?PageSize=50&Page=0
                       next_page_url: null
                       key: categories
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4432,6 +5024,31 @@ paths:
                     category_sid: FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     name: abcd
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Categories/FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4535,6 +5152,31 @@ paths:
                       type: select
                       id: a6a8a54f-5305-4aec-b92c-a6e429932f58
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questions/GEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -4631,7 +5273,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsQuestionnairesQuestionResponse
                 properties:
                   questions:
                     type: array
@@ -4660,6 +5301,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsQuestionnairesQuestionResponse
               examples:
                 readEmpty:
                   value:
@@ -4711,6 +5353,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questions?CategorySid=FYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
                       next_page_url: null
                       key: questions
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4782,6 +5449,31 @@ paths:
                       type: select
                       id: a6a8a54f-5305-4aec-b92c-a6e429932f58
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Questions/GEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -4921,7 +5613,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInsightsSegmentsResponse
                 properties:
                   segments:
                     type: array
@@ -4950,6 +5641,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInsightsSegmentsResponse
               examples:
                 readEmpty:
                   value:
@@ -5032,6 +5724,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Insights/Segments?SegmentId=02dd8a65-c9e3-550b-9e98-5b11abb9b3a5&PageSize=50&Page=0
                       next_page_url: null
                       key: segments
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5073,6 +5790,31 @@ paths:
                       \u2026kHXd\n=vOBk\n-----END PGP MESSAGE-----\n"
                     base_url: https://analytics.ytica.com/
                     url: https://flex-api.twilio.com/v1/Insights/Session
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -5159,6 +5901,31 @@ paths:
                       name: N/A
                       score: 0
                       sort: 0
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5198,6 +5965,31 @@ paths:
                       name: Good
                       sort: 0
                     url: https://flex-api.twilio.com/v1/Insights/QualityManagement/Settings/CommentTags
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5235,6 +6027,31 @@ paths:
                     roles:
                     - wfo.full_access
                     url: https://flex-api.twilio.com/v1/Insights/UserRoles
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5291,6 +6108,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       channels: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5357,6 +6199,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       channels: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -5381,7 +6248,6 @@ paths:
                     lookup sid
               required:
               - Channel
-              - Routing
             examples:
               create:
                 value:
@@ -5453,6 +6319,31 @@ paths:
                     links:
                       participants: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants
                       invites: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Invites
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5525,6 +6416,31 @@ paths:
                     links:
                       participants: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants
                       invites: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Invites
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5624,7 +6540,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInteractionChannelResponse
                 properties:
                   channels:
                     type: array
@@ -5653,6 +6568,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInteractionChannelResponse
               examples:
                 read:
                   value:
@@ -5715,6 +6631,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels?PageSize=50&Page=0
                       next_page_url: null
                       key: channels
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -5792,6 +6733,31 @@ paths:
                         age_in_queue: 0
                         addons: '{}'
                     url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Invites/KGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -5860,7 +6826,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInteractionChannelInviteResponse
                 properties:
                   invites:
                     type: array
@@ -5889,6 +6854,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInteractionChannelInviteResponse
               examples:
                 read:
                   value:
@@ -5963,6 +6929,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Invites?PageSize=50&Page=0
                       next_page_url: null
                       key: invites
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6018,6 +7009,31 @@ paths:
                       worker_sid: WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       reservation_sid: WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -6100,7 +7116,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListInteractionChannelParticipantResponse
                 properties:
                   participants:
                     type: array
@@ -6129,6 +7144,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListInteractionChannelParticipantResponse
               examples:
                 read:
                   value:
@@ -6156,6 +7172,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants?PageSize=50&Page=0
                       next_page_url: null
                       key: participants
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6232,6 +7273,31 @@ paths:
                       worker_sid: WKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       reservation_sid: WRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://flex-api.twilio.com/v1/Interactions/KDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Channels/UOaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1/Participants/UTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6307,7 +7373,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListPluginResponse
                 properties:
                   plugins:
                     type: array
@@ -6336,6 +7401,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListPluginResponse
               examples:
                 readEmpty:
                   value:
@@ -6370,6 +7436,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/PluginService/Plugins?PageSize=50&Page=0
                       next_page_url: null
                       key: plugins
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6404,6 +7495,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       plugin_versions: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -6484,6 +7600,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       plugin_versions: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6524,6 +7665,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       plugin_versions: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6592,6 +7758,31 @@ paths:
                     date_created: '2020-01-10T20:00:00Z'
                     date_updated: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Archive
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6647,7 +7838,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListPluginConfigurationResponse
                 properties:
                   configurations:
                     type: array
@@ -6676,6 +7866,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListPluginConfigurationResponse
               examples:
                 readEmpty:
                   value:
@@ -6708,6 +7899,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/PluginService/Configurations?PageSize=50&Page=0
                       next_page_url: null
                       key: configurations
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6740,6 +7956,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       plugins: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Plugins
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -6826,6 +8067,31 @@ paths:
                     url: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       plugins: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Plugins
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6876,6 +8142,31 @@ paths:
                     archived: true
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Configurations/FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Archive
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -6926,7 +8217,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListPluginReleaseResponse
                 properties:
                   releases:
                     type: array
@@ -6955,6 +8245,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListPluginReleaseResponse
               examples:
                 readEmpty:
                   value:
@@ -6983,6 +8274,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/PluginService/Releases?PageSize=50&Page=0
                       next_page_url: null
                       key: releases
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7011,6 +8327,31 @@ paths:
                     configuration_sid: FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Releases/FKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -7080,6 +8421,31 @@ paths:
                     configuration_sid: FJaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Releases/FKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7138,7 +8504,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListPluginVersionResponse
                 properties:
                   plugin_versions:
                     type: array
@@ -7167,6 +8532,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListPluginVersionResponse
               examples:
                 readEmpty:
                   value:
@@ -7190,6 +8556,7 @@ paths:
                       changelog: the changelog
                       private: false
                       archived: false
+                      validated: false
                       date_created: '2020-01-10T20:00:00Z'
                       url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     meta:
@@ -7200,6 +8567,31 @@ paths:
                       url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions?PageSize=50&Page=0
                       next_page_url: null
                       key: plugin_versions
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7237,6 +8629,7 @@ paths:
                     changelog: the changelog
                     private: true
                     archived: false
+                    validated: false
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 createWithCliVersion:
@@ -7249,6 +8642,7 @@ paths:
                     changelog: the changelog
                     private: true
                     archived: false
+                    validated: false
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                 createWithCliAndValidateStatus:
@@ -7261,8 +8655,34 @@ paths:
                     changelog: the changelog
                     private: true
                     archived: false
+                    validated: true
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -7319,7 +8739,7 @@ paths:
                   Changelog: the changelog
                   Private: true
                   CliVersion: 6.3.2
-                  ValidateStatus: Validated
+                  ValidateStatus: success
   /v1/PluginService/Plugins/{PluginSid}/Versions/{Sid}:
     servers:
     - url: https://flex-api.twilio.com
@@ -7372,8 +8792,34 @@ paths:
                     changelog: the changelog
                     private: false
                     archived: false
+                    validated: false
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7430,6 +8876,31 @@ paths:
                     archived: true
                     date_created: '2020-01-10T20:00:00Z'
                     url: https://flex-api.twilio.com/v1/PluginService/Plugins/FPaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Versions/FVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Archive
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7458,6 +8929,31 @@ paths:
                   value:
                     status: active
                     url: https://flex-api.twilio.com/v1/account/provision/status
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7502,7 +8998,6 @@ paths:
             application/json:
               schema:
                 type: object
-                title: ListWebChannelResponse
                 properties:
                   flex_chat_channels:
                     type: array
@@ -7531,6 +9026,7 @@ paths:
                         format: uri
                         type: string
                     type: object
+                title: ListWebChannelResponse
               examples:
                 readFull:
                   value:
@@ -7560,6 +9056,31 @@ paths:
                       next_page_url: null
                       key: flex_chat_channels
                     flex_chat_channels: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7583,6 +9104,31 @@ paths:
                     date_created: '2016-08-01T22:10:40Z'
                     date_updated: '2016-08-01T22:10:40Z'
                     url: https://flex-api.twilio.com/v1/WebChannels/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -7667,6 +9213,31 @@ paths:
                     date_created: '2016-08-01T22:10:40Z'
                     date_updated: '2016-08-01T22:10:40Z'
                     url: https://flex-api.twilio.com/v1/WebChannels/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7700,6 +9271,31 @@ paths:
                     date_created: '2016-08-01T22:10:40Z'
                     date_updated: '2016-08-01T22:10:40Z'
                     url: https://flex-api.twilio.com/v1/WebChannels/CHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -7747,8 +9343,10 @@ servers:
 - url: https://flex-api.twilio.com
 tags:
 - name: FlexV1AiInsights
+- name: FlexV1AiInsightsConversations
 - name: FlexV1Assessments
 - name: FlexV1Channel
+- name: FlexV1ChannelParticipantTwiml
 - name: FlexV1ChannelUser
 - name: FlexV1Configuration
 - name: FlexV1ConfiguredPlugin

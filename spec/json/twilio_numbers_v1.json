@@ -160,70 +160,7 @@
           "phone-bill"
         ]
       },
-      "numbers.v1.porting_bulk_portability": {
-        "type": "object",
-        "properties": {
-          "sid": {
-            "type": "string",
-            "minLength": 34,
-            "maxLength": 34,
-            "pattern": "^KZ[0-9a-fA-F]{32}$",
-            "nullable": true,
-            "description": "A 34 character string that uniquely identifies this Portability check."
-          },
-          "status": {
-            "type": "string",
-            "$ref": "#/components/schemas/porting_bulk_portability_enum_status",
-            "nullable": true,
-            "description": "The Status of this Portability check. One of `in-progress`, `completed` or `expired`."
-          },
-          "datetime_created": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "The date that the Portability check was created, given in ISO 8601 format."
-          },
-          "phone_numbers": {
-            "type": "array",
-            "items": {},
-            "nullable": true,
-            "description": "Contains a list with all the information of the requested phone numbers. Each phone number contains the following properties: `phone_number`: The phone number which portability is to be checked. `portable`: Boolean flag specifying if phone number is portable or not. `not_portable_reason`: Reason why the phone number cannot be ported into Twilio, `null` otherwise. `not_portable_reason_code`: The Portability Reason Code for the phone number if it cannot be ported in Twilio, `null` otherwise. `pin_and_account_number_required`: Boolean flag specifying if PIN and account number is required for the phone number. `number_type`: The type of the requested phone number. `country` Country the phone number belongs to. `messaging_carrier` Current messaging carrier of the phone number. `voice_carrier` Current voice carrier of the phone number."
-          },
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true,
-            "description": "This is the url of the request that you're trying to reach out to locate the resource."
-          }
-        }
-      },
-      "porting_bulk_portability_enum_status": {
-        "type": "string",
-        "enum": [
-          "in-progress",
-          "completed",
-          "expired"
-        ]
-      },
       "numbers.v1.porting_port_in": {
-        "type": "object",
-        "properties": {
-          "port_in_request_sid": {
-            "type": "string",
-            "minLength": 34,
-            "maxLength": 34,
-            "pattern": "^KW[0-9a-fA-F]{32}$",
-            "nullable": true,
-            "description": "The SID of the Port In request. This is a unique identifier of the port in request."
-          },
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          }
-        }
-      },
-      "numbers.v1.porting_port_in_fetch": {
         "type": "object",
         "properties": {
           "port_in_request_sid": {
@@ -320,6 +257,68 @@
             "type": "string",
             "format": "uri",
             "nullable": true
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the account that the phone number belongs to."
+          },
+          "phone_number_type": {
+            "type": "string",
+            "nullable": true,
+            "description": "The type of the phone number."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date when the phone number was created."
+          },
+          "country": {
+            "type": "string",
+            "format": "iso-country-code",
+            "nullable": true,
+            "description": "The country of the phone number."
+          },
+          "missing_required_fields": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "The phone number is missing required fields."
+          },
+          "status_last_time_updated_timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The timestamp when the status was last updated."
+          },
+          "phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "The phone number."
+          },
+          "portable": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "The phone number is portable."
+          },
+          "not_portability_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "The reason why the phone number is not portable."
+          },
+          "not_portability_reason_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The code of the reason why the phone number is not portable."
+          },
+          "port_in_phone_number_status": {
+            "type": "string",
+            "nullable": true,
+            "description": "The status of the phone number in the port in request."
           }
         }
       },
@@ -398,6 +397,104 @@
           "MOBILE",
           "TOLL-FREE"
         ]
+      },
+      "numbers.v1.porting_webhook_configuration": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the webhook configuration request"
+          },
+          "port_in_target_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Webhook URL to send a request when a port in request or port in phone number event happens"
+          },
+          "port_out_target_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Webhook URL to send a request when a port out phone number event happens"
+          },
+          "notifications_of": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "List of notification events to send a request to the webhook URL"
+          }
+        }
+      },
+      "numbers.v1.porting_webhook_configuration_delete": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the webhook configuration request"
+          },
+          "webhook_type": {
+            "type": "string",
+            "$ref": "#/components/schemas/porting_webhook_configuration_delete_enum_webhook_type",
+            "nullable": true,
+            "description": "The of the webhook type of the configuration to be deleted"
+          }
+        }
+      },
+      "porting_webhook_configuration_delete_enum_webhook_type": {
+        "type": "string",
+        "enum": [
+          "PORT_IN",
+          "PORT_OUT"
+        ]
+      },
+      "numbers.v1.porting_webhook_configuration_fetch": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the webhook configuration request"
+          },
+          "port_in_target_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Webhook URL to send a request when a port in request or port in phone number event happens"
+          },
+          "port_out_target_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Webhook URL to send a request when a port out phone number event happens"
+          },
+          "notifications_of": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "List of notification events to send a request to the webhook URL"
+          },
+          "port_in_target_date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Creation date for the port in webhook configuration"
+          },
+          "port_out_target_date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Creation date for the port out webhook configuration"
+          }
+        }
       }
     }
   },
@@ -454,6 +551,42 @@
                       "url": "https://numbers.twilio.com/v1/HostedNumber/Eligibility/Bulk/ECaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
                   }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -549,6 +682,42 @@
                 }
               }
             },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -626,6 +795,42 @@
                 }
               }
             },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
             "description": "Created"
           }
         },
@@ -642,177 +847,6 @@
                 "type": "object",
                 "title": "CreateEligibilityRequest",
                 "properties": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/Porting/Portability/{Sid}": {
-      "servers": [
-        {
-          "url": "https://numbers.twilio.com"
-        }
-      ],
-      "description": "",
-      "x-twilio": {
-        "defaultOutputProperties": [
-          "sid",
-          "status"
-        ],
-        "mountName": "porting_bulk_portabilities",
-        "pathType": "instance"
-      },
-      "get": {
-        "description": "Fetch a previous portability check. This should return the current status of the validation and the result for all the numbers provided, given that they have been validated (as this process is performed asynchronously).",
-        "tags": [
-          "NumbersV1PortingBulkPortability"
-        ],
-        "parameters": [
-          {
-            "name": "Sid",
-            "in": "path",
-            "description": "A 34 character string that uniquely identifies the Portability check.",
-            "schema": {
-              "type": "string",
-              "minLength": 34,
-              "maxLength": 34,
-              "pattern": "^KZ[0-9a-fA-F]{32}$"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/numbers.v1.porting_bulk_portability"
-                },
-                "examples": {
-                  "fetch": {
-                    "value": {
-                      "sid": "KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                      "status": "completed",
-                      "datetime_created": "2015-07-30T20:00:00Z",
-                      "phone_numbers": [
-                        {
-                          "phone_number": "+14153334440",
-                          "portable": true,
-                          "pin_and_account_number_required": true,
-                          "not_portable_reason": null,
-                          "not_portable_reason_code": null,
-                          "number_type": "LOCAL",
-                          "country": "US",
-                          "messaging_carrier": "string",
-                          "voice_carrier": "string"
-                        },
-                        {
-                          "phone_number": "+18002178781",
-                          "portable": false,
-                          "pin_and_account_number_required": false,
-                          "not_portable_reason": "MANUAL_PORTING_AVAILABLE",
-                          "not_portable_reason_code": 22133,
-                          "number_type": "TOLL-FREE",
-                          "country": "US",
-                          "messaging_carrier": "Verizon",
-                          "voice_carrier": "Verizon"
-                        }
-                      ],
-                      "url": "https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "accountSid_authToken": []
-          }
-        ],
-        "operationId": "FetchPortingBulkPortability"
-      }
-    },
-    "/v1/Porting/Portability": {
-      "servers": [
-        {
-          "url": "https://numbers.twilio.com"
-        }
-      ],
-      "description": "",
-      "x-twilio": {
-        "defaultOutputProperties": [
-          "sid",
-          "status"
-        ],
-        "mountName": "porting_bulk_portabilities",
-        "pathType": "list"
-      },
-      "post": {
-        "description": "Allows to check if a list of phone numbers can be ported to Twilio or not. This is done asynchronous for each phone number.",
-        "tags": [
-          "NumbersV1PortingBulkPortability"
-        ],
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/numbers.v1.porting_bulk_portability"
-                },
-                "examples": {
-                  "create": {
-                    "value": {
-                      "sid": "KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                      "status": "in-progress",
-                      "datetime_created": "2015-07-30T20:00:00Z",
-                      "phone_numbers": [],
-                      "url": "https://numbers.twilio.com/v1/Porting/Portability/KZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Accepted"
-          }
-        },
-        "security": [
-          {
-            "accountSid_authToken": []
-          }
-        ],
-        "operationId": "CreatePortingBulkPortability",
-        "requestBody": {
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "title": "CreatePortingBulkPortabilityRequest",
-                "properties": {
-                  "PhoneNumbers": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "The phone numbers which portability is to be checked. This should be a list of strings. Phone numbers are in E.164 format (e.g. +16175551212). ."
-                  }
-                },
-                "required": [
-                  "PhoneNumbers"
-                ]
-              },
-              "examples": {
-                "create": {
-                  "value": {
-                    "PhoneNumbers": [
-                      "+14153334440",
-                      "+18002178781"
-                    ]
-                  }
-                }
               }
             }
           }
@@ -849,9 +883,84 @@
                   "create": {
                     "value": {
                       "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "notification_emails": [
+                        "user@domain.com"
+                      ],
+                      "target_port_in_date": "2023-09-10",
+                      "target_port_in_time_range_start": "10:00:00+01:00",
+                      "target_port_in_time_range_end": "20:00:00+01:00",
+                      "port_in_request_status": "pending",
+                      "losing_carrier_information": {
+                        "customer_type": "Business/Individual",
+                        "customer_name": "Customer name for carrier",
+                        "authorized_representative": "John Smith",
+                        "authorized_representative_email": "signer@domain.com",
+                        "account_number": "123456",
+                        "account_telephone_number": "+133232323",
+                        "address_sid": "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "address": {
+                          "street": "Your Street",
+                          "street_2": "Other Street or null",
+                          "city": "City",
+                          "state": "State",
+                          "zip": "000000",
+                          "country": "US"
+                        }
+                      },
+                      "phone_numbers": [
+                        {
+                          "phone_number": "+16175551212",
+                          "pin": "123456",
+                          "portable": true,
+                          "not_portability_reason": "string",
+                          "port_in_phone_number_sid": "PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "port_in_phone_number_status": "In Review",
+                          "not_portability_reason_code": 0
+                        }
+                      ],
+                      "documents": [
+                        "ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                      ],
                       "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
                   }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -925,7 +1034,7 @@
       "get": {
         "description": "Fetch a port in request by SID",
         "tags": [
-          "NumbersV1PortingPortInFetch"
+          "NumbersV1PortingPortIn"
         ],
         "parameters": [
           {
@@ -946,7 +1055,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/numbers.v1.porting_port_in_fetch"
+                  "$ref": "#/components/schemas/numbers.v1.porting_port_in"
                 },
                 "examples": {
                   "fetch": {
@@ -997,6 +1106,42 @@
                 }
               }
             },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -1005,11 +1150,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPortingPortInFetch",
-        "x-twilio": {
-          "mountName": "porting_port_ins_fetch",
-          "className": "porting_port_in_fetch"
-        }
+        "operationId": "FetchPortingPortIn"
       }
     },
     "/v1/Porting/PortIn/{PortInRequestSid}/PhoneNumber/{PhoneNumberSid}": {
@@ -1069,6 +1210,112 @@
           }
         ],
         "operationId": "DeletePortingPortInPhoneNumber"
+      },
+      "get": {
+        "description": "Fetch a phone number by port in request SID and phone number SID",
+        "tags": [
+          "NumbersV1PortingPortInPhoneNumber"
+        ],
+        "parameters": [
+          {
+            "name": "PortInRequestSid",
+            "in": "path",
+            "description": "The SID of the Port In request. This is a unique identifier of the port in request.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^KW[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "PhoneNumberSid",
+            "in": "path",
+            "description": "The SID of the Phone number. This is a unique identifier of the phone number.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^PU[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.porting_port_in_phone_number"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "phone_number_type": "LOCAL",
+                      "date_created": "2024-04-10T06:52:21Z",
+                      "country": "US",
+                      "missing_required_fields": false,
+                      "status_last_time_updated_timestamp": "2024-03-12T06:52:21Z",
+                      "phone_number": "+15024953384",
+                      "portable": true,
+                      "not_portability_reason": "ALREADY_IN_TWILIO_DIFFERENT_OWNER",
+                      "not_portability_reason_code": "22132",
+                      "port_in_phone_number_status": "in_review",
+                      "phone_number_sid": "PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumber/PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchPortingPortInPhoneNumber"
       }
     },
     "/v1/Porting/Portability/PhoneNumber/{PhoneNumber}": {
@@ -1142,6 +1389,42 @@
                 }
               }
             },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
             "description": "OK"
           }
         },
@@ -1151,6 +1434,244 @@
           }
         ],
         "operationId": "FetchPortingPortability"
+      }
+    },
+    "/v1/Porting/Configuration/Webhook": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "mountName": "porting_webhook_configurations",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Allows to create a new webhook configuration",
+        "tags": [
+          "NumbersV1PortingWebhookConfiguration"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.porting_webhook_configuration"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "port_in_target_url": "https://www.example.com/port-in",
+                      "port_out_target_url": "https://www.example.com/port-out",
+                      "notifications_of": [
+                        "PortInWaitingForSignature",
+                        "PortInInProgress",
+                        "PortInCompleted",
+                        "PortInActionRequired",
+                        "PortInCanceled",
+                        "PortInExpired",
+                        "PortInPhoneNumberWaitingForSignature",
+                        "PortInPhoneNumberSubmitted",
+                        "PortInPhoneNumberPending",
+                        "PortInPhoneNumberCompleted",
+                        "PortInPhoneNumberRejected",
+                        "PortOutPhoneNumberCompleted"
+                      ],
+                      "url": "https://numbers.twilio.com/v1/Porting/Configuration/Webhook"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreatePortingWebhookConfiguration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "CreatePortingWebhookConfigurationRequest",
+                "properties": {}
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "Allows to fetch the webhook configuration",
+        "tags": [
+          "NumbersV1PortingWebhookConfigurationFetch"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.porting_webhook_configuration_fetch"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "port_in_target_url": "https://www.example.com/port-in",
+                      "port_out_target_url": "https://www.example.com/port-out",
+                      "notifications_of": [
+                        "PortInWaitingForSignature",
+                        "PortInInProgress",
+                        "PortInCompleted",
+                        "PortInActionRequired",
+                        "PortInCanceled",
+                        "PortInExpired",
+                        "PortInPhoneNumberWaitingForSignature",
+                        "PortInPhoneNumberSubmitted",
+                        "PortInPhoneNumberPending",
+                        "PortInPhoneNumberCompleted",
+                        "PortInPhoneNumberRejected",
+                        "PortOutPhoneNumberCompleted"
+                      ],
+                      "port_in_target_date_created": "2024-05-14T13:49:04Z",
+                      "port_out_target_date_created": "2024-05-14T13:49:07Z",
+                      "url": "https://numbers.twilio.com/v1/Porting/Configuration/Webhook"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchPortingWebhookConfigurationFetch",
+        "x-twilio": {
+          "mountName": "porting_webhook_configuration_fetch"
+        }
+      }
+    },
+    "/v1/Porting/Configuration/Webhook/{WebhookType}": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "mountName": "porting_webhook_configurations_delete",
+        "className": "porting_webhook_configuration_delete",
+        "pathType": "instance"
+      },
+      "delete": {
+        "description": "Allows the client to delete a webhook configuration.",
+        "tags": [
+          "NumbersV1PortingWebhookConfigurationDelete"
+        ],
+        "parameters": [
+          {
+            "name": "WebhookType",
+            "in": "path",
+            "description": "The of the webhook type of the configuration to be deleted",
+            "schema": {
+              "type": "string",
+              "$ref": "#/components/schemas/porting_webhook_configuration_delete_enum_webhook_type"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeletePortingWebhookConfigurationDelete"
       }
     }
   },
@@ -1182,19 +1703,22 @@
       "name": "NumbersV1Identity"
     },
     {
-      "name": "NumbersV1PortingBulkPortability"
-    },
-    {
       "name": "NumbersV1PortingPortIn"
-    },
-    {
-      "name": "NumbersV1PortingPortInFetch"
     },
     {
       "name": "NumbersV1PortingPortInPhoneNumber"
     },
     {
       "name": "NumbersV1PortingPortability"
+    },
+    {
+      "name": "NumbersV1PortingWebhookConfiguration"
+    },
+    {
+      "name": "NumbersV1PortingWebhookConfigurationDelete"
+    },
+    {
+      "name": "NumbersV1PortingWebhookConfigurationFetch"
     },
     {
       "name": "NumbersV1ProofOfAddress"
