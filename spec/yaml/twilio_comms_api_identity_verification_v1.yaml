@@ -1,0 +1,2936 @@
+openapi: 3.1.0
+info:
+  title: Twilio Communications API
+  version: preview
+  contact:
+    name: Twilio
+    url: https://www.twilio.com
+  description: A comprehensive communications API for connecting people through software.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://comms.twilio.com/preview
+    description: Twilio Communications API
+security:
+  - account_id_auth_token: []
+tags:
+  - name: Identity Verification
+    description: '*Fight fraud and protect user accounts. Quickly verify users with OTP over any communication type (`Message`, `Email`, `PushNotification`), and with convenient methods like Passkeys, TOTP, and Silent Device Approval*'
+paths:
+  /Verifications:
+    post:
+      summary: Start a Verification
+      operationId: start-verification
+      description: This operation initiates a Verification session.
+      tags:
+        - Identity Verification
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+              examples:
+                Example 1 - An in-progress Verification over email with OTP code:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      channel: email
+                      address: johndoe@coolcompany.com
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    status: pending
+                    related:
+                      - name: email
+                        id: comms_email_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Emails/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example 2 - An in-progress Verification using end-user's Passkey factor:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    status: pending
+                    to:
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      user_identifier: john.doe
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                    next_step:
+                      publicKey:
+                        challenge: MDFoOWtyd3Bya2VlZThmenFzcHZ3eTZucTg
+                        timeout: 300000
+                        rpId: example.com
+                        allowCredentials:
+                          - id: 6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ
+                            type: public-key
+                            transports:
+                              - internal
+                        userVerification: preferred
+                        extensions: {}
+                    related:
+                      - name: factor
+                        id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Factors/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example 3 - An in-progress Verification using discoverable Passkey credential:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    status: pending
+                    next_step:
+                      publicKey:
+                        challenge: MDFoOWtyd3Bya2VlZThmenFzcHZ3eTZucTg
+                        timeout: 300000
+                        rpId: example.com
+                        allowCredentials:
+                          - id: 6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ
+                            type: public-key
+                            transports:
+                              - internal
+                        userVerification: preferred
+                        extensions: {}
+                    related: []
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example 4 - A completed, approved Verification using end-user's Passkey factor:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                    status: approved
+                    related:
+                      - name: factor
+                        id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Factors/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+          description: Created
+        '409':
+          description: This error indicates that more than one Contact was found for the provided `ContactRecipientFinder` payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwilioError'
+              examples:
+                Example 1:
+                  value:
+                    code: 20409
+                    message: More than one Contact was found for the provided `ContactRecipientFinder` payload. Please provide a more specific set of criteria or use a contact ID to start the verification.
+                    more_info: https://www.twilio.com/docs/api/errors/20409
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: StartVerificationRequest
+              type: object
+              properties:
+                from:
+                  title: StartVerificationRequestFrom
+                  description: |-
+                    The sending identity to associate with a Verification communication.
+                    To have Twilio optimize across multiple communication channels, use an AgentPool.
+                  type: object
+                  anyOf:
+                    - $ref: '#/components/schemas/MessageAddressee'
+                    - $ref: '#/components/schemas/EmailAddressee'
+                    - $ref: '#/components/schemas/AgentAddressee'
+                    - $ref: '#/components/schemas/AgentPoolAddressee'
+                to:
+                  title: StartVerificationRequestTo
+                  description: |-
+                    The user to Verify.
+                    - Use `ContactRecipient` to verify a known `Contact` with either an optimal channel or (optionally) a specific channel.
+                    - Use `ContactRecipientFinder` to find a Contact by address or user identifier and verify them using an optimal channel. 
+                    - Use `AddressRecipient` to verify a user with at a specific address.
+                    - Use `UserIdentifierRecipient` to verify a user via a unique user identifier.
+                    - Use `FactorRecipient` to verify a user using an approved `Factor`.
+                  type: object
+                  anyOf:
+                    - type: object
+                      title: ContactRecipient
+                      allOf:
+                        - type: object
+                          properties:
+                            contact_id:
+                              $ref: '#/components/schemas/ContactId'
+                            channel:
+                              $ref: '#/components/schemas/VerificationChannel'
+                            otp_type:
+                              $ref: '#/components/schemas/OTPType'
+                          required:
+                            - contact_id
+                    - type: object
+                      title: ContactRecipientFinder
+                      properties:
+                        find_contact_by:
+                          description: This set of properties will be used to find the Contact and determine the optimal channel to send the Verification communication to.
+                          type: object
+                          anyOf:
+                            - title: FindContactByAddress
+                              type: object
+                              properties:
+                                address:
+                                  type: string
+                                  description: An address to find a Contact by.
+                                channel:
+                                  $ref: '#/components/schemas/VerificationChannel'
+                              required:
+                                - address
+                                - channel
+                            - title: FindContactByUserIdentifier
+                              type: object
+                              properties:
+                                user_identifier:
+                                  $ref: '#/components/schemas/UserIdentifier'
+                              required:
+                                - user_identifier
+                            - title: FindContactByAddressAndUserIdentifier
+                              type: object
+                              properties:
+                                address:
+                                  type: string
+                                  description: An address to find a Contact by.
+                                channel:
+                                  $ref: '#/components/schemas/VerificationChannel'
+                                user_identifier:
+                                  $ref: '#/components/schemas/UserIdentifier'
+                              required:
+                                - address
+                                - channel
+                                - user_identifier
+                      required:
+                        - find_contact_by
+                    - type: object
+                      title: AddressRecipient
+                      allOf:
+                        - type: object
+                          properties:
+                            address:
+                              type: string
+                              description: |-
+                                A specific address to send a Verification communication to.
+                                This can be an Email address, Message address, or Push Notification address.
+                            address_extension:
+                              type: number
+                              description: For phone number extensions only.
+                            device_ip:
+                              type: string
+                              description: |-
+                                The IP address of the client's device. 
+                                If provided, it has to be a valid IPv4 or IPv6 address. 
+                                Strongly encouraged if using a Silent Network Auth factor.
+                            channel:
+                              $ref: '#/components/schemas/VerificationChannel'
+                            otp_type:
+                              $ref: '#/components/schemas/OTPType'
+                          required:
+                            - address
+                            - channel
+                    - type: object
+                      title: UserIdentifierRecipient
+                      allOf:
+                        - type: object
+                          properties:
+                            user_identifier:
+                              $ref: '#/components/schemas/UserIdentifier'
+                            channel:
+                              $ref: '#/components/schemas/VerificationChannel'
+                            otp_type:
+                              $ref: '#/components/schemas/OTPType'
+                          required:
+                            - user_identifier
+                    - type: object
+                      title: FactorRecipient
+                      properties:
+                        factor_id:
+                          $ref: '#/components/schemas/FactorId'
+                      required:
+                        - factor_id
+                content:
+                  title: VerificationContentInput
+                  description: |-
+                    The content of the Verification communication.
+                    - For default content template, Twilio-generated OTP, and optional overrides use `DefaultVerificationContent` or leave empty.
+                    - For custom content use a communication type-specific content or `OmniChannelContentInput`.
+                  type: object
+                  anyOf:
+                    - type: object
+                      title: DefaultVerificationContent
+                      properties:
+                        recipient_name:
+                          type: string
+                          description: |-
+                            A custom user-defined, friendly name for the recipient that overwrites
+                            the existing one in the default Verification content text.
+                        otp_code:
+                          type: string
+                          description: |-
+                            For Verfication communications using the default content template.
+                            A custom user-defined code to use for the Verification instead of a Twilio-generated code.
+                            The code can be between 4 and 10 characters, inclusive.
+                          default: auto
+                        locale:
+                          type: string
+                          description: |-
+                            Locale will automatically resolve for OTP verification communications sent
+                            over channels that use phone number addresses with country codes (phone, whatsapp).
+                            It will fallback to English or the template's default translation
+                            if the selected translation is not available. This parameter
+                            will override the automatic locale resolution. [See supported
+                            languages and more information here](https://www.twilio.com/docs/verify/supported-languages).
+                        amount:
+                          type: string
+                          description: |-
+                            The amount of the associated PSD2 compliant transaction.
+                            Requires the PSD2 Service flag enabled.
+                        payee:
+                          type: string
+                          description: |-
+                            The payee of the associated PSD2 compliant transaction.
+                            Requires the PSD2 Service flag enabled.
+                        app_hash:
+                          type: string
+                          description: |-
+                            Your [App Hash](https://developers.google.com/identity/sms-retriever/verify#computing_your_apps_hash_string)
+                            to be appended at the end of your communication content. 
+                            Example SMS body: `Your AppName verification code is: 1234 He42w354ol9`.
+                    - $ref: '#/components/schemas/MessagesRequestContentRich'
+                    - $ref: '#/components/schemas/PushNotificationsRequestContent'
+                    - $ref: '#/components/schemas/EmailsRequestContent'
+                    - $ref: '#/components/schemas/CommunicationsRequestContent'
+                    - $ref: '#/components/schemas/PasskeyRequestContent'
+                processing_options:
+                  $ref: '#/components/schemas/ProcessingOptions'
+                tags:
+                  $ref: '#/components/schemas/Tags'
+            examples:
+              Example Request 1 - Start a comms (OTP, sms) verification to recipient:
+                value:
+                  to:
+                    address: '+37259000000'
+                    channel: phone
+              Example Request 2 - Start a comms (OTP, sms) verification to recipient with explicit from-address:
+                value:
+                  from:
+                    address: '+19143101337'
+                    channel: phone
+                  to:
+                    address: '+37259000000'
+                    channel: phone
+              Example Request 3 - Start a comms (OTP, whatsapp) verification to a Contact:
+                value:
+                  from:
+                    agent_id: comms_agent_01h9krwprkeee8fzqspvwy6nq8
+                  to:
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    channel: whatsapp
+              Example Request 4 - Start a comms (push, APN) verification to a recipient:
+                value:
+                  to:
+                    address: 00fc13adff785122b4ad28809a3420982341241421348097878e577c991de8f0
+                    channel: apn
+                  content:
+                    title: Verify your identity
+                    text: Are you logging in to Cool Company?
+                    channel_passthrough:
+                      - channel: apn
+                        data:
+                          aps:
+                            alert:
+                              title: Verify your identity
+                          custom_meta:
+                            location: Seattle, WA
+                            property: Cool Console
+                            time: '15:25'
+                            user: stlemon
+                    click_action:
+                      activity: verify_modal_prompt
+                  processing_options:
+                    push_notifications:
+                      priority: high
+              Example Request 5 - Start a factor (TOTP) verification to a Contact:
+                value:
+                  to:
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    channel: totp
+              Example Request 6 - Start a factor (by id) verification to a Contact:
+                value:
+                  to:
+                    factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+              Example Request 7 - Start a comms (SNA) verification to a Contact:
+                value:
+                  to:
+                    address: '+37259000000'
+                    channel: sna
+              Example Request 8 - Start an (omnichannel) verification to a Contact:
+                value:
+                  to:
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+              Example Request 9 - Start a factor (passkey) verification to a Contact:
+                value:
+                  to:
+                    user_identifier: john.doe
+                  content:
+                    rp_id: example.com
+                    user_verification: preferred
+              Example Request 10 - Start a factor (passkey) verification without specifying Contact information:
+                value:
+                  content:
+                    rp_id: example.com
+                    user_verification: required
+              Example Request 11 - Start a comms (OTP, phone call) verification to a Contact:
+                value:
+                  to:
+                    address: '+37259000000'
+                    channel: phone
+                    otp_type: call
+              Example Request 12 - Start an (omnichannel) verification to a Contact found via a phone number address:
+                value:
+                  to:
+                    find_contact_by:
+                      address: '+37259000000'
+                      channel: phone
+              Example Request 13 - Start an (omnichannel) verification to a Contact found via a user identifier:
+                value:
+                  to:
+                    find_contact_by:
+                      user_identifier: john.doe
+              Example Request 14 - Start an (omnichannel) verification to a Contact found via user identifier & phone number:
+                value:
+                  to:
+                    find_contact_by:
+                      address: '+37259000000'
+                      channel: phone
+                      user_identifier: john.doe
+    get:
+      summary: List Verifications
+      operationId: list-verifications
+      description: This operation fetches a paginated list of Verifications.
+      parameters:
+        - in: query
+          name: status
+          description: Filter to Verifications that match a specific status.
+          schema:
+            $ref: '#/components/schemas/VerificationStatus'
+        - in: query
+          name: factor_id
+          description: Filter to Verifications that match a specific factor.
+          schema:
+            $ref: '#/components/schemas/FactorId'
+        - in: query
+          name: factor_type
+          description: Filter to Verifications that match a specific recipient factor type.
+          schema:
+            $ref: '#/components/schemas/FactorType'
+        - in: query
+          name: contact_id
+          description: Filter to Verifications for a specific Contact.
+          schema:
+            $ref: '#/components/schemas/ContactId'
+        - in: query
+          name: user_identifier
+          description: Filter to Verifications for a specific `user_identifier`.
+          schema:
+            type: string
+        - in: query
+          name: channel
+          description: Filter to Verifications that match a specific channel.
+          schema:
+            $ref: '#/components/schemas/CommunicationChannel'
+        - in: query
+          name: start_date
+          description: Filter to Verifications created after the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: end_date
+          description: Filter to Verifications created before the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: page_size
+          description: The number of resources to return in a page.
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - in: query
+          name: page_token
+          description: The token to retrieve the next page of results.
+          schema:
+            $ref: '#/components/schemas/PageToken'
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ListVerificationsResponse
+                type: object
+                properties:
+                  verifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Verification'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationMetadata'
+              examples:
+                Example 1 - List first page of Verifications:
+                  value:
+                    verifications:
+                      - id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                        to:
+                          channel: email
+                          address: johndoe@coolcompany.com
+                          contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                          user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                        status: pending
+                        related:
+                          - name: email
+                            id: comms_email_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Emails/01h9krwprkeee8fzqspvwy6nq8
+                          - name: contact
+                            id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                        tags: {}
+                        created_at: '2023-08-24T14:15:22Z'
+                        updated_at: '2023-08-24T14:15:22Z'
+                        deleted_at: null
+                      - id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                        to:
+                          factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                          channel: passkey
+                          contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                          user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                        status: approved
+                        related:
+                          - name: email
+                            id: comms_email_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Emails/01h9krwprkeee8fzqspvwy6nq8
+                          - name: contact
+                            id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                        tags: {}
+                        created_at: '2023-08-24T14:15:22Z'
+                        updated_at: '2023-08-24T14:16:10Z'
+                        deleted_at: null
+                    pagination:
+                      next: null
+                      self: https://comms.twilio.com/v1/Verifications
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Verifications/Settings:
+    get:
+      summary: Fetch Verification Settings
+      operationId: fetch-verification-settings
+      description: This operation fetches the current Verification settings.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/VerificationsSettings'
+                required:
+                  - fraud_guard_level
+                  - time_to_expire
+                  - time_to_delete
+              examples:
+                Example Response:
+                  value:
+                    fraud_guard_level: basic
+                    time_to_expire: PT10M
+                    time_to_delete: P30D
+        '429':
+          $ref: '#/components/responses/Http429Response'
+    patch:
+      summary: Update Verifications Settings
+      operationId: update-verifications-settings
+      description: This operation partially updates the current Verifications resource collection settings.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationsSettings'
+              examples:
+                Example Response:
+                  value:
+                    fraud_guard_level: standard
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationsSettings'
+            examples:
+              Example Request:
+                value:
+                  fraud_guard_level: standard
+  /Verifications/{verification_id}:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: verification_id
+        in: path
+        required: true
+    get:
+      summary: Fetch a Verification
+      operationId: fetch-single-verification
+      description: This operation fetches a single Verification using its Id.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+              examples:
+                Example 1 - An in-progress Verification over email with OTP code:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      channel: email
+                      address: johndoe@coolcompany.com
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    status: pending
+                    related:
+                      - name: email
+                        id: comms_email_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Emails/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example 2 - A completed, approved Verification using end-user's Passkey factor:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    status: approved
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+    delete:
+      summary: Delete a Verification
+      operationId: delete-verification
+      description: This operation deletes a Verification
+      tags:
+        - Identity Verification
+      responses:
+        '204':
+          description: No Content
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Verifications/{verification_id}/Approve:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: verification_id
+        in: path
+        required: true
+    post:
+      summary: Approve a Verification
+      operationId: approve-verification
+      description: This operation approves a Verification
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+              examples:
+                Example 1 - An approved Verification using end-user's Passkey factor:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    status: approved
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                      - name: factor
+                        id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Factors/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+          description: OK
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Verifications/{verification_id}/Cancel:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: verification_id
+        in: path
+        required: true
+    post:
+      summary: Cancel a Verification
+      operationId: cancel-verification
+      description: This operation cancels a Verification
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+              examples:
+                Example 1 - A Canceled Verification:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    status: canceled
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+          description: OK
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Verifications/Check:
+    post:
+      summary: Check a Verification
+      operationId: check-verification
+      description: This operation checks a Verification
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Verification'
+              examples:
+                Example 1 - A Check on a Verification always returns the updated Verification:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      channel: email
+                      address: johndoe@coolcompany.com
+                      user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    status: pending
+                    related:
+                      - name: email
+                        id: comms_email_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Emails/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example 2 - A failed passkey Check denies the Verification:
+                  value:
+                    id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                    to:
+                      contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                      user_identifier: john.doe
+                      factor_id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                      channel: passkey
+                    status: denied
+                    related:
+                      - name: factor
+                        id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Factors/01h9krwprkeee8fzqspvwy6nq8
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+          description: OK
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: CheckVerificationRequest
+              type: object
+              required:
+                - content
+              properties:
+                verification_id:
+                  $ref: '#/components/schemas/VerificationId'
+                content:
+                  title: VerificationCheckRequestContent
+                  description: The set of properties to check against the Verification, according to the Verification channel or factor.
+                  type: object
+                  oneOf:
+                    - title: VerificationCheckOTP
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          description: The 4-10 character string being verified.
+                        psd2_options:
+                          $ref: '#/components/schemas/VerificationPSD2Options'
+                      required:
+                        - code
+                    - title: VerificationCheckPasskey
+                      allOf:
+                        - $ref: '#/components/schemas/PublicKeyCredential'
+                        - type: object
+                          properties:
+                            response:
+                              $ref: '#/components/schemas/AuthenticatorAssertionResponse'
+                          required:
+                            - response
+            examples:
+              Example 1 - Check a verification with an OTP code:
+                value:
+                  verification_id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                  content:
+                    code: '123456'
+              Example 2 - Check a PSD2 compliant transaction with an OTP code:
+                value:
+                  verification_id: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+                  content:
+                    code: '123456'
+                    psd2_options:
+                      amount: '100.00'
+                      payee: John Doe
+              Example 3 - Check a verification with a passkey:
+                value:
+                  content:
+                    id: 6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ
+                    rawId: eb24a684977aa8650c0ad862aaccf26f839de14e93167d2fdc32f3fb5119acd4
+                    authenticatorAttachment: platform
+                    type: public-key
+                    response:
+                      signature: MEYCIQDDs662ykELzpmxkQaOR6HY5GwO7nX5z7jc7q9GbWZmvwIhAMEm4VBjWKzn60eGF8VtO6uqkRtSQpJvixCEy9Pr6E4o
+                      userHandle: MDFoOWtyd3Bya2VlZThmenFzcHZ3eTZucTg
+                      clientDataJSON: eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiV1VNd05EazRaV05sWXpaaFpXWXdZV1ZpWmpSbU5tSmtaakJrTVRabE9HVXlOdyIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9
+                      authenticatorData: o3mm9u6vuaVeN4wRgDTidR5oL6ufLTCrE9ISVYbOGUcFAAAAAQ
+  /Factors:
+    post:
+      summary: Enroll a Factor
+      operationId: enroll-factor
+      description: This operation enrolls a Factor.
+      tags:
+        - Identity Verification
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factor'
+              examples:
+                Example Response 1 - Enrolled factor:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: 'totp factor #1'
+                    type: totp
+                    status: approved
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: EnrollFactorRequest
+              type: object
+              properties:
+                friendly_name:
+                  type: string
+                  description: |-
+                    A human-readable description of the Factor.
+                    Maximum length is 255 characters.
+                to:
+                  type: object
+                  description: The end user that is enrolling the factor.
+                  oneOf:
+                    - title: ContactIdAddressee
+                      type: object
+                      properties:
+                        contact_id:
+                          $ref: '#/components/schemas/ContactId'
+                      required:
+                        - contact_id
+                    - title: UserIdentifierAddressee
+                      type: object
+                      properties:
+                        user_identifier:
+                          $ref: '#/components/schemas/UserIdentifier'
+                      required:
+                        - user_identifier
+                content:
+                  title: EnrollFactorContent
+                  type: object
+                  description: The configuration options of the Factor according to the Factor type.
+                  oneOf:
+                    - $ref: '#/components/schemas/PasskeyFactorCreationRequest'
+                    - title: EnrollTotpFactorContent
+                      description: The configuration options of a TOTP Factor.
+                      type: object
+                      properties:
+                        alg:
+                          type: string
+                        time_step:
+                          type: integer
+                        code_length:
+                          type: integer
+                        skew:
+                          type: integer
+                      required:
+                        - alg
+                        - time_step
+                        - code_length
+                tags:
+                  $ref: '#/components/schemas/Tags'
+              required:
+                - content
+            examples:
+              Request Example 1 - Enroll a totp Factor:
+                value:
+                  friendly_name: 'totp factor #1'
+                  to:
+                    user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                  content:
+                    alg: SHA1
+                    time_step: 30
+                    code_length: 6
+                    skew: 1
+              Request Example 2 - Enroll a passkey Factor:
+                value:
+                  friendly_name: 'passkey factor #1'
+                  to:
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                  content:
+                    relying_party:
+                      id: example.com
+                      name: Example
+                      origins:
+                        - https://example.com
+                    authenticator_criteria:
+                      authenticator_attachment: platform
+                      discoverable_credentials: preferred
+                      user_verification: preferred
+              Request Example 3 - Enroll a passkey Factor using a Domain:
+                value:
+                  friendly_name: 'passkey factor #2'
+                  to:
+                    user_identifier: john.doe
+                  content:
+                    relying_party:
+                      domain_id: comms_domain_01h9krwprkeee8fzqspvwy6nq8
+    get:
+      summary: List Factors
+      operationId: list-factors
+      description: This operation fetches a paginated list of Factors.
+      tags:
+        - Identity Verification
+      parameters:
+        - in: query
+          name: contact_id
+          description: Filter Factors by Contact Id.
+          schema:
+            $ref: '#/components/schemas/ContactId'
+        - in: query
+          name: user_identifier
+          description: Filter Factors by User Identifier.
+          schema:
+            $ref: '#/components/schemas/UserIdentifier'
+        - in: query
+          name: type
+          description: Filter Factors by type.
+          schema:
+            $ref: '#/components/schemas/FactorType'
+        - in: query
+          name: status
+          description: Filter Factors by status.
+          schema:
+            $ref: '#/components/schemas/FactorStatus'
+        - in: query
+          name: friendly_name
+          description: Filter Factors by friendly name.
+          schema:
+            type: string
+        - in: query
+          name: start_date
+          description: Filter to Factors enrolled after the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: end_date
+          description: Filter to Factors enrolled before the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: sort_by
+          description: Sort Factors by the specified field.
+          schema:
+            type: string
+        - in: query
+          name: page_size
+          description: The number of resources to return in a page.
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - in: query
+          name: page_token
+          description: The token to retrieve the next page of results.
+          schema:
+            $ref: '#/components/schemas/PageToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ListFactorsResponse
+                type: object
+                properties:
+                  factors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Factor'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationMetadata'
+              examples:
+                Example 1 - List factors:
+                  value:
+                    factors:
+                      - id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                        friendly_name: My Factor
+                        user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                        type: totp
+                        status: approved
+                        related:
+                          - name: contact
+                            id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                        tags: {}
+                        created_at: '2023-08-24T14:15:22Z'
+                        updated_at: '2023-08-24T14:15:22Z'
+                        deleted_at: null
+                      - id: comms_factor_01h9krwprkeee8fzqspvwy6nq9
+                        friendly_name: ''
+                        user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                        contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        type: totp
+                        status: approved
+                        related:
+                          - name: contact
+                            id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                        tags: {}
+                        created_at: '2023-08-24T14:15:22Z'
+                        updated_at: '2023-08-24T14:15:22Z'
+                        deleted_at: null
+                    pagination:
+                      next: null
+                      self: https://comms.twilio.com/v1/Factors
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Factors/Approve:
+    post:
+      summary: Approve a Factor
+      operationId: approve-factor
+      description: This operation approves a Factor.
+      tags:
+        - Identity Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                factor_id:
+                  $ref: '#/components/schemas/FactorId'
+                content:
+                  title: FactorApprovalContent
+                  description: The payload required to approve a Factor, depending on the Factor type.
+                  type: object
+                  oneOf:
+                    - title: PasskeyFactorApprovalContent
+                      allOf:
+                        - $ref: '#/components/schemas/PublicKeyCredential'
+                        - type: object
+                          properties:
+                            response:
+                              $ref: '#/components/schemas/AuthenticatorAttestationResponse'
+                          required:
+                            - response
+              required:
+                - content
+            examples:
+              Request Example 1 - Approve passkey Factor:
+                value:
+                  content:
+                    id: 6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ
+                    rawId: eb24a684977aa8650c0ad862aaccf26f839de14e93167d2fdc32f3fb5119acd4
+                    authenticatorAttachment: platform
+                    response:
+                      attestationObject: o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViko3mm9u6vuaVeN4wRgDTidR5oL6ufLTCrE9ISVYbOGUdFAAAAAAAAAAAAAAAAAAAAAAAAAAAAIOskpoSXeqhlDArYYqrM8m-DneFOkxZ9L9wy8_tRGazUpQECAyYgASFYIOP8op-6gZJ1H0wHNLe2k7cgBqaSUR4pdcBqtOHPaYUhIlggsXZWuWfZS-6YpbeU9dsB2UoroACSKXJOrdE_auaUIf4
+                      clientDataJSON: eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiV1VZd05EaGtNV0UzWldNellUSmhOamszTURBMU9XTXlOelkyWW1Kak4yVXdaZyIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9
+                      transports:
+                        - internal
+                    type: public-key
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factor'
+              examples:
+                Example 1 - An approved Factor using end-user's Passkey factor:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: My Factor
+                    type: passkey
+                    status: approved
+                    user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    content:
+                      relying_party:
+                        id: example.com
+                        name: Example
+                        origins:
+                          - https://example.com
+                      authenticator_criteria:
+                        authenticator_attachment: platform
+                        discoverable_credentials: preferred
+                        user_verification: preferred
+                      credential:
+                        credential_id: 6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ
+                        credential_public_key: pQECAyYgASFYIOP8op-6gZJ1H0wHNLe2k7cgBqaSUR4pdcBqtOHPaYUhIlggsXZWuWfZS-6YpbeU9dsB2UoroACSKXJOrdE_auaUIf4
+                        transports:
+                          - internal
+                        flags:
+                          - user-present
+                          - user-verified
+                        authenticator_metadata:
+                          AAGUID: 00000000-0000-0000-0000-000000000000
+                          sign_count: 0
+                          clone_warning: false
+                          authenticator_attachment: platform
+                    tags: {}
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+                Example 2 - A failed attempt to approve a Factor using a passkey will cancel Factor enrollment:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: My Factor
+                    type: passkey
+                    status: canceled
+                    user_identifier: john.doe
+                    content:
+                      relying_party:
+                        id: example.com
+                        name: Example
+                        origins:
+                          - https://example.com
+                      authenticator_criteria:
+                        authenticator_attachment: platform
+                        discoverable_credentials: preferred
+                        user_verification: preferred
+                    tags: {}
+                    related: []
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Factors/{factor_id}:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: factor_id
+        in: path
+        required: true
+    patch:
+      summary: Update a Factor
+      operationId: update-factor
+      description: This operation partially updates a Factor.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factor'
+              examples:
+                Example 1 - Update factor friendly name:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: My Factor
+                    type: totp
+                    status: approved
+                    user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UpdateFactorRequest
+              type: object
+              properties:
+                friendly_name:
+                  type: string
+                  description: |-
+                    A human-readable description of the Factor.
+                    Maximum length is 255 characters.
+    get:
+      summary: Fetch a Factor
+      operationId: fetch-single-factor
+      description: This operation fetches a single Factor using its Id.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factor'
+              examples:
+                Example Response 1 - Fetch a totp Factor:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: My Factor
+                    type: totp
+                    user_identifier: 770fb34b448d08f2ddfaf340332a5837
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    status: approved
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+                Example Response 2 - Fetch a Passkey Factor:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: Passkey Factor
+                    type: passkey
+                    contact_id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    status: approved
+                    related:
+                      - name: contact
+                        id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        uri: /Contacts/01h9krwprkeee8fzqspvwy6nq8
+                    tags: {}
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:15:22Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+    delete:
+      summary: Delete a Factor
+      operationId: delete-factor
+      description: This operation deletes a Factor.
+      tags:
+        - Identity Verification
+      responses:
+        '202':
+          $ref: '#/components/responses/Http202Response'
+        '204':
+          description: No Content
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Factors/{factor_id}/Cancel:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: factor_id
+        in: path
+        required: true
+    post:
+      summary: Cancel a Factor enrollment
+      operationId: cancel-factor
+      description: This operation cancels the enrollment of a Factor.
+      tags:
+        - Identity Verification
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factor'
+              examples:
+                Example 1 - A canceled passkey Factor:
+                  value:
+                    id: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+                    friendly_name: TouchID
+                    type: passkey
+                    status: canceled
+                    user_identifier: john.doe
+                    content:
+                      relying_party:
+                        id: example.com
+                        name: Example
+                        origins:
+                          - https://example.com
+                      authenticator_criteria:
+                        authenticator_attachment: platform
+                        discoverable_credentials: preferred
+                        user_verification: preferred
+                    tags: {}
+                    related: []
+                    created_at: '2023-08-24T14:15:22Z'
+                    updated_at: '2023-08-24T14:16:10Z'
+                    deleted_at: null
+        '429':
+          $ref: '#/components/responses/Http429Response'
+components:
+  securitySchemes:
+    account_id_auth_token:
+      type: http
+      scheme: basic
+  schemas:
+    VerificationStatus:
+      title: VerificationStatus
+      type: string
+      description: |-
+        The status of the Verification.
+        - `pending` : The Verification session is pending (no outcome yet).
+        - `canceled`: The Verification session was canceled.
+        - `approved`: The Verification check was successful (eg. code was valid).
+        - `expired`:  The Verification session time was expired.
+        - `denied`:   The Verification session was denied.
+      enum:
+        - pending
+        - canceled
+        - approved
+        - expired
+        - denied
+    FactorId:
+      description: A reference to a Factor.
+      title: FactorId
+      type: string
+      pattern: ^comms_factor_[a-z0-9]{26,34}$
+      minLength: 39
+      maxLength: 47
+      example: comms_factor_01h9krwprkeee8fzqspvwy6nq8
+    FactorType:
+      title: FactorType
+      type: string
+      description: The type of Verification Factor.
+      enum:
+        - totp
+        - passkey
+    ContactId:
+      description: A reference to a Contact.
+      title: ContactId
+      type: string
+      pattern: ^comms_contact_[a-z0-9]{26,34}$
+      minLength: 40
+      maxLength: 48
+      example: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+    CommunicationChannel:
+      description: |-
+        The medium which a unit of communication is transmitted through.
+        These are differentiated by a mix of transmission protocol, network controller/owner, endpoint and address model,
+        as well as the model for content of the atomic unit of communication itself.
+      title: CommunicationChannel
+      type: string
+      enum:
+        - email
+        - phone
+        - whatsapp
+        - fbm
+        - gbm
+        - chat
+        - push
+        - apn
+        - fcm
+    PageSize:
+      description: Total number of items returned in a single page, the minimum is 1 and maximum is 1000. Default is 50.
+      title: PageSize
+      type: integer
+      minimum: 1
+      maximum: 1000
+      default: 50
+      example: 50
+    PageToken:
+      description: The token that identifies the page of resources to fetch.
+      title: PageToken
+      type: string
+    VerificationId:
+      description: A reference to a Verification.
+      title: VerificationId
+      type: string
+      pattern: ^comms_verification_[a-z0-9]{26,34}$
+      minLength: 45
+      maxLength: 53
+      example: comms_verification_01h9krwprkeee8fzqspvwy6nq8
+    UserIdentifier:
+      title: UserIdentifier
+      type: string
+      description: |-
+        A custom string that uniquely identifies a person or end-user.
+        For example, this can be the end-user's username or a UUID4 string or an SHA256 hash.
+      minLength: 1
+      maxLength: 32
+    VerificationChannel:
+      description: |-
+        The medium through which to verify a contact, address or user identifier.
+        These are differentiated by a mix of transmission protocol, network controller/owner, endpoint and address model,
+        as well as the model for content of the atomic unit of verification itself.
+      title: VerificationChannel
+      type: string
+      enum:
+        - email
+        - phone
+        - whatsapp
+        - fbm
+        - gbm
+        - chat
+        - apn
+        - fcm
+        - sna
+        - totp
+        - passkey
+    OTPType:
+      description: The medium through which to verify a contact, address or user identifier via OTP (one-time password).
+      title: OTPType
+      type: string
+      enum:
+        - text
+        - call
+      default: text
+    VerificationSNANextStep:
+      title: VerificationSNANextStep
+      type: object
+      properties:
+        silent_network_auth_url:
+          type:
+            - string
+            - 'null'
+          format: uri
+          description: For Silent Network Authentication. The URL to be invoked to verify the address (phone number).
+      required:
+        - silent_network_auth_url
+    Base64UrlString:
+      title: Base64UrlString
+      type: string
+      contentEncoding: base64
+      description: A [base64url](https://base64.guru/standards/base64url)-encoded string.
+      additionalProperties: false
+    PublicKeyType:
+      title: PublicKeyType
+      description: |-
+        The valid credential types supported by the API.
+        The values of this enumeration are used for versioning the `AuthenticatorAssertion` and `AuthenticatorAttestation` structures according to the type of the authenticator.
+      type: string
+      enum:
+        - public-key
+      default: public-key
+    TransportTypes:
+      title: TransportTypes
+      description: |-
+        An array of strings providing hints as to the methods the client could use to communicate with the relevant 
+        authenticator of the public key credential to retrieve.
+      type: array
+      items:
+        type: string
+        enum:
+          - usb
+          - nfc
+          - ble
+          - smart-card
+          - internal
+          - hybrid
+    AllowCredentials:
+      type: array
+      description: |-
+        An array of objects defining a restricted list of the acceptable credentials for retrieval.
+
+        If `allowCredentials` is omitted, it will default to an empty array, meaning that any credential is potentially acceptable for retrieval without the relying party first providing an ID.
+        An empty array enables the use of discoverable credentials on the client.
+      items:
+        type: object
+        properties:
+          id:
+            description: The ID of the public key credential to retrieve. This value is mirrored by the `rawId` property of the `PublicKeyCredential` object
+            $ref: '#/components/schemas/Base64UrlString'
+          type:
+            $ref: '#/components/schemas/PublicKeyType'
+          transports:
+            $ref: '#/components/schemas/TransportTypes'
+    UserVerification:
+      title: UserVerification
+      description: |-
+        A string that specifies the extent to which the relying party desires to authenticate the user to the client,
+        and the extent to which the client should request that the user be authenticated.
+      type: string
+      enum:
+        - required
+        - preferred
+        - discouraged
+    VerificationPasskeyNextStep:
+      title: VerificationPasskeyNextStep
+      type: object
+      description: |-
+        The public key credential options for the next step in the passkey verification process.
+        This payload must be passed to the `navigator.credentials.get()` method to initialize client-side passkey authentication.
+      properties:
+        publicKey:
+          type: object
+          properties:
+            challenge:
+              description: |-
+                A cryptographic challenge created by the replying party server.
+                This value must be signed by the authenticator as part of the challenge verification flow.
+              type: string
+            rpId:
+              description: The relying party identifier. If omitted, it will default to the current origin's domain.
+              type: string
+            allowCredentials:
+              $ref: '#/components/schemas/AllowCredentials'
+            timeout:
+              type: integer
+              format: int64
+              description: The time in milliseconds that the challenge is valid for.
+            userVerification:
+              $ref: '#/components/schemas/UserVerification'
+              default: preferred
+            extensions:
+              type: object
+              description: |-
+                An object containing properties representing the input values for any requested [Webauthn extensions](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/WebAuthn_extensions). 
+                These extensions are used to specific additional processing by the client or authenticator during the authentication process.
+              additionalProperties: true
+          required:
+            - challenge
+    RelatedResource:
+      title: RelatedResource
+      type: object
+      description: A reference to a related resource.
+      properties:
+        name:
+          type: string
+          description: The name of the related resource.
+          enum:
+            - email
+            - message
+            - push_notification
+            - conversation
+            - verification
+            - factor
+            - contact
+            - audience
+            - media
+            - agent
+            - agent_pool
+            - subscription
+            - sink
+            - operation
+            - address_lookup
+        id:
+          type: string
+          description: The ID of the related resource.
+        uri:
+          type: string
+          description: The path to the related resource.
+    Tags:
+      title: Tags
+      type: object
+      description: |-
+        Custom metadata in the form of key-value pairs.
+        Maximum size of a tag key is 128 characters.
+        Maximum size of a tag value is 128 characters.
+        There can be a maximum of 10 key-value pairs.
+      additionalProperties:
+        type: string
+    Verification:
+      title: Verification
+      type: object
+      description: A Verification represents the unit of work of verifying a person is in control of a channel address.
+      properties:
+        id:
+          $ref: '#/components/schemas/VerificationId'
+        to:
+          type: object
+          title: VerificationRecipient
+          description: The recipient of the verification request.
+          properties:
+            contact_id:
+              $ref: '#/components/schemas/ContactId'
+            user_identifier:
+              $ref: '#/components/schemas/UserIdentifier'
+            address:
+              description: The identifier within a channel address space for an verification end user (e.g. phone number)
+              type: string
+            factor_id:
+              $ref: '#/components/schemas/FactorId'
+            channel:
+              $ref: '#/components/schemas/VerificationChannel'
+            otp_type:
+              $ref: '#/components/schemas/OTPType'
+            address_extension:
+              type: number
+              description: For phone number extensions only.
+            device_ip:
+              type: string
+              description: |-
+                The IP address of the client's device. 
+                If provided, it has to be a valid IPv4 or IPv6 address.
+          required:
+            - channel
+        status:
+          $ref: '#/components/schemas/VerificationStatus'
+        next_step:
+          title: NextVerificationStep
+          type: object
+          description: The input required for the next step in the verification process.
+          oneOf:
+            - $ref: '#/components/schemas/VerificationSNANextStep'
+            - $ref: '#/components/schemas/VerificationPasskeyNextStep'
+        related:
+          description: A list of resources that are associated with the Verification.
+          type: array
+          items:
+            $ref: '#/components/schemas/RelatedResource'
+        tags:
+          $ref: '#/components/schemas/Tags'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type:
+            - string
+            - 'null'
+          format: date-time
+      required:
+        - id
+        - status
+        - related
+        - tags
+        - created_at
+        - updated_at
+        - deleted_at
+    PaginationMetadata:
+      title: PaginationMetadata
+      type: object
+      properties:
+        next:
+          description: URL to the next page of results using a token.
+          type:
+            - string
+            - 'null'
+        self:
+          description: URL to the current page of results using a token.
+          type: string
+    TwilioError:
+      title: TwilioError
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        more_info:
+          type: string
+          format: uri
+      description: A generic error object communicating client and server side API errors.
+      example:
+        code: 21614
+        message: The address specified in the request is not a valid phone number.
+        more_info: https://www.twilio.com/docs/api/errors/21614
+    MessageChannel:
+      description: The channels available for Message entity.
+      title: MessageChannel
+      type: string
+      enum:
+        - phone
+        - whatsapp
+        - fbm
+        - gbm
+        - chat
+      example: phone
+    MessageAddressee:
+      description: A messaging address and channel
+      type: object
+      properties:
+        address:
+          type: string
+          description: The identifier within a channel address space for an actor (e.g. phone number)
+        channel:
+          $ref: '#/components/schemas/MessageChannel'
+      required:
+        - address
+        - channel
+    EmailAddressee:
+      description: An email address and associated name
+      type: object
+      properties:
+        address:
+          type: string
+          description: The email address of the person or entity.
+        name:
+          type: string
+          description: The name of the person or entity associated with the email address.
+      required:
+        - address
+    AgentId:
+      description: A reference to an Agent.
+      title: AgentId
+      type: string
+      pattern: ^comms_agent_[a-z0-9]{26,34}$
+      minLength: 38
+      maxLength: 46
+      example: comms_agent_01h9krwprkeee8fzqspvwy6nq8
+    AgentAddressee:
+      description: A reference to an Agent.
+      title: AgentAddressee
+      type: object
+      properties:
+        agent_id:
+          $ref: '#/components/schemas/AgentId'
+      required:
+        - agent_id
+    AgentPoolId:
+      description: A reference to an AgentPool.
+      title: AgentPoolId
+      type: string
+      pattern: ^comms_agentpool_[a-z0-9]{26,34}$
+      minLength: 42
+      maxLength: 50
+      example: comms_agentpool_01h9krwprkeee8fzqspvwy6nq8
+    AgentPoolAddressee:
+      title: AgentPoolAddressee
+      description: A reference to an AgentPool.
+      type: object
+      properties:
+        agent_pool_id:
+          $ref: '#/components/schemas/AgentPoolId'
+      required:
+        - agent_pool_id
+    MediaId:
+      description: A reference to a Media.
+      title: MediaId
+      type: string
+      pattern: ^comms_media_[a-z0-9]{26,34}$
+      minLength: 38
+      maxLength: 46
+      example: comms_media_01h9krwprkeee8fzqspvwy6nq8
+    CommunicationAddress:
+      title: CommunicationAddress
+      type: object
+      properties:
+        address:
+          description: The identifier within a channel address space for an actor (e.g. phone number)
+          type: string
+        channel:
+          $ref: '#/components/schemas/CommunicationChannel'
+      required:
+        - address
+        - channel
+    ContactAddressee:
+      description: A reference to a Contact.
+      title: ContactAddressee
+      type: object
+      properties:
+        contact_id:
+          $ref: '#/components/schemas/ContactId'
+      required:
+        - contact_id
+    MediaAuthor:
+      type: object
+      title: MediaAuthor
+      description: The person or legal entity that uploaded the media file.
+      oneOf:
+        - $ref: '#/components/schemas/CommunicationAddress'
+        - $ref: '#/components/schemas/AgentAddressee'
+        - $ref: '#/components/schemas/ContactAddressee'
+    MediaUrl:
+      title: MediaUrl
+      type: object
+      properties:
+        media_url:
+          type: string
+          description: The publicly accessible URL of the media file to copy.
+          format: uri
+        tags:
+          $ref: '#/components/schemas/Tags'
+        created_by:
+          description: The person or legal entity that uploaded the media file.
+          $ref: '#/components/schemas/MediaAuthor'
+      required:
+        - media_url
+    MimeType:
+      title: MimeType
+      type: string
+      example: text/plain
+      default: text/plain
+      description: A MIME type (or "media type") identifies the type of data of an object.
+    MediaInline:
+      title: MediaInline
+      type: object
+      properties:
+        data:
+          description: The base64-encoded media file content.
+          type: string
+          format: byte
+        file_name:
+          description: The name of the media file.
+          type: string
+        file_size:
+          description: The size of the media file in bytes.
+          type: number
+        mime_type:
+          $ref: '#/components/schemas/MimeType'
+        tags:
+          $ref: '#/components/schemas/Tags'
+        created_by:
+          description: The person or legal entity that uploaded the media file.
+          $ref: '#/components/schemas/MediaAuthor'
+      required:
+        - data
+    ContentMediaInput:
+      title: ContentMediaInput
+      type: array
+      description: A list of Media objects (images, etc.) to include in the message.
+      items:
+        title: ContentMediaInputItem
+        oneOf:
+          - title: ContentMediaInputMediaId
+            type: object
+            properties:
+              media_id:
+                $ref: '#/components/schemas/MediaId'
+            required:
+              - media_id
+          - $ref: '#/components/schemas/MediaUrl'
+          - $ref: '#/components/schemas/MediaInline'
+    MessagesRequestContent:
+      type: object
+      title: MessagesRequestContent
+      properties:
+        text:
+          type: string
+          description: |-
+            A simple content string (formerly called 'body').
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        media:
+          $ref: '#/components/schemas/ContentMediaInput'
+        default_variables:
+          type: object
+          description: These are default values that can be declared for use with parameterized content fields including `text` and `body` and `template_id`.
+          additionalProperties:
+            type: string
+    ContentLocation:
+      title: ContentLocation
+      description: A Twilio Location content.
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the location.
+        latitude:
+          type: number
+          description: The latitude of the location.
+        longitude:
+          type: number
+          description: The longitude of the location.
+    ContentListPicker:
+      title: ContentListPicker
+      description: A Twilio List Picker content.
+      type: object
+      properties:
+        text:
+          type: string
+          description: A simple text string that is displayed above the List Picker.
+        button_text:
+          type: string
+          description: The text that is displayed on the button that opens the List Picker.
+        list_items:
+          description: A list of items that are displayed in the List Picker.
+          type: array
+          items:
+            title: ContentListPickerItem
+            description: A list item in a Twilio List Picker content.
+            type: object
+            properties:
+              id:
+                type: string
+                description: A unique identifier for the list item.  This is used to identify the item that was picked.
+              title:
+                type: string
+                description: This is the text displayed for the item in the List Picker.
+              subtitle:
+                type: string
+                description: The text displayed underneath the title for the item in the List Picker.
+    ContentQuickReply:
+      title: ContentQuickReply
+      description: A Twilio Quick Reply content object.
+      type: object
+      properties:
+        text:
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+          type: string
+        reply_items:
+          type: array
+          items:
+            title: ContentQuickReplyItems
+            type: object
+            properties:
+              id:
+                type: string
+                description: A unique identifier for the reply item.  This is used to identify the quick reply item that was picked.
+              title:
+                type: string
+                description: The title of the reply item.  This is the displayed text for the item in the list of replies.
+    ContentActionItemURL:
+      title: ContentCallToActionItemURL
+      description: A Call To Action action item with a URL.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - url
+        title:
+          type: string
+          description: The title to display for the action item.
+        url:
+          type: string
+          description: The URL to open when the action is triggered.
+      required:
+        - type
+        - title
+        - url
+    ContentActionItemPhoneNumber:
+      title: ContentCallToActionItemPhoneNumber
+      description: A Call To Action action item with a URL.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - phone_number
+        title:
+          type: string
+          description: The title to display for the action item.
+        phone_number:
+          type: string
+          description: The phone number to call when the action is triggered.
+      required:
+        - type
+        - title
+        - phone_number
+    ContentCallToAction:
+      title: ContentCallToAction
+      description: A Twilio Call To Action content object.
+      type: object
+      properties:
+        text:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        actions:
+          type: array
+          items:
+            title: ContentCallToActionItem
+            description: A Call To Action action item.
+            oneOf:
+              - $ref: '#/components/schemas/ContentActionItemURL'
+              - $ref: '#/components/schemas/ContentActionItemPhoneNumber'
+            discriminator:
+              propertyName: type
+              mapping:
+                url: '#/components/schemas/ContentActionItemURL'
+                phone_number: '#/components/schemas/ContentActionItemPhoneNumber'
+      required:
+        - text
+        - actions
+    ContentCard:
+      title: ContentCard
+      description: A Twilio Card content object.
+      type: object
+      properties:
+        title:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        subtitle:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        actions:
+          type: array
+          items:
+            title: ContentCardActionItem
+            description: A Card action item.
+            oneOf:
+              - $ref: '#/components/schemas/ContentActionItemURL'
+              - $ref: '#/components/schemas/ContentActionItemPhoneNumber'
+            discriminator:
+              propertyName: type
+              mapping:
+                url: '#/components/schemas/ContentActionItemURL'
+                phone_number: '#/components/schemas/ContentActionItemPhoneNumber'
+      required:
+        - title
+    ContentCardWhatsApp:
+      title: ContentCardWhatsApp
+      description: A WhatsApp Card content object.
+      type: object
+      properties:
+        title:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        text:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        footer:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        actions:
+          type: array
+          items:
+            title: ContentCardActionItem
+            description: A Card action item.
+            oneOf:
+              - $ref: '#/components/schemas/ContentActionItemURL'
+              - $ref: '#/components/schemas/ContentActionItemPhoneNumber'
+            discriminator:
+              propertyName: type
+              mapping:
+                url: '#/components/schemas/ContentActionItemURL'
+                phone_number: '#/components/schemas/ContentActionItemPhoneNumber'
+      required:
+        - title
+    MessageContentRich:
+      title: MessageContentRich
+      description: Rich Content for Messages.
+      type: object
+      properties:
+        location:
+          title: MessageContentLocation
+          description: A Location content object.
+          oneOf:
+            - $ref: '#/components/schemas/ContentLocation'
+        list_picker:
+          title: MessageContentListPicker
+          description: A List Picker content object.
+          oneOf:
+            - $ref: '#/components/schemas/ContentListPicker'
+        quick_reply:
+          title: MessageContentQuickReply
+          description: A Quick Reply content object.
+          oneOf:
+            - $ref: '#/components/schemas/ContentQuickReply'
+        call_to_action:
+          title: MessageContentCallToAction
+          description: A Call-To-Action content object.
+          oneOf:
+            - $ref: '#/components/schemas/ContentCallToAction'
+        card:
+          title: MessageContentCard
+          description: A Card content object.
+          oneOf:
+            - $ref: '#/components/schemas/ContentCard'
+            - $ref: '#/components/schemas/ContentCardWhatsApp'
+    MessagesRequestContentRich:
+      title: MessagesRequestContentRich
+      description: The content of the Message -  including text, media, Location, List Picker,  Quick Reply, Call-To-Action, and Card.
+      allOf:
+        - $ref: '#/components/schemas/MessagesRequestContent'
+        - $ref: '#/components/schemas/MessageContentRich'
+    PushNotificationClickAction:
+      title: PushNotificationClickAction
+      description: The activity to launch or URL to open upon clicking the push notification
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL to open for the push notification.
+          format: uri
+        activity:
+          type: string
+          description: The activity to launch for the push notification.
+    PushNotificationChannel:
+      description: The channels available for PushNotification entity.
+      title: PushNotificationChannel
+      type: string
+      enum:
+        - apn
+        - fcm
+    ContentChannelPassthrough:
+      title: ContentChannelPassthrough
+      type: object
+      properties:
+        data:
+          type: object
+      description: This represents channel-specific properties passed into the message, email or push notification.
+    PushNotificationContentBase:
+      type: object
+      title: PushNotificationContentBase
+      properties:
+        title:
+          type: string
+          description: The title of the push notification.
+        text:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        click_action:
+          $ref: '#/components/schemas/PushNotificationClickAction'
+        channel_passthrough:
+          type: array
+          description: A list of objects that contain channel-specific properties passed into the push notification(s).'
+          items:
+            title: PushNotificationContentChannelPassthrough
+            allOf:
+              - type: object
+                properties:
+                  channel:
+                    $ref: '#/components/schemas/PushNotificationChannel'
+              - $ref: '#/components/schemas/ContentChannelPassthrough'
+        icon:
+          type: string
+          description: The code of the icon to display for the push notification.
+        default_variables:
+          type: object
+          description: |-
+            These are default values that can be declared for use with parameterized content fields
+             including `text` and `title`.
+          additionalProperties:
+            type: string
+      additionalProperties: false
+    PushNotificationsRequestContent:
+      title: PushNotificationsRequestContent
+      allOf:
+        - $ref: '#/components/schemas/PushNotificationContentBase'
+        - type: object
+          properties:
+            images:
+              $ref: '#/components/schemas/ContentMediaInput'
+    EmailContentBase:
+      type: object
+      title: EmailContentBase
+      properties:
+        subject:
+          type: string
+          description: |-
+            The subject of the email.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        text:
+          type: string
+          description: |-
+            The plain-text email body (`text/plain` MIME).
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        html:
+          type: string
+          description: |-
+            The HTML email body (`text/html` MIME).
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        default_variables:
+          type: object
+          description: |-
+            These are default values that can be declared for use with parameterized content fields
+             including `subject`, `text`, and `html`.
+          additionalProperties:
+            type: string
+    EmailsRequestContent:
+      title: EmailsRequestContent
+      allOf:
+        - $ref: '#/components/schemas/EmailContentBase'
+        - type: object
+          properties:
+            attachments:
+              $ref: '#/components/schemas/ContentMediaInput'
+    CommunicationsRequestContent:
+      title: CommunicationsRequestContent
+      type: object
+      properties:
+        text:
+          type: string
+          description: |-
+            A simple content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        html:
+          type: string
+          description: |-
+            An HTML content string.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization and `default_variables` for defaults.
+        title:
+          type: string
+          description: |-
+            For Emails, this is the subject of the email. For Push Notifications, this is the title of the push notification. For Messages, this is not used.
+            The string can be parameterized and supplied with `variables` for per-recipient personalization
+             and `default_variables` for defaults.
+        media:
+          $ref: '#/components/schemas/ContentMediaInput'
+        default_variables:
+          type: object
+          description: These are default values that can be declared for use with parameterized content field values.
+          additionalProperties:
+            type: string
+    PasskeyRequestContent:
+      type: object
+      title: PasskeyRequestContent
+      description: Start the process of verifying a contact's identity using a passkey.
+      properties:
+        rp_id:
+          description: The relying party identifier.
+          type: string
+        user_verification:
+          $ref: '#/components/schemas/UserVerification'
+      required:
+        - rpId
+    ScheduleSendAt:
+      title: ScheduleSendAt
+      description: A schedule is a set of rules that define when a communication should be sent to a recipient.
+      type: object
+      properties:
+        send_at:
+          description: The date and time to send the communication.
+          type: string
+          format: date-time
+      required:
+        - send_at
+    ScheduleWindow:
+      title: ScheduleWindow
+      description: A a Schedule Window defines a `start` and `end` time to form a sending window over which the communication can be sent to the recipient(s).
+      type: object
+      properties:
+        start:
+          description: 'The date and time to send the communication. Use along with `start` to define a sending window. '
+          type: string
+          format: date-time
+        end:
+          description: Use along with `start` to define a sending window.  The communication will be sent at an optimized send time within this window.
+          type: string
+          format: date-time
+      required:
+        - start
+        - end
+    MessagesProcessingOptions:
+      title: MessagesProcessingOptions
+      description: Optional processing directives for Messages
+      type: object
+      properties:
+        smart_encoding:
+          type: boolean
+          description: Set to `false` to disable Smart Encoding.
+          default: true
+        media_converter:
+          description: Set to `false` to disable fallback of MMS when recipient address does not support Media.
+          type: boolean
+          default: true
+        shorten_urls:
+          type: boolean
+          default: true
+          description: Set to `false` to disable Link Shortening.
+    EmailsProcessingOptions:
+      title: EmailsProcessingOptions
+      description: Optional processing directives for Emails
+      type: object
+      properties:
+        reply_to:
+          title: ProcessingOptionsEmailsReplyTo
+          type: array
+          items:
+            title: ProcessingOptionsEmailsReplyToRecipient
+            anyOf:
+              - $ref: '#/components/schemas/EmailAddressee'
+              - $ref: '#/components/schemas/ContactAddressee'
+        cc:
+          title: ProcessingOptionsEmailsCC
+          type: array
+          description: |-
+            A list of recipients to carbon-copy ('cc') emails to. 
+            Recipients will have visibility of eachother's addresses.
+          maxItems: 50
+          items:
+            title: ProcessingOptionsEmailsCCRecipient
+            anyOf:
+              - $ref: '#/components/schemas/EmailAddressee'
+              - $ref: '#/components/schemas/ContactAddressee'
+        bcc:
+          title: ProcessingOptionsEmailsBCC
+          type: array
+          description: |-
+            A list of recipients to blindly carbon-copy ('cc') emails to. 
+            Recipients will NOT have visibility of eachother's addresses.
+          maxItems: 50
+          items:
+            title: ProcessingOptionsEmailsBCCRecipient
+            anyOf:
+              - $ref: '#/components/schemas/EmailAddressee'
+              - $ref: '#/components/schemas/ContactAddressee'
+    PushNotificationPriority:
+      title: PushNotificationPriority
+      description: The priority of the Push Notification. A value of "low" reduces the client app battery consumption. A value of "high" sends the notification immediately and can wake up a sleeping device.
+      type: string
+      enum:
+        - high
+        - low
+      default: high
+    PushNotificationSound:
+      title: PushNotificationSound
+      type:
+        - string
+        - 'null'
+      description: The name of the sound to be played for the push notification.
+    PushNotificationTimeToDeliver:
+      title: PushNotificationTimeToDeliver
+      description: How long the notification delivery is attempted.
+      oneOf:
+        - type: string
+          title: PushNotificationTimeToDeliverISO8601
+          anyOf:
+            - title: Duration
+              format: duration
+              description: Time to deliver the push notification represented in ISO8601 duration format.
+              example: PT10M
+            - title: Datetime
+              format: date-time
+              description: The push notification delivery deadline in ISO8601 format with time zone.
+              example: '2023-09-03T22:35:07Z'
+        - type: number
+          title: PushNotificationTimeToDeliverSeconds
+          description: Time to deliver the push notification, in seconds.
+          minimum: 0
+          maximum: 2419200
+          example: 600
+    PushNotificationsProcessingOptions:
+      title: PushNotificationsProcessingOptions
+      description: Optional processing directives for Push Notifications
+      type: object
+      properties:
+        priority:
+          $ref: '#/components/schemas/PushNotificationPriority'
+        sound:
+          $ref: '#/components/schemas/PushNotificationSound'
+        time_to_deliver:
+          $ref: '#/components/schemas/PushNotificationTimeToDeliver'
+    ProcessingOptions:
+      title: ProcessingOptions
+      description: Optional processing directives, specific to the related resources to be created.
+      type: object
+      properties:
+        schedule:
+          title: ProcessingOptionsSchedule
+          description: Schedule defines when the Communication(s) should be sent to the recipient(s).
+          oneOf:
+            - $ref: '#/components/schemas/ScheduleSendAt'
+            - $ref: '#/components/schemas/ScheduleWindow'
+        use_preference:
+          type: object
+          title: ProcessingOptionsUsePreference
+          description: |-
+            Specify the `Preference` that pertains to the content of the Communication
+            - For each recipient, Twilio will reference the Contact's `Preference` to
+              determine the available channels to use to send the Communication --
+              and whether or not to suppress the Communication altogether.
+
+            - Use the `Preferences` API to create and manage Preferences.
+        messages:
+          $ref: '#/components/schemas/MessagesProcessingOptions'
+        emails:
+          $ref: '#/components/schemas/EmailsProcessingOptions'
+        push_notifications:
+          $ref: '#/components/schemas/PushNotificationsProcessingOptions'
+    VerificationsSettings:
+      title: VerificationsSettings
+      type: object
+      properties:
+        fraud_guard_level:
+          type: string
+          description: |-
+            The level of fraud protection to apply to the Verification.
+            - `none` - No fraud protection is applied.
+            - `basic` - Cautious fraud protection is applied.
+            - `standard` - Standard fraud protection is applied.
+            - `maximum` - Maximum fraud protection is applied.
+          enum:
+            - none
+            - basic
+            - standard
+            - maximum
+          default: standard
+        time_to_expire:
+          type: string
+          title: Duration
+          format: duration
+          description: The duration of time, in ISO 8601 duration format, after which Verifications automatically expire.
+          example: PT10M
+          default: PT10M
+        time_to_delete:
+          type: string
+          title: Duration
+          format: duration
+          description: The duration of time, in ISO 8601 duration format, after which Verifications are automatically deleted.
+          example: P30D
+          default: P30D
+    Identifier:
+      description: A 128-bit UUIDv7 encoded as a 26-character string using a modified base32 encoding. This schema is used for identifier path params as the type prefix ('<type>_') is redundant in URIs.
+      type: string
+      pattern: ^[a-z0-9]{26,34}$
+      minLength: 26
+      maxLength: 34
+      example: 01h9krwprkeee8fzqspvwy6nq8
+    VerificationPSD2Options:
+      title: VerificationPSD2Options
+      type: object
+      description: The PSD2 compliant transaction details.  Only needed when verifying Payment Service Directive 2 transactions.
+      properties:
+        amount:
+          type: string
+          description: The amount of the associated PSD2 compliant transaction. Requires the PSD2 Service flag enabled.
+        payee:
+          type: string
+          description: The payee of the associated PSD2 compliant transaction. Requires the PSD2 Service flag enabled.
+    AuthenticatorAttachment:
+      title: AuthenticatorAttachment
+      description: |-
+        A string that indicates the mechanism by which the WebAuthn implementation is attached to the authenticator at the time the associated 
+        `navigator.credentials.create()` or `navigator.credentials.get()` call completes.
+      type: string
+      enum:
+        - platform
+        - cross-platform
+    PublicKeyCredential:
+      type: object
+      title: PublicKeyCredential
+      description: |-
+        The public key credential created by the authenticator, as specified in
+        [PublicKeyCredential](https://developer.mozilla.org/en-US/docs/Web/API/PublicKeyCredential).
+      properties:
+        id:
+          description: A [base64url](https://base64.guru/standards/base64url) encoded representation of `rawId`.
+          $ref: '#/components/schemas/Base64UrlString'
+        rawId:
+          description: The globally unique identifier for this `PublicKeyCredential`.
+          $ref: '#/components/schemas/Base64UrlString'
+        authenticatorAttachment:
+          $ref: '#/components/schemas/AuthenticatorAttachment'
+        type:
+          $ref: '#/components/schemas/PublicKeyType'
+      required:
+        - id
+        - rawId
+        - authenticatorAttachment
+    CBORString:
+      title: CBORString
+      type: string
+      description: |-
+        A CBOR-encoded string, in 
+        [CTAP2 canonical CBOR encoding form](https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html#ctap2-canonical-cbor-encoding-form).
+      additionalProperties: false
+    AuthenticatorAssertionResponse:
+      title: AuthenticatorAssertionResponse
+      type: object
+      description: The result of a WebAuthn authentication via a `navigator.credentials.get()` request, as specified in [AuthenticatorAttestationResponse](https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse).
+      properties:
+        authenticatorData:
+          $ref: '#/components/schemas/CBORString'
+        clientDataJSON:
+          description: This property contains the JSON-compatible serialization of the data passed from the browser to the authenticator in order to generate this credential.
+          $ref: '#/components/schemas/Base64UrlString'
+        signature:
+          $ref: '#/components/schemas/Base64UrlString'
+          description: |-
+            An assertion signature over `authenticatorData` and `clientDataJSON`.
+            The assertion signature is created with the private key of the key pair that was created during the originating `navigator.credentials.create()` call
+            and verified using the public key of that same key pair.
+        userHandle:
+          type: string
+          description: |-
+            The user handle stored in the authenticator, specified as `user.id` in the options passed to the originating `navigator.credentials.create()` call.
+            This property should contain a base64url-encoded contact ID.
+      required:
+        - authenticatorData
+        - clientDataJSON
+        - signature
+    FactorStatus:
+      title: FactorStatus
+      type: string
+      description: |-
+        The verification status of the Factor.
+
+        - `pending` : The Factor is not yet approved and cannot be used in a
+        Verification session.
+
+        - `canceled`: The Factor verification process was canceled.
+
+        - `approved`: The Factor is approved and can be used in a Verification
+        session.
+
+        - `expired`: The Factor has expired and cannot be used in a Verification
+        session.
+      enum:
+        - pending
+        - canceled
+        - approved
+        - expired
+    RelyingPartyOrigins:
+      title: RelyingPartyOrigins
+      type: array
+      description: List of Relying Party Server Origins or App IDs that are permitted.
+      items:
+        type: string
+    RelyingParty:
+      title: RelyingParty
+      type: object
+      properties:
+        id:
+          type: string
+          description: The relying party identifier. This should generally be the origin without a scheme and port.
+        name:
+          type: string
+          description: The relying party name that the authenticator will show during the registration/authentication process.
+        origins:
+          $ref: '#/components/schemas/RelyingPartyOrigins'
+      required:
+        - id
+    DomainId:
+      title: DomainId
+      description: A reference to a Domain.
+      type: string
+      pattern: ^comms_domain_[a-z0-9]{26,34}$
+      minLength: 39
+      maxLength: 47
+      example: comms_domain_01h9krwprkeee8fzqspvwy6nq8
+    ExpandedAuthenticatorAttachment:
+      title: AuthenticatorAttachment
+      description: |-
+        A string that indicates the mechanism by which the WebAuthn implementation is attached to the authenticator at the time the associated 
+        `navigator.credentials.create()` or `navigator.credentials.get()` call completes.
+      type: string
+      enum:
+        - platform
+        - cross-platform
+        - any
+    ResidentKey:
+      title: ResidentKey
+      description: A string that specifies the extent to which the relying party desires to create a client-side discoverable credential.
+      type: string
+      enum:
+        - required
+        - preferred
+        - discouraged
+    PasskeyFactorCreationRequest:
+      title: PasskeyFactorCreationRequest
+      type: object
+      description: |-
+        The basic information needed to initiate the FIDO2 registration process.
+        This configuration will be used to generate the (PublicKeyCredentialCreationOptions)[https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create#publickey_object_structure] in the response.
+      properties:
+        relying_party:
+          type: object
+          description: The relying party information.
+          oneOf:
+            - $ref: '#/components/schemas/RelyingParty'
+            - title: RelyingPartyDomain
+              type: object
+              properties:
+                domain_id:
+                  $ref: '#/components/schemas/DomainId'
+                origins:
+                  $ref: '#/components/schemas/RelyingPartyOrigins'
+              required:
+                - domain_id
+        authenticator_criteria:
+          type: object
+          description: A set of criteria to guide the selection of an eligible authenticator.
+          properties:
+            authenticator_attachment:
+              description: A flag indicating a requirement to attach only to a certain type of authenticator.
+              $ref: '#/components/schemas/ExpandedAuthenticatorAttachment'
+              default: any
+            discoverable_credentials:
+              $ref: '#/components/schemas/ResidentKey'
+              description: A flag indicating the level of preference for discoverable credentials.
+              default: preferred
+            user_verification:
+              $ref: '#/components/schemas/UserVerification'
+              default: preferred
+              description: Whether user identity verification (via biometrics or PIN) is required.
+      required:
+        - relying_party
+    PasskeyFactorCredentialContent:
+      title: PasskeyFactorCredentialContent
+      type: object
+      description: The properties of the verified passkey credential.
+      properties:
+        credential_id:
+          description: A unique identifier for this credential so that it can be requested for future authentications.
+          $ref: '#/components/schemas/Base64UrlString'
+        credential_public_key:
+          type: string
+          description: A COSE-encoded public key. This public key will be stored on the server associated with a user's account and be used for future authentications.
+          $ref: '#/components/schemas/Base64UrlString'
+        transports:
+          $ref: '#/components/schemas/TransportTypes'
+        flags:
+          type: array
+          items:
+            type: string
+            enum:
+              - user-present
+              - user-verified
+              - backup-eligible
+              - backup-state
+              - attested-credential-data
+              - extension-data
+          description: The most commonly stored authenticator flags.
+        authenticator_metadata:
+          type: object
+          description: |-
+            The [authenticator data](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/Authenticator_data) structure contains information from the authenticator
+            about the processing of a credential creation or authentication request.
+          properties:
+            AAGUID:
+              type: string
+              description: The authenticator attestation GUID.
+            sign_count:
+              type: integer
+              description: The signature counter value of the authenticator.
+            clone_warning:
+              type: boolean
+              description: A flag indicating that the authenticator may be cloned.
+            authenticator_attachment:
+              $ref: '#/components/schemas/AuthenticatorAttachment'
+    PasskeyFactorContent:
+      title: PasskeyFactorContent
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PasskeyFactorCreationRequest'
+        - type: object
+          properties:
+            credential:
+              $ref: '#/components/schemas/PasskeyFactorCredentialContent'
+    PublicKeyAlgorithm:
+      title: PublicKeyAlgorithm
+      description: |-
+        The algorithm used to generate the public key, 
+        represented as a [COSE Algorithm Identifier](https://www.iana.org/assignments/cose/cose.xhtml#algorithms).
+
+        `-8`: Ed25519
+        `-7`: ES256
+        `-257`: RS256
+      type: integer
+      enum:
+        - -8
+        - -7
+        - -257
+    PasskeyFactorNextStep:
+      title: PasskeyFactorNextStep
+      description: An instance of a [PublicKeyCredentialCreationOptions](https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer/create#publickey_object_structure) object that can be passed directly to the `navigator.credentials.create()` interface of the Webauthn API.
+      type: object
+      properties:
+        rp:
+          type: object
+          description: An object describing the relying party that requested the credential creation.
+          properties:
+            id:
+              type: string
+              description: The relying party identifier. This should be the origin without a scheme and port.
+            name:
+              type: string
+              description: The relying party name that the authenticator will show during the registration/authentication process.
+          required:
+            - id
+            - name
+        user:
+          type: object
+          description: An object describing the user account for which the credential is generated.
+          properties:
+            id:
+              type: string
+              description: |-
+                The unique ID for the user account. This property will contain the base64url-encoded contact ID and should not be displayed to the end user.
+                The `user.id` will later be used for authentication via discoverable credentials, where this same identifier will be passed via the `userHandle` property.
+              $ref: '#/components/schemas/Base64UrlString'
+            name:
+              type: string
+              description: A string providing a human-friendly identifier for the user's account, to help distinguish between different accounts with similar `displayName`s.
+            displayName:
+              type: string
+              description: A string providing a human-friendly user display name.
+          required:
+            - id
+            - name
+            - displayName
+        challenge:
+          type: string
+          description: |-
+            A string generated as a cryptographic challenge, to be signed by the authenticator and sent back as part of the registration process.
+            This will contain a base64url-encoded verification ID.
+          $ref: '#/components/schemas/Base64UrlString'
+        pubKeyCredParams:
+          type: array
+          description: An array of objects which specify the key types and signature algorithms the relying party supports, ordered from most preferred to least preferred.
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/PublicKeyType'
+              alg:
+                $ref: '#/components/schemas/PublicKeyAlgorithm'
+            required:
+              - type
+              - alg
+        timeout:
+          type: integer
+          description: A numerical hint, in milliseconds, which indicates the time the calling app is willing to wait for the creation operation to complete.
+          format: int64
+        excludeCredentials:
+          type: array
+          description: |-
+            An array of objects describing existing credentials that are already mapped
+            to this user account (as identified by `user.id`).
+          items:
+            type: object
+            properties:
+              type:
+                $ref: '#/components/schemas/PublicKeyType'
+              id:
+                type: string
+              transports:
+                $ref: '#/components/schemas/TransportTypes'
+            required:
+              - type
+              - id
+        authenticatorSelection:
+          type: object
+          description: An object whose properties are criteria used to filter out the potential authenticators for the credential creation operation.
+          properties:
+            authenticatorAttachment:
+              $ref: '#/components/schemas/AuthenticatorAttachment'
+            requireResidentKey:
+              type: boolean
+              description: A flag indicating that the authenticator must support the resident key requirement.
+            residentKey:
+              $ref: '#/components/schemas/ResidentKey'
+            userVerification:
+              $ref: '#/components/schemas/UserVerification'
+        attestation:
+          description: |-
+            A string specifying the relying party's preference for how the attestation statement
+            (i.e., provision of verifiable evidence of the authenticity of the authenticator and its data) is conveyed during credential creation.
+
+            Attestation is not supported in the current version of the API.
+          type: string
+          enum:
+            - none
+      required:
+        - challenge
+        - pubKeyCredParams
+        - rp
+        - user
+    Factor:
+      title: Factor
+      type: object
+      description: A Factor is a credential that can be used in a Verification session to authenticate an end-user.
+      properties:
+        id:
+          $ref: '#/components/schemas/FactorId'
+        type:
+          $ref: '#/components/schemas/FactorType'
+        friendly_name:
+          type: string
+          description: |-
+            A human-readable description of the Factor.
+            Maximum length is 255 characters.
+        contact_id:
+          $ref: '#/components/schemas/ContactId'
+        user_identifier:
+          $ref: '#/components/schemas/UserIdentifier'
+        status:
+          $ref: '#/components/schemas/FactorStatus'
+        content:
+          type: object
+          description: The content of the Factor. This will vary depending on the Factor type.
+          oneOf:
+            - $ref: '#/components/schemas/PasskeyFactorContent'
+        next_step:
+          type: object
+          description: The input required for the next step in the Factor verification process.
+          oneOf:
+            - $ref: '#/components/schemas/PasskeyFactorNextStep'
+        related:
+          description: A list of resources that are associated with the Factor.
+          type: array
+          items:
+            $ref: '#/components/schemas/RelatedResource'
+        tags:
+          $ref: '#/components/schemas/Tags'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type:
+            - string
+            - 'null'
+          format: date-time
+      required:
+        - id
+        - type
+        - friendly_name
+        - status
+        - related
+        - tags
+        - created_at
+        - updated_at
+        - deleted_at
+    AuthenticatorAttestationResponse:
+      title: AuthenticatorAttestationResponse
+      type: object
+      description: |-
+        The result of a WebAuthn credential registration via `navigator.credentials.create()`, 
+        as specified in [AuthenticatorAttestationResponse](https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse).
+      properties:
+        attestationObject:
+          description: The authenticator data and an attestation statement for a new key pair generated by the authenticator.
+          $ref: '#/components/schemas/CBORString'
+        clientDataJSON:
+          description: This property contains the JSON-compatible serialization of the data passed from the browser to the authenticator in order to generate this credential.
+          $ref: '#/components/schemas/Base64UrlString'
+        transports:
+          $ref: '#/components/schemas/TransportTypes'
+      required:
+        - attestationObject
+        - clientDataJSON
+  responses:
+    Http429Response:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TwilioError'
+          examples:
+            Example 1:
+              value:
+                code: 20429
+                message: Too many requests. Please retry according to the Retry-After response header.
+                more_info: https://www.twilio.com/docs/api/errors/20429
+      headers:
+        Retry-After:
+          schema:
+            type: string
+          description: The amount of time in seconds that the customer should wait before issuing a new request towards the API.
+    Http202Response:
+      description: Accepted
+      headers:
+        X-Twilio-Resource-Location:
+          schema:
+            type: string
+          description: The location of the accessed resource.
