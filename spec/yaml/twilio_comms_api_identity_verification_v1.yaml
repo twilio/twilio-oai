@@ -15,9 +15,452 @@ servers:
 security:
   - account_id_auth_token: []
 tags:
+  - name: Contacts & Audiences
+    description: '*Use `Contacts` to build and maintain a reliable directory of customers with validated communications addresses and identity profiles. Build up `Audiences` and leverage them with `Messages`, `Emails`, `PushNotifications` and `Communications` to broadcast communications to larger audiences*.'
+  - name: Messages
+    description: '*Use `Messages` to send and receive SMS & MMS, WhatsApp, Facebook Messenger, and Google Business messages.*'
+  - name: Emails
+    description: '*Use `Emails` to send and receive email with Twilio SendGrid.*'
+  - name: Push Notifications
+    description: '*Use `PushNotifications` to send push notifications to your mobile apps via Firebase Cloud Messaging and Apple Push Notification services as well as other push-enabled services.*'
+  - name: Communications
+    description: '*Use `Communications` to send and receive 1:1 omni-channel communications across all channels of all communication types. Reach each and every customer with personalized content, on the right channel, at the optimal time, at scale. Just send it!*'
+  - name: Conversations
+    description: '*Use Conversations to build engaging conversational messaging experiences across all communication types and all channels. Use directly with `Messages`, `Emails`, `PushNotifications`, and `Communications` to support two-way conversations with your customers*'
   - name: Identity Verification
     description: '*Fight fraud and protect user accounts. Quickly verify users with OTP over any communication type (`Message`, `Email`, `PushNotification`), and with convenient methods like Passkeys, TOTP, and Silent Device Approval*'
+  - name: Content & Media
+    description: '*Use `Content` & `Media` to build, store, and retrieve reusable content templates and media files.*'
+  - name: Agents & AgentPools
+    description: |-
+      *Use `Agents` to build the sending and receiving identities that represent your business & applications.*
+      - For 'outbound' communications, it is used as the sender of the commmunication (`from` field).
+      - For 'inbound' communications to your app (sent by a Contact/end-user), it is used as the recipient (`to` field).
+      - An Agent represents existing inventory created and setup in other APIs, such as Phone Numbers.
+      - Use `AgentPools` to organize your `Agents` into logical groups to build omni-channel identities with multiple types of communications addresses (phone numbers, short codes, email addresses).
+  - name: Address Lookups
+    description: '*Use `AddressLookups` to validate your phone numbers and email addresses and get back a detailed report on their validity and the identity of the people behind them.*'
+  - name: Event Subscriptions
+    description: |-
+      *Use Event `Subscriptions`, `Sinks`, and `Schemas` to tap into a unified stream of every interaction sent or received on Twilio.*
+      - Stream your data to your existing systems by configuring a modern,
+        persistent streaming technology like Amazon Kinesis or to a webhook.
+
+      - Easily consume and leverage data from multiple Twilio products with consistent metadata,
+        well-defined and versioned schemas, and control over which events you want delivered.
+
+      - Trust that your events will be queued if your system goes down and delivered as soon as it's back up
+        with event queuing for up to 24 hours or 5M events.
 paths:
+  /Contacts:
+    post:
+      summary: Create Contacts
+      operationId: create-contacts
+      description: This operation creates Contacts
+      tags:
+        - Contacts & Audiences
+      responses:
+        '201':
+          description: Created
+          headers:
+            X-Twilio-Operation-Id:
+              $ref: '#/components/headers/X-Twilio-Operation-Id'
+          content:
+            application/json:
+              schema:
+                title: CreateContactsResponse
+                type: object
+                properties:
+                  contacts:
+                    type: array
+                    description: The Contacts that were created.
+                    items:
+                      $ref: '#/components/schemas/Contact'
+              examples:
+                Example 1 - Contact with an email address and phone number:
+                  value:
+                    contacts:
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Igor
+                        last_name: Pletnjov
+                        display_name: Igor Pletnjov
+                        addresses:
+                          - channel: phone
+                            address: '+37259000000'
+                            is_validated_by_lookup: true
+                            last_validated_by_lookup: '2019-08-24T14:15:22Z'
+                          - channel: email
+                            address: ipletnjov@twilio.com
+                            is_validated_by_lookup: null
+                            last_validated_by_lookup: null
+                        created_at: '2019-08-24T14:15:22Z'
+                        updated_at: '2019-08-24T14:15:22Z'
+                        deleted_at: null
+                Example 2 - Contact with just an email address:
+                  value:
+                    contacts:
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Nicholas
+                        last_name: Fury
+                        display_name: Nick Fury
+                        addresses:
+                          - channel: email
+                            address: nickfury@avengers.com
+                            is_validated_by_lookup: true
+                            last_validated_by_lookup: '2019-08-24T14:15:22Z'
+                        created_at: '2019-08-24T14:15:22Z'
+                        updated_at: '2019-08-24T14:15:22Z'
+                        deleted_at: null
+                Example 3 - Contact with a push device token and chat address for a mobile app:
+                  value:
+                    contacts:
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Dave
+                        last_name: Lee
+                        display_name: Dave Lee
+                        addresses:
+                          - channel: fcm
+                            address: dqWD7WEC83K41WHyufTS7:APA91bFcrVaOLqKeJfSiEutJXX2Tr9wN_tYOwYd8rFA6mYUMBFqdz9n6k3v5EpFA_ukXD89hGqG3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEh
+                            app_name: ubereats-b2c
+                            is_validated_by_lookup: null
+                            last_validated_by_lookup: null
+                          - channel: chat
+                            address: dalee
+                            app_name: ubereats-b2c
+                            is_validated_by_lookup: null
+                            last_validated_by_lookup: null
+                        created_at: '2019-08-24T14:15:22Z'
+                        updated_at: '2019-08-24T14:15:22Z'
+                        deleted_at: null
+                Example 4 - Contact with push device tokens for 2 different mobile apps:
+                  value:
+                    contacts:
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Dave
+                        last_name: Lee
+                        display_name: Dave Lee
+                        addresses:
+                          - channel: fcm
+                            address: dqWD7WEC83K41WHyufTS7:APA91bFcrVaOLqKeJfSiEutJXX2Tr9wN_tYOwYd8rFA6mYUMBFqdz9n6k3v5EpFA_ukXD89hGqG3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEh
+                            app_name: ubereats-b2c
+                            is_validated_by_lookup: null
+                            last_validated_by_lookup: null
+                          - channel: fcm
+                            address: abCD1XyZ23EF45ghI6JK78lmN9OP01qrST23UV45WX67YZ89abCD01EF23GH45IJ67KL89MNOPQR01ST23UV45WX67YZ89Gq3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEj
+                            app_name: uber-b2c
+                            is_validated_by_lookup: null
+                            last_validated_by_lookup: null
+                        created_at: '2019-08-24T14:15:22Z'
+                        updated_at: '2019-08-24T14:15:22Z'
+                        deleted_at: null
+        '202':
+          $ref: '#/components/responses/Http202ResponseWithOperation'
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: CreateContactsRequest
+              type: object
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    type: object
+                    title: ContactInput
+                    description: Specify the Contact including their communications addresses and descriptors of their identity.
+                    properties:
+                      addresses:
+                        type: array
+                        description: The communications addresses of the Contact (phone number, email, push device token).
+                        items:
+                          $ref: '#/components/schemas/ContactAddressInput'
+                      first_name:
+                        type: string
+                        description: The first name of the Contact.
+                      last_name:
+                        type: string
+                        description: The last name of the Contact.
+                      display_name:
+                        type: string
+                        description: |-
+                          The name to associate with the address for sending and receiving communications,
+                          visible for some types of communications like email.
+                      user_identifier:
+                        $ref: '#/components/schemas/UserIdentifier'
+                      external_identifier:
+                        $ref: '#/components/schemas/ExternalIdentifier'
+                      location:
+                        $ref: '#/components/schemas/ContactLocation'
+                      date_of_birth:
+                        description: Contact's date of birth.
+                        type: string
+                      national_id:
+                        description: Contact's national ID, such as SSN or Passport ID.
+                        type: string
+                      tags:
+                        $ref: '#/components/schemas/Tags'
+            examples:
+              Example 1 - Create a Contact with an email address and phone number:
+                value:
+                  contacts:
+                    - first_name: Igor
+                      last_name: Pletnjov
+                      display_name: Igor Pletnjov
+                      user_identifier: 3c35422849fea46d37b099ae59fae22c
+                      external_identifier: 006E0000004TguX
+                      addresses:
+                        - channel: phone
+                          address: '+37259000000'
+                        - channel: email
+                          address: ipletnjov@twilio.com
+              Example 2 - Create a Contact with an email address and phone number:
+                value:
+                  contacts:
+                    - first_name: Bruce
+                      last_name: Banner
+                      display_name: Hulk
+                      user_identifier: '+37259000011'
+                      external_identifier: 006E0000004TguX
+                      addresses:
+                        - channel: phone
+                          address: '+37259000011'
+                        - channel: email
+                          address: hulk@avengers.com
+                      tags:
+                        shirt_size: X-Large
+              Example 3 - Create a Contact with a push device token and chat address for a mobile app:
+                value:
+                  contacts:
+                    - first_name: Dave
+                      last_name: Lee
+                      display_name: Dave Lee
+                      addresses:
+                        - channel: fcm
+                          address: dqWD7WEC83K41WHyufTS7:APA91bFcrVaOLqKeJfSiEutJXX2Tr9wN_tYOwYd8rFA6mYUMBFqdz9n6k3v5EpFA_ukXD89hGqG3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEh
+                          app_name: ubereats-b2c
+                        - channel: chat
+                          address: dalee
+                          app_name: ubereats-b2c
+              Example 4 - Create a Contact with push device tokens for 2 different mobile apps:
+                value:
+                  contacts:
+                    - first_name: Dave
+                      last_name: Lee
+                      display_name: Dave Lee
+                      addresses:
+                        - channel: fcm
+                          address: dqWD7WEC83K41WHyufTS7:APA91bFcrVaOLqKeJfSiEutJXX2Tr9wN_tYOwYd8rFA6mYUMBFqdz9n6k3v5EpFA_ukXD89hGqG3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEh
+                          app_name: ubereats-b2c
+                        - channel: fcm
+                          address: abCD1XyZ23EF45ghI6JK78lmN9OP01qrST23UV45WX67YZ89abCD01EF23GH45IJ67KL89MNOPQR01ST23UV45WX67YZ89GqG3OarzbVfdjGnLOIAQfwbQcqJkjQWMrhwElrtU1y3JLDPfnjc0eTJLxzhyYvDFopEj
+                          app_name: uber-b2c
+    get:
+      summary: List Contacts
+      operationId: list-contacts
+      description: This operation fetches a paginated list of Contacts.
+      tags:
+        - Contacts & Audiences
+      parameters:
+        - in: query
+          name: start_date
+          description: Filter to Contacts created after the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: end_date
+          description: Filter to Contacts created before the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: updated_date
+          description: Filter to Contacts updated after the specified date and time.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: app_name
+          description: Filter to Contacts that have at least one address belonging to a specific app.
+          schema:
+            $ref: '#/components/schemas/AppName'
+        - in: query
+          name: operation_id
+          description: Filter to Contacts by operation id.
+          schema:
+            $ref: '#/components/schemas/OperationId'
+        - in: query
+          name: contact_ids
+          description: List of contact ids for filtering the contacts.
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ContactId'
+        - in: query
+          name: page_token
+          description: The token to retrieve the next page of results.
+          schema:
+            $ref: '#/components/schemas/PageToken'
+        - in: query
+          name: page_size
+          description: The number of resources to return in a page.
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: ListContactsResponse
+                type: object
+                properties:
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Contact'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationMetadata'
+              examples:
+                Example 1 - First page of Contacts for list read with no filter:
+                  value:
+                    contacts:
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Nicholas
+                        last_name: Fury
+                        display_name: Nick Fury
+                        user_identifier: 3c35422849fea46d37b099ae59fae22c
+                        external_identifier: 006E0000004TguX
+                        addresses:
+                          - channel: email
+                            address: nickfury@avengers.com
+                        created_at: '2022-08-24T14:15:22Z'
+                        updated_at: '2023-09-13T12:00:24Z'
+                        deleted_at: null
+                      - id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                        first_name: Beetle
+                        last_name: Juice
+                        related:
+                          - name: operation
+                            id: operation_01h9krwprkeee8fzqspvwy6nq8
+                            uri: /Contacts/Operations/01h9krwprkeee8fzqspvwy6nq8
+                        display_name: Beetle Juice
+                        user_identifier: beetlejuice@warnerbros.com
+                        external_identifier: 006E0000004TguX
+                        addresses:
+                          - channel: email
+                            address: beetlejuice@warnerbros.com
+                        created_at: '2019-08-24T14:15:22Z'
+                        updated_at: '2023-08-24T14:15:22Z'
+                        deleted_at: null
+                    pagination:
+                      next: page_01h9krwprkeee8fzqspvwy6nq9
+                      self: https://comms.twilio.com/v1/Contacts
+        '429':
+          $ref: '#/components/responses/Http429Response'
+  /Contacts/{contact_id}:
+    parameters:
+      - schema:
+          $ref: '#/components/schemas/Identifier'
+        name: contact_id
+        in: path
+        required: true
+    get:
+      summary: Fetch a Contact
+      operationId: fetch-single-contact
+      description: This operation fetches a single contact using its ID.
+      tags:
+        - Contacts & Audiences
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '429':
+          $ref: '#/components/responses/Http429Response'
+    patch:
+      summary: Update a Contact
+      operationId: update-contact
+      description: This operation partially updates a Contact
+      tags:
+        - Contacts & Audiences
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+              examples:
+                Example 1 - Updated Contact with a phone number:
+                  value:
+                    id: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+                    first_name: Igor
+                    last_name: Pletnjov
+                    display_name: Igor Pletnjov
+                    user_identifier: 3c35422849fea46d37b099ae59fae22c
+                    external_identifier: 006E0000004TguX
+                    addresses:
+                      - channel: phone
+                        address: '+37259000000'
+                      - channel: email
+                        address: ipletnjov@twilio.com
+                    created_at: '2019-08-24T14:15:22Z'
+                    updated_at: '2023-10-02T11:20:00Z'
+                    deleted_at: null
+        '202':
+          $ref: '#/components/responses/Http202Response'
+        '429':
+          $ref: '#/components/responses/Http429Response'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: UpdateContactRequest
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                display_name:
+                  type: string
+                addresses:
+                  title: UpdateContactAddresses
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContactAddressInput'
+                tags:
+                  $ref: '#/components/schemas/TagsNullable'
+            examples:
+              Example 1 - Update Contact addresses:
+                value:
+                  addresses:
+                    - channel: phone
+                      address: '+37259000000'
+                    - channel: email
+                      address: ipletnjov@twilio.com
+              Example 2 - Update Contact tags:
+                value:
+                  tags:
+                    shirt_size: X-Large
+    delete:
+      summary: Delete a Contact
+      operationId: delete-contact
+      description: This operation deletes a Contact
+      tags:
+        - Contacts & Audiences
+      responses:
+        '202':
+          $ref: '#/components/responses/Http202Response'
+        '204':
+          description: No Content
+        '429':
+          $ref: '#/components/responses/Http429Response'
   /Verifications:
     post:
       summary: Start a Verification
@@ -544,61 +987,6 @@ paths:
                       self: https://comms.twilio.com/v1/Verifications
         '429':
           $ref: '#/components/responses/Http429Response'
-  /Verifications/Settings:
-    get:
-      summary: Fetch Verification Settings
-      operationId: fetch-verification-settings
-      description: This operation fetches the current Verification settings.
-      tags:
-        - Identity Verification
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/VerificationsSettings'
-                required:
-                  - fraud_guard_level
-                  - time_to_expire
-                  - time_to_delete
-              examples:
-                Example Response:
-                  value:
-                    fraud_guard_level: basic
-                    time_to_expire: PT10M
-                    time_to_delete: P30D
-        '429':
-          $ref: '#/components/responses/Http429Response'
-    patch:
-      summary: Update Verifications Settings
-      operationId: update-verifications-settings
-      description: This operation partially updates the current Verifications resource collection settings.
-      tags:
-        - Identity Verification
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VerificationsSettings'
-              examples:
-                Example Response:
-                  value:
-                    fraud_guard_level: standard
-        '429':
-          $ref: '#/components/responses/Http429Response'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VerificationsSettings'
-            examples:
-              Example Request:
-                value:
-                  fraud_guard_level: standard
   /Verifications/{verification_id}:
     parameters:
       - schema:
@@ -1381,6 +1769,304 @@ components:
       type: http
       scheme: basic
   schemas:
+    AppName:
+      description: A unique name for a mobile or web app operated by the Twilio customer.
+      title: AppName
+      type: string
+      minLength: 1
+      maxLength: 64
+      example: authy-2fa-app
+    OperationId:
+      description: |-
+        An identifier that correlates resources created in the same (request).
+        This can be used for convenient retrieval of correlated resources and their aggregates.
+      title: OperationId
+      type: string
+      pattern: ^comms_operation_[a-z0-9]{26,34}$
+      minLength: 42
+      maxLength: 50
+      example: comms_operation_01h9krwprkeee8fzqspvwy6nq8
+    ContactId:
+      description: A reference to a Contact.
+      title: ContactId
+      type: string
+      pattern: ^comms_contact_[a-z0-9]{26,34}$
+      minLength: 40
+      maxLength: 48
+      example: comms_contact_01h9krwprkeee8fzqspvwy6nq8
+    PageToken:
+      description: The token that identifies the page of resources to fetch.
+      title: PageToken
+      type: string
+    PageSize:
+      description: Total number of items returned in a single page, the minimum is 1 and maximum is 1000. Default is 50.
+      title: PageSize
+      type: integer
+      minimum: 1
+      maximum: 1000
+      default: 50
+      example: 50
+    UserIdentifier:
+      title: UserIdentifier
+      type: string
+      description: |-
+        A custom string that uniquely identifies a person or end-user.
+        For example, this can be the end-user's username or a UUID4 string or an SHA256 hash.
+      minLength: 1
+      maxLength: 32
+    ContactLocation:
+      type: object
+      title: ContactLocation
+      description: The physical geo-location of the Contact.
+      properties:
+        latitude:
+          description: |-
+            The latitude coordinate of the Contact's location in decimal degrees.
+            Positive values indicate locations north of the equator.
+          type: number
+          format: float
+        longitude:
+          description: |-
+            The longitude coordinate of the Contact's location in decimal degrees.
+            Positive values indicate locations east of the prime meridian.
+          type: number
+          format: float
+        address_line_1:
+          description: Contact's first address line.
+          type: string
+        address_line_2:
+          description: Contact's second address line.
+          type: string
+        city:
+          description: Contact's city.
+          type: string
+        state:
+          description: Contact's state.
+          type: string
+        postal_code:
+          description: Contact's postal zip code.
+          type: string
+        country_code:
+          description: Contact's country, up to two characters.
+          type: string
+          format: iso-country-code
+    ContactIdentity:
+      title: ContactIdentity
+      type: object
+      description: An Identity is the schema of a person or user.
+      properties:
+        first_name:
+          type: string
+          description: The first name of the Contact.
+        last_name:
+          type: string
+          description: The last name of the Contact.
+        display_name:
+          type: string
+          description: |-
+            The name associatde with the address for sending and receiving communications,
+            visible for some types of communications like email.
+        user_identifier:
+          $ref: '#/components/schemas/UserIdentifier'
+        location:
+          $ref: '#/components/schemas/ContactLocation'
+        date_of_birth:
+          description: Contact's date of birth.
+          type: string
+        national_id:
+          description: Contact's national ID, such as SSN or Passport ID.
+          type: string
+    CommunicationChannel:
+      description: |-
+        The medium which a unit of communication is transmitted through.
+        These are differentiated by a mix of transmission protocol, network controller/owner, endpoint and address model,
+        as well as the model for content of the atomic unit of communication itself.
+      title: CommunicationChannel
+      type: string
+      enum:
+        - email
+        - phone
+        - whatsapp
+        - fbm
+        - gbm
+        - chat
+        - push
+        - apn
+        - fcm
+    ContactAddress:
+      type: object
+      title: ContactAddress
+      properties:
+        address:
+          description: The identifier that uniquely addresses an actor within a communications channel.
+          type: string
+        channel:
+          $ref: '#/components/schemas/CommunicationChannel'
+        app_name:
+          description: The name of the mobile or web app that this communications address is associated with.
+          $ref: '#/components/schemas/AppName'
+        is_validated_by_lookup:
+          description: Whether this communications address is valid as determined by Twilio AddressLookups.
+          type:
+            - boolean
+            - 'null'
+        last_validated_by_lookup:
+          description: The last date on which this communications address was validated by Twilio AddressLookups.
+          type:
+            - string
+            - 'null'
+          format: date-time
+      required:
+        - address
+        - channel
+    ExternalIdentifier:
+      title: ExternalIdentifier
+      description: An external identifier is a unique identifier for a Contact in an external system, such as a CRM or CDP.
+      type: string
+    Tags:
+      title: Tags
+      type: object
+      description: |-
+        Custom metadata in the form of key-value pairs.
+        Maximum size of a tag key is 128 characters.
+        Maximum size of a tag value is 128 characters.
+        There can be a maximum of 10 key-value pairs.
+      additionalProperties:
+        type: string
+    RelatedResource:
+      title: RelatedResource
+      type: object
+      description: A reference to a related resource.
+      properties:
+        name:
+          type: string
+          description: The name of the related resource.
+          enum:
+            - email
+            - message
+            - push_notification
+            - conversation
+            - verification
+            - factor
+            - contact
+            - audience
+            - media
+            - agent
+            - agent_pool
+            - subscription
+            - sink
+            - operation
+            - address_lookup
+        id:
+          type: string
+          description: The ID of the related resource.
+        uri:
+          type: string
+          description: The path to the related resource.
+    Contact:
+      title: Contact
+      type: object
+      description: |-
+        A Contact represents a person or entity to communicate with.
+        It is composed of one more addresses and some additional identity info.
+      allOf:
+        - $ref: '#/components/schemas/ContactIdentity'
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ContactId'
+            addresses:
+              title: ContactAddresses
+              description: The communications addresses of the Contact (phone number, email, push device token ).
+              type: array
+              items:
+                $ref: '#/components/schemas/ContactAddress'
+            external_identifier:
+              $ref: '#/components/schemas/ExternalIdentifier'
+            tags:
+              $ref: '#/components/schemas/Tags'
+            related:
+              title: ContactRelatedResources
+              description: A list of resources that are associated with the Contact.
+              type: array
+              items:
+                $ref: '#/components/schemas/RelatedResource'
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+            deleted_at:
+              type:
+                - string
+                - 'null'
+              format: date-time
+          required:
+            - id
+            - created_at
+            - updated_at
+            - deleted_at
+    PaginationMetadata:
+      title: PaginationMetadata
+      type: object
+      properties:
+        next:
+          description: URL to the next page of results using a token.
+          type:
+            - string
+            - 'null'
+        self:
+          description: URL to the current page of results using a token.
+          type: string
+    TwilioError:
+      title: TwilioError
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        more_info:
+          type: string
+          format: uri
+      description: A generic error object communicating client and server side API errors.
+      example:
+        code: 21614
+        message: The address specified in the request is not a valid phone number.
+        more_info: https://www.twilio.com/docs/api/errors/21614
+    ContactAddressInput:
+      type: object
+      title: ContactAddressInput
+      properties:
+        channel:
+          $ref: '#/components/schemas/CommunicationChannel'
+        address:
+          description: The identifier that uniquely addresses an actor within a communications channel.
+          type: string
+        app_name:
+          description: The name of the mobile or web app that this communications address is associated with.
+          $ref: '#/components/schemas/AppName'
+    Identifier:
+      description: A 128-bit UUIDv7 encoded as a 26-character string using a modified base32 encoding. This schema is used for identifier path params as the type prefix ('<type>_') is redundant in URIs.
+      type: string
+      pattern: ^[a-z0-9]{26,34}$
+      minLength: 26
+      maxLength: 34
+      example: 01h9krwprkeee8fzqspvwy6nq8
+    TagsNullable:
+      title: TagsNullable
+      type:
+        - object
+        - 'null'
+      description: |-
+        Custom metadata in the form of key-value pairs.
+        Maximum size of a tag key is 128 characters.
+        Maximum size of a tag value is 128 characters.
+        There can be a maximum of 10 key-value pairs.
+      additionalProperties:
+        type: string
     VerificationStatus:
       title: VerificationStatus
       type: string
@@ -1412,43 +2098,6 @@ components:
       enum:
         - totp
         - passkey
-    ContactId:
-      description: A reference to a Contact.
-      title: ContactId
-      type: string
-      pattern: ^comms_contact_[a-z0-9]{26,34}$
-      minLength: 40
-      maxLength: 48
-      example: comms_contact_01h9krwprkeee8fzqspvwy6nq8
-    CommunicationChannel:
-      description: |-
-        The medium which a unit of communication is transmitted through.
-        These are differentiated by a mix of transmission protocol, network controller/owner, endpoint and address model,
-        as well as the model for content of the atomic unit of communication itself.
-      title: CommunicationChannel
-      type: string
-      enum:
-        - email
-        - phone
-        - whatsapp
-        - fbm
-        - gbm
-        - chat
-        - push
-        - apn
-        - fcm
-    PageSize:
-      description: Total number of items returned in a single page, the minimum is 1 and maximum is 1000. Default is 50.
-      title: PageSize
-      type: integer
-      minimum: 1
-      maximum: 1000
-      default: 50
-      example: 50
-    PageToken:
-      description: The token that identifies the page of resources to fetch.
-      title: PageToken
-      type: string
     VerificationId:
       description: A reference to a Verification.
       title: VerificationId
@@ -1457,14 +2106,6 @@ components:
       minLength: 45
       maxLength: 53
       example: comms_verification_01h9krwprkeee8fzqspvwy6nq8
-    UserIdentifier:
-      title: UserIdentifier
-      type: string
-      description: |-
-        A custom string that uniquely identifies a person or end-user.
-        For example, this can be the end-user's username or a UUID4 string or an SHA256 hash.
-      minLength: 1
-      maxLength: 32
     VerificationChannel:
       description: |-
         The medium through which to verify a contact, address or user identifier.
@@ -1596,46 +2237,6 @@ components:
               additionalProperties: true
           required:
             - challenge
-    RelatedResource:
-      title: RelatedResource
-      type: object
-      description: A reference to a related resource.
-      properties:
-        name:
-          type: string
-          description: The name of the related resource.
-          enum:
-            - email
-            - message
-            - push_notification
-            - conversation
-            - verification
-            - factor
-            - contact
-            - audience
-            - media
-            - agent
-            - agent_pool
-            - subscription
-            - sink
-            - operation
-            - address_lookup
-        id:
-          type: string
-          description: The ID of the related resource.
-        uri:
-          type: string
-          description: The path to the related resource.
-    Tags:
-      title: Tags
-      type: object
-      description: |-
-        Custom metadata in the form of key-value pairs.
-        Maximum size of a tag key is 128 characters.
-        Maximum size of a tag value is 128 characters.
-        There can be a maximum of 10 key-value pairs.
-      additionalProperties:
-        type: string
     Verification:
       title: Verification
       type: object
@@ -1706,35 +2307,6 @@ components:
         - created_at
         - updated_at
         - deleted_at
-    PaginationMetadata:
-      title: PaginationMetadata
-      type: object
-      properties:
-        next:
-          description: URL to the next page of results using a token.
-          type:
-            - string
-            - 'null'
-        self:
-          description: URL to the current page of results using a token.
-          type: string
-    TwilioError:
-      title: TwilioError
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int64
-        message:
-          type: string
-        more_info:
-          type: string
-          format: uri
-      description: A generic error object communicating client and server side API errors.
-      example:
-        code: 21614
-        message: The address specified in the request is not a valid phone number.
-        more_info: https://www.twilio.com/docs/api/errors/21614
     MessageChannel:
       description: The channels available for Message entity.
       title: MessageChannel
@@ -2444,45 +3016,6 @@ components:
           $ref: '#/components/schemas/EmailsProcessingOptions'
         push_notifications:
           $ref: '#/components/schemas/PushNotificationsProcessingOptions'
-    VerificationsSettings:
-      title: VerificationsSettings
-      type: object
-      properties:
-        fraud_guard_level:
-          type: string
-          description: |-
-            The level of fraud protection to apply to the Verification.
-            - `none` - No fraud protection is applied.
-            - `basic` - Cautious fraud protection is applied.
-            - `standard` - Standard fraud protection is applied.
-            - `maximum` - Maximum fraud protection is applied.
-          enum:
-            - none
-            - basic
-            - standard
-            - maximum
-          default: standard
-        time_to_expire:
-          type: string
-          title: Duration
-          format: duration
-          description: The duration of time, in ISO 8601 duration format, after which Verifications automatically expire.
-          example: PT10M
-          default: PT10M
-        time_to_delete:
-          type: string
-          title: Duration
-          format: duration
-          description: The duration of time, in ISO 8601 duration format, after which Verifications are automatically deleted.
-          example: P30D
-          default: P30D
-    Identifier:
-      description: A 128-bit UUIDv7 encoded as a 26-character string using a modified base32 encoding. This schema is used for identifier path params as the type prefix ('<type>_') is redundant in URIs.
-      type: string
-      pattern: ^[a-z0-9]{26,34}$
-      minLength: 26
-      maxLength: 34
-      example: 01h9krwprkeee8fzqspvwy6nq8
     VerificationPSD2Options:
       title: VerificationPSD2Options
       type: object
@@ -2927,6 +3460,15 @@ components:
           schema:
             type: string
           description: The amount of time in seconds that the customer should wait before issuing a new request towards the API.
+    Http202ResponseWithOperation:
+      description: Accepted
+      headers:
+        X-Twilio-Resource-Location:
+          schema:
+            type: string
+          description: The location of the accessed resource.
+        X-Twilio-Operation-Id:
+          $ref: '#/components/headers/X-Twilio-Operation-Id'
     Http202Response:
       description: Accepted
       headers:
@@ -2934,3 +3476,11 @@ components:
           schema:
             type: string
           description: The location of the accessed resource.
+  headers:
+    X-Twilio-Operation-Id:
+      schema:
+        $ref: '#/components/schemas/OperationId'
+      description: |-
+        Th Operation Id is an identifier that can be used to correlate all of the resources created in a request.
+        Issue a GET request to the resource list location, using the Operation Id as a filter
+        to retrieve a list of the created resources and an aggregate status.
