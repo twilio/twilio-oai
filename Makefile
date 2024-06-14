@@ -4,8 +4,7 @@ install:
 	npm install
 
 spectral: install
-	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq
-
+	./node_modules/.bin/spectral lint spec/json/twilio_*.json -Dq --verbose
 test: spectral
 
 test-docker:
