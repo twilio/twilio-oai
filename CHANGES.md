@@ -1,5 +1,32 @@
 twilio-oai changelog
 ====================
+[2024-06-18] Version 2.0.0
+--------------------------
+**Note:** This release contains breaking changes, check our [upgrade guide](./UPGRADE.md#2024-06-18-156x-to-2xx) for detailed migration notes.
+
+**Library - Feature**
+- [PR #111](https://github.com/twilio/twilio-oai/pull/111): Merge branch '2.0.0-rc' into main. Thanks to [@tiwarishubham635](https://github.com/tiwarishubham635)! **(breaking change)**
+- [PR #110](https://github.com/twilio/twilio-oai/pull/110): Merge branch '2.0.0-rc' into main. Thanks to [@tiwarishubham635](https://github.com/tiwarishubham635)! **(breaking change)**
+
+**Events**
+- Add `status` and `documentation_url` to Event Types
+
+**Lookups**
+- Removed unused `fraud` lookups in V1 only to facilitate rest proxy migration
+
+**Numbers**
+- Add date_created field to the Get Port In Request API
+- Rename the `status_last_time_updated_timestamp` field to `last_updated` in the Get Port In Phone Number API **(breaking change)**
+- Add Rejection reason and rejection reason code to the Get Port In Phone Number API
+- Remove the carrier information from the Portability API
+
+**Proxy**
+- Change property `type` from enum to ienum
+
+**Trusthub**
+- Add skipMessagingUseCase field in compliance_tollfree_inquiry.
+
+
 [2024-06-06] Version 1.56.1
 ---------------------------
 **Api**
