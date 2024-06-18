@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "pricing.v1.messaging": {
         "type": "object",
@@ -396,12 +402,6 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -417,7 +417,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.56.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -427,7 +427,7 @@
           "url": "https://pricing.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "name"
@@ -449,8 +449,8 @@
           "inbound_sms_prices",
           "price_unit"
         ],
-        "pathType": "list",
-        "parent": "/Messaging"
+        "parent": "/Messaging",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -500,16 +500,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -518,21 +520,91 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListMessagingCountryResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "countries": [],
+                      "meta": {
+                        "first_page_url": "https://pricing.twilio.com/v1/Messaging/Countries?PageSize=50&Page=0",
+                        "key": "countries",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/Messaging/Countries?PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "countries": [
+                        {
+                          "country": "country",
+                          "iso_country": "US",
+                          "url": "https://pricing.twilio.com/v1/Messaging/Countries/US"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://pricing.twilio.com/v1/Messaging/Countries?PageSize=50&Page=0",
+                        "key": "countries",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/Messaging/Countries?PageSize=50&Page=0"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -544,10 +616,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListMessagingCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListMessagingCountry"
       }
     },
     "/v1/Messaging/Countries/{IsoCountry}": {
@@ -564,8 +633,8 @@
           "inbound_sms_prices",
           "price_unit"
         ],
-        "pathType": "instance",
-        "parent": "/Messaging"
+        "parent": "/Messaging",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -590,6 +659,73 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pricing.v1.messaging.messaging_country-instance"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "country": "country",
+                      "inbound_sms_prices": [
+                        {
+                          "base_price": "0.05",
+                          "current_price": "0.05",
+                          "number_type": "mobile"
+                        }
+                      ],
+                      "iso_country": "US",
+                      "outbound_sms_prices": [
+                        {
+                          "carrier": "att",
+                          "mcc": "foo",
+                          "mnc": "bar",
+                          "prices": [
+                            {
+                              "base_price": "0.05",
+                              "current_price": "0.05",
+                              "number_type": "mobile"
+                            }
+                          ]
+                        }
+                      ],
+                      "price_unit": "USD",
+                      "url": "https://pricing.twilio.com/v1/Messaging/Countries/US"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -601,10 +737,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchMessagingCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchMessagingCountry"
       }
     },
     "/v1/PhoneNumbers": {
@@ -613,7 +746,7 @@
           "url": "https://pricing.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "name"
@@ -633,8 +766,8 @@
           "country",
           "price_unit"
         ],
-        "pathType": "list",
-        "parent": "/PhoneNumbers"
+        "parent": "/PhoneNumbers",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -684,16 +817,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -702,21 +837,91 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListPhoneNumberCountryResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "countries": [
+                        {
+                          "country": "Austria",
+                          "iso_country": "AT",
+                          "url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries/AT"
+                        }
+                      ],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "countries"
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "countries": [],
+                      "meta": {
+                        "first_page_url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries?PageSize=50&Page=0",
+                        "key": "countries",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries?PageSize=50&Page=0"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -728,10 +933,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListPhoneNumberCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListPhoneNumberCountry"
       }
     },
     "/v1/PhoneNumbers/Countries/{IsoCountry}": {
@@ -746,8 +948,8 @@
           "country",
           "price_unit"
         ],
-        "pathType": "instance",
-        "parent": "/PhoneNumbers"
+        "parent": "/PhoneNumbers",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -772,6 +974,64 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pricing.v1.phone_number.phone_number_country-instance"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "country": "United States",
+                      "iso_country": "US",
+                      "phone_number_prices": [
+                        {
+                          "number_type": "local",
+                          "base_price": "1.00",
+                          "current_price": "1.00"
+                        },
+                        {
+                          "number_type": "toll free",
+                          "base_price": "2.00",
+                          "current_price": "2.00"
+                        }
+                      ],
+                      "price_unit": "USD",
+                      "url": "https://pricing.twilio.com/v1/PhoneNumbers/Countries/US"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -783,10 +1043,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchPhoneNumberCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchPhoneNumberCountry"
       }
     },
     "/v1/Voice": {
@@ -795,7 +1052,7 @@
           "url": "https://pricing.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "name"
@@ -815,8 +1072,8 @@
           "country",
           "price_unit"
         ],
-        "pathType": "list",
-        "parent": "/Voice"
+        "parent": "/Voice",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -866,16 +1123,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -884,21 +1143,91 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListVoiceCountryResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "countries": [
+                        {
+                          "country": "Andorra",
+                          "iso_country": "AD",
+                          "url": "https://pricing.twilio.com/v1/Voice/Countries/AD"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://pricing.twilio.com/v1/Voice/Countries?PageSize=50&Page=0",
+                        "key": "countries",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/Voice/Countries?PageSize=50&Page=0"
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "countries": [],
+                      "meta": {
+                        "first_page_url": "https://pricing.twilio.com/v1/Voice/Countries?PageSize=50&Page=0",
+                        "key": "countries",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://pricing.twilio.com/v1/Voice/Countries?PageSize=50&Page=0"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -910,10 +1239,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListVoiceCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListVoiceCountry"
       }
     },
     "/v1/Voice/Countries/{IsoCountry}": {
@@ -928,8 +1254,8 @@
           "country",
           "price_unit"
         ],
-        "pathType": "instance",
-        "parent": "/Voice"
+        "parent": "/Voice",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -954,6 +1280,74 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pricing.v1.voice.voice_country-instance"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "country": "United States",
+                      "inbound_call_prices": [
+                        {
+                          "current_price": "0.0085",
+                          "number_type": "local",
+                          "base_price": "0.0085"
+                        },
+                        {
+                          "current_price": "0.022",
+                          "number_type": "toll free",
+                          "base_price": "0.022"
+                        }
+                      ],
+                      "iso_country": "US",
+                      "outbound_prefix_prices": [
+                        {
+                          "prefixes": [
+                            "1907"
+                          ],
+                          "current_price": "0.090",
+                          "friendly_name": "Programmable Outbound Minute - United States - Alaska",
+                          "base_price": "0.090"
+                        }
+                      ],
+                      "price_unit": "USD",
+                      "url": "https://pricing.twilio.com/v1/Voice/Countries/US"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -965,10 +1359,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchVoiceCountry",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchVoiceCountry"
       }
     },
     "/v1/Voice/Numbers/{Number}": {
@@ -985,8 +1376,8 @@
           "inbound_call_price",
           "price_unit"
         ],
-        "pathType": "instance",
-        "parent": "/Voice"
+        "parent": "/Voice",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -1011,6 +1402,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/pricing.v1.voice.voice_number"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "country": "Iran",
+                      "inbound_call_price": {
+                        "base_price": null,
+                        "current_price": null,
+                        "number_type": null
+                      },
+                      "iso_country": "IR",
+                      "number": "+987654321",
+                      "outbound_call_price": {
+                        "base_price": "0.255",
+                        "current_price": "0.255"
+                      },
+                      "price_unit": "USD",
+                      "url": "https://pricing.twilio.com/v1/Voice/Numbers/+987654321"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1022,10 +1469,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchVoiceNumber",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchVoiceNumber"
       }
     },
     "/v1/Voice/Numbers": {
@@ -1042,8 +1486,8 @@
           "inbound_call_price",
           "price_unit"
         ],
-        "pathType": "list",
-        "parent": "/Voice"
+        "parent": "/Voice",
+        "pathType": "list"
       }
     }
   },
@@ -1060,10 +1504,9 @@
       "name": "PricingV1Number"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "GA",
-      "description": "This product is Generally Available."
+      "accountSid_authToken": []
     }
   ]
 }

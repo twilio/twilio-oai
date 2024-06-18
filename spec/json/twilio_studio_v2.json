@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "studio.v2.flow.execution": {
         "type": "object",
@@ -497,12 +503,6 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -518,7 +518,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.56.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -535,7 +535,6 @@
           "status",
           "date_created"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "steps": {
             "mapping": {
@@ -552,7 +551,8 @@
             "resource_url": "/v2/Flows/{flow_sid}/Executions/{execution_sid}/Context"
           }
         },
-        "parent": "/Flows/{Sid}"
+        "parent": "/Flows/{Sid}",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of all Executions for the Flow.",
@@ -632,16 +632,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -650,21 +652,71 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListExecutionResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions?PageSize=50&Page=0",
+                        "page": 0,
+                        "first_page_url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "executions"
+                      },
+                      "executions": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -676,10 +728,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListExecution",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListExecution"
       },
       "post": {
         "description": "Triggers a new Execution for the Flow",
@@ -706,6 +755,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "context": {},
+                      "contact_channel_address": "+18001234567",
+                      "status": "active",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "links": {
+                        "steps": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps",
+                        "execution_context": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -718,9 +822,6 @@
           }
         ],
         "operationId": "CreateExecution",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -746,6 +847,15 @@
                   "To",
                   "From"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "To": "+18001234567",
+                    "From": "+18007654321",
+                    "Parameters": "{\"first_name\":\"Foo\"}"
+                  }
+                }
               }
             }
           }
@@ -765,7 +875,6 @@
           "status",
           "date_created"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "steps": {
             "mapping": {
@@ -782,7 +891,8 @@
             "resource_url": "/v2/Flows/{flow_sid}/Executions/{execution_sid}/Context"
           }
         },
-        "parent": "/Flows/{Sid}"
+        "parent": "/Flows/{Sid}",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve an Execution",
@@ -821,6 +931,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "contact_channel_address": "+14155555555",
+                      "status": "ended",
+                      "context": {},
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": null,
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "steps": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps",
+                        "execution_context": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -832,10 +997,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExecution",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExecution"
       },
       "delete": {
         "description": "Delete the Execution and all Steps relating to it.",
@@ -878,10 +1040,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteExecution",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteExecution"
       },
       "post": {
         "description": "Update the status of an Execution to `ended`.",
@@ -920,6 +1079,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "context": {},
+                      "contact_channel_address": "+14155555555",
+                      "status": "ended",
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": "2017-11-06T12:00:00Z",
+                      "links": {
+                        "steps": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps",
+                        "execution_context": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -932,9 +1146,6 @@
           }
         ],
         "operationId": "UpdateExecution",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -951,6 +1162,13 @@
                 "required": [
                   "Status"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "Status": "ended"
+                  }
+                }
               }
             }
           }
@@ -968,9 +1186,9 @@
         "defaultOutputProperties": [
           "context"
         ],
-        "pathType": "instance",
         "parent": "/Flows/{FlowSid}/Executions/{Sid}",
-        "mountName": "execution_context"
+        "mountName": "execution_context",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve the most recent context for an Execution.",
@@ -1009,6 +1227,55 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution.execution_context"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "context": {
+                        "foo": "bar"
+                      },
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "execution_sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1020,10 +1287,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExecutionContext",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExecutionContext"
       }
     },
     "/v2/Flows/{FlowSid}/Executions/{ExecutionSid}/Steps": {
@@ -1039,7 +1303,6 @@
           "name",
           "date_created"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "step_context": {
             "mapping": {
@@ -1051,7 +1314,8 @@
           }
         },
         "parent": "/Flows/{FlowSid}/Executions/{Sid}",
-        "className": "execution_step"
+        "className": "execution_step",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of all Steps for an Execution.",
@@ -1125,16 +1389,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1143,21 +1409,71 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListExecutionStepResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps?PageSize=50&Page=0",
+                        "page": 0,
+                        "first_page_url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "steps"
+                      },
+                      "steps": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1169,10 +1485,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListExecutionStep",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListExecutionStep"
       }
     },
     "/v2/Flows/{FlowSid}/Executions/{ExecutionSid}/Steps/{Sid}": {
@@ -1188,7 +1501,6 @@
           "name",
           "date_created"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "step_context": {
             "mapping": {
@@ -1200,7 +1512,8 @@
           }
         },
         "parent": "/Flows/{FlowSid}/Executions/{Sid}",
-        "className": "execution_step"
+        "className": "execution_step",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve a Step.",
@@ -1251,6 +1564,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution.execution_step"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "FTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "execution_sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "parent_step_sid": null,
+                      "name": "incomingRequest",
+                      "context": {},
+                      "transitioned_from": "Trigger",
+                      "transitioned_to": "Ended",
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": null,
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps/FTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "step_context": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps/FTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1262,10 +1632,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExecutionStep",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExecutionStep"
       }
     },
     "/v2/Flows/{FlowSid}/Executions/{ExecutionSid}/Steps/{StepSid}/Context": {
@@ -1279,10 +1646,10 @@
         "defaultOutputProperties": [
           "context"
         ],
-        "pathType": "instance",
         "parent": "/Flows/{FlowSid}/Executions/{ExecutionSid}/Steps/{Sid}",
         "mountName": "step_context",
-        "className": "execution_step_context"
+        "className": "execution_step_context",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve the context for an Execution Step.",
@@ -1333,6 +1700,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.execution.execution_step.execution_step_context"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "context": {
+                        "foo": "bar"
+                      },
+                      "flow_sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "execution_sid": "FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "step_sid": "FTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions/FNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Steps/FTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Context"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1344,10 +1761,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExecutionStepContext",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExecutionStepContext"
       }
     },
     "/v2/Flows": {
@@ -1364,7 +1778,6 @@
           "status",
           "revision"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "revisions": {
             "mapping": {
@@ -1384,7 +1797,8 @@
             },
             "resource_url": "/v2/Flows/{flow_sid}/Executions"
           }
-        }
+        },
+        "pathType": "list"
       },
       "post": {
         "description": "Create a Flow.",
@@ -1397,6 +1811,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "definition": {
+                        "initial_state": "Trigger"
+                      },
+                      "friendly_name": "Test Flow",
+                      "status": "published",
+                      "revision": 1,
+                      "commit_message": null,
+                      "valid": true,
+                      "errors": [],
+                      "warnings": [],
+                      "webhook_url": "http://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": null,
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "test_users": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers",
+                        "revisions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions",
+                        "executions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1409,9 +1886,6 @@
           }
         ],
         "operationId": "CreateFlow",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1441,6 +1915,15 @@
                   "Status",
                   "Definition"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "Test Flow",
+                    "Status": "published",
+                    "Definition": "{\"initial_state\": \"Trigger\"}"
+                  }
+                }
               }
             }
           }
@@ -1494,16 +1977,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1512,21 +1997,93 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListFlowResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "url": "https://studio.twilio.com/v2/Flows?PageSize=50&Page=0",
+                        "page": 0,
+                        "first_page_url": "https://studio.twilio.com/v2/Flows?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "flows"
+                      },
+                      "flows": [
+                        {
+                          "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "Test Flow",
+                          "status": "published",
+                          "revision": 1,
+                          "definition": null,
+                          "commit_message": null,
+                          "valid": null,
+                          "errors": null,
+                          "warnings": null,
+                          "webhook_url": "http://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2017-11-06T12:00:00Z",
+                          "date_updated": "2017-11-06T12:00:00Z",
+                          "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "links": {
+                            "test_users": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers",
+                            "revisions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions",
+                            "executions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1538,10 +2095,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListFlow",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListFlow"
       }
     },
     "/v2/Flows/{Sid}": {
@@ -1558,7 +2112,6 @@
           "status",
           "revision"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "revisions": {
             "mapping": {
@@ -1578,7 +2131,8 @@
             },
             "resource_url": "/v2/Flows/{flow_sid}/Executions"
           }
-        }
+        },
+        "pathType": "instance"
       },
       "post": {
         "description": "Update a Flow.",
@@ -1605,6 +2159,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "definition": {
+                        "initial_state": "Trigger"
+                      },
+                      "friendly_name": "Test Flow",
+                      "status": "published",
+                      "revision": 1,
+                      "commit_message": null,
+                      "valid": true,
+                      "errors": [],
+                      "warnings": [],
+                      "webhook_url": "http://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": "2017-11-06T12:00:00Z",
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "test_users": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers",
+                        "revisions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions",
+                        "executions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1617,9 +2234,6 @@
           }
         ],
         "operationId": "UpdateFlow",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1647,6 +2261,15 @@
                 "required": [
                   "Status"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "Test Flow",
+                    "Status": "published",
+                    "Definition": "{\"initial_state\": \"Trigger\"}"
+                  }
+                }
               }
             }
           }
@@ -1677,6 +2300,69 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "Test Flow",
+                      "definition": {
+                        "initial_state": "Trigger"
+                      },
+                      "status": "published",
+                      "revision": 1,
+                      "commit_message": "commit",
+                      "valid": true,
+                      "errors": [],
+                      "warnings": [],
+                      "webhook_url": "http://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": null,
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "test_users": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers",
+                        "revisions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions",
+                        "executions": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Executions"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1688,10 +2374,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchFlow",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchFlow"
       },
       "delete": {
         "description": "Delete a specific Flow.",
@@ -1722,10 +2405,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteFlow",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteFlow"
       }
     },
     "/v2/Flows/{Sid}/Revisions": {
@@ -1742,9 +2422,9 @@
           "status",
           "revision"
         ],
-        "pathType": "list",
         "parent": "/Flows/{Sid}",
-        "className": "flow_revision"
+        "className": "flow_revision",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of all Flows revisions.",
@@ -1806,16 +2486,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1824,21 +2506,86 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListFlowRevisionResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions?PageSize=50&Page=0",
+                        "page": 0,
+                        "first_page_url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "revisions"
+                      },
+                      "revisions": [
+                        {
+                          "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "Test Flow",
+                          "status": "published",
+                          "revision": 1,
+                          "definition": null,
+                          "commit_message": null,
+                          "valid": null,
+                          "errors": null,
+                          "date_created": "2017-11-06T12:00:00Z",
+                          "date_updated": "2017-11-06T12:00:00Z",
+                          "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions/1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1850,10 +2597,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListFlowRevision",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListFlowRevision"
       }
     },
     "/v2/Flows/{Sid}/Revisions/{Revision}": {
@@ -1870,9 +2614,9 @@
           "status",
           "revision"
         ],
-        "pathType": "instance",
         "parent": "/Flows/{Sid}",
-        "className": "flow_revision"
+        "className": "flow_revision",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve a specific Flow revision.",
@@ -1908,6 +2652,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.flow_revision"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "definition": {
+                        "initial_state": "Trigger"
+                      },
+                      "friendly_name": "Test Flow",
+                      "status": "published",
+                      "revision": 1,
+                      "commit_message": null,
+                      "valid": true,
+                      "errors": [],
+                      "date_created": "2017-11-06T12:00:00Z",
+                      "date_updated": null,
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Revisions/1"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1919,10 +2719,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchFlowRevision",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchFlowRevision"
       }
     },
     "/v2/Flows/Validate": {
@@ -1936,8 +2733,8 @@
         "defaultOutputProperties": [
           "valid"
         ],
-        "pathType": "list",
-        "mountName": "flow_validate"
+        "mountName": "flow_validate",
+        "pathType": "list"
       },
       "post": {
         "description": "Validate flow JSON definition",
@@ -1950,6 +2747,49 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow_validate"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "valid": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1962,9 +2802,6 @@
           }
         ],
         "operationId": "UpdateFlowValidate",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1994,6 +2831,15 @@
                   "Status",
                   "Definition"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "Test Flow",
+                    "Status": "published",
+                    "Definition": "{\"initial_state\": \"Trigger\"}"
+                  }
+                }
               }
             }
           }
@@ -2011,9 +2857,9 @@
         "defaultOutputProperties": [
           "test_users"
         ],
-        "pathType": "instance",
         "parent": "/Flows/{Sid}",
-        "className": "flow_test_user"
+        "className": "flow_test_user",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch flow test users",
@@ -2040,6 +2886,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.test_user"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "test_users": [
+                        "user1",
+                        "user2"
+                      ],
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2051,10 +2945,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchTestUser",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchTestUser"
       },
       "post": {
         "description": "Update flow test users",
@@ -2081,6 +2972,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/studio.v2.flow.test_user"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "test_users": [
+                        "user1",
+                        "user2"
+                      ],
+                      "url": "https://studio.twilio.com/v2/Flows/FWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/TestUsers"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2093,9 +3032,6 @@
           }
         ],
         "operationId": "UpdateTestUser",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2114,6 +3050,16 @@
                 "required": [
                   "TestUsers"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "TestUsers": [
+                      "user1",
+                      "user2"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -2127,6 +3073,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "StudioV2Application"
+    },
     {
       "name": "StudioV2Execution"
     },
@@ -2152,10 +3101,9 @@
       "name": "StudioV2FlowValidate"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "GA",
-      "description": "This product is Generally Available."
+      "accountSid_authToken": []
     }
   ]
 }

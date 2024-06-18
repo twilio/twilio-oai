@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     numbers.v2.authorization_document:
       type: object
@@ -1055,10 +1059,6 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the Supporting Document Type resource.
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Numbers
   description: This is the public Twilio REST API.
@@ -1070,21 +1070,21 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.56.1
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v2/HostedNumber/AuthorizationDocuments/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       dependentProperties:
         dependent_hosted_number_orders:
           mapping:
             signing_document_sid: sid
           resource_url: /v2/HostedNumber/AuthorizationDocuments/{signing_document_sid}/DependentHostedNumberOrders
+      pathType: instance
     get:
       description: Fetch a specific AuthorizationDocument.
       tags:
@@ -1105,12 +1105,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.authorization_document'
+              examples:
+                fetch:
+                  value:
+                    address_sid: AD11111111111111111111111111111111
+                    cc_emails:
+                    - aaa@twilio.com
+                    - bbb@twilio.com
+                    date_created: '2017-03-28T20:06:39Z'
+                    date_updated: '2017-03-28T20:06:39Z'
+                    email: test@twilio.com
+                    links:
+                      dependent_hosted_number_orders: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders
+                    sid: PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: signing
+                    url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchAuthorizationDocument
-      x-maturity:
-      - Beta
     delete:
       description: Cancel the AuthorizationDocument request.
       tags:
@@ -1131,20 +1169,18 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteAuthorizationDocument
-      x-maturity:
-      - Beta
   /v2/HostedNumber/AuthorizationDocuments:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       dependentProperties:
         dependent_hosted_number_orders:
           mapping:
             signing_document_sid: sid
           resource_url: /v2/HostedNumber/AuthorizationDocuments/{signing_document_sid}/DependentHostedNumberOrders
+      pathType: list
     get:
       description: Retrieve a list of AuthorizationDocuments belonging to the account
         initiating the request.
@@ -1160,6 +1196,9 @@ paths:
           pii:
             handling: standard
             deleteSla: 30
+        examples:
+          readEmpty:
+            value: test+hosted@twilio.com
       - name: Status
         in: query
         description: 'Status of an instance resource. It can hold one of the values:
@@ -1169,6 +1208,9 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/authorization_document_enum_status'
+        examples:
+          readEmpty:
+            value: signed
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1200,35 +1242,93 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.authorization_document'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListAuthorizationDocumentResponse
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments?Status=signed&Email=test%2Bhosted%40twilio.com&PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments?Status=signed&Email=test%2Bhosted%40twilio.com&PageSize=50&Page=0
+                    items: []
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments?PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments?PageSize=50&Page=0
+                    items:
+                    - address_sid: ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      cc_emails:
+                      - test1@twilio.com
+                      - test2@twilio.com
+                      date_created: '2017-03-28T20:06:39Z'
+                      date_updated: '2017-03-28T20:06:39Z'
+                      email: test+hosted@twilio.com
+                      links:
+                        dependent_hosted_number_orders: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders
+                      sid: PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: signing
+                      url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListAuthorizationDocument
-      x-maturity:
-      - Beta
     post:
       description: Create an AuthorizationDocument for authorizing the hosting of
         phone number capabilities on Twilio's platform.
@@ -1240,12 +1340,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.authorization_document'
+              examples:
+                create:
+                  value:
+                    address_sid: ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    cc_emails:
+                    - test1@twilio.com
+                    - test2@twilio.com
+                    date_created: '2017-03-28T20:06:39Z'
+                    date_updated: '2017-03-28T20:06:39Z'
+                    email: test+hosted@twilio.com
+                    links:
+                      dependent_hosted_number_orders: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders
+                    sid: PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: signing
+                    url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateAuthorizationDocument
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1291,14 +1429,27 @@ paths:
               - Email
               - ContactPhoneNumber
               - HostedNumberOrderSids
+            examples:
+              create:
+                value:
+                  AddressSid: ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Email: test+hosted@twilio.com
+                  CcEmails:
+                  - test1@twilio.com
+                  - test2@twilio.com
+                  HostedNumberOrderSids:
+                  - HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa01
+                  - HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa02
+                  ContactTitle: Mr.
+                  ContactPhoneNumber: '+14155555555'
   /v2/HostedNumber/Orders/Bulk/{BulkHostingSid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       mountName: bulk_hosted_number_orders
+      pathType: instance
     get:
       description: Fetch a specific BulkHostedNumberOrder.
       tags:
@@ -1325,30 +1476,163 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.bulk_hosted_number_order'
+              examples:
+                fetchNoParams:
+                  value:
+                    friendly_name: test
+                    bulk_hosting_sid: BHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    notification_email: test@twilio.com
+                    request_status: PROCESSED
+                    url: https://numbers.twilio.com/v2/HostedNumber/Orders/Bulk/BHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2023-06-29T15:19:37Z'
+                    date_completed: '2023-06-30T15:19:37Z'
+                    total_count: 4
+                    results:
+                    - order_status: pending_loa
+                      count: '2'
+                      get_more_info: null
+                      orders:
+                      - hosting_order_sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        phone_number: '+12222222222'
+                        account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        failure_reason: null
+                        next_step: null
+                        url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        email: test@twilio.com
+                        signing_document_sid: PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      - hosting_order_sid: HRbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                        phone_number: '+13333333333'
+                        account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        failure_reason: null
+                        next_step: null
+                        url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                        email: test@twilio.com
+                        signing_document_sid: PXbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+                    - order_status: failed
+                      count: '2'
+                      get_more_info: 'For more information, call the Hosted Number
+                        Eligibility API: https://www.twilio.com/docs/phone-numbers/hosted-numbers-api/eligibility-api-overview'
+                      orders:
+                      - hosting_order_sid: HRcccccccccccccccccccccccccccccccc
+                        phone_number: '+14444444444'
+                        account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        failure_reason: test failure-reason
+                        next_step: test next-step
+                        url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRcccccccccccccccccccccccccccccccc
+                        email: test@twilio.com
+                        signing_document_sid: null
+                      - hosting_order_sid: HRdddddddddddddddddddddddddddddddd
+                        phone_number: '+15555555555'
+                        account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        failure_reason: test failure-reason
+                        next_step: test next-step
+                        url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRdddddddddddddddddddddddddddddddd
+                        email: test@twilio.com
+                        signing_document_sid: null
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBulkHostedNumberOrder
-      x-maturity:
-      - Beta
   /v2/HostedNumber/Orders/Bulk:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: bulk_hosted_number_orders
+      pathType: list
+    post:
+      description: Host multiple phone numbers on Twilio's platform.
+      tags:
+      - NumbersV2BulkHostedNumberOrder
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v2.bulk_hosted_number_order'
+              examples:
+                create:
+                  value:
+                    friendly_name: test
+                    bulk_hosting_sid: BHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    request_status: QUEUED
+                    notification_email: test@twilio.com
+                    url: https://numbers.twilio.com/v2/HostedNumber/Orders/Bulk/BHaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2023-06-29T15:19:37Z'
+                    date_completed: null
+                    total_count: 4
+                    results: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+          description: Accepted
+      security:
+      - accountSid_authToken: []
+      operationId: CreateBulkHostedNumberOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: CreateBulkHostedNumberOrderRequest
+              properties: {}
   /v2/RegulatoryCompliance/Bundles:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - regulation_sid
       - friendly_name
-      pathType: list
       dependentProperties:
         evaluations:
           mapping:
@@ -1367,6 +1651,7 @@ paths:
             bundle_sid: sid
           resource_url: /v2/RegulatoryCompliance/Bundles/{bundle_sid}/ReplaceItems
       parent: /RegulatoryCompliance
+      pathType: list
     post:
       description: Create a new Bundle.
       tags:
@@ -1377,12 +1662,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle'
+              examples:
+                create:
+                  value:
+                    sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    status: draft
+                    email: email
+                    status_callback: http://www.example.com
+                    valid_until: null
+                    date_created: '2019-07-30T22:29:24Z'
+                    date_updated: '2019-07-31T01:09:00Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                      item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                      bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBundle
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1425,6 +1751,13 @@ paths:
               required:
               - FriendlyName
               - Email
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  Email: email
+                  RegulationSid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  StatusCallback: http://www.example.com
     get:
       description: Retrieve a list of all Bundles for an account.
       tags:
@@ -1438,12 +1771,24 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/bundle_enum_status'
+        examples:
+          readFull:
+            value: draft
+          readApprovedAuMobileWithDate:
+            value: twilio-approved
+          readApprovedAuMobileDateLess:
+            value: twilio-approved
+          readApprovedJapanTollfreeDateBetween:
+            value: twilio-approved
       - name: FriendlyName
         in: query
         description: The string that you assigned to describe the resource. The column
           can contain 255 variable characters.
         schema:
           type: string
+        examples:
+          readFull:
+            value: friendly_name
       - name: RegulationSid
         in: query
         description: The unique string of a [Regulation resource](https://www.twilio.com/docs/phone-numbers/regulatory/api/regulations)
@@ -1453,24 +1798,48 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^RN[0-9a-fA-F]{32}$
+        examples:
+          readFull:
+            value: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: IsoCountry
         in: query
         description: The 2-digit [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
           of the Bundle's phone number country ownership request.
         schema:
           type: string
+        examples:
+          readFull:
+            value: US
+          readApprovedAuMobileWithDate:
+            value: AU
+          readApprovedAuMobileDateLess:
+            value: AU
+          readApprovedJapanTollfreeDateBetween:
+            value: JP
       - name: NumberType
         in: query
         description: The type of phone number of the Bundle's ownership request. Can
           be `local`, `mobile`, `national`, or `tollfree`.
         schema:
           type: string
+        examples:
+          readFull:
+            value: mobile
+          readApprovedAuMobileWithDate:
+            value: mobile
+          readApprovedAuMobileDateLess:
+            value: mobile
+          readApprovedJapanTollfreeDateBetween:
+            value: tollfree
       - name: HasValidUntilDate
         in: query
         description: Indicates that the Bundle is a valid Bundle until a specified
           expiration date.
         schema:
           type: boolean
+        examples:
+          readApprovedAuMobileWithDate:
+            value: 'true'
       - name: SortBy
         in: query
         description: Can be `valid-until` or `date-updated`. Defaults to `date-created`.
@@ -1501,6 +1870,11 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readApprovedAuMobileDateLess:
+            value: '2022-11-29T23:59:59Z'
+          readApprovedJapanTollfreeDateBetween:
+            value: '2022-11-29T23:59:59Z'
       - name: ValidUntilDate>
         in: query
         description: Date to filter Bundles having their `valid_until_date` before
@@ -1510,6 +1884,9 @@ paths:
         schema:
           type: string
           format: date-time
+        examples:
+          readApprovedJapanTollfreeDateBetween:
+            value: '2022-01-01T00:00:00Z'
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1541,45 +1918,183 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListBundleResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      status: provisionally-approved
+                      email: email
+                      status_callback: http://www.example.com
+                      valid_until: '2020-07-31T01:00:00Z'
+                      date_created: '2019-07-30T22:29:24Z'
+                      date_updated: '2019-07-31T01:09:00Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                        item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                        bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=draft&RegulationSid=RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&IsoCountry=US&FriendlyName=friendly_name&NumberType=mobile&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=draft&RegulationSid=RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&IsoCountry=US&FriendlyName=friendly_name&NumberType=mobile&PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readApprovedAuMobileWithDate:
+                  value:
+                    results:
+                    - sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      status: twilio-approved
+                      email: email
+                      status_callback: http://www.example.com
+                      valid_until: '2022-11-29T01:00:00Z'
+                      date_created: '2021-08-30T22:29:24Z'
+                      date_updated: '2021-08-31T01:09:00Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                        item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                        bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=AU&HasValidUntilDate=true&NumberType=mobile&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=AU&HasValidUntilDate=true&NumberType=mobile&PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readApprovedAuMobileDateLess:
+                  value:
+                    results:
+                    - sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      status: twilio-approved
+                      email: email
+                      status_callback: http://www.example.com
+                      valid_until: '2022-11-29T01:00:00Z'
+                      date_created: '2021-08-30T22:29:24Z'
+                      date_updated: '2021-08-31T01:09:00Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                        item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                        bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=AU&ValidUntilDate%3C=2022-11-29T23%3A59%3A59Z&NumberType=mobile&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=AU&ValidUntilDate%3C=2022-11-29T23%3A59%3A59Z&NumberType=mobile&PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readApprovedJapanTollfreeDateBetween:
+                  value:
+                    results:
+                    - sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      status: twilio-approved
+                      email: email
+                      status_callback: http://www.example.com
+                      valid_until: '2022-11-29T01:00:00Z'
+                      date_created: '2021-08-30T22:29:24Z'
+                      date_updated: '2021-08-31T01:09:00Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                        item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                        bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=JP&ValidUntilDate%3E=2022-01-01T00%3A00%3A00Z&ValidUntilDate%3C=2022-11-29T23%3A59%3A59Z&NumberType=tollfree&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles?Status=twilio-approved&IsoCountry=JP&ValidUntilDate%3E=2022-01-01T00%3A00%3A00Z&ValidUntilDate%3C=2022-11-29T23%3A59%3A59Z&NumberType=tollfree&PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListBundle
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Bundles/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - regulation_sid
       - friendly_name
-      pathType: instance
       dependentProperties:
         evaluations:
           mapping:
@@ -1598,6 +2113,7 @@ paths:
             bundle_sid: sid
           resource_url: /v2/RegulatoryCompliance/Bundles/{bundle_sid}/ReplaceItems
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch a specific Bundle instance.
       tags:
@@ -1618,12 +2134,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle'
+              examples:
+                fetch:
+                  value:
+                    sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    status: draft
+                    valid_until: null
+                    email: email
+                    status_callback: http://www.example.com
+                    date_created: '2019-07-30T22:29:24Z'
+                    date_updated: '2019-07-31T01:09:00Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                      item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                      bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchBundle
-      x-maturity:
-      - GA
     post:
       description: Updates a Bundle in an account.
       tags:
@@ -1644,12 +2201,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle'
+              examples:
+                update:
+                  value:
+                    sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    status: draft
+                    email: email
+                    status_callback: http://www.example.com
+                    valid_until: null
+                    date_created: '2019-07-30T22:29:24Z'
+                    date_updated: '2019-07-31T01:09:00Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      evaluations: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations
+                      item_assignments: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments
+                      bundle_copies: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateBundle
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1673,8 +2271,13 @@ paths:
                   type: string
                   description: The email address that will receive updates when the
                     Bundle resource changes status.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  Status: draft
+                  StatusCallback: http://www.example.com
+                  FriendlyName: friendly_name
+                  Email: email
     delete:
       description: Delete a specific Bundle.
       tags:
@@ -1695,17 +2298,15 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteBundle
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/Copies:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /RegulatoryCompliance/Bundles/{Sid}
       mountName: bundle_copies
+      pathType: list
     post:
       description: Creates a new copy of a Bundle. It will internally create copies
         of all the bundle items (identities and documents) of the original bundle
@@ -1727,12 +2328,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.bundle_copy'
+              examples:
+                create:
+                  value:
+                    sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    status: draft
+                    valid_until: '2015-07-30T20:00:00Z'
+                    email: email
+                    status_callback: http://www.example.com
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateBundleCopy
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1744,8 +2381,10 @@ paths:
                   type: string
                   description: The string that you assigned to describe the copied
                     bundle.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
     get:
       description: Retrieve a list of all Bundles Copies for a Bundle.
       tags:
@@ -1791,43 +2430,99 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.bundle_copy'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListBundleCopyResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      status: twilio-approved
+                      email: email
+                      status_callback: http://www.example.com
+                      valid_until: '2020-07-31T01:00:00Z'
+                      date_created: '2019-07-30T22:29:24Z'
+                      date_updated: '2019-07-31T01:09:00Z'
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Copies?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListBundleCopy
-      x-maturity:
-      - Beta
   /v2/HostedNumber/AuthorizationDocuments/{SigningDocumentSid}/DependentHostedNumberOrders:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /HostedNumber/AuthorizationDocuments/{Sid}
+      pathType: list
     get:
       description: Retrieve a list of dependent HostedNumberOrders belonging to the
         AuthorizationDocument.
@@ -1853,12 +2548,18 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/dependent_hosted_number_order_enum_status'
+        examples:
+          readEmpty:
+            value: completed
       - name: PhoneNumber
         in: query
         description: An E164 formatted phone number hosted by this HostedNumberOrder.
         schema:
           type: string
           format: phone-number
+        examples:
+          readEmpty:
+            value: '+19193608000'
       - name: IncomingPhoneNumberSid
         in: query
         description: A 34 character string that uniquely identifies the IncomingPhoneNumber
@@ -1868,6 +2569,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^PN[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       - name: FriendlyName
         in: query
         description: A human readable description of this resource, up to 128 characters.
@@ -1877,6 +2581,9 @@ paths:
           pii:
             handling: standard
             deleteSla: 30
+        examples:
+          readEmpty:
+            value: example
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -1908,45 +2615,113 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.authorization_document.dependent_hosted_number_order'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListDependentHostedNumberOrderResponse
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders?Status=completed&FriendlyName=example&PhoneNumber=%2B19193608000&IncomingPhoneNumberSid=PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders?Status=completed&FriendlyName=example&PhoneNumber=%2B19193608000&IncomingPhoneNumberSid=PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
+                    items: []
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders?PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/AuthorizationDocuments/PXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DependentHostedNumberOrders?PageSize=50&Page=0
+                    items:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      address_sid: AD11111111111111111111111111111111
+                      capabilities:
+                        sms: true
+                        voice: false
+                      cc_emails:
+                      - aaa@twilio.com
+                      - bbb@twilio.com
+                      date_created: '2017-03-28T20:06:39Z'
+                      date_updated: '2017-03-28T20:06:39Z'
+                      email: test@twilio.com
+                      friendly_name: friendly_name
+                      incoming_phone_number_sid: PN11111111111111111111111111111111
+                      phone_number: '+14153608311'
+                      sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      signing_document_sid: PX11111111111111111111111111111111
+                      status: received
+                      failure_reason: ''
+                      contact_title: contact_title_test
+                      contact_phone_number: '+12344444444'
+                      bulk_hosting_request_sid: BH11111111111111111111111111111111
+                      next_step: Test
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListDependentHostedNumberOrder
-      x-maturity:
-      - Beta
   /v2/RegulatoryCompliance/EndUsers:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: list
       parent: /RegulatoryCompliance
+      pathType: list
     post:
       description: Create a new End User.
       tags:
@@ -1957,12 +2732,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user'
+              examples:
+                create:
+                  value:
+                    sid: ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    type: individual
+                    attributes:
+                      email: foobar@twilio.com
+                    date_created: '2019-07-30T21:57:45Z'
+                    date_updated: '2019-07-30T21:57:45Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers/ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateEndUser
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1984,6 +2794,12 @@ paths:
               required:
               - FriendlyName
               - Type
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  Type: individual
+                  Attributes: '{}'
     get:
       description: Retrieve a list of all End User for an account.
       tags:
@@ -2020,45 +2836,100 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListEndUserResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      type: individual
+                      attributes:
+                        email: foobar@twilio.com
+                      date_created: '2019-07-30T21:57:45Z'
+                      date_updated: '2019-07-30T21:57:45Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers/ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEndUser
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/EndUsers/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: instance
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch specific End User Instance.
       tags:
@@ -2080,12 +2951,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user'
+              examples:
+                fetch:
+                  value:
+                    sid: ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    type: individual
+                    attributes:
+                      email: foobar@twilio.com
+                    date_created: '2019-07-30T21:57:45Z'
+                    date_updated: '2019-07-30T21:57:45Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers/ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEndUser
-      x-maturity:
-      - GA
     post:
       description: Update an existing End User.
       tags:
@@ -2107,12 +3013,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user'
+              examples:
+                update:
+                  value:
+                    sid: ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    type: individual
+                    attributes:
+                      email: foobar@twilio.com
+                    date_created: '2019-07-30T21:57:45Z'
+                    date_updated: '2019-07-30T21:57:45Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUsers/ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateEndUser
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2126,8 +3067,11 @@ paths:
                 Attributes:
                   description: The set of parameters that are the attributes of the
                     End User resource which are derived End User Types.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  FriendlyName: friendly_name
+                  Attributes: '{}'
     delete:
       description: Delete a specific End User.
       tags:
@@ -2149,18 +3093,16 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteEndUser
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/EndUserTypes:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: list
       parent: /RegulatoryCompliance
+      pathType: list
     get:
       description: Retrieve a list of all End-User Types.
       tags:
@@ -2197,45 +3139,102 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user_type'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListEndUserTypeResponse
+              examples:
+                readEmpty:
+                  value:
+                    end_user_types: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes?PageSize=50&Page=0
+                      next_page_url: null
+                      key: end_user_types
+                readFull:
+                  value:
+                    end_user_types:
+                    - sid: OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      machine_name: machine_name
+                      fields:
+                      - friendly_name: Business Purpose
+                        machine_name: business_purpose
+                        constraint: String
+                      - friendly_name: Last Name
+                        machine_name: last_name
+                        constraint: String
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes/OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes?PageSize=50&Page=0
+                      next_page_url: null
+                      key: end_user_types
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEndUserType
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/EndUserTypes/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: instance
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch a specific End-User Type Instance.
       tags:
@@ -2253,21 +3252,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.end_user_type'
+              examples:
+                fetch:
+                  value:
+                    sid: OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    machine_name: machine_name
+                    fields:
+                    - friendly_name: Business Purpose
+                      machine_name: business_purpose
+                      constraint: String
+                    - friendly_name: Last Name
+                      machine_name: last_name
+                      constraint: String
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/EndUserTypes/OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEndUserType
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/Evaluations:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
-      pathType: list
       parent: /RegulatoryCompliance/Bundles/{Sid}
+      pathType: list
     post:
       description: Creates an evaluation for a bundle
       tags:
@@ -2288,12 +3324,190 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.evaluation'
+              examples:
+                create:
+                  value:
+                    sid: ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: noncompliant
+                    date_created: '2020-04-28T18:14:01Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations/ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results:
+                    - friendly_name: Business
+                      object_type: business
+                      passed: false
+                      failure_reason: A Business End-User is missing. Please add one
+                        to the regulatory bundle.
+                      error_code: 22214
+                      valid: []
+                      invalid:
+                      - friendly_name: Business Name
+                        object_field: business_name
+                        failure_reason: The Business Name is missing. Please enter
+                          in a Business Name on the Business information.
+                        error_code: 22215
+                      - friendly_name: Business Registration Number
+                        object_field: business_registration_number
+                        failure_reason: The Business Registration Number is missing.
+                          Please enter in a Business Registration Number on the Business
+                          information.
+                        error_code: 22215
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing. Please enter in
+                          a First Name on the Business information.
+                        error_code: 22215
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing. Please enter in
+                          a Last Name on the Business information.
+                        error_code: 22215
+                      requirement_friendly_name: Business
+                      requirement_name: business_info
+                    - friendly_name: Excerpt from the commercial register (Extrait
+                        K-bis) showing name of Authorized Representative
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register (Extrait
+                        K-bis) showing name of Authorized Representative is missing.
+                        Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Business Name
+                        object_field: business_name
+                        failure_reason: The Business Name is missing. Or, it does
+                          not match the Business Name you entered within Business
+                          information. Please enter in the Business Name shown on
+                          the Excerpt from the commercial register (Extrait K-bis)
+                          showing name of Authorized Representative or make sure both
+                          Business Name fields use the same exact inputs.
+                        error_code: 22217
+                      requirement_friendly_name: Business Name
+                      requirement_name: business_name_info
+                    - friendly_name: Excerpt from the commercial register showing
+                        French address
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register showing
+                        French address is missing. Please add one to the regulatory
+                        bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Address sid(s)
+                        object_field: address_sids
+                        failure_reason: The Address is missing. Please enter in the
+                          address shown on the Excerpt from the commercial register
+                          showing French address.
+                        error_code: 22219
+                      requirement_friendly_name: Business Address (Proof of Address)
+                      requirement_name: business_address_proof_info
+                    - friendly_name: Excerpt from the commercial register (Extrait
+                        K-bis)
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register (Extrait
+                        K-bis) is missing. Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Document Number
+                        object_field: document_number
+                        failure_reason: The Document Number is missing. Please enter
+                          in the Document Number shown on the Excerpt from the commercial
+                          register (Extrait K-bis).
+                        error_code: 22217
+                      requirement_friendly_name: Business Registration Number
+                      requirement_name: business_reg_no_info
+                    - friendly_name: Government-issued ID
+                      object_type: government_issued_document
+                      passed: false
+                      failure_reason: A Government-issued ID is missing. Please add
+                        one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing. Or, it does not
+                          match the First Name you entered within Business information.
+                          Please enter in the First Name shown on the Government-issued
+                          ID or make sure both First Name fields use the same exact
+                          inputs.
+                        error_code: 22217
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing. Or, it does not
+                          match the Last Name you entered within Business information.
+                          Please enter in the Last Name shown on the Government-issued
+                          ID or make sure both Last Name fields use the same exact
+                          inputs.
+                        error_code: 22217
+                      requirement_friendly_name: Name of Authorized Representative
+                      requirement_name: name_of_auth_rep_info
+                    - friendly_name: Executed Copy of Power of Attorney
+                      object_type: power_of_attorney
+                      passed: false
+                      failure_reason: An Executed Copy of Power of Attorney is missing.
+                        Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid: []
+                      requirement_friendly_name: Power of Attorney
+                      requirement_name: power_of_attorney_info
+                    - friendly_name: Government-issued ID
+                      object_type: government_issued_document
+                      passed: false
+                      failure_reason: A Government-issued ID is missing. Please add
+                        one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing on the Governnment-Issued
+                          ID.
+                        error_code: 22217
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing on the Government-issued
+                          ID
+                        error_code: 22217
+                      requirement_friendly_name: Name of Person granted the Power
+                        of Attorney
+                      requirement_name: name_in_power_of_attorney_info
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateEvaluation
-      x-maturity:
-      - GA
     get:
       description: Retrieve a list of Evaluations associated to the Bundle resource.
       tags:
@@ -2339,44 +3553,242 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.evaluation'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListEvaluationResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      status: noncompliant
+                      date_created: '2020-04-28T18:14:01Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations/ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      results:
+                      - friendly_name: Business
+                        object_type: business
+                        passed: false
+                        failure_reason: A Business End-User is missing. Please add
+                          one to the regulatory bundle.
+                        error_code: 22214
+                        valid: []
+                        invalid:
+                        - friendly_name: Business Name
+                          object_field: business_name
+                          failure_reason: The Business Name is missing. Please enter
+                            in a Business Name on the Business information.
+                          error_code: 22215
+                        - friendly_name: Business Registration Number
+                          object_field: business_registration_number
+                          failure_reason: The Business Registration Number is missing.
+                            Please enter in a Business Registration Number on the
+                            Business information.
+                          error_code: 22215
+                        - friendly_name: First Name
+                          object_field: first_name
+                          failure_reason: The First Name is missing. Please enter
+                            in a First Name on the Business information.
+                          error_code: 22215
+                        - friendly_name: Last Name
+                          object_field: last_name
+                          failure_reason: The Last Name is missing. Please enter in
+                            a Last Name on the Business information.
+                          error_code: 22215
+                        requirement_friendly_name: Business
+                        requirement_name: business_info
+                      - friendly_name: Excerpt from the commercial register (Extrait
+                          K-bis) showing name of Authorized Representative
+                        object_type: commercial_registrar_excerpt
+                        passed: false
+                        failure_reason: An Excerpt from the commercial register (Extrait
+                          K-bis) showing name of Authorized Representative is missing.
+                          Please add one to the regulatory bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid:
+                        - friendly_name: Business Name
+                          object_field: business_name
+                          failure_reason: The Business Name is missing. Or, it does
+                            not match the Business Name you entered within Business
+                            information. Please enter in the Business Name shown on
+                            the Excerpt from the commercial register (Extrait K-bis)
+                            showing name of Authorized Representative or make sure
+                            both Business Name fields use the same exact inputs.
+                          error_code: 22217
+                        requirement_friendly_name: Business Name
+                        requirement_name: business_name_info
+                      - friendly_name: Excerpt from the commercial register showing
+                          French address
+                        object_type: commercial_registrar_excerpt
+                        passed: false
+                        failure_reason: An Excerpt from the commercial register showing
+                          French address is missing. Please add one to the regulatory
+                          bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid:
+                        - friendly_name: Address sid(s)
+                          object_field: address_sids
+                          failure_reason: The Address is missing. Please enter in
+                            the address shown on the Excerpt from the commercial register
+                            showing French address.
+                          error_code: 22219
+                        requirement_friendly_name: Business Address (Proof of Address)
+                        requirement_name: business_address_proof_info
+                      - friendly_name: Excerpt from the commercial register (Extrait
+                          K-bis)
+                        object_type: commercial_registrar_excerpt
+                        passed: false
+                        failure_reason: An Excerpt from the commercial register (Extrait
+                          K-bis) is missing. Please add one to the regulatory bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid:
+                        - friendly_name: Document Number
+                          object_field: document_number
+                          failure_reason: The Document Number is missing. Please enter
+                            in the Document Number shown on the Excerpt from the commercial
+                            register (Extrait K-bis).
+                          error_code: 22217
+                        requirement_friendly_name: Business Registration Number
+                        requirement_name: business_reg_no_info
+                      - friendly_name: Government-issued ID
+                        object_type: government_issued_document
+                        passed: false
+                        failure_reason: A Government-issued ID is missing. Please
+                          add one to the regulatory bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid:
+                        - friendly_name: First Name
+                          object_field: first_name
+                          failure_reason: The First Name is missing. Or, it does not
+                            match the First Name you entered within Business information.
+                            Please enter in the First Name shown on the Government-issued
+                            ID or make sure both First Name fields use the same exact
+                            inputs.
+                          error_code: 22217
+                        - friendly_name: Last Name
+                          object_field: last_name
+                          failure_reason: The Last Name is missing. Or, it does not
+                            match the Last Name you entered within Business information.
+                            Please enter in the Last Name shown on the Government-issued
+                            ID or make sure both Last Name fields use the same exact
+                            inputs.
+                          error_code: 22217
+                        requirement_friendly_name: Name of Authorized Representative
+                        requirement_name: name_of_auth_rep_info
+                      - friendly_name: Executed Copy of Power of Attorney
+                        object_type: power_of_attorney
+                        passed: false
+                        failure_reason: An Executed Copy of Power of Attorney is missing.
+                          Please add one to the regulatory bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid: []
+                        requirement_friendly_name: Power of Attorney
+                        requirement_name: power_of_attorney_info
+                      - friendly_name: Government-issued ID
+                        object_type: government_issued_document
+                        passed: false
+                        failure_reason: A Government-issued ID is missing. Please
+                          add one to the regulatory bundle.
+                        error_code: 22216
+                        valid: []
+                        invalid:
+                        - friendly_name: First Name
+                          object_field: first_name
+                          failure_reason: The First Name is missing on the Governnment-Issued
+                            ID.
+                          error_code: 22217
+                        - friendly_name: Last Name
+                          object_field: last_name
+                          failure_reason: The Last Name is missing on the Government-issued
+                            ID
+                          error_code: 22217
+                        requirement_friendly_name: Name of Person granted the Power
+                          of Attorney
+                        requirement_name: name_in_power_of_attorney_info
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListEvaluation
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/Evaluations/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
-      pathType: instance
       parent: /RegulatoryCompliance/Bundles/{Sid}
+      pathType: instance
     get:
       description: Fetch specific Evaluation Instance.
       tags:
@@ -2406,20 +3818,198 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.evaluation'
+              examples:
+                fetch:
+                  value:
+                    sid: ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    status: noncompliant
+                    date_created: '2020-04-28T18:14:01Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Evaluations/ELaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    results:
+                    - friendly_name: Business
+                      object_type: business
+                      passed: false
+                      failure_reason: A Business End-User is missing. Please add one
+                        to the regulatory bundle.
+                      error_code: 22214
+                      valid: []
+                      invalid:
+                      - friendly_name: Business Name
+                        object_field: business_name
+                        failure_reason: The Business Name is missing. Please enter
+                          in a Business Name on the Business information.
+                        error_code: 22215
+                      - friendly_name: Business Registration Number
+                        object_field: business_registration_number
+                        failure_reason: The Business Registration Number is missing.
+                          Please enter in a Business Registration Number on the Business
+                          information.
+                        error_code: 22215
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing. Please enter in
+                          a First Name on the Business information.
+                        error_code: 22215
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing. Please enter in
+                          a Last Name on the Business information.
+                        error_code: 22215
+                      requirement_friendly_name: Business
+                      requirement_name: business_info
+                    - friendly_name: Excerpt from the commercial register (Extrait
+                        K-bis) showing name of Authorized Representative
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register (Extrait
+                        K-bis) showing name of Authorized Representative is missing.
+                        Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Business Name
+                        object_field: business_name
+                        failure_reason: The Business Name is missing. Or, it does
+                          not match the Business Name you entered within Business
+                          information. Please enter in the Business Name shown on
+                          the Excerpt from the commercial register (Extrait K-bis)
+                          showing name of Authorized Representative or make sure both
+                          Business Name fields use the same exact inputs.
+                        error_code: 22217
+                      requirement_friendly_name: Business Name
+                      requirement_name: business_name_info
+                    - friendly_name: Excerpt from the commercial register showing
+                        French address
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register showing
+                        French address is missing. Please add one to the regulatory
+                        bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Address sid(s)
+                        object_field: address_sids
+                        failure_reason: The Address is missing. Please enter in the
+                          address shown on the Excerpt from the commercial register
+                          showing French address.
+                        error_code: 22219
+                      requirement_friendly_name: Business Address (Proof of Address)
+                      requirement_name: business_address_proof_info
+                    - friendly_name: Excerpt from the commercial register (Extrait
+                        K-bis)
+                      object_type: commercial_registrar_excerpt
+                      passed: false
+                      failure_reason: An Excerpt from the commercial register (Extrait
+                        K-bis) is missing. Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: Document Number
+                        object_field: document_number
+                        failure_reason: The Document Number is missing. Please enter
+                          in the Document Number shown on the Excerpt from the commercial
+                          register (Extrait K-bis).
+                        error_code: 22217
+                      requirement_friendly_name: Business Registration Number
+                      requirement_name: business_reg_no_info
+                    - friendly_name: Government-issued ID
+                      object_type: government_issued_document
+                      passed: false
+                      failure_reason: A Government-issued ID is missing. Please add
+                        one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing. Or, it does not
+                          match the First Name you entered within Business information.
+                          Please enter in the First Name shown on the Government-issued
+                          ID or make sure both First Name fields use the same exact
+                          inputs.
+                        error_code: 22217
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing. Or, it does not
+                          match the Last Name you entered within Business information.
+                          Please enter in the Last Name shown on the Government-issued
+                          ID or make sure both Last Name fields use the same exact
+                          inputs.
+                        error_code: 22217
+                      requirement_friendly_name: Name of Authorized Representative
+                      requirement_name: name_of_auth_rep_info
+                    - friendly_name: Executed Copy of Power of Attorney
+                      object_type: power_of_attorney
+                      passed: false
+                      failure_reason: An Executed Copy of Power of Attorney is missing.
+                        Please add one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid: []
+                      requirement_friendly_name: Power of Attorney
+                      requirement_name: power_of_attorney_info
+                    - friendly_name: Government-issued ID
+                      object_type: government_issued_document
+                      passed: false
+                      failure_reason: A Government-issued ID is missing. Please add
+                        one to the regulatory bundle.
+                      error_code: 22216
+                      valid: []
+                      invalid:
+                      - friendly_name: First Name
+                        object_field: first_name
+                        failure_reason: The First Name is missing on the Governnment-Issued
+                          ID.
+                        error_code: 22217
+                      - friendly_name: Last Name
+                        object_field: last_name
+                        failure_reason: The Last Name is missing on the Government-issued
+                          ID
+                        error_code: 22217
+                      requirement_friendly_name: Name of Person granted the Power
+                        of Attorney
+                      requirement_name: name_in_power_of_attorney_info
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchEvaluation
-      x-maturity:
-      - GA
   /v2/HostedNumber/Orders/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: instance
       mountName: hosted_number_orders
+      pathType: instance
     get:
       description: Fetch a specific HostedNumberOrder.
       tags:
@@ -2440,12 +4030,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.hosted_number_order'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address_sid: AD11111111111111111111111111111111
+                    capabilities:
+                      sms: true
+                      voice: false
+                    cc_emails:
+                    - aaa@twilio.com
+                    - bbb@twilio.com
+                    date_created: '2017-03-28T20:06:39Z'
+                    date_updated: '2017-03-28T20:06:39Z'
+                    email: test@twilio.com
+                    failure_reason: ''
+                    bulk_hosting_request_sid: BH11111111111111111111111111111111
+                    next_step: next_step
+                    friendly_name: friendly_name
+                    incoming_phone_number_sid: PN11111111111111111111111111111111
+                    phone_number: '+14153608311'
+                    sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    signing_document_sid: PX11111111111111111111111111111111
+                    status: received
+                    url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    contact_title: contact_title_test
+                    contact_phone_number: '+12344444444'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchHostedNumberOrder
-      x-maturity:
-      - Beta
     delete:
       description: Cancel the HostedNumberOrder (only available when the status is
         in `received`).
@@ -2467,16 +4106,14 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteHostedNumberOrder
-      x-maturity:
-      - Beta
   /v2/HostedNumber/Orders:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       mountName: hosted_number_orders
+      pathType: list
     get:
       description: Retrieve a list of HostedNumberOrders belonging to the account
         initiating the request.
@@ -2491,6 +4128,9 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/hosted_number_order_enum_status'
+        examples:
+          readEmpty:
+            value: completed
       - name: SmsCapability
         in: query
         description: Whether the SMS capability will be hosted on our platform. Can
@@ -2507,6 +4147,9 @@ paths:
           pii:
             handling: standard
             deleteSla: 30
+        examples:
+          readEmpty:
+            value: '+19193608000'
       - name: IncomingPhoneNumberSid
         in: query
         description: A 34 character string that uniquely identifies the IncomingPhoneNumber
@@ -2516,6 +4159,9 @@ paths:
           minLength: 34
           maxLength: 34
           pattern: ^PN[0-9a-fA-F]{32}$
+        examples:
+          readEmpty:
+            value: PNzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
       - name: FriendlyName
         in: query
         description: A human readable description of this resource, up to 128 characters.
@@ -2525,6 +4171,9 @@ paths:
           pii:
             handling: standard
             deleteSla: 30
+        examples:
+          readEmpty:
+            value: example
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2556,35 +4205,104 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.hosted_number_order'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListHostedNumberOrderResponse
+              examples:
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/Orders?Status=completed&FriendlyName=example&PhoneNumber=%2B19193608000&IncomingPhoneNumberSid=PNzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz&PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/Orders?Status=completed&FriendlyName=example&PhoneNumber=%2B19193608000&IncomingPhoneNumberSid=PNzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz&PageSize=50&Page=0
+                    items: []
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://numbers.twilio.com/v2/HostedNumber/Orders?PageSize=50&Page=0
+                      key: items
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/HostedNumber/Orders?PageSize=50&Page=0
+                    items:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      address_sid: AD11111111111111111111111111111111
+                      capabilities:
+                        sms: true
+                        voice: false
+                      cc_emails:
+                      - aaa@twilio.com
+                      - bbb@twilio.com
+                      date_created: '2017-03-28T20:06:39Z'
+                      date_updated: '2017-03-28T20:06:39Z'
+                      email: test@twilio.com
+                      failure_reason: ''
+                      friendly_name: friendly_name
+                      bulk_hosting_request_sid: BH11111111111111111111111111111111
+                      next_step: next_step
+                      incoming_phone_number_sid: PN11111111111111111111111111111111
+                      phone_number: '+14153608311'
+                      sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      signing_document_sid: PX11111111111111111111111111111111
+                      status: received
+                      url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      contact_title: contact_title_test
+                      contact_phone_number: '+12344444444'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListHostedNumberOrder
-      x-maturity:
-      - Beta
     post:
       description: Host a phone number's capability on Twilio's platform.
       tags:
@@ -2595,12 +4313,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.hosted_number_order'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address_sid: AD11111111111111111111111111111111
+                    capabilities:
+                      sms: true
+                      voice: false
+                    cc_emails: []
+                    date_created: '2017-03-28T20:06:39Z'
+                    date_updated: '2017-03-28T20:06:39Z'
+                    email: test@twilio.com
+                    failure_reason: ''
+                    friendly_name: null
+                    incoming_phone_number_sid: PN11111111111111111111111111111111
+                    phone_number: '+14153608311'
+                    bulk_hosting_request_sid: BH11111111111111111111111111111111
+                    next_step: next_step
+                    sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    signing_document_sid: null
+                    status: received
+                    url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    contact_title: contact_title_test
+                    contact_phone_number: '+12344444444'
+                createWithoutOptionalLoaFields:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address_sid: AD11111111111111111111111111111111
+                    capabilities:
+                      sms: true
+                      voice: false
+                    cc_emails: []
+                    date_created: '2017-03-28T20:06:39Z'
+                    date_updated: '2017-03-28T20:06:39Z'
+                    email: test@twilio.com
+                    contact_title: null
+                    failure_reason: ''
+                    friendly_name: null
+                    incoming_phone_number_sid: PN11111111111111111111111111111111
+                    phone_number: '+14153608311'
+                    bulk_hosting_request_sid: BH11111111111111111111111111111111
+                    next_step: next_step
+                    sid: HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    signing_document_sid: null
+                    status: received
+                    url: https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    contact_phone_number: '+12344444444'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateHostedNumberOrder
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2713,15 +4501,29 @@ paths:
               - ContactPhoneNumber
               - AddressSid
               - Email
+            examples:
+              create:
+                value:
+                  AddressSid: AD11111111111111111111111111111111
+                  PhoneNumber: '+14153608311'
+                  ContactPhoneNumber: '+12344444444'
+                  ContactTitle: contact_title_test
+                  Email: test@twilio.com
+              createWithoutOptionalLoaFields:
+                value:
+                  PhoneNumber: '+14153608311'
+                  ContactPhoneNumber: '+12344444444'
+                  Email: test@twilio.com
+                  AddressSid: AD11111111111111111111111111111111
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/ItemAssignments:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
-      pathType: list
       parent: /RegulatoryCompliance/Bundles/{Sid}
+      pathType: list
     post:
       description: Create a new Assigned Item.
       tags:
@@ -2742,12 +4544,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.item_assignment'
+              examples:
+                create:
+                  value:
+                    sid: BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    object_sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2019-07-31T02:34:41Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments/BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateItemAssignment
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -2764,6 +4598,10 @@ paths:
                     the different items.
               required:
               - ObjectSid
+            examples:
+              create:
+                value:
+                  ObjectSid: ITaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: Retrieve a list of all Assigned Items for an account.
       tags:
@@ -2809,44 +4647,96 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.item_assignment'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListItemAssignmentResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      object_sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2019-07-31T02:34:41Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments/BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListItemAssignment
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/ItemAssignments/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
-      pathType: instance
       parent: /RegulatoryCompliance/Bundles/{Sid}
+      pathType: instance
     get:
       description: Fetch specific Assigned Item Instance.
       tags:
@@ -2876,12 +4766,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.item_assignment'
+              examples:
+                fetch:
+                  value:
+                    sid: BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    bundle_sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    object_sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2019-07-31T02:34:41Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ItemAssignments/BVaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchItemAssignment
-      x-maturity:
-      - GA
     delete:
       description: Remove an Assignment Item Instance.
       tags:
@@ -2911,18 +4833,16 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteItemAssignment
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Regulations:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: list
       parent: /RegulatoryCompliance
+      pathType: list
     get:
       description: Retrieve a list of all Regulations.
       tags:
@@ -2935,16 +4855,25 @@ paths:
         schema:
           type: string
           $ref: '#/components/schemas/regulation_enum_end_user_type'
+        examples:
+          readEmpty:
+            value: business
       - name: IsoCountry
         in: query
         description: The ISO country code of the phone number's country.
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: US
       - name: NumberType
         in: query
         description: The type of phone number that the regulatory requiremnt is restricting.
         schema:
           type: string
+        examples:
+          readEmpty:
+            value: mobile
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
@@ -2976,45 +4905,131 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.regulation'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListRegulationResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations?IsoCountry=US&EndUserType=business&NumberType=mobile&PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations?IsoCountry=US&EndUserType=business&NumberType=mobile&PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: 'Australia: Local - Individual'
+                      iso_country: AU
+                      number_type: local
+                      end_user_type: individual
+                      requirements:
+                        end_user:
+                        - name: Individual
+                          type: individual
+                          requirement_name: individual_info
+                          url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations/individual
+                          fields:
+                          - first_name
+                          - last_name
+                          detailed_fields:
+                          - machine_name: first_name
+                            friendly_name: First Name
+                            description: First name of the Individual
+                          - machine_name: last_name
+                            friendly_name: Last Name
+                            description: Last name of the Individual
+                        supporting_document:
+                        - - name: Address
+                            type: document
+                            requirement_name: proof_of_address
+                            description: The physical location of the individual or
+                              business. Must be within locality or region covered
+                              by the phone numbers prefix; a PO Box is not acceptable
+                              where a local address is required.
+                            accepted_documents:
+                            - name: Address Validation
+                              type: address
+                              url: https://numbers.twilio.com/v2/RegulatoryCompliance/DocumentTypes/address
+                              fields:
+                              - address_sids
+                              detailed_fields:
+                              - machine_name: address_sids
+                                friendly_name: Address sid(s)
+                                description: Address sid of the individual
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations/RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListRegulation
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/Regulations/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: instance
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch specific Regulation Instance.
       tags:
@@ -3035,28 +5050,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.regulation'
+              examples:
+                fetch:
+                  value:
+                    sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: 'Australia: Local - Individual'
+                    iso_country: AU
+                    number_type: local
+                    end_user_type: individual
+                    requirements:
+                      end_user:
+                      - name: Individual
+                        type: individual
+                        requirement_name: individual_info
+                        url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations/individual
+                        fields:
+                        - first_name
+                        - last_name
+                        detailed_fields:
+                        - machine_name: first_name
+                          friendly_name: First Name
+                          description: First name of the Individual
+                        - machine_name: last_name
+                          friendly_name: Last Name
+                          description: Last name of the Individual
+                      supporting_document:
+                      - - name: Address
+                          type: document
+                          requirement_name: proof_of_address
+                          description: The physical location of the individual or
+                            business. Must be within locality or region covered by
+                            the phone numbers prefix; a PO Box is not acceptable where
+                            a local address is required.
+                          accepted_documents:
+                          - name: Address Validation
+                            type: address
+                            url: https://numbers.twilio.com/v2/RegulatoryCompliance/DocumentTypes/address
+                            fields:
+                            - address_sids
+                            detailed_fields:
+                            - machine_name: address_sids
+                              friendly_name: Address sid(s)
+                              description: Address sid of the individual
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/Regulations/RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRegulation
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
       pathType: list
   /v2/RegulatoryCompliance/Bundles/{BundleSid}/ReplaceItems:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties: []
-      pathType: list
       parent: /RegulatoryCompliance/Bundles/{Sid}
       className: replace_items
+      pathType: list
     post:
       description: Replaces all bundle items in the target bundle (specified in the
         path) with all the bundle items of the source bundle (specified by the from_bundle_sid
@@ -3080,12 +5161,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.bundle.replace_items'
+              examples:
+                create:
+                  value:
+                    sid: BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    regulation_sid: RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    status: draft
+                    valid_until: '2015-07-30T20:00:00Z'
+                    email: email
+                    status_callback: http://www.example.com
+                    date_created: '2015-07-30T20:00:00Z'
+                    date_updated: '2015-07-30T20:00:00Z'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateReplaceItems
-      x-maturity:
-      - Beta
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3102,16 +5219,20 @@ paths:
                     from.
               required:
               - FromBundleSid
+            examples:
+              create:
+                value:
+                  FromBundleSid: BUbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
   /v2/RegulatoryCompliance/SupportingDocuments:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: list
       parent: /RegulatoryCompliance
+      pathType: list
     post:
       description: Create a new Supporting Document.
       tags:
@@ -3122,12 +5243,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document'
+              examples:
+                create:
+                  value:
+                    sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    mime_type: mime_type
+                    status: draft
+                    failure_reason: null
+                    type: type
+                    attributes:
+                      first_name: foo
+                      last_name: bar
+                    date_created: '2019-07-31T02:11:52Z'
+                    date_updated: '2019-07-31T02:11:52Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments/RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateSupportingDocument
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3148,6 +5308,12 @@ paths:
               required:
               - FriendlyName
               - Type
+            examples:
+              create:
+                value:
+                  FriendlyName: friendly_name
+                  Type: type
+                  Attributes: '{}'
     get:
       description: Retrieve a list of all Supporting Document for an account.
       tags:
@@ -3184,45 +5350,128 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListSupportingDocumentResponse
+              examples:
+                readEmpty:
+                  value:
+                    results: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readFull:
+                  value:
+                    results:
+                    - sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      mime_type: mime_type
+                      status: draft
+                      failure_reason: null
+                      type: type
+                      attributes:
+                        first_name: foo
+                        last_name: bar
+                      date_created: '2019-07-31T02:11:52Z'
+                      date_updated: '2019-07-31T02:11:52Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments/RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+                readRejectedDocument:
+                  value:
+                    results:
+                    - sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: friendly_name
+                      mime_type: mime_type
+                      status: twilio-rejected
+                      failure_reason: Some failure reason.
+                      type: type
+                      attributes:
+                        first_name: foo
+                        last_name: bar
+                      date_created: '2019-07-31T02:11:52Z'
+                      date_updated: '2019-07-31T02:11:52Z'
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments/RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments?PageSize=50&Page=0
+                      next_page_url: null
+                      key: results
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSupportingDocument
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/SupportingDocuments/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: instance
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch specific Supporting Document Instance.
       tags:
@@ -3244,12 +5493,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document'
+              examples:
+                fetch:
+                  value:
+                    sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    mime_type: mime_type
+                    status: draft
+                    failure_reason: null
+                    type: type
+                    attributes:
+                      first_name: foo
+                      last_name: bar
+                    date_created: '2019-07-31T02:11:52Z'
+                    date_updated: '2019-07-31T02:11:52Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments/RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSupportingDocument
-      x-maturity:
-      - GA
     post:
       description: Update an existing Supporting Document.
       tags:
@@ -3271,12 +5559,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document'
+              examples:
+                update:
+                  value:
+                    sid: RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: friendly_name
+                    mime_type: mime_type
+                    status: draft
+                    failure_reason: null
+                    type: type
+                    attributes:
+                      first_name: foo
+                      last_name: bar
+                    date_created: '2019-07-31T02:11:52Z'
+                    date_updated: '2019-07-31T02:11:52Z'
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocuments/RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateSupportingDocument
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -3291,8 +5618,11 @@ paths:
                   description: The set of parameters that are the attributes of the
                     Supporting Document resource which are derived Supporting Document
                     Types.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  FriendlyName: friendly_name
+                  Attributes: '{}'
     delete:
       description: Delete a specific Supporting Document.
       tags:
@@ -3314,18 +5644,16 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteSupportingDocument
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/SupportingDocumentTypes:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: list
       parent: /RegulatoryCompliance
+      pathType: list
     get:
       description: Retrieve a list of all Supporting Document Types.
       tags:
@@ -3362,45 +5690,99 @@ paths:
                     items:
                       $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document_type'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListSupportingDocumentTypeResponse
+              examples:
+                readEmpty:
+                  value:
+                    supporting_document_types: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes?PageSize=50&Page=0
+                      next_page_url: null
+                      key: supporting_document_types
+                readFull:
+                  value:
+                    supporting_document_types:
+                    - sid: OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      friendly_name: Passport
+                      machine_name: passport
+                      fields:
+                      - friendly_name: Last Name
+                        machine_name: last_name
+                        constraint: String
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes/OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes?PageSize=50&Page=0
+                      next_page_url: null
+                      key: supporting_document_types
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListSupportingDocumentType
-      x-maturity:
-      - GA
   /v2/RegulatoryCompliance/SupportingDocumentTypes/{Sid}:
     servers:
     - url: https://numbers.twilio.com
-    description: 'TODO: Resource-level docs'
+    description: ''
     x-twilio:
       defaultOutputProperties:
       - sid
       - friendly_name
-      pathType: instance
       parent: /RegulatoryCompliance
+      pathType: instance
     get:
       description: Fetch a specific Supporting Document Type Instance.
       tags:
@@ -3419,12 +5801,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/numbers.v2.regulatory_compliance.supporting_document_type'
+              examples:
+                fetch:
+                  value:
+                    sid: OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    friendly_name: Passport
+                    machine_name: passport
+                    fields:
+                    - friendly_name: Last Name
+                      machine_name: last_name
+                      constraint: String
+                    url: https://numbers.twilio.com/v2/RegulatoryCompliance/SupportingDocumentTypes/OYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchSupportingDocumentType
-      x-maturity:
-      - GA
 servers:
 - url: https://numbers.twilio.com
 tags:
@@ -3442,9 +5858,5 @@ tags:
 - name: NumbersV2ReplaceItems
 - name: NumbersV2SupportingDocument
 - name: NumbersV2SupportingDocumentType
-x-maturity:
-- name: GA
-  description: This product is Generally Available.
-- name: Beta
-  description: PLEASE NOTE that this is a Beta product that is subject to change.
-    Use it with caution.
+security:
+- accountSid_authToken: []

@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "voice.v1.archived_call": {
         "type": "object",
@@ -503,6 +509,29 @@
           }
         }
       },
+      "recording_enum_status": {
+        "type": "string",
+        "enum": [
+          "in-progress",
+          "paused",
+          "stopped",
+          "processing",
+          "completed",
+          "absent"
+        ]
+      },
+      "recording_enum_source": {
+        "type": "string",
+        "enum": [
+          "DialVerb",
+          "Conference",
+          "OutboundAPI",
+          "Trunking",
+          "RecordVerb",
+          "StartCallRecordingAPI",
+          "StartConferenceRecordingAPI"
+        ]
+      },
       "voice.v1.source_ip_mapping": {
         "type": "object",
         "properties": {
@@ -550,12 +579,6 @@
           }
         }
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -571,7 +594,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.56.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -581,11 +604,11 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "instance",
-        "mountName": "archived_calls"
+        "mountName": "archived_calls",
+        "pathType": "instance"
       },
       "delete": {
         "description": "Delete an archived call record from Bulk Export. Note: this does not also delete the record from the Voice API.",
@@ -626,10 +649,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteArchivedCall",
-        "x-maturity": [
-          "Beta"
-        ]
+        "operationId": "DeleteArchivedCall"
       }
     },
     "/v1/ByocTrunks": {
@@ -658,6 +678,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.byoc_trunk"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "voice_url": "https://byoc.example.com/twilio/app",
+                      "voice_method": "POST",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "https://byoc.example.com/twilio/fallback",
+                      "status_callback_method": "POST",
+                      "status_callback_url": "https://byoc.example.com/twilio/status_callback",
+                      "cnam_lookup_enabled": false,
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "from_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:36Z",
+                      "url": "https://voice.twilio.com/v1/ByocTrunks/BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -670,9 +747,6 @@
           }
         ],
         "operationId": "CreateByocTrunk",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -745,12 +819,25 @@
                     "description": "The SID of the SIP Domain that should be used in the `From` header of originating calls sent to your SIP infrastructure. If your SIP infrastructure allows users to \"call back\" an incoming call, configure this with a [SIP Domain](https://www.twilio.com/docs/voice/api/sending-sip) to ensure proper routing. If not configured, the from domain will default to \"sip.twilio.com\"."
                   }
                 }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "VoiceUrl": "https://byoc.example.com/twilio/app",
+                    "VoiceMethod": "POST",
+                    "VoiceFallbackUrl": "https://byoc.example.com/twilio/fallback",
+                    "VoiceFallbackMethod": "POST",
+                    "StatusCallbackUrl": "https://byoc.example.com/twilio/status_callback",
+                    "StatusCallbackMethod": "POST",
+                    "CnamLookupEnabled": false,
+                    "ConnectionPolicySid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "FromDomainSid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "get": {
@@ -801,16 +888,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -819,21 +908,103 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListByocTrunkResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ByocTrunks?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ByocTrunks?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "byoc_trunks"
+                      },
+                      "byoc_trunks": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "friendly_name",
+                          "voice_url": "https://byoc.example.com/twilio/app",
+                          "voice_method": "POST",
+                          "voice_fallback_method": "POST",
+                          "voice_fallback_url": "https://byoc.example.com/twilio/fallback",
+                          "status_callback_method": "POST",
+                          "status_callback_url": "https://byoc.example.com/twilio/status_callback",
+                          "cnam_lookup_enabled": false,
+                          "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "from_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2020-03-18T23:31:36Z",
+                          "date_updated": "2020-03-18T23:31:37Z",
+                          "url": "https://voice.twilio.com/v1/ByocTrunks/BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ByocTrunks?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ByocTrunks?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "byoc_trunks"
+                      },
+                      "byoc_trunks": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -845,10 +1016,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListByocTrunk",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListByocTrunk"
       }
     },
     "/v1/ByocTrunks/{Sid}": {
@@ -891,6 +1059,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.byoc_trunk"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "voice_url": "https://byoc.example.com/twilio/app",
+                      "voice_method": "POST",
+                      "voice_fallback_method": "POST",
+                      "voice_fallback_url": "https://byoc.example.com/twilio/fallback",
+                      "status_callback_method": "POST",
+                      "status_callback_url": "https://byoc.example.com/twilio/status_callback",
+                      "cnam_lookup_enabled": false,
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "from_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ByocTrunks/BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -902,10 +1127,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchByocTrunk",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchByocTrunk"
       },
       "post": {
         "description": "",
@@ -932,6 +1154,63 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.byoc_trunk"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "update_name",
+                      "voice_url": "https://byoc.example.com/twilio_updated/app",
+                      "voice_method": "GET",
+                      "voice_fallback_method": "GET",
+                      "voice_fallback_url": "https://byoc.example.com/twilio_updated/fallback",
+                      "status_callback_method": "GET",
+                      "status_callback_url": "https://byoc.example.com/twilio_updated/status_callback",
+                      "cnam_lookup_enabled": true,
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                      "from_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ByocTrunks/BYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -944,9 +1223,6 @@
           }
         ],
         "operationId": "UpdateByocTrunk",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1019,12 +1295,25 @@
                     "description": "The SID of the SIP Domain that should be used in the `From` header of originating calls sent to your SIP infrastructure. If your SIP infrastructure allows users to \"call back\" an incoming call, configure this with a [SIP Domain](https://www.twilio.com/docs/voice/api/sending-sip) to ensure proper routing. If not configured, the from domain will default to \"sip.twilio.com\"."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "update_name",
+                    "VoiceUrl": "https://byoc.example.com/twilio_updated/app",
+                    "VoiceMethod": "GET",
+                    "VoiceFallbackUrl": "https://byoc.example.com/twilio_updated/fallback",
+                    "VoiceFallbackMethod": "GET",
+                    "StatusCallbackUrl": "https://byoc.example.com/twilio_updated/status_callback",
+                    "StatusCallbackMethod": "GET",
+                    "CnamLookupEnabled": true,
+                    "ConnectionPolicySid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                    "FromDomainSid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -1056,10 +1345,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteByocTrunk",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteByocTrunk"
       }
     },
     "/v1/ConnectionPolicies": {
@@ -1074,7 +1360,6 @@
           "sid",
           "friendly_name"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "targets": {
             "mapping": {
@@ -1082,7 +1367,8 @@
             },
             "resource_url": "/v1/ConnectionPolicies/{connection_policy_sid}/Targets"
           }
-        }
+        },
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -1095,6 +1381,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:36Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "targets": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1107,9 +1444,6 @@
           }
         ],
         "operationId": "CreateConnectionPolicy",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1122,12 +1456,16 @@
                     "description": "A descriptive string that you create to describe the resource. It is not unique and can be up to 255 characters long."
                   }
                 }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "get": {
@@ -1178,16 +1516,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1196,21 +1536,97 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListConnectionPolicyResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ConnectionPolicies?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ConnectionPolicies?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "connection_policies"
+                      },
+                      "connection_policies": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "friendly_name",
+                          "date_created": "2020-03-18T23:31:36Z",
+                          "date_updated": "2020-03-18T23:31:37Z",
+                          "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "links": {
+                            "targets": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ConnectionPolicies?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ConnectionPolicies?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "connection_policies"
+                      },
+                      "connection_policies": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1222,10 +1638,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListConnectionPolicy",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListConnectionPolicy"
       }
     },
     "/v1/ConnectionPolicies/{Sid}": {
@@ -1240,7 +1653,6 @@
           "sid",
           "friendly_name"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "targets": {
             "mapping": {
@@ -1248,7 +1660,8 @@
             },
             "resource_url": "/v1/ConnectionPolicies/{connection_policy_sid}/Targets"
           }
-        }
+        },
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -1275,6 +1688,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "targets": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1286,10 +1750,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchConnectionPolicy",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchConnectionPolicy"
       },
       "post": {
         "description": "",
@@ -1316,6 +1777,57 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "updated_name",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "links": {
+                        "targets": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1328,9 +1840,6 @@
           }
         ],
         "operationId": "UpdateConnectionPolicy",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1343,12 +1852,16 @@
                     "description": "A descriptive string that you create to describe the resource. It is not unique and can be up to 255 characters long."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "updated_name"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -1380,10 +1893,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteConnectionPolicy",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteConnectionPolicy"
       }
     },
     "/v1/ConnectionPolicies/{ConnectionPolicySid}/Targets": {
@@ -1400,9 +1910,9 @@
           "target",
           "enabled"
         ],
-        "pathType": "list",
         "parent": "/ConnectionPolicies/{Sid}",
-        "className": "connection_policy_target"
+        "className": "connection_policy_target",
+        "pathType": "list"
       },
       "post": {
         "description": "",
@@ -1429,6 +1939,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy.connection_policy_target"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "target": "sip:sip-box.com:1234",
+                      "priority": 1,
+                      "weight": 20,
+                      "enabled": true,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:36Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets/NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1441,9 +2004,6 @@
           }
         ],
         "operationId": "CreateConnectionPolicyTarget",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1476,6 +2036,17 @@
                 "required": [
                   "Target"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "Target": "sip:sip-box.com:1234",
+                    "Priority": 1,
+                    "Weight": 20,
+                    "Enabled": true
+                  }
+                }
               }
             }
           }
@@ -1541,16 +2112,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -1559,21 +2132,99 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListConnectionPolicyTargetResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "targets"
+                      },
+                      "targets": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "friendly_name",
+                          "target": "sip:sip-box.com:1234",
+                          "priority": 1,
+                          "weight": 20,
+                          "enabled": true,
+                          "date_created": "2020-03-18T23:31:36Z",
+                          "date_updated": "2020-03-18T23:31:37Z",
+                          "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets/NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "targets"
+                      },
+                      "targets": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1585,10 +2236,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListConnectionPolicyTarget",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListConnectionPolicyTarget"
       }
     },
     "/v1/ConnectionPolicies/{ConnectionPolicySid}/Targets/{Sid}": {
@@ -1605,9 +2253,9 @@
           "target",
           "enabled"
         ],
-        "pathType": "instance",
         "parent": "/ConnectionPolicies/{Sid}",
-        "className": "connection_policy_target"
+        "className": "connection_policy_target",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -1646,6 +2294,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy.connection_policy_target"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "target": "sip:sip-box.com:1234",
+                      "priority": 1,
+                      "weight": 20,
+                      "enabled": true,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets/NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1657,10 +2358,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchConnectionPolicyTarget",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchConnectionPolicyTarget"
       },
       "post": {
         "description": "",
@@ -1699,6 +2397,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.connection_policy.connection_policy_target"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "connection_policy_sid": "NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "updated_name",
+                      "target": "sip:sip-updated.com:4321",
+                      "priority": 2,
+                      "weight": 10,
+                      "enabled": false,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/ConnectionPolicies/NYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Targets/NEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1711,9 +2462,6 @@
           }
         ],
         "operationId": "UpdateConnectionPolicyTarget",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -1743,12 +2491,20 @@
                     "description": "Whether the Target is enabled."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "updated_name",
+                    "Target": "sip:sip-updated.com:4321",
+                    "Priority": 2,
+                    "Weight": 10,
+                    "Enabled": false
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -1792,10 +2548,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteConnectionPolicyTarget",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteConnectionPolicyTarget"
       }
     },
     "/v1/DialingPermissions": {
@@ -1804,11 +2557,11 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "list",
-        "className": "dialing_permissions"
+        "className": "dialing_permissions",
+        "pathType": "list"
       }
     },
     "/v1/DialingPermissions/Countries/{IsoCode}": {
@@ -1817,14 +2570,13 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "iso_code",
           "name",
           "continent"
         ],
-        "pathType": "instance",
         "dependentProperties": {
           "highrisk_special_prefixes": {
             "mapping": {
@@ -1833,7 +2585,8 @@
             "resource_url": "/v1/DialingPermissions/Countries/{iso_code}/HighRiskSpecialPrefixes"
           }
         },
-        "parent": "/DialingPermissions"
+        "parent": "/DialingPermissions",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve voice dialing country permissions identified by the given ISO country code",
@@ -1858,6 +2611,61 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.dialing_permissions.dialing_permissions_country-instance"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "iso_code": "US",
+                      "name": "United States/Canada",
+                      "country_codes": [
+                        "+1"
+                      ],
+                      "continent": "NORTH_AMERICA",
+                      "low_risk_numbers_enabled": false,
+                      "high_risk_special_numbers_enabled": false,
+                      "high_risk_tollfraud_numbers_enabled": false,
+                      "url": "https://voice.twilio.com/v1/DialingPermissions/Countries/US",
+                      "links": {
+                        "highrisk_special_prefixes": "https://voice.twilio.com/v1/DialingPermissions/Countries/US/HighRiskSpecialPrefixes"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -1869,10 +2677,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchDialingPermissionsCountry",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "FetchDialingPermissionsCountry"
       }
     },
     "/v1/DialingPermissions/Countries": {
@@ -1881,14 +2686,13 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "iso_code",
           "name",
           "continent"
         ],
-        "pathType": "list",
         "dependentProperties": {
           "highrisk_special_prefixes": {
             "mapping": {
@@ -1897,7 +2701,8 @@
             "resource_url": "/v1/DialingPermissions/Countries/{iso_code}/HighRiskSpecialPrefixes"
           }
         },
-        "parent": "/DialingPermissions"
+        "parent": "/DialingPermissions",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve all voice dialing country permissions for this account",
@@ -1912,6 +2717,11 @@
             "schema": {
               "type": "string",
               "format": "iso-country-code"
+            },
+            "examples": {
+              "readUs": {
+                "value": "US"
+              }
             }
           },
           {
@@ -1996,16 +2806,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -2014,21 +2826,87 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListDialingPermissionsCountryResponse"
+                },
+                "examples": {
+                  "readUs": {
+                    "value": {
+                      "content": [
+                        {
+                          "iso_code": "US",
+                          "name": "United States/Canada",
+                          "country_codes": [
+                            "+1"
+                          ],
+                          "continent": "NORTH_AMERICA",
+                          "low_risk_numbers_enabled": false,
+                          "high_risk_special_numbers_enabled": false,
+                          "high_risk_tollfraud_numbers_enabled": false,
+                          "url": "https://voice.twilio.com/v1/DialingPermissions/Countries/US",
+                          "links": {
+                            "highrisk_special_prefixes": "https://voice.twilio.com/v1/DialingPermissions/Countries/US/HighRiskSpecialPrefixes"
+                          }
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://voice.twilio.com/v1/DialingPermissions/Countries?IsoCode=US&PageSize=50&Page=0",
+                        "key": "content",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/DialingPermissions/Countries?IsoCode=US&PageSize=50&Page=0"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2040,10 +2918,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListDialingPermissionsCountry",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "ListDialingPermissionsCountry"
       }
     },
     "/v1/DialingPermissions/BulkCountryUpdates": {
@@ -2052,14 +2927,14 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "update_request",
           "update_count"
         ],
-        "pathType": "list",
-        "parent": "/DialingPermissions"
+        "parent": "/DialingPermissions",
+        "pathType": "list"
       },
       "post": {
         "description": "Create a bulk update request to change voice dialing country permissions of one or more countries identified by the corresponding [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)",
@@ -2072,6 +2947,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.dialing_permissions.dialing_permissions_country_bulk_update"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "update_count": 1,
+                      "update_request": "accepted"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2084,9 +3003,6 @@
           }
         ],
         "operationId": "CreateDialingPermissionsCountryBulkUpdate",
-        "x-maturity": [
-          "Preview"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2102,6 +3018,13 @@
                 "required": [
                   "UpdateRequest"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "UpdateRequest": "[ { \"iso_code\": \"GB\", \"low_risk_numbers\": \"Enabled\", \"high_risk_special_numbers\":\"Enabled\", \"high_risk_irsf_numbers\": \"Enabled\" } ]"
+                  }
+                }
               }
             }
           }
@@ -2114,14 +3037,14 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "prefix"
         ],
-        "pathType": "list",
         "parent": "/DialingPermissions/Countries/{IsoCode}",
-        "mountName": "highrisk_special_prefixes"
+        "mountName": "highrisk_special_prefixes",
+        "pathType": "list"
       },
       "get": {
         "description": "Fetch the high-risk special services prefixes from the country resource corresponding to the [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)",
@@ -2181,16 +3104,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -2199,21 +3124,78 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListDialingPermissionsHrsPrefixesResponse"
+                },
+                "examples": {
+                  "readLv": {
+                    "value": {
+                      "content": [
+                        {
+                          "prefix": "+37181"
+                        },
+                        {
+                          "prefix": "+3719000"
+                        }
+                      ],
+                      "meta": {
+                        "first_page_url": "https://voice.twilio.com/v1/DialingPermissions/Countries/LV/HighRiskSpecialPrefixes?PageSize=50&Page=0",
+                        "key": "content",
+                        "next_page_url": null,
+                        "page": 0,
+                        "page_size": 50,
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/DialingPermissions/Countries/LV/HighRiskSpecialPrefixes?PageSize=50&Page=0"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2225,10 +3207,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListDialingPermissionsHrsPrefixes",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "ListDialingPermissionsHrsPrefixes"
       }
     },
     "/v1/Settings": {
@@ -2237,14 +3216,14 @@
           "url": "https://voice.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "dialing_permissions_inheritance"
         ],
-        "pathType": "instance",
         "parent": "/DialingPermissions",
-        "className": "settings"
+        "className": "settings",
+        "pathType": "instance"
       },
       "get": {
         "description": "Retrieve voice dialing permissions inheritance for the sub-account",
@@ -2257,6 +3236,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.dialing_permissions.dialing_permissions_settings"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "dialing_permissions_inheritance": true,
+                      "url": "https://voice.twilio.com/v1/Settings"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2268,10 +3291,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchDialingPermissionsSettings",
-        "x-maturity": [
-          "Preview"
-        ]
+        "operationId": "FetchDialingPermissionsSettings"
       },
       "post": {
         "description": "Update voice dialing permissions inheritance for the sub-account",
@@ -2284,6 +3304,50 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.dialing_permissions.dialing_permissions_settings"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "dialing_permissions_inheritance": true,
+                      "url": "https://voice.twilio.com/v1/Settings"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2296,9 +3360,6 @@
           }
         ],
         "operationId": "UpdateDialingPermissionsSettings",
-        "x-maturity": [
-          "Preview"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2311,12 +3372,16 @@
                     "description": "`true` for the sub-account to inherit voice dialing permissions from the Master Project; otherwise `false`."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "DialingPermissionsInheritance": true
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       }
     },
@@ -2347,6 +3412,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.ip_record"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "ip_address": "10.2.3.4",
+                      "cidr_prefix_length": 30,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:36Z",
+                      "url": "https://voice.twilio.com/v1/IpRecords/ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2359,9 +3474,6 @@
           }
         ],
         "operationId": "CreateIpRecord",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2385,6 +3497,15 @@
                 "required": [
                   "IpAddress"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "IpAddress": "10.2.3.4",
+                    "CidrPrefixLength": 30
+                  }
+                }
               }
             }
           }
@@ -2438,16 +3559,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -2456,21 +3579,96 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListIpRecordResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/IpRecords?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/IpRecords?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "ip_records"
+                      },
+                      "ip_records": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "friendly_name",
+                          "ip_address": "10.2.3.4",
+                          "cidr_prefix_length": 30,
+                          "date_created": "2020-03-18T23:31:36Z",
+                          "date_updated": "2020-03-18T23:31:37Z",
+                          "url": "https://voice.twilio.com/v1/IpRecords/ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/IpRecords?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/IpRecords?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "ip_records"
+                      },
+                      "ip_records": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2482,10 +3680,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListIpRecord",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListIpRecord"
       }
     },
     "/v1/IpRecords/{Sid}": {
@@ -2529,6 +3724,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.ip_record"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "ip_address": "10.2.3.4",
+                      "cidr_prefix_length": 30,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/IpRecords/ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2540,10 +3785,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchIpRecord",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchIpRecord"
       },
       "post": {
         "description": "",
@@ -2570,6 +3812,56 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.ip_record"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "update_name",
+                      "ip_address": "10.2.3.4",
+                      "cidr_prefix_length": 30,
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/IpRecords/ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2582,9 +3874,6 @@
           }
         ],
         "operationId": "UpdateIpRecord",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2597,12 +3886,16 @@
                     "description": "A descriptive string that you create to describe the resource. It is not unique and can be up to 255 characters long."
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "FriendlyName": "update_name"
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       },
       "delete": {
@@ -2634,10 +3927,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteIpRecord",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteIpRecord"
       }
     },
     "/v1/SourceIpMappings": {
@@ -2666,6 +3956,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.source_ip_mapping"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_record_sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sip_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:36Z",
+                      "url": "https://voice.twilio.com/v1/SourceIpMappings/IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2678,9 +4016,6 @@
           }
         ],
         "operationId": "CreateSourceIpMapping",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2707,6 +4042,14 @@
                   "IpRecordSid",
                   "SipDomainSid"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "IpRecordSid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "SipDomainSid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                  }
+                }
               }
             }
           }
@@ -2760,16 +4103,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -2778,21 +4123,94 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListSourceIpMappingResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/SourceIpMappings?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/SourceIpMappings?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "source_ip_mappings"
+                      },
+                      "source_ip_mappings": [
+                        {
+                          "sid": "IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "ip_record_sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sip_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2020-03-18T23:31:36Z",
+                          "date_updated": "2020-03-18T23:31:37Z",
+                          "url": "https://voice.twilio.com/v1/SourceIpMappings/IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://voice.twilio.com/v1/SourceIpMappings?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://voice.twilio.com/v1/SourceIpMappings?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "source_ip_mappings"
+                      },
+                      "source_ip_mappings": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2804,10 +4222,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListSourceIpMapping",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListSourceIpMapping"
       }
     },
     "/v1/SourceIpMappings/{Sid}": {
@@ -2850,6 +4265,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.source_ip_mapping"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_record_sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sip_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/SourceIpMappings/IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2861,10 +4324,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchSourceIpMapping",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchSourceIpMapping"
       },
       "post": {
         "description": "",
@@ -2891,6 +4351,54 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/voice.v1.source_ip_mapping"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "ip_record_sid": "ILaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sip_domain_sid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                      "date_created": "2020-03-18T23:31:36Z",
+                      "date_updated": "2020-03-18T23:31:37Z",
+                      "url": "https://voice.twilio.com/v1/SourceIpMappings/IBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -2903,9 +4411,6 @@
           }
         ],
         "operationId": "UpdateSourceIpMapping",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -2924,6 +4429,13 @@
                 "required": [
                   "SipDomainSid"
                 ]
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "SipDomainSid": "SDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab"
+                  }
+                }
               }
             }
           }
@@ -2958,10 +4470,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteSourceIpMapping",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteSourceIpMapping"
       }
     }
   },
@@ -2996,24 +4505,24 @@
       "name": "VoiceV1IpRecord"
     },
     {
+      "name": "VoiceV1Media"
+    },
+    {
+      "name": "VoiceV1MediaUrl"
+    },
+    {
+      "name": "VoiceV1Recording"
+    },
+    {
       "name": "VoiceV1Settings"
     },
     {
       "name": "VoiceV1SourceIpMapping"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "GA",
-      "description": "This product is Generally Available."
-    },
-    {
-      "name": "Beta",
-      "description": "PLEASE NOTE that this is a Beta product that is subject to change. Use it with caution."
-    },
-    {
-      "name": "Preview",
-      "description": "PLEASE NOTE that this is a Preview product that is subject to change. Use it with caution. If you currently do not have developer preview access, please contact https://www.twilio.com/help/contact."
+      "accountSid_authToken": []
     }
   ]
 }

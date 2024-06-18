@@ -1,5 +1,11 @@
 {
   "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
     "schemas": {
       "bulkexports.v1.export.day": {
         "type": "object",
@@ -250,12 +256,6 @@
           "DeletedByUserRequest"
         ]
       }
-    },
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "type": "http",
-        "scheme": "basic"
-      }
     }
   },
   "info": {
@@ -271,7 +271,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.56.1"
+    "version": "1.0.0"
   },
   "openapi": "3.0.1",
   "paths": {
@@ -281,7 +281,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "friendly_name",
@@ -291,8 +291,8 @@
           "size",
           "redirectTo"
         ],
-        "pathType": "instance",
-        "parent": "/Exports/{ResourceType}"
+        "parent": "/Exports/{ResourceType}",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a specific Day.",
@@ -325,6 +325,49 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export.day-instance"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "redirect_to": "https://documentation-example-twilio-bucket.s3.amazonaws.com/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -336,10 +379,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchDay",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchDay"
       }
     },
     "/v1/Exports/{ResourceType}/Days": {
@@ -348,7 +388,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "friendly_name",
@@ -358,8 +398,8 @@
           "size",
           "redirectTo"
         ],
-        "pathType": "list",
-        "parent": "/Exports/{ResourceType}"
+        "parent": "/Exports/{ResourceType}",
+        "pathType": "list"
       },
       "get": {
         "description": "Retrieve a list of all Days for a resource.",
@@ -418,16 +458,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -436,21 +478,93 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListDayResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "days": [],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://bulkexports.twilio.com/v1/Exports/Messages/Days?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Days?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "days"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "days": [
+                        {
+                          "day": "2017-04-01",
+                          "size": 100,
+                          "resource_type": "Messages",
+                          "create_date": "2017-04-02",
+                          "friendly_name": "friendly_name"
+                        }
+                      ],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://bulkexports.twilio.com/v1/Exports/Messages/Days?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Days?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "days"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -462,10 +576,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListDay",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListDay"
       }
     },
     "/v1/Exports/{ResourceType}": {
@@ -474,10 +585,9 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "instance",
         "dependentProperties": {
           "days": {
             "mapping": {
@@ -491,7 +601,8 @@
             },
             "resource_url": "/v1/Exports/{resource_type}/Jobs"
           }
-        }
+        },
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a specific Export.",
@@ -515,6 +626,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "resource_type": "Messages",
+                      "url": "https://bulkexports.twilio.com/v1/Exports/Messages",
+                      "links": {
+                        "days": "https://bulkexports.twilio.com/v1/Exports/Messages/Days"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -526,10 +684,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExport",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExport"
       }
     },
     "/v1/Exports": {
@@ -538,10 +693,9 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [],
-        "pathType": "list",
         "dependentProperties": {
           "days": {
             "mapping": {
@@ -555,7 +709,8 @@
             },
             "resource_url": "/v1/Exports/{resource_type}/Jobs"
           }
-        }
+        },
+        "pathType": "list"
       }
     },
     "/v1/Exports/{ResourceType}/Configuration": {
@@ -564,7 +719,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "enabled",
@@ -573,8 +728,8 @@
           "webhook_method",
           "webhook_url"
         ],
-        "pathType": "instance",
-        "mountName": "export_configuration"
+        "mountName": "export_configuration",
+        "pathType": "instance"
       },
       "get": {
         "description": "Fetch a specific Export Configuration.",
@@ -598,6 +753,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export_configuration"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Configuration",
+                      "enabled": true,
+                      "webhook_url": "",
+                      "webhook_method": "",
+                      "resource_type": "Messages"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -609,10 +811,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchExportConfiguration",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchExportConfiguration"
       },
       "post": {
         "description": "Update a specific Export Configuration.",
@@ -636,6 +835,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export_configuration"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Configuration",
+                      "enabled": true,
+                      "webhook_url": "",
+                      "resource_type": "Messages",
+                      "webhook_method": ""
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -648,9 +894,6 @@
           }
         ],
         "operationId": "UpdateExportConfiguration",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -672,12 +915,16 @@
                     "description": "Sets whether Twilio should call a webhook URL when the automatic generation is complete, using GET or POST. The actual destination is set in the webhook_url"
                   }
                 }
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "Enabled": true
+                  }
+                }
               }
             }
           }
-        },
-        "x-twilio": {
-          "addContentTypeIfEmptyForm": true
         }
       }
     },
@@ -687,7 +934,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "details",
@@ -702,9 +949,9 @@
           "webhook_method",
           "webhook_url"
         ],
-        "pathType": "list",
         "parent": "/Exports/{ResourceType}",
-        "mountName": "export_custom_jobs"
+        "mountName": "export_custom_jobs",
+        "pathType": "list"
       },
       "get": {
         "description": "",
@@ -763,16 +1010,18 @@
                       }
                     },
                     "meta": {
-                      "type": "object",
                       "properties": {
                         "first_page_url": {
-                          "type": "string",
-                          "format": "uri"
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
                         },
                         "next_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "page": {
                           "type": "integer"
@@ -781,21 +1030,99 @@
                           "type": "integer"
                         },
                         "previous_page_url": {
-                          "type": "string",
                           "format": "uri",
-                          "nullable": true
+                          "nullable": true,
+                          "type": "string"
                         },
                         "url": {
-                          "type": "string",
-                          "format": "uri"
-                        },
-                        "key": {
+                          "format": "uri",
                           "type": "string"
                         }
-                      }
+                      },
+                      "type": "object"
                     }
                   },
                   "title": "ListExportCustomJobResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Jobs?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "jobs",
+                        "first_page_url": "https://bulkexports.twilio.com/v1/Exports/Messages/Jobs?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "page": 0
+                      },
+                      "jobs": []
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "previous_page_url": null,
+                        "url": "https://bulkexports.twilio.com/v1/Exports/Messages/Jobs?PageSize=50&Page=0",
+                        "page_size": 50,
+                        "key": "jobs",
+                        "first_page_url": "https://bulkexports.twilio.com/v1/Exports/Messages/Jobs?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "page": 0
+                      },
+                      "jobs": [
+                        {
+                          "start_day": "start_day",
+                          "job_sid": "JSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "friendly_name": "friendly_name",
+                          "webhook_method": "webhook_method",
+                          "details": {},
+                          "end_day": "end_day",
+                          "webhook_url": "webhook_url",
+                          "email": "email",
+                          "resource_type": "resource_type",
+                          "job_queue_position": "1",
+                          "estimated_completion_time": "2021-03-15T20:20:14.547"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -807,10 +1134,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "ListExportCustomJob",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "ListExportCustomJob"
       },
       "post": {
         "description": "",
@@ -834,6 +1158,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export.export_custom_job"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "start_day": "start_day",
+                      "job_sid": "JSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "webhook_method": "webhook_method",
+                      "details": {},
+                      "end_day": "end_day",
+                      "webhook_url": "webhook_url",
+                      "email": "email",
+                      "resource_type": "resource_type",
+                      "job_queue_position": "1",
+                      "estimated_completion_time": "2021-03-15T20:20:14.547"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -846,9 +1223,6 @@
           }
         ],
         "operationId": "CreateExportCustomJob",
-        "x-maturity": [
-          "GA"
-        ],
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
@@ -886,6 +1260,18 @@
                   "EndDay",
                   "FriendlyName"
                 ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "EndDay": "end_day_value",
+                    "StartDay": "start_day_value",
+                    "WebhookUrl": "webhook_url_value",
+                    "WebhookMethod": "webhook_method_value",
+                    "FriendlyName": "friendly_name_value",
+                    "Email": "email_value"
+                  }
+                }
               }
             }
           }
@@ -898,7 +1284,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "details",
@@ -913,8 +1299,8 @@
           "webhook_method",
           "webhook_url"
         ],
-        "pathType": "instance",
-        "parent": "/Exports"
+        "parent": "/Exports",
+        "pathType": "instance"
       },
       "get": {
         "description": "",
@@ -941,6 +1327,60 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/bulkexports.v1.export.job"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "start_day": "start_day",
+                      "job_sid": "JSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "url": "https://bulkexports.twilio.com/v1/Exports/Jobs/JSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "end_day": "end_day",
+                      "details": {},
+                      "webhook_url": "https://webhookexample.com",
+                      "webhook_method": "webhook_method",
+                      "email": "email",
+                      "resource_type": "resource_type",
+                      "job_queue_position": "1",
+                      "estimated_completion_time": "2021-03-15T20:20:14.547"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
                 }
               }
             },
@@ -952,10 +1392,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "FetchJob",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "FetchJob"
       },
       "delete": {
         "description": "",
@@ -986,10 +1423,7 @@
             "accountSid_authToken": []
           }
         ],
-        "operationId": "DeleteJob",
-        "x-maturity": [
-          "GA"
-        ]
+        "operationId": "DeleteJob"
       }
     },
     "/v1/Exports/Jobs": {
@@ -998,7 +1432,7 @@
           "url": "https://bulkexports.twilio.com"
         }
       ],
-      "description": "TODO: Resource-level docs",
+      "description": "",
       "x-twilio": {
         "defaultOutputProperties": [
           "details",
@@ -1013,8 +1447,8 @@
           "webhook_method",
           "webhook_url"
         ],
-        "pathType": "list",
-        "parent": "/Exports"
+        "parent": "/Exports",
+        "pathType": "list"
       }
     }
   },
@@ -1040,10 +1474,9 @@
       "name": "BulkexportsV1Job"
     }
   ],
-  "x-maturity": [
+  "security": [
     {
-      "name": "GA",
-      "description": "This product is Generally Available."
+      "accountSid_authToken": []
     }
   ]
 }

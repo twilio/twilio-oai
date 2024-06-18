@@ -1,4 +1,8 @@
 components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
   schemas:
     trunking.v1.trunk.credential_list:
       type: object
@@ -528,10 +532,6 @@ components:
       enum:
       - from-transferee
       - from-transferor
-  securitySchemes:
-    accountSid_authToken:
-      type: http
-      scheme: basic
 info:
   title: Twilio - Trunking
   description: This is the public Twilio REST API.
@@ -543,7 +543,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.56.1
+  version: 1.0.0
 openapi: 3.0.1
 paths:
   /v1/Trunks/{TrunkSid}/CredentialLists/{Sid}:
@@ -555,10 +555,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: instance
       parent: /Trunks/{Sid}
       mountName: credentials_lists
       className: credential_list
+      pathType: instance
     get:
       description: ''
       tags:
@@ -589,12 +589,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.credential_list'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-04-28T00:10:23Z'
+                    date_updated: '2018-04-28T00:10:23Z'
+                    friendly_name: friendly_name
+                    sid: CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists/CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchCredentialList
-      x-maturity:
-      - GA
     delete:
       description: ''
       tags:
@@ -625,8 +658,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteCredentialList
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/CredentialLists:
     servers:
     - url: https://trunking.twilio.com
@@ -636,10 +667,10 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: list
       parent: /Trunks/{Sid}
       mountName: credentials_lists
       className: credential_list
+      pathType: list
     post:
       description: ''
       tags:
@@ -660,12 +691,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.credential_list'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-05-02T17:29:30Z'
+                    date_updated: '2018-05-02T17:29:30Z'
+                    friendly_name: friendly_name
+                    sid: CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists/CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateCredentialList
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -683,6 +747,10 @@ paths:
                     will authenticate access to the trunk against this list.
               required:
               - CredentialListSid
+            examples:
+              create:
+                value:
+                  CredentialListSid: CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: ''
       tags:
@@ -728,35 +796,88 @@ paths:
                     items:
                       $ref: '#/components/schemas/trunking.v1.trunk.credential_list'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListCredentialListResponse
+              examples:
+                readFull:
+                  value:
+                    credential_lists:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2018-04-27T22:02:11Z'
+                      date_updated: '2018-04-27T22:02:11Z'
+                      friendly_name: friendly_name
+                      sid: CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists/CLaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists?PageSize=50&Page=0
+                      next_page_url: null
+                      key: credential_lists
+                readEmpty:
+                  value:
+                    credential_lists: []
+                    meta:
+                      page: 0
+                      page_size: 50
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists?PageSize=50&Page=0
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists?PageSize=50&Page=0
+                      next_page_url: null
+                      key: credential_lists
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListCredentialList
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/IpAccessControlLists/{Sid}:
     servers:
     - url: https://trunking.twilio.com
@@ -766,8 +887,8 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: instance
       parent: /Trunks/{Sid}
+      pathType: instance
     get:
       description: ''
       tags:
@@ -799,12 +920,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.ip_access_control_list'
+              examples:
+                fetch:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-05-02T17:29:34Z'
+                    date_updated: '2018-05-02T17:29:34Z'
+                    friendly_name: friendly_name
+                    sid: ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists/ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchIpAccessControlList
-      x-maturity:
-      - GA
     delete:
       description: Remove an associated IP Access Control List from a Trunk
       tags:
@@ -836,8 +990,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteIpAccessControlList
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/IpAccessControlLists:
     servers:
     - url: https://trunking.twilio.com
@@ -847,8 +999,8 @@ paths:
       - sid
       - friendly_name
       - date_created
-      pathType: list
       parent: /Trunks/{Sid}
+      pathType: list
     post:
       description: Associate an IP Access Control List with a Trunk
       tags:
@@ -870,12 +1022,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.ip_access_control_list'
+              examples:
+                create:
+                  value:
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-04-30T20:59:06Z'
+                    date_updated: '2018-04-30T20:59:06Z'
+                    friendly_name: friendly_name
+                    sid: ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists/ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateIpAccessControlList
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -892,6 +1077,10 @@ paths:
                     that you want to associate with the trunk.
               required:
               - IpAccessControlListSid
+            examples:
+              create:
+                value:
+                  IpAccessControlListSid: ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: List all IP Access Control Lists for a Trunk
       tags:
@@ -938,35 +1127,88 @@ paths:
                     items:
                       $ref: '#/components/schemas/trunking.v1.trunk.ip_access_control_list'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListIpAccessControlListResponse
+              examples:
+                readEmpty:
+                  value:
+                    ip_access_control_lists: []
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists?PageSize=50&Page=0
+                      key: ip_access_control_lists
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists?PageSize=50&Page=0
+                readFull:
+                  value:
+                    ip_access_control_lists:
+                    - account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2018-05-02T17:29:34Z'
+                      date_updated: '2018-05-02T17:29:34Z'
+                      friendly_name: friendly_name
+                      sid: ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists/ALaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists?PageSize=50&Page=0
+                      key: ip_access_control_lists
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists?PageSize=50&Page=0
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListIpAccessControlList
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/OriginationUrls/{Sid}:
     servers:
     - url: https://trunking.twilio.com
@@ -978,8 +1220,8 @@ paths:
       - sip_url
       - priority
       - weight
-      pathType: instance
       parent: /Trunks/{Sid}
+      pathType: instance
     get:
       description: ''
       tags:
@@ -1010,12 +1252,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.origination_url'
+              examples:
+                fetch:
+                  value:
+                    weight: 1
+                    date_updated: '2018-05-07T20:20:46Z'
+                    enabled: false
+                    friendly_name: friendly_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    priority: 1
+                    sip_url: sip://sip-box.com:1234
+                    sid: OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-05-07T20:20:46Z'
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls/OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchOriginationUrl
-      x-maturity:
-      - GA
     delete:
       description: ''
       tags:
@@ -1046,8 +1325,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteOriginationUrl
-      x-maturity:
-      - GA
     post:
       description: ''
       tags:
@@ -1078,12 +1355,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.origination_url'
+              examples:
+                update:
+                  value:
+                    weight: 2
+                    date_updated: '2018-05-07T20:50:58Z'
+                    enabled: false
+                    friendly_name: updated_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    priority: 2
+                    sip_url: sip://sip-updated.com:4321
+                    sid: OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-05-07T20:50:58Z'
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls/OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateOriginationUrl
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1115,8 +1429,14 @@ paths:
                   format: uri
                   description: The SIP address you want Twilio to route your Origination
                     calls to. This must be a `sip:` schema. `sips` is NOT supported.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  FriendlyName: updated_name
+                  Weight: 2
+                  Priority: 2
+                  SipUrl: sip://sip-updated.com:4321
+                  Enabled: false
   /v1/Trunks/{TrunkSid}/OriginationUrls:
     servers:
     - url: https://trunking.twilio.com
@@ -1128,8 +1448,8 @@ paths:
       - sip_url
       - priority
       - weight
-      pathType: list
       parent: /Trunks/{Sid}
+      pathType: list
     post:
       description: ''
       tags:
@@ -1150,12 +1470,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.origination_url'
+              examples:
+                create:
+                  value:
+                    weight: 1
+                    date_updated: '2018-05-07T20:50:58Z'
+                    enabled: true
+                    friendly_name: friendly_name
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    priority: 1
+                    sip_url: sip://sip-box.com:1234
+                    sid: OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2018-05-07T20:50:58Z'
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls/OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateOriginationUrl
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1193,6 +1550,14 @@ paths:
               - Enabled
               - FriendlyName
               - SipUrl
+            examples:
+              create:
+                value:
+                  Enabled: true
+                  FriendlyName: friendly_name
+                  Priority: 1
+                  Weight: 1
+                  SipUrl: sip://sip-box.com:1234
     get:
       description: ''
       tags:
@@ -1238,35 +1603,92 @@ paths:
                     items:
                       $ref: '#/components/schemas/trunking.v1.trunk.origination_url'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListOriginationUrlResponse
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls?PageSize=50&Page=0
+                      key: origination_urls
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls?PageSize=50&Page=0
+                    origination_urls:
+                    - weight: 1
+                      date_updated: '2018-05-09T20:47:35Z'
+                      enabled: true
+                      friendly_name: friendly_name
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      priority: 1
+                      sip_url: sip://sip-box.com:1234
+                      sid: OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2018-05-09T20:47:35Z'
+                      trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls/OUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls?PageSize=50&Page=0
+                      key: origination_urls
+                      next_page_url: null
+                      page: 0
+                      page_size: 50
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls?PageSize=50&Page=0
+                    origination_urls: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListOriginationUrl
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/PhoneNumbers/{Sid}:
     servers:
     - url: https://trunking.twilio.com
@@ -1276,8 +1698,8 @@ paths:
       - sid
       - friendly_name
       - phone_number
-      pathType: instance
       parent: /Trunks/{Sid}
+      pathType: instance
     get:
       description: ''
       tags:
@@ -1308,12 +1730,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.phone_number'
+              examples:
+                fetch:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2010-12-10T17:27:34Z'
+                    date_updated: '2015-10-09T11:36:32Z'
+                    friendly_name: (415) 867-5309
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    phone_number: '+14158675309'
+                    api_version: '2010-04-01'
+                    voice_caller_id_lookup: null
+                    voice_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Call
+                    voice_method: POST
+                    voice_fallback_url: null
+                    voice_fallback_method: null
+                    status_callback: ''
+                    status_callback_method: POST
+                    voice_application_sid: ''
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sms_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Message
+                    sms_method: POST
+                    sms_fallback_url: ''
+                    sms_fallback_method: POST
+                    sms_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address_requirements: none
+                    beta: false
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    capabilities:
+                      voice: true
+                      sms: true
+                      mms: true
+                    links:
+                      phone_number: https://api.twilio.com/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IncomingPhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchPhoneNumber
-      x-maturity:
-      - GA
     delete:
       description: ''
       tags:
@@ -1344,8 +1822,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeletePhoneNumber
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/PhoneNumbers:
     servers:
     - url: https://trunking.twilio.com
@@ -1355,8 +1831,8 @@ paths:
       - sid
       - friendly_name
       - phone_number
-      pathType: list
       parent: /Trunks/{Sid}
+      pathType: list
     post:
       description: ''
       tags:
@@ -1377,12 +1853,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.phone_number'
+              examples:
+                create:
+                  value:
+                    sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    date_created: '2010-12-10T17:27:34Z'
+                    date_updated: '2015-10-09T11:36:32Z'
+                    friendly_name: (415) 867-5309
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    phone_number: '+14158675309'
+                    api_version: '2010-04-01'
+                    voice_caller_id_lookup: null
+                    voice_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Call
+                    voice_method: POST
+                    voice_fallback_url: null
+                    voice_fallback_method: null
+                    status_callback: ''
+                    status_callback_method: POST
+                    voice_application_sid: ''
+                    trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    sms_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Message
+                    sms_method: POST
+                    sms_fallback_url: ''
+                    sms_fallback_method: POST
+                    sms_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    address_requirements: none
+                    beta: false
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    capabilities:
+                      voice: true
+                      sms: true
+                      mms: true
+                    links:
+                      phone_number: https://api.twilio.com/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IncomingPhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreatePhoneNumber
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1399,6 +1931,10 @@ paths:
                     that you want to associate with the trunk.
               required:
               - PhoneNumberSid
+            examples:
+              create:
+                value:
+                  PhoneNumberSid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     get:
       description: ''
       tags:
@@ -1444,35 +1980,111 @@ paths:
                     items:
                       $ref: '#/components/schemas/trunking.v1.trunk.phone_number'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListPhoneNumberResponse
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=1&Page=0
+                      key: phone_numbers
+                      next_page_url: null
+                      page: 0
+                      page_size: 1
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=1&Page=0
+                    phone_numbers:
+                    - sid: PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      date_created: '2010-12-10T17:27:34Z'
+                      date_updated: '2015-10-09T11:36:32Z'
+                      friendly_name: (415) 867-5309
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      phone_number: '+14158675309'
+                      api_version: '2010-04-01'
+                      voice_caller_id_lookup: null
+                      voice_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Call
+                      voice_method: POST
+                      voice_fallback_url: null
+                      voice_fallback_method: null
+                      status_callback: ''
+                      status_callback_method: POST
+                      voice_application_sid: ''
+                      trunk_sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      sms_url: https://webhooks.twilio.com/v1/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Proxy/KSaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Webhooks/Message
+                      sms_method: POST
+                      sms_fallback_url: ''
+                      sms_fallback_method: POST
+                      sms_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      address_requirements: none
+                      beta: false
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      capabilities:
+                        voice: true
+                        sms: true
+                        mms: true
+                      links:
+                        phone_number: https://api.twilio.com/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IncomingPhoneNumbers/PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=1&Page=0
+                      key: phone_numbers
+                      next_page_url: null
+                      page: 0
+                      page_size: 1
+                      previous_page_url: null
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers?PageSize=1&Page=0
+                    phone_numbers: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListPhoneNumber
-      x-maturity:
-      - GA
   /v1/Trunks/{TrunkSid}/Recording:
     servers:
     - url: https://trunking.twilio.com
@@ -1481,9 +2093,9 @@ paths:
       defaultOutputProperties:
       - mode
       - trim
-      pathType: instance
       parent: /Trunks/{Sid}
       mountName: recordings
+      pathType: instance
     get:
       description: ''
       tags:
@@ -1504,12 +2116,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.recording'
+              examples:
+                fetch:
+                  value:
+                    mode: do-not-record
+                    trim: do-not-trim
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchRecording
-      x-maturity:
-      - GA
     post:
       description: ''
       tags:
@@ -1530,12 +2170,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk.recording'
+              examples:
+                update:
+                  value:
+                    mode: do-not-record
+                    trim: do-not-trim
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Accepted
       security:
       - accountSid_authToken: []
       operationId: UpdateRecording
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1554,8 +2222,11 @@ paths:
                   $ref: '#/components/schemas/recording_enum_recording_trim'
                   description: The recording trim setting for the trunk. Can be do-not-trim
                     (default) or trim-silence.
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  Mode: do-not-record
+                  Trim: do-not-trim
   /v1/Trunks/{Sid}:
     servers:
     - url: https://trunking.twilio.com
@@ -1565,7 +2236,6 @@ paths:
       - sid
       - friendly_name
       - domain_name
-      pathType: instance
       dependentProperties:
         origination_urls:
           mapping:
@@ -1587,6 +2257,7 @@ paths:
           mapping:
             trunk_sid: sid
           resource_url: /v1/Trunks/{trunk_sid}/Recording
+      pathType: instance
     get:
       description: ''
       tags:
@@ -1608,12 +2279,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk'
+              examples:
+                fetch:
+                  value:
+                    sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: test.pstn.twilio.com
+                    disaster_recovery_method: POST
+                    disaster_recovery_url: http://disaster-recovery.com
+                    friendly_name: friendly_name
+                    secure: false
+                    cnam_lookup_enabled: false
+                    recording:
+                      mode: do-not-record
+                      trim: do-not-trim
+                    transfer_mode: disable-all
+                    transfer_caller_id: from-transferor
+                    auth_type: ''
+                    auth_type_set: []
+                    date_created: '2015-01-02T11:23:45Z'
+                    date_updated: '2015-01-02T11:23:45Z'
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      origination_urls: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls
+                      credential_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists
+                      ip_access_control_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists
+                      phone_numbers: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: FetchTrunk
-      x-maturity:
-      - GA
     delete:
       description: ''
       tags:
@@ -1635,8 +2355,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: DeleteTrunk
-      x-maturity:
-      - GA
     post:
       description: ''
       tags:
@@ -1658,12 +2376,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk'
+              examples:
+                update:
+                  value:
+                    sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: test.pstn.twilio.com
+                    disaster_recovery_method: GET
+                    disaster_recovery_url: http://updated-recovery.com
+                    friendly_name: updated_name
+                    secure: true
+                    cnam_lookup_enabled: true
+                    recording:
+                      mode: do-not-record
+                      trim: do-not-trim
+                    transfer_mode: disable-all
+                    transfer_caller_id: from-transferor
+                    auth_type: ''
+                    auth_type_set: []
+                    date_created: '2015-01-02T11:23:45Z'
+                    date_updated: '2015-01-02T11:23:45Z'
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      origination_urls: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls
+                      credential_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists
+                      ip_access_control_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists
+                      phone_numbers: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: UpdateTrunk
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1723,8 +2490,16 @@ paths:
                   $ref: '#/components/schemas/trunk_enum_transfer_caller_id'
                   description: 'Caller Id for transfer target. Can be: `from-transferee`
                     (default) or `from-transferor`.'
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              update:
+                value:
+                  FriendlyName: updated_name
+                  DisasterRecoveryMethod: GET
+                  DisasterRecoveryUrl: http://updated-recovery.com
+                  Secure: true
+                  TransferMode: disable-all
+                  TransferCallerId: from-transferor
+                  CnamLookupEnabled: true
   /v1/Trunks:
     servers:
     - url: https://trunking.twilio.com
@@ -1734,7 +2509,6 @@ paths:
       - sid
       - friendly_name
       - domain_name
-      pathType: list
       dependentProperties:
         origination_urls:
           mapping:
@@ -1756,6 +2530,7 @@ paths:
           mapping:
             trunk_sid: sid
           resource_url: /v1/Trunks/{trunk_sid}/Recording
+      pathType: list
     post:
       description: ''
       tags:
@@ -1766,12 +2541,61 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/trunking.v1.trunk'
+              examples:
+                create:
+                  value:
+                    sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    domain_name: test.pstn.twilio.com
+                    disaster_recovery_method: POST
+                    disaster_recovery_url: http://disaster-recovery.com
+                    friendly_name: friendly_name
+                    secure: false
+                    cnam_lookup_enabled: false
+                    recording:
+                      mode: do-not-record
+                      trim: do-not-trim
+                    transfer_mode: disable-all
+                    transfer_caller_id: from-transferee
+                    auth_type: ''
+                    auth_type_set: []
+                    date_created: '2015-01-02T11:23:45Z'
+                    date_updated: '2015-01-02T11:23:45Z'
+                    url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    links:
+                      origination_urls: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls
+                      credential_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists
+                      ip_access_control_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists
+                      phone_numbers: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
       operationId: CreateTrunk
-      x-maturity:
-      - GA
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -1831,8 +2655,17 @@ paths:
                   $ref: '#/components/schemas/trunk_enum_transfer_caller_id'
                   description: 'Caller Id for transfer target. Can be: `from-transferee`
                     (default) or `from-transferor`.'
-      x-twilio:
-        addContentTypeIfEmptyForm: true
+            examples:
+              create:
+                value:
+                  DomainName: test.pstn.twilio.com
+                  FriendlyName: friendly_name
+                  DisasterRecoveryMethod: GET
+                  DisasterRecoveryUrl: http://disaster-recovery.com
+                  TransferMode: disable-all
+                  TransferCallerId: from-transferee
+                  Secure: false
+                  CnamLookupEnabled: false
     get:
       description: ''
       tags:
@@ -1869,35 +2702,104 @@ paths:
                     items:
                       $ref: '#/components/schemas/trunking.v1.trunk'
                   meta:
-                    type: object
                     properties:
                       first_page_url:
-                        type: string
                         format: uri
-                      next_page_url:
                         type: string
+                      key:
+                        type: string
+                      next_page_url:
                         format: uri
                         nullable: true
+                        type: string
                       page:
                         type: integer
                       page_size:
                         type: integer
                       previous_page_url:
-                        type: string
                         format: uri
                         nullable: true
+                        type: string
                       url:
-                        type: string
                         format: uri
-                      key:
                         type: string
+                    type: object
                 title: ListTrunkResponse
+              examples:
+                readFull:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks?PageSize=50&Page=0
+                      url: https://trunking.twilio.com/v1/Trunks?PageSize=50&Page=0
+                      page_size: 50
+                      key: trunks
+                      next_page_url: null
+                      page: 0
+                      previous_page_url: null
+                    trunks:
+                    - sid: TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      domain_name: test.pstn.twilio.com
+                      disaster_recovery_method: POST
+                      disaster_recovery_url: http://disaster-recovery.com
+                      friendly_name: friendly_name
+                      secure: false
+                      cnam_lookup_enabled: false
+                      recording:
+                        mode: do-not-record
+                        trim: do-not-trim
+                      transfer_mode: disable-all
+                      transfer_caller_id: from-transferee
+                      auth_type: ''
+                      auth_type_set: []
+                      date_created: '2015-01-02T11:23:45Z'
+                      date_updated: '2015-01-02T11:23:45Z'
+                      url: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      links:
+                        origination_urls: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OriginationUrls
+                        credential_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/CredentialLists
+                        ip_access_control_lists: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/IpAccessControlLists
+                        phone_numbers: https://trunking.twilio.com/v1/Trunks/TKaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/PhoneNumbers
+                readEmpty:
+                  value:
+                    meta:
+                      first_page_url: https://trunking.twilio.com/v1/Trunks?PageSize=50&Page=0
+                      url: https://trunking.twilio.com/v1/Trunks?PageSize=50&Page=0
+                      page_size: 50
+                      key: trunks
+                      next_page_url: null
+                      page: 0
+                      previous_page_url: null
+                    trunks: []
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
       operationId: ListTrunk
-      x-maturity:
-      - GA
 servers:
 - url: https://trunking.twilio.com
 tags:
@@ -1907,6 +2809,5 @@ tags:
 - name: TrunkingV1PhoneNumber
 - name: TrunkingV1Recording
 - name: TrunkingV1Trunk
-x-maturity:
-- name: GA
-  description: This product is Generally Available.
+security:
+- accountSid_authToken: []
