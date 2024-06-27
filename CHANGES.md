@@ -1,5 +1,28 @@
 twilio-oai changelog
 ====================
+[2024-06-27] Version 2.0.1
+--------------------------
+**Library - Chore**
+- [PR #113](https://github.com/twilio/twilio-oai/pull/113): regenerated from open-api. Thanks to [@sbansla](https://github.com/sbansla)!
+- [PR #112](https://github.com/twilio/twilio-oai/pull/112): disable example validation. Thanks to [@sbansla](https://github.com/sbansla)!
+
+**Api**
+- Add `transcription` resource
+- Add beta feature request managed cert
+
+**Flex**
+- Changed mount name for flex_team v2 api
+
+**Intelligence**
+- Add `X-Rate-Limit-Limit`, `X-Rate-Limit-Remaining`, and `X-Rate-Limit-Config` as Response Headers to Operator resources
+
+**Numbers**
+- Added include_constraints query parameter to the Regulations API
+
+**Twiml**
+- Add support for `<Transcription>` noun
+
+
 [2024-06-18] Version 2.0.0
 --------------------------
 **Note:** This release contains breaking changes, check our [upgrade guide](./UPGRADE.md#2024-06-18-156x-to-2xx) for detailed migration notes.
