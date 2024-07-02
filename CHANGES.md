@@ -1,5 +1,14 @@
 twilio-oai changelog
 ====================
+[2024-07-02] Version 2.0.2
+--------------------------
+**Library - Chore**
+- [PR #114](https://github.com/twilio/twilio-oai/pull/114): remove empty models. Thanks to [@tiwarishubham635](https://github.com/tiwarishubham635)!
+
+**Intelligence**
+- Deprecate account flag api.twilio-intelligence.v2
+
+
 [2024-06-27] Version 2.0.1
 --------------------------
 **Library - Chore**
