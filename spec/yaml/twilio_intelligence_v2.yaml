@@ -44,6 +44,7 @@ components:
             Type resource.
         version:
           type: integer
+          default: 0
           nullable: true
           description: Numeric Custom Operator version. Incremented with each update
             on the resource, used to ensure integrity when updating the Custom Operator.
@@ -154,6 +155,7 @@ components:
             Type resource.
         version:
           type: integer
+          default: 0
           nullable: true
           description: Numeric Operator version. Incremented with each update on the
             resource, used to ensure integrity when updating the Operator.
@@ -464,6 +466,7 @@ components:
             Type resource.
         version:
           type: integer
+          default: 0
           nullable: true
           description: Numeric Operator version. Incremented with each update on the
             resource, used to ensure integrity when updating the Operator.
@@ -507,10 +510,12 @@ components:
       properties:
         media_channel:
           type: integer
+          default: 0
           nullable: true
           description: The channel number.
         sentence_index:
           type: integer
+          default: 0
           nullable: true
           description: The index of the sentence in the transcript.
         start_time:
@@ -541,6 +546,11 @@ components:
         confidence:
           type: number
           nullable: true
+        words:
+          type: array
+          items: {}
+          nullable: true
+          description: Detailed information for each of the words of the given Sentence.
     intelligence.v2.service:
       type: object
       properties:
@@ -633,6 +643,7 @@ components:
           description: Operator sids attached to this service, read only
         version:
           type: integer
+          default: 0
           nullable: true
           description: The version number of this Service.
     service_enum_http_method:
@@ -711,6 +722,7 @@ components:
             ISO 8601 format.
         duration:
           type: integer
+          default: 0
           nullable: true
           description: The duration of this Transcript's source
         url:
@@ -1294,6 +1306,15 @@ paths:
                     media_url: https://media.server.com/media.wav
                     url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -1869,6 +1890,15 @@ paths:
                       next_page_url: null
                       key: operator_results
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -1965,6 +1995,15 @@ paths:
                     transcript_sid: GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults/LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -2154,13 +2193,10 @@ paths:
       parameters:
       - name: Sid
         in: path
-        description: A 34 character string that uniquely identifies this Operator
-          Type.
+        description: Either a 34 character string that uniquely identifies this Operator
+          Type or the unique name that references an Operator Type.
         schema:
           type: string
-          minLength: 34
-          maxLength: 34
-          pattern: ^EY[0-9a-fA-F]{32}$
         required: true
       responses:
         '200':
@@ -2489,6 +2525,7 @@ paths:
       - start_time
       - end_time
       - confidence
+      - words
       parent: /Transcripts/{Sid}
       pathType: list
     get:
@@ -2509,6 +2546,15 @@ paths:
         in: query
         description: Grant access to PII Redacted/Unredacted Sentences. If redaction
           is enabled, the default is `true` to access redacted sentences.
+        schema:
+          type: boolean
+        examples:
+          readParams:
+            value: 'True'
+      - name: WordTimestamps
+        in: query
+        description: Returns word level timestamps information, if word_timestamps
+          is enabled. The default is `false`.
         schema:
           type: boolean
         examples:
@@ -2579,6 +2625,13 @@ paths:
                       transcript: test test
                       sid: GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       confidence: null
+                      words:
+                      - word: test
+                        start_time: null
+                        end_time: null
+                      - word: test
+                        start_time: null
+                        end_time: null
                     meta:
                       key: sentences
                       page: 0
@@ -2597,15 +2650,31 @@ paths:
                       transcript: test test
                       sid: GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       confidence: null
+                      words:
+                      - word: test
+                        start_time: null
+                        end_time: null
+                      - word: test
+                        start_time: null
+                        end_time: null
                     meta:
                       key: sentences
                       page: 0
                       page_size: 50
-                      first_page_url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0
-                      url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0
+                      first_page_url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&WordTimestamps=True&PageSize=50&Page=0
+                      url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&WordTimestamps=True&PageSize=50&Page=0
                       next_page_url: null
                       previous_page_url: null
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -2679,6 +2748,15 @@ paths:
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             ETag:
+              schema:
+                type: string
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
               schema:
                 type: string
             Access-Control-Allow-Origin:
@@ -2871,6 +2949,15 @@ paths:
                       previous_page_url: null
                       url: https://intelligence.twilio.com/v2/Services?PageSize=50&Page=0
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -2926,6 +3013,19 @@ paths:
       responses:
         '204':
           description: The resource was deleted successfully.
+          headers:
+            ETag:
+              schema:
+                type: string
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
       security:
       - accountSid_authToken: []
       operationId: DeleteService
@@ -2968,6 +3068,15 @@ paths:
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             ETag:
+              schema:
+                type: string
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
               schema:
                 type: string
             Access-Control-Allow-Origin:
@@ -3042,6 +3151,15 @@ paths:
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             ETag:
+              schema:
+                type: string
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
               schema:
                 type: string
             Access-Control-Allow-Origin:
@@ -3205,6 +3323,15 @@ paths:
                       media: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
                       operator_results: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -3461,6 +3588,15 @@ paths:
                       previous_page_url: null
                       url: https://intelligence.twilio.com/v2/Transcripts?ServiceSid=GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&PageSize=50&Page=0
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -3556,6 +3692,15 @@ paths:
                       media: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media
                       operator_results: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults
           headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
               schema:
@@ -3601,6 +3746,16 @@ paths:
       responses:
         '204':
           description: The resource was deleted successfully.
+          headers:
+            X-Rate-Limit-Limit:
+              schema:
+                type: string
+            X-Rate-Limit-Remaining:
+              schema:
+                type: string
+            X-Rate-Limit-Config:
+              schema:
+                type: string
       security:
       - accountSid_authToken: []
       operationId: DeleteTranscript
