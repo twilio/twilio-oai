@@ -150,6 +150,7 @@
           },
           "total_count": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "The total count of phone numbers in this Bulk hosting request."
           },
@@ -287,6 +288,81 @@
           "ASC",
           "DESC"
         ]
+      },
+      "numbers.v2.bundle_clone": {
+        "type": "object",
+        "properties": {
+          "bundle_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Bundle resource."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the Bundle resource."
+          },
+          "regulation_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^RN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string of a regulation that is associated to the Bundle resource."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The string that you assigned to describe the resource."
+          },
+          "status": {
+            "type": "string",
+            "$ref": "#/components/schemas/bundle_clone_enum_status",
+            "nullable": true,
+            "description": "The verification status of the Bundle resource."
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format when the resource will be valid until."
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "description": "The email address that will receive updates when the Bundle resource changes status."
+          },
+          "status_callback": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL we call to inform your application of status changes."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was last updated specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource."
+          }
+        }
       },
       "bundle_clone_enum_status": {
         "type": "string",
@@ -2180,6 +2256,10 @@
                   "NumberType": {
                     "type": "string",
                     "description": "The type of phone number of the Bundle's ownership request. Can be `local`, `mobile`, `national`, or `toll free`."
+                  },
+                  "IsTest": {
+                    "type": "boolean",
+                    "description": "Indicates that Bundle is a Test Bundle and will be Auto-Rejected"
                   }
                 },
                 "required": [
@@ -2951,6 +3031,149 @@
           }
         ],
         "operationId": "DeleteBundle"
+      }
+    },
+    "/v2/RegulatoryCompliance/Bundles/{BundleSid}/Clones": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "mountName": "bundle_clone",
+        "pathType": "instance"
+      },
+      "post": {
+        "description": "Creates a new clone of the Bundle in target Account. It will internally create clones of all the bundle items (identities and documents) of the original bundle",
+        "tags": [
+          "NumbersV2BundleClone"
+        ],
+        "parameters": [
+          {
+            "name": "BundleSid",
+            "in": "path",
+            "description": "The unique string that identifies the Bundle to be cloned.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^BU[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.bundle_clone"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "bundle_sid": "BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                      "regulation_sid": "RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "friendly_name",
+                      "status": "draft",
+                      "valid_until": "2015-07-30T20:00:00Z",
+                      "email": "email",
+                      "status_callback": "http://www.example.com",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "url": "https://numbers.twilio.com/v2/RegulatoryCompliance/Bundles/BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab/Clones"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateBundleClone",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateBundleCloneRequest",
+                "properties": {
+                  "TargetAccountSid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AC[0-9a-fA-F]{32}$",
+                    "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) where the bundle needs to be cloned."
+                  },
+                  "MoveToDraft": {
+                    "type": "boolean",
+                    "description": "This is to determine whether the cloned bundle needs to be in draft state or not."
+                  },
+                  "FriendlyName": {
+                    "type": "string",
+                    "description": "The string that you assigned to describe the cloned bundle."
+                  }
+                },
+                "required": [
+                  "TargetAccountSid"
+                ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "FriendlyName": "friendly_name",
+                    "TargetAccountSid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+                    "MoveToDraft": true
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v2/RegulatoryCompliance/Bundles/{BundleSid}/Copies": {

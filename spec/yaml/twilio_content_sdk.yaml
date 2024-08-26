@@ -95,6 +95,33 @@ components:
       required:
       - type
       - title
+    carouselActions:
+      type: array
+      items:
+        $ref: '#/components/schemas/carouselAction'
+    carouselActionType:
+      type: string
+      enum:
+      - URL
+      - PHONE_NUMBER
+      - QUICK_REPLY
+    carouselAction:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          $ref: '#/components/schemas/carouselActionType'
+        title:
+          type: string
+        url:
+          type: string
+        phone:
+          type: string
+        id:
+          type: string
+      required:
+      - type
+      - title
     authenticationActions:
       type: array
       items:
@@ -134,6 +161,22 @@ components:
           type: number
         description:
           type: string
+    carouselCards:
+      type: array
+      items:
+        $ref: '#/components/schemas/carouselCard'
+    carouselCard:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        media:
+          type: string
+        actions:
+          $ref: '#/components/schemas/carouselActions'
     twilioText:
       type: object
       description: Type containing only plain text-based content
@@ -297,6 +340,21 @@ components:
           type: string
       required:
       - body
+    twilioCarousel:
+      type: object
+      description: twilio/carousel templates allow you to send a single text message
+        accompanied by a set of up to 10 carousel cards in a horizontally scrollable
+        view
+      nullable: true
+      additionalProperties: false
+      properties:
+        body:
+          type: string
+        cards:
+          $ref: '#/components/schemas/carouselCards'
+      required:
+      - body
+      - cards
     ContentApprovalRequest:
       type: object
       description: Content approval request body
@@ -350,6 +408,8 @@ components:
           $ref: '#/components/schemas/twilioCard'
         twilio/catalog:
           $ref: '#/components/schemas/twilioCatalog'
+        twilio/carousel:
+          $ref: '#/components/schemas/twilioCarousel'
         whatsapp/card:
           $ref: '#/components/schemas/whatsappCard'
         whatsapp/authentication:
@@ -643,10 +703,35 @@ paths:
                     status: unsubmitted
                     rejection_reason: ''
                     allow_category_change: true
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
-      operationId: CreateContentApprovalRequest
+      operationId: CreateApprovalCreate
   /v1/Content/{ContentSid}/ApprovalRequests:
     servers:
     - url: https://content.twilio.com
@@ -696,10 +781,35 @@ paths:
                       rejection_reason: ''
                       allow_category_change: true
                     url: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
-      operationId: FetchApproval
+      operationId: FetchApprovalFetch
   /v1/Content/{Sid}:
     servers:
     - url: https://content.twilio.com
@@ -768,6 +878,31 @@ paths:
                     links:
                       approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
                       approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -856,6 +991,31 @@ paths:
                     links:
                       approval_create: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp
                       approval_fetch: https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: Created
       security:
       - accountSid_authToken: []
@@ -1000,6 +1160,31 @@ paths:
                       url: https://content.twilio.com/v1/Content?PageSize=20&Page=0
                       next_page_url: null
                       key: contents
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -1177,6 +1362,31 @@ paths:
                       previous_page_url: null
                       next_page_url: null
                       key: contents
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []
@@ -1336,6 +1546,31 @@ paths:
                       url: https://content.twilio.com/v1/LegacyContent?PageSize=20&Page=0
                       next_page_url: null
                       key: contents
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
           description: OK
       security:
       - accountSid_authToken: []

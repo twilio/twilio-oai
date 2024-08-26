@@ -235,7 +235,31 @@
       },
       "marketplace.v1.installed_add_on.installed_add_on_usage": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "billable_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "quantity": {
+                  "type": "number",
+                  "description": "Any floating number greater than 0."
+                },
+                "sid": {
+                  "type": "string",
+                  "description": "BillingSid to use for billing."
+                }
+              },
+              "required": [
+                "quantity",
+                "sid"
+              ]
+            }
+          }
+        },
+        "required": [
+          "billable_items"
+        ]
       },
       "marketplace.v1.module_data_management": {
         "type": "object",
@@ -243,29 +267,52 @@
           "url": {
             "type": "string",
             "format": "uri",
-            "nullable": true
+            "nullable": true,
+            "description": "URL to query the subresource."
           },
           "sid": {
             "type": "string",
             "minLength": 34,
             "maxLength": 34,
             "pattern": "^XB[0-9a-fA-F]{32}$",
-            "nullable": true
+            "nullable": true,
+            "description": "ModuleSid that identifies this Listing."
           },
           "description": {
-            "nullable": true
+            "nullable": true,
+            "description": "A JSON object describing the module and is displayed under the Description tab of the Module detail page. You can define the main body of the description, highlight key features or aspects of the module and if applicable, provide code samples for developers"
           },
           "support": {
-            "nullable": true
+            "nullable": true,
+            "description": "A JSON object containing information on how customers can obtain support for the module. Use this parameter to provide details such as contact information and support description."
           },
           "policies": {
-            "nullable": true
+            "nullable": true,
+            "description": "A JSON object describing the module's privacy and legal policies and is displayed under the Policies tab of the Module detail page. The maximum file size for Policies is 5MB"
           },
           "module_info": {
-            "nullable": true
+            "nullable": true,
+            "description": "A JSON object containing essential attributes that define a module. This information is presented on the Module detail page in the Twilio Marketplace Catalog. You can pass the following attributes in the JSON object"
           },
           "documentation": {
-            "nullable": true
+            "nullable": true,
+            "description": "A JSON object for providing comprehensive information, instructions, and resources related to the module"
+          },
+          "configuration": {
+            "nullable": true,
+            "description": "A JSON object for providing listing specific configuration. Contains button setup, notification url, among others."
+          }
+        }
+      },
+      "marketplace.v1.referral_conversion": {
+        "type": "object",
+        "properties": {
+          "converted_account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": false
           }
         }
       }
@@ -2025,29 +2072,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "billable_items": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "quantity": {
-                          "type": "number",
-                          "description": ""
-                        },
-                        "sid": {
-                          "type": "string",
-                          "description": ""
-                        }
-                      },
-                      "required": [
-                        "quantity",
-                        "sid"
-                      ]
-                    }
-                  }
-                }
+                "$ref": "#/components/schemas/marketplace.v1.installed_add_on.installed_add_on_usage"
               },
               "examples": {
                 "multiple_sids": {
@@ -2062,6 +2087,211 @@
                         "quantity": 44.02
                       }
                     ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ReferralConversion": {
+      "servers": [
+        {
+          "url": "https://marketplace.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "pathType": "instance"
+      },
+      "post": {
+        "description": "",
+        "tags": [
+          "MarketplaceReferralConversion"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/marketplace.v1.referral_conversion"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "converted_account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/marketplace.v1.referral_conversion"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "converted_account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "ACCEPTED"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "x-jvm-type": "com.twilio.rest.TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "NOT_FOUND"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateReferralConversion",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "referral_account_sid": {
+                    "type": "string",
+                    "minLength": 34,
+                    "maxLength": 34,
+                    "pattern": "^AC[0-9a-fA-F]{32}$",
+                    "nullable": false
+                  }
+                }
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "referral_account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                   }
                 }
               }
@@ -2150,6 +2380,18 @@
                       },
                       "documentation": {
                         "body": "aBody"
+                      },
+                      "configuration": {
+                        "buttons": [
+                          {
+                            "url": "https://example.com",
+                            "label": "Configurable button text",
+                            "help_text": "The button text, url, and help text are now configurable via self service"
+                          }
+                        ],
+                        "notification_configuration": {
+                          "callback_url": "https://example.com"
+                        }
                       }
                     }
                   }
@@ -2230,6 +2472,10 @@
                   "Support": {
                     "type": "string",
                     "description": ""
+                  },
+                  "Configuration": {
+                    "type": "string",
+                    "description": ""
                   }
                 }
               },
@@ -2240,7 +2486,8 @@
                     "Description": "test",
                     "Documentation": "test",
                     "Policies": "test",
-                    "Support": "test"
+                    "Support": "test",
+                    "Configuration": "test"
                   }
                 }
               }
@@ -2249,7 +2496,7 @@
         }
       },
       "get": {
-        "description": "",
+        "description": "This endpoint returns the data of a given Listing. To find a Listing's SID, use the [Available Add-ons resource](/docs/marketplace/api/available-add-ons) or view its Listing details page in the Console by visiting the [Catalog](https://console.twilio.com/us1/develop/add-ons/catalog) or the [My Listings tab](https://console.twilio.com/us1/develop/add-ons/publish/my-listings) and selecting the Listing.",
         "tags": [
           "MarketplaceModuleDataManagement"
         ],
@@ -2257,7 +2504,7 @@
           {
             "name": "Sid",
             "in": "path",
-            "description": "",
+            "description": "The unique identifier of a Listing.",
             "schema": {
               "type": "string",
               "minLength": 34,
@@ -2316,6 +2563,18 @@
                       },
                       "documentation": {
                         "body": "aBody"
+                      },
+                      "configuration": {
+                        "buttons": [
+                          {
+                            "url": "https://example.com",
+                            "label": "Configurable button text",
+                            "help_text": "The button text, url, and help text are now configurable via self service"
+                          }
+                        ],
+                        "notification_configuration": {
+                          "callback_url": "https://example.com"
+                        }
                       }
                     }
                   }
@@ -2396,6 +2655,9 @@
     },
     {
       "name": "MarketplaceModuleDataManagement"
+    },
+    {
+      "name": "MarketplaceReferralConversion"
     }
   ],
   "security": [

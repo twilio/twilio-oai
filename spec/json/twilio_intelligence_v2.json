@@ -48,6 +48,7 @@
           },
           "version": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "Numeric Custom Operator version. Incremented with each update on the resource, used to ensure integrity when updating the Custom Operator."
           },
@@ -172,6 +173,7 @@
           },
           "version": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "Numeric Operator version. Incremented with each update on the resource, used to ensure integrity when updating the Operator."
           },
@@ -521,6 +523,7 @@
           },
           "version": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "Numeric Operator version. Incremented with each update on the resource, used to ensure integrity when updating the Operator."
           },
@@ -568,11 +571,13 @@
         "properties": {
           "media_channel": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "The channel number."
           },
           "sentence_index": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "The index of the sentence in the transcript."
           },
@@ -608,6 +613,12 @@
           "confidence": {
             "type": "number",
             "nullable": true
+          },
+          "words": {
+            "type": "array",
+            "items": {},
+            "nullable": true,
+            "description": "Detailed information for each of the words of the given Sentence."
           }
         }
       },
@@ -704,6 +715,7 @@
           },
           "version": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "The version number of this Service."
           }
@@ -788,6 +800,7 @@
           },
           "duration": {
             "type": "integer",
+            "default": 0,
             "nullable": true,
             "description": "The duration of this Transcript's source"
           },
@@ -1640,6 +1653,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -2482,6 +2510,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -2619,6 +2662,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -2899,12 +2957,9 @@
           {
             "name": "Sid",
             "in": "path",
-            "description": "A 34 character string that uniquely identifies this Operator Type.",
+            "description": "Either a 34 character string that uniquely identifies this Operator Type or the unique name that references an Operator Type.",
             "schema": {
-              "type": "string",
-              "minLength": 34,
-              "maxLength": 34,
-              "pattern": "^EY[0-9a-fA-F]{32}$"
+              "type": "string"
             },
             "required": true
           }
@@ -3387,7 +3442,8 @@
           "transcript",
           "start_time",
           "end_time",
-          "confidence"
+          "confidence",
+          "words"
         ],
         "parent": "/Transcripts/{Sid}",
         "pathType": "list"
@@ -3414,6 +3470,19 @@
             "name": "Redacted",
             "in": "query",
             "description": "Grant access to PII Redacted/Unredacted Sentences. If redaction is enabled, the default is `true` to access redacted sentences.",
+            "schema": {
+              "type": "boolean"
+            },
+            "examples": {
+              "readParams": {
+                "value": "True"
+              }
+            }
+          },
+          {
+            "name": "WordTimestamps",
+            "in": "query",
+            "description": "Returns word level timestamps information, if word_timestamps is enabled. The default is `false`.",
             "schema": {
               "type": "boolean"
             },
@@ -3510,7 +3579,19 @@
                           "end_time": null,
                           "transcript": "test test",
                           "sid": "GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "confidence": null
+                          "confidence": null,
+                          "words": [
+                            {
+                              "word": "test",
+                              "start_time": null,
+                              "end_time": null
+                            },
+                            {
+                              "word": "test",
+                              "start_time": null,
+                              "end_time": null
+                            }
+                          ]
                         }
                       ],
                       "meta": {
@@ -3534,15 +3615,27 @@
                           "end_time": null,
                           "transcript": "test test",
                           "sid": "GXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                          "confidence": null
+                          "confidence": null,
+                          "words": [
+                            {
+                              "word": "test",
+                              "start_time": null,
+                              "end_time": null
+                            },
+                            {
+                              "word": "test",
+                              "start_time": null,
+                              "end_time": null
+                            }
+                          ]
                         }
                       ],
                       "meta": {
                         "key": "sentences",
                         "page": 0,
                         "page_size": 50,
-                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0",
-                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&PageSize=50&Page=0",
+                        "first_page_url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&WordTimestamps=True&PageSize=50&Page=0",
+                        "url": "https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences?Redacted=True&WordTimestamps=True&PageSize=50&Page=0",
                         "next_page_url": null,
                         "previous_page_url": null
                       }
@@ -3552,6 +3645,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -3656,6 +3764,21 @@
             },
             "headers": {
               "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
                 "schema": {
                   "type": "string"
                 }
@@ -3904,6 +4027,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -3986,7 +4124,29 @@
         ],
         "responses": {
           "204": {
-            "description": "The resource was deleted successfully."
+            "description": "The resource was deleted successfully.",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -4047,6 +4207,21 @@
             },
             "headers": {
               "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
                 "schema": {
                   "type": "string"
                 }
@@ -4155,6 +4330,21 @@
             },
             "headers": {
               "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
                 "schema": {
                   "type": "string"
                 }
@@ -4368,6 +4558,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -4730,6 +4935,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -4867,6 +5087,21 @@
               }
             },
             "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Access-Control-Allow-Origin": {
                 "description": "Specify the origin(s) allowed to access the resource",
                 "schema": {
@@ -4933,7 +5168,24 @@
         ],
         "responses": {
           "204": {
-            "description": "The resource was deleted successfully."
+            "description": "The resource was deleted successfully.",
+            "headers": {
+              "X-Rate-Limit-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Remaining": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Rate-Limit-Config": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
