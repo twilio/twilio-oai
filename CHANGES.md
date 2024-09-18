@@ -1,5 +1,15 @@
 twilio-oai changelog
 ====================
+[2024-09-18] Version 2.1.1
+--------------------------
+**Intelligence**
+- Remove public from operator_type
+- Update operator_type to include general-availablity and deprecated
+
+**Numbers**
+- Remove beta flag for bundle clone API
+
+
 [2024-09-05] Version 2.1.0
 --------------------------
 **Iam**

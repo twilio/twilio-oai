@@ -236,6 +236,11 @@
       "marketplace.v1.installed_add_on.installed_add_on_usage": {
         "type": "object",
         "properties": {
+          "total_submitted": {
+            "type": "number",
+            "description": "Total amount in local currency that was billed in this request. Aggregates all billable_items that were successfully submitted.",
+            "readOnly": true
+          },
           "billable_items": {
             "type": "array",
             "items": {
@@ -243,11 +248,16 @@
               "properties": {
                 "quantity": {
                   "type": "number",
-                  "description": "Any floating number greater than 0."
+                  "description": "Total amount in local currency that was billed for this Billing Item. Can be any floating number greater than 0."
                 },
                 "sid": {
                   "type": "string",
                   "description": "BillingSid to use for billing."
+                },
+                "submitted": {
+                  "type": "boolean",
+                  "description": "Whether the billing event was successfully generated for this Billable Item.",
+                  "readOnly": true
                 }
               },
               "required": [
@@ -301,6 +311,10 @@
           "configuration": {
             "nullable": true,
             "description": "A JSON object for providing listing specific configuration. Contains button setup, notification url, among others."
+          },
+          "pricing": {
+            "nullable": true,
+            "description": "A JSON object for providing Listing specific pricing information."
           }
         }
       },
@@ -313,6 +327,60 @@
             "maxLength": 34,
             "pattern": "^AC[0-9a-fA-F]{32}$",
             "nullable": false
+          }
+        }
+      },
+      "marketplace.v1.referral_records": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^XL[0-9a-fA-F]{32}$",
+            "nullable": false,
+            "description": "The unique identifier for this resource."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": false,
+            "description": "The account sid that owns this record."
+          },
+          "net_revenue": {
+            "type": "number",
+            "nullable": false,
+            "description": "Net revenue collected as part of this record."
+          },
+          "filename": {
+            "type": "string",
+            "nullable": false,
+            "description": "Name of the file attached to the record."
+          },
+          "documentation_link": {
+            "type": "string",
+            "nullable": false,
+            "description": "Link to download record's invoice."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in UTC when the resource was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in UTC when the resource was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the resource."
           }
         }
       }
@@ -2025,7 +2093,7 @@
         "pathType": "list"
       },
       "post": {
-        "description": "",
+        "description": "Allows Twilio Marketplace publishers to manually report customer usage on No-code Partner Listings that they own.",
         "tags": [
           "MarketplaceBillingUsage"
         ],
@@ -2033,7 +2101,7 @@
           {
             "name": "InstalledAddOnSid",
             "in": "path",
-            "description": "",
+            "description": "Customer Installation SID to report usage on.",
             "schema": {
               "type": "string",
               "minLength": 34,
@@ -2049,11 +2117,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/marketplace.v1.installed_add_on.billing_usage_response"
+                  "$ref": "#/components/schemas/marketplace.v1.installed_add_on.installed_add_on_usage"
                 },
                 "examples": {
                   "create": {
-                    "value": {}
+                    "value": {
+                      "total_submitted": 44.02,
+                      "billable_items": [
+                        {
+                          "sid": "BIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "quantity": 12.355,
+                          "submitted": false
+                        },
+                        {
+                          "sid": "BIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "quantity": 44.02,
+                          "submitted": true
+                        }
+                      ]
+                    }
                   }
                 }
               }
@@ -2313,7 +2395,7 @@
         "pathType": "instance"
       },
       "post": {
-        "description": "",
+        "description": "This endpoint updates the data of a given Listing. To find a Listing's SID, use the [Available Add-ons resource](https://www.twilio.com/docs/marketplace/api/available-add-ons) or view its Listing details page in the Console by visiting the [Catalog](https://console.twilio.com/us1/develop/add-ons/catalog) or the [My Listings tab](https://console.twilio.com/us1/develop/add-ons/publish/my-listings) and selecting the Listing. Only Listing owners are allowed to update the Listing.",
         "tags": [
           "MarketplaceModuleDataManagement"
         ],
@@ -2321,7 +2403,7 @@
           {
             "name": "Sid",
             "in": "path",
-            "description": "",
+            "description": "SID that uniquely identifies the Listing.",
             "schema": {
               "type": "string",
               "minLength": 34,
@@ -2380,6 +2462,9 @@
                       },
                       "documentation": {
                         "body": "aBody"
+                      },
+                      "pricing": {
+                        "body": "Basic plan - $10/month"
                       },
                       "configuration": {
                         "buttons": [
@@ -2455,39 +2540,100 @@
                 "properties": {
                   "ModuleInfo": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object containing essential attributes that define a Listing."
                   },
                   "Description": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object describing the Listing. You can define the main body of the description, highlight key features or aspects of the Listing, and provide code samples for developers if applicable."
                   },
                   "Documentation": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object for providing comprehensive information, instructions, and resources related to the Listing."
                   },
                   "Policies": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object describing the Listing's privacy and legal policies. The maximum file size for Policies is 5MB."
                   },
                   "Support": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object containing information on how Marketplace users can obtain support for the Listing. Use this parameter to provide details such as contact information and support description."
                   },
                   "Configuration": {
                     "type": "string",
-                    "description": ""
+                    "description": "A JSON object for providing Listing-specific configuration. Contains button setup, notification URL, and more."
+                  },
+                  "Pricing": {
+                    "type": "string",
+                    "description": "A JSON object for providing Listing's purchase options."
                   }
                 }
               },
               "examples": {
                 "update": {
                   "value": {
-                    "ModuleInfo": "test",
-                    "Description": "test",
-                    "Documentation": "test",
-                    "Policies": "test",
-                    "Support": "test",
-                    "Configuration": "test"
+                    "ModuleInfo": {
+                      "name": "My Company Marketplace Listing",
+                      "short_description": "Short description on what the Company does.",
+                      "tagline": "My Company Subheadline",
+                      "logo_url": "https://mycompany.com/image.png",
+                      "provider_web_url": "https://www.sampleurl.com",
+                      "provider_name": "My Company Name",
+                      "logo_bg_color_hex": "#ff5722"
+                    },
+                    "Description": {
+                      "body": "Long Description about the Listing/Company",
+                      "highlights": [
+                        {
+                          "title": "Feature 1",
+                          "description": "Feature 1 Description"
+                        },
+                        {
+                          "title": "Feature 2",
+                          "description": "Feature 2 Description"
+                        }
+                      ],
+                      "code_samples": [
+                        {
+                          "title": "Example 1",
+                          "description": "This is just a code sample",
+                          "code": "console.log(\u2018Hello, World\u2019);"
+                        }
+                      ]
+                    },
+                    "Documentation": {
+                      "body": "### Large documentation body."
+                    },
+                    "Policies": {
+                      "privacy": "[Link Custom Name](https://www.mycompany.privacy.com)",
+                      "legal": "[Link Custom Name](https://www.mycompany.legal)"
+                    },
+                    "Support": {
+                      "billing_email": "billing@billing.com",
+                      "billing_phone": "+1 888-888-8888",
+                      "technical_email": "support@support.com",
+                      "technical_phone": "+1 888-888-8888",
+                      "customer_support_email": "support@support.com",
+                      "customer_support_phone": "+1 888-888-8888",
+                      "support_description": "Call Support for any help."
+                    },
+                    "Configuration": {
+                      "buttons": [
+                        {
+                          "url": "https://mycompanysignup.com",
+                          "label": "Setup Account",
+                          "help_text": "Help caption for the button"
+                        }
+                      ],
+                      "notification_configuration": {
+                        "callback_url": "https://example.com",
+                        "notification_events": [
+                          "module_install"
+                        ]
+                      }
+                    },
+                    "Pricing": {
+                      "body": "### Basic plan - $15/month"
+                    }
                   }
                 }
               }
@@ -2563,6 +2709,9 @@
                       },
                       "documentation": {
                         "body": "aBody"
+                      },
+                      "pricing": {
+                        "body": "Basic plan - $10/month"
                       },
                       "configuration": {
                         "buttons": [
