@@ -109,6 +109,10 @@
             "type": "string",
             "description": "The owner/company of the assistant."
           },
+          "url": {
+            "type": "string",
+            "description": "The url of the assistant resource."
+          },
           "personality_prompt": {
             "type": "string",
             "description": "The personality prompt to be used for assistant."
@@ -171,6 +175,10 @@
             "description": "The type of knowledge source ('Web', 'Database', 'Text', 'File')",
             "type": "string"
           },
+          "url": {
+            "type": "string",
+            "description": "The url of the knowledge resource."
+          },
           "date_created": {
             "description": "The date and time in GMT when the Knowledge was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
             "format": "date-time",
@@ -221,6 +229,10 @@
           "type": {
             "description": "The type of the tool. ('WEBHOOK')",
             "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "The url of the tool resource."
           },
           "date_created": {
             "description": "The date and time in GMT when the Tool was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
@@ -717,32 +729,6 @@
           }
         }
       },
-      "assistants.v1.service.search_knowledge_request": {
-        "type": "object",
-        "properties": {
-          "query": {
-            "description": "The query to search the knowledge source.",
-            "type": "string"
-          },
-          "top": {
-            "description": "The topK results to return.",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 20
-          },
-          "knowledge_ids": {
-            "description": "The list of knowledge IDs to search.",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "query",
-          "top"
-        ]
-      },
       "assistants.v1.service.knowledge_chunk": {
         "type": "object",
         "properties": {
@@ -905,13 +891,6 @@
     }
   ],
   "paths": {
-    "/v1/{AssistantSid}/Messages": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
     "/v1/Assistants/{id}/Messages": {
       "servers": [
         {
@@ -921,6 +900,62 @@
       "x-twilio": {
         "parent": "/Assistants/{id}",
         "pathType": "list"
+      },
+      "post": {
+        "description": "send a message",
+        "summary": "Send a message to the assistant",
+        "operationId": "CreateMessage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/assistants.v1.service.assistant_send_message_request"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "the Assistant ID.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/assistants.v1.service.assistant_send_message_response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/assistants.v1.service.assistant_send_message_response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "429": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
       }
     },
     "/v1/Assistants": {
@@ -929,9 +964,38 @@
           "url": "https://assistants.twilio.com"
         }
       ],
+      "x-twilio": {
+        "dependentProperties": {
+          "messages": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Messages"
+          },
+          "feedbacks": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Feedbacks"
+          },
+          "knowledge": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Knowledge"
+          },
+          "tools": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Tools"
+          }
+        },
+        "pathType": "list"
+      },
       "get": {
         "description": "list assistants",
-        "operationId": "ListAssistant",
+        "operationId": "ListAssistants",
         "summary": "List all assistants",
         "parameters": [
           {
@@ -1060,6 +1124,35 @@
           "url": "https://assistants.twilio.com"
         }
       ],
+      "x-twilio": {
+        "dependentProperties": {
+          "messages": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Messages"
+          },
+          "feedbacks": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Feedbacks"
+          },
+          "knowledge": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Knowledge"
+          },
+          "tools": {
+            "mapping": {
+              "id": "id"
+            },
+            "resource_url": "/v1/Assistants/{id}/Tools"
+          }
+        },
+        "pathType": "instance"
+      },
       "get": {
         "description": "get an assistant",
         "operationId": "FetchAssistant",
@@ -1404,17 +1497,6 @@
         ]
       }
     },
-    "/v1/Knowledge/Search": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ],
-      "x-twilio": {
-        "parent": "/Knowledge",
-        "pathType": "list"
-      }
-    },
     "/v1/Knowledge/{id}/Status": {
       "servers": [
         {
@@ -1423,7 +1505,41 @@
       ],
       "x-twilio": {
         "parent": "/Knowledge/{id}",
-        "pathType": "list"
+        "mountName": "knowledge_status",
+        "pathType": "instance"
+      },
+      "get": {
+        "operationId": "FetchKnowledgeStatus",
+        "summary": "Get knowledge status",
+        "description": "Get knowledge status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "the Knowledge ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/assistants.v1.service.knowledge_status"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
       }
     },
     "/v1/Knowledge/{id}/Chunks": {
@@ -1684,14 +1800,7 @@
         ]
       }
     },
-    "/v1/Assistants/{assistant_id}/Knowledge/{knowledge_id}": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/Assistants/{assistant_id}/Tools/{tool_id}": {
+    "/v1/Assistants/{assistantId}/Knowledge": {
       "servers": [
         {
           "url": "https://assistants.twilio.com"
@@ -1699,7 +1808,381 @@
       ],
       "x-twilio": {
         "parent": "/Assistants/{id}",
+        "mountName": "assistants_knowledge",
         "pathType": "list"
+      },
+      "get": {
+        "operationId": "ListKnowledgeByAssistant",
+        "summary": "List all knowledge for an Assistant",
+        "description": "List all knowledge for an Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "knowledge": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/assistants.v1.service.knowledge"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListKnowledgeByAssistantResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v1/Assistants/{assistantId}/Knowledge/{id}": {
+      "servers": [
+        {
+          "url": "https://assistants.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "parent": "/Assistants/{id}",
+        "mountName": "assistants_knowledge",
+        "pathType": "instance"
+      },
+      "post": {
+        "operationId": "CreateAssistantKnowledgeAttachment",
+        "summary": "Attach Knowledge to Assistant",
+        "description": "Attach Knowledge to Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The knowledge ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteAssistantKnowledgeAttachment",
+        "summary": "Detach Knowledge to Assistant",
+        "description": "Detach Knowledge to Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The knowledge ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v1/Assistants/{assistantId}/Tools": {
+      "x-twilio": {
+        "parent": "/Assistants/{id}",
+        "mountName": "assistants_tools",
+        "pathType": "list"
+      },
+      "get": {
+        "operationId": "ListToolsByAssistant",
+        "summary": "List tools for an Assistant",
+        "description": "List tools for an Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tools": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/assistants.v1.service.tool"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListToolsByAssistantResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v1/Assistants/{assistantId}/Tools/{id}": {
+      "servers": [
+        {
+          "url": "https://assistants.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "parent": "/Assistants/{id}",
+        "mountName": "assistants_tools",
+        "pathType": "instance"
+      },
+      "post": {
+        "operationId": "CreateAssistantToolAttachment",
+        "summary": "Attach Tool to Assistant",
+        "description": "Attach Tool to Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The tool ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteAssistantToolAttachment",
+        "summary": "Detach Tool to Assistant",
+        "description": "Detach Tool to Assistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assistantId",
+            "description": "The assistant ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The tool ID.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
       }
     },
     "/v1/Tools": {
@@ -1865,6 +2348,38 @@
         "responses": {
           "204": {
             "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "FetchTool",
+        "summary": "Get tool",
+        "description": "Get tool",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/assistants.v1.service.tool_with_policies"
+                }
+              }
+            },
+            "description": "OK"
           }
         },
         "security": [
@@ -2281,83 +2796,6 @@
           }
         ]
       }
-    },
-    "/v1/assistants": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/assistants/{id}": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/knowledges": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/knowledges/{id}": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/knowledges/search": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/knowledges/{id}/status": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/knowledges/{id}/chunks": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/tools/{id}": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/policies": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/tools": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
-    },
-    "/v1/assistants/{id}/feedbacks": {
-      "servers": [
-        {
-          "url": "https://assistants.twilio.com"
-        }
-      ]
     }
   }
 }

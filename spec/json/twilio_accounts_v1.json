@@ -49,6 +49,36 @@
           }
         }
       },
+      "accounts.v1.bulk_consents": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "nullable": true,
+            "description": "A list of objects where each object represents the result of processing a `correlation_id`. Each object contains the following fields: `correlation_id`, a unique 32-character UUID that maps the response to the original request; `error_code`, an integer where 0 indicates success and any non-zero value represents an error; and `error_messages`, an array of strings describing specific validation errors encountered. If the request is successful, the error_messages array will be empty.",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          }
+        }
+      },
+      "accounts.v1.bulk_contacts": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "nullable": true,
+            "description": "A list of objects where each object represents the result of processing a `correlation_id`. Each object contains the following fields: `correlation_id`, a unique 32-character UUID that maps the response to the original request; `error_code`, an integer where 0 indicates success and any non-zero value represents an error; and `error_messages`, an array of strings describing specific validation errors encountered. If the request is successful, the error_messages array will be empty.",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          }
+        }
+      },
       "accounts.v1.credential": {
         "type": "object",
         "properties": {}
@@ -324,6 +354,258 @@
           }
         ],
         "operationId": "UpdateAuthTokenPromotion"
+      }
+    },
+    "/v1/Consents/Bulk": {
+      "servers": [
+        {
+          "url": "https://accounts.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "items"
+        ],
+        "mountName": "bulk_consents",
+        "className": "bulk_consents",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "",
+        "tags": [
+          "AccountsV1BulkConsents"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.bulk_consents"
+                },
+                "examples": {
+                  "post": {
+                    "value": {
+                      "items": [
+                        {
+                          "correlation_id": "ad388b5a46b33b874b0d41f7226db2ef",
+                          "error_code": 0,
+                          "error_messages": []
+                        },
+                        {
+                          "correlation_id": "02520cfa6c432f0e3ec3a38c122d428d",
+                          "error_code": 30646,
+                          "error_messages": [
+                            "INVALID_CONTACT_ID"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateBulkConsents",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateBulkConsentsRequest",
+                "properties": {
+                  "Items": {
+                    "type": "array",
+                    "items": {},
+                    "description": "This is a list of objects that describes a contact's opt-in status. Each object contains the following fields: `contact_id`, which must be a string representing phone number in [E.164 format](https://www.twilio.com/docs/glossary/what-e164); `correlation_id`, a unique 32-character UUID used to uniquely map the request item with the response item; `sender_id`, which can be either a valid messaging service SID or a from phone number; `status`, a string representing the consent status. Can be one of [`opt-in`, `opt-out`]; and `source`, a string indicating the medium through which the consent was collected. Can be one of [`website`, `offline`, `opt-in-message`, `opt-out-message`, `others`]."
+                  }
+                },
+                "required": [
+                  "Items"
+                ]
+              },
+              "examples": {
+                "post": {
+                  "value": {
+                    "Items": [
+                      "{\"contact_id\":\"+19999999999\",\"correlation_id\":\"ad388b5a46b33b874b0d41f7226db2ef\",\"sender_id\":\"MG00000000000000000000000000000001\",\"status\":\"opt-out\",\"source\":\"website\"}",
+                      "{\"contact_id\":\"+19\",\"correlation_id\":\"02520cfa6c432f0e3ec3a38c122d428d\",\"sender_id\":\"123456\",\"status\":\"opt-in\",\"source\":\"opt-in-message\"}"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/Contacts/Bulk": {
+      "servers": [
+        {
+          "url": "https://accounts.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "items"
+        ],
+        "mountName": "bulk_contacts",
+        "className": "bulk_contacts",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "",
+        "tags": [
+          "AccountsV1BulkContacts"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.bulk_contacts"
+                },
+                "examples": {
+                  "post": {
+                    "value": {
+                      "items": [
+                        {
+                          "correlation_id": "ad388b5a46b33b874b0d41f7226db2eh",
+                          "error_code": 0,
+                          "error_messages": []
+                        },
+                        {
+                          "correlation_id": "02520cfa6c432f0e3ec3a38c122d428a",
+                          "error_code": 30647,
+                          "error_messages": [
+                            "INVALID_CONTACT_ID"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateBulkContacts",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateBulkContactsRequest",
+                "properties": {
+                  "Items": {
+                    "type": "array",
+                    "items": {},
+                    "description": "A list of objects where each object represents a contact's details. Each object includes the following fields: `contact_id`, which must be a string representing phone number in [E.164 format](https://www.twilio.com/docs/glossary/what-e164); `correlation_id`, a unique 32-character UUID that maps the response to the original request; `country_iso_code`, a string representing the country using the ISO format (e.g., US for the United States); and `zip_code`, a string representing the postal code."
+                  }
+                },
+                "required": [
+                  "Items"
+                ]
+              },
+              "examples": {
+                "post": {
+                  "value": {
+                    "Items": [
+                      "{\"contact_id\":\"+19999999999\",\"correlation_id\":\"ad388b5a46b33b874b0d41f7226db2eh\",\"country_iso_code\":\"US\",\"zip_code\":\"12345\"}",
+                      "{\"contact_id\":\"+19\",\"correlation_id\":\"02520cfa6c432f0e3ec3a38c122d428a\",\"country_iso_code\":\"US\",\"zip_code\":\"12345\"}"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v1/Credentials": {
@@ -1776,6 +2058,12 @@
     },
     {
       "name": "AccountsV1Aws"
+    },
+    {
+      "name": "AccountsV1BulkConsents"
+    },
+    {
+      "name": "AccountsV1BulkContacts"
     },
     {
       "name": "AccountsV1PublicKey"

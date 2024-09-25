@@ -1,5 +1,19 @@
 twilio-oai changelog
 ====================
+[2024-09-25] Version 2.1.2
+--------------------------
+**Library - Chore**
+- [PR #121](https://github.com/twilio/twilio-oai/pull/121): content sdk changes moved to content v1 in internal open api repo. Thanks to [@sbansla](https://github.com/sbansla)!
+
+**Accounts**
+- Update docs and mounts.
+- Change library visibility to public
+- Enable consent and contact bulk upsert APIs in prod.
+
+**Serverless**
+- Add is_plugin parameter in deployments api to check if it is plugins deployment
+
+
 [2024-09-18] Version 2.1.1
 --------------------------
 **Intelligence**
