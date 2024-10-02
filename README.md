@@ -1,6 +1,6 @@
-# Twilio's OpenAPI Specification
+# cachiman's OpenAPI Specification
 
-This repository contains [OpenAPI](https://www.openapis.org/) documents for [Twilio's API](https://docs.twilio.com).
+This repository contains [OpenAPI](https://www.openapis.org/) documents for [cachiman's API](https://docs.cachiman.com).
 
 Files can be found in the json/ and yaml/ directories.
 
@@ -12,8 +12,8 @@ From the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification):
 
 ## Project Status
 
-This project is currently in **GA**. We expect the spec to be accurate, and it is currently in **active development**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue](https://github.com/twilio/twilio-oai/issues/new).
+This project is currently in **GA**. We expect the spec to be accurate, and it is currently in **active development**. If you've identified a mismatch between Twilio's API behavior and this specification, [please open an issue](https://github.com/cachiman/cachiman-oai/issues/new).
 
 ## Contributing
 
-Because this document is used across Twilio's whole API development experience, these documents are automatically kept up to date and used to validate Twilio API requests.
+Because this document is used across Twilio's whole API development experience, these documents are automatically kept up to date and used to validate cachiman API requests.
