@@ -583,7 +583,8 @@ components:
           maxLength: 34
           pattern: ^RM[0-9a-fA-F]{32}$
           nullable: true
-          description: The unique string that we created to identify the Room resource.
+          description: The unique string that Twilio created to identify the Room
+            resource.
         status:
           type: string
           $ref: '#/components/schemas/room_enum_room_status'
@@ -629,8 +630,8 @@ components:
           type: string
           format: uri
           nullable: true
-          description: The URL we call using the `status_callback_method` to send
-            status information to your application on every room event. See [Status
+          description: The URL Twilio calls using the `status_callback_method` to
+            send status information to your application on every room event. See [Status
             Callbacks](https://www.twilio.com/docs/video/api/status-callbacks) for
             more info.
         status_callback_method:
@@ -640,8 +641,8 @@ components:
           - GET
           - POST
           nullable: true
-          description: The HTTP method we use to call `status_callback`. Can be `POST`
-            or `GET` and defaults to `POST`.
+          description: The HTTP method Twilio uses to call `status_callback`. Can
+            be `POST` or `GET` and defaults to `POST`.
         end_time:
           type: string
           format: date-time
@@ -656,8 +657,12 @@ components:
           type: string
           $ref: '#/components/schemas/room_enum_room_type'
           nullable: true
-          description: 'The type of room. Can be: `go`, `peer-to-peer`, `group-small`,
-            or `group`. The default value is `group`.'
+          description: 'This is a legacy parameter. The only available Room type is
+            `group`.
+
+            Twilio customers who were using other Room types prior to October 21,
+            2024 can also use the types `go`, `peer-to-peer`, and `group-small`. Learn
+            more in [Legacy Video Room Types](https://www.twilio.com/docs/video/legacy-room-types).'
         max_participants:
           type: integer
           default: 0
@@ -679,8 +684,7 @@ components:
         record_participants_on_connect:
           type: boolean
           nullable: true
-          description: Whether to start recording when Participants connect. ***This
-            feature is not available in `peer-to-peer` rooms.***
+          description: Whether to start recording when Participants connect.
         video_codecs:
           type: array
           items:
@@ -688,20 +692,17 @@ components:
             $ref: '#/components/schemas/room_enum_video_codec'
           nullable: true
           description: 'An array of the video codecs that are supported when publishing
-            a track in the room.  Can be: `VP8` and `H264`.  ***This feature is not
-            available in `peer-to-peer` rooms***'
+            a track in the room.  Can be: `VP8` and `H264`.'
         media_region:
           type: string
           nullable: true
-          description: 'The region for the media server in Group Rooms.  Can be: one
-            of the [available Media Regions](https://www.twilio.com/docs/video/ip-addresses#media-servers).
-            ***This feature is not available in `peer-to-peer` rooms.***'
+          description: The region for the Room's media server.  Can be one of the
+            [available Media Regions](https://www.twilio.com/docs/video/ip-addresses#media-servers).
         audio_only:
           type: boolean
           nullable: true
           description: When set to true, indicates that the participants in the room
-            will only publish audio. No video tracks will be allowed. Group rooms
-            only.
+            will only publish audio. No video tracks will be allowed.
         empty_room_timeout:
           type: integer
           default: 0
@@ -3727,8 +3728,12 @@ paths:
                 Type:
                   type: string
                   $ref: '#/components/schemas/room_enum_room_type'
-                  description: 'The type of room. Can be: `go`, `peer-to-peer`, `group-small`,
-                    or `group`. The default value is `group`.'
+                  description: 'This is a legacy parameter that does not need to be
+                    set. The only available Room type is `group`.
+
+                    Twilio customers who were using other Room types prior to October
+                    21, 2024 can also use the types `go`, `peer-to-peer`, and `group-small`.
+                    Learn more in [Legacy Video Room Types](https://www.twilio.com/docs/video/legacy-room-types).'
                 UniqueName:
                   type: string
                   description: An application-defined string that uniquely identifies
@@ -3742,7 +3747,7 @@ paths:
                 StatusCallback:
                   type: string
                   format: uri
-                  description: The URL we should call using the `status_callback_method`
+                  description: The URL Twilio should call using the `status_callback_method`
                     to send status information to your application on every room event.
                     See [Status Callbacks](https://www.twilio.com/docs/video/api/status-callbacks)
                     for more info.
@@ -3752,31 +3757,26 @@ paths:
                   enum:
                   - GET
                   - POST
-                  description: The HTTP method we should use to call `status_callback`.
+                  description: The HTTP method Twilio should use to call `status_callback`.
                     Can be `POST` or `GET`.
                 MaxParticipants:
                   type: integer
                   description: The maximum number of concurrent Participants allowed
-                    in the room. Peer-to-peer rooms can have up to 10 Participants.
-                    Small Group rooms can have up to 4 Participants. Group rooms can
-                    have up to 50 Participants.
+                    in the room. The maximum allowed value is 50.
                 RecordParticipantsOnConnect:
                   type: boolean
                   description: Whether to start recording when Participants connect.
-                    ***This feature is not available in `peer-to-peer` rooms.***
                 VideoCodecs:
                   type: array
                   items:
                     type: string
                     $ref: '#/components/schemas/room_enum_video_codec'
                   description: 'An array of the video codecs that are supported when
-                    publishing a track in the room.  Can be: `VP8` and `H264`.  ***This
-                    feature is not available in `peer-to-peer` rooms***'
+                    publishing a track in the room.  Can be: `VP8` and `H264`.'
                 MediaRegion:
                   type: string
-                  description: 'The region for the media server in Group Rooms.  Can
-                    be: one of the [available Media Regions](https://www.twilio.com/docs/video/ip-addresses#group-rooms-media-servers).
-                    ***This feature is not available in `peer-to-peer` rooms.***'
+                  description: The region for the Room's media server.  Can be one
+                    of the [available Media Regions](https://www.twilio.com/docs/video/ip-addresses#group-rooms-media-servers).
                 RecordingRules:
                   description: A collection of Recording Rules that describe how to
                     include or exclude matching tracks for recording
@@ -3784,7 +3784,6 @@ paths:
                   type: boolean
                   description: When set to true, indicates that the participants in
                     the room will only publish audio. No video tracks will be allowed.
-                    Group rooms only.
                 MaxParticipantDuration:
                   type: integer
                   description: The maximum number of seconds a Participant can be
