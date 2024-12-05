@@ -958,6 +958,40 @@
             "type": "string",
             "nullable": true,
             "description": "The next step you need to take to complete the hosted number order and request it successfully."
+          },
+          "verification_attempts": {
+            "type": "integer",
+            "default": 0,
+            "description": "The number of attempts made to verify ownership via a call for the hosted phone number."
+          },
+          "verification_call_sids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "The Call SIDs that identify the calls placed to verify ownership."
+          },
+          "verification_call_delay": {
+            "type": "integer",
+            "default": 0,
+            "description": "The number of seconds to wait before initiating the ownership verification call. Can be a value between 0 and 60, inclusive."
+          },
+          "verification_call_extension": {
+            "type": "string",
+            "nullable": true,
+            "description": "The numerical extension to dial when making the ownership verification call."
+          },
+          "verification_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The digits the user must pass in the ownership verification call."
+          },
+          "verification_type": {
+            "type": "string",
+            "$ref": "#/components/schemas/hosted_number_order_enum_verification_type",
+            "nullable": true,
+            "description": "The method used to verify ownership of the number to be hosted. Can be: `phone-call` or `phone-bill` and the default is `phone-call`."
           }
         }
       },
@@ -965,12 +999,19 @@
         "type": "string",
         "enum": [
           "received",
+          "pending-verification",
           "verified",
           "pending-loa",
           "carrier-processing",
           "completed",
           "failed",
           "action-required"
+        ]
+      },
+      "hosted_number_order_enum_verification_type": {
+        "type": "string",
+        "enum": [
+          "phone-call"
         ]
       },
       "numbers.v2.regulatory_compliance.bundle.item_assignment": {
@@ -5543,7 +5584,13 @@
                       "status": "received",
                       "url": "https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "contact_title": "contact_title_test",
-                      "contact_phone_number": "+12344444444"
+                      "contact_phone_number": "+12344444444",
+                      "verification_attempts": 0,
+                      "verification_call_sids": [],
+                      "verification_code": null,
+                      "verification_type": "phone-call",
+                      "verification_call_delay": 0,
+                      "verification_call_extension": null
                     }
                   }
                 }
@@ -5625,6 +5672,155 @@
           }
         ],
         "operationId": "DeleteHostedNumberOrder"
+      },
+      "post": {
+        "description": "Updates a specific HostedNumberOrder.",
+        "tags": [
+          "NumbersV2HostedNumberOrder"
+        ],
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID of the HostedNumberOrder resource to update.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HR[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.hosted_number_order"
+                },
+                "examples": {
+                  "updateStatus": {
+                    "value": {
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "address_sid": "AD11111111111111111111111111111111",
+                      "signing_document_sid": "PX11111111111111111111111111111111",
+                      "capabilities": {
+                        "mms": true,
+                        "sms": true,
+                        "voice": false
+                      },
+                      "cc_emails": [
+                        "aaa@twilio.com",
+                        "bbb@twilio.com"
+                      ],
+                      "date_created": "2017-03-28T20:06:39Z",
+                      "date_updated": "2017-03-28T20:06:39Z",
+                      "email": "test@twilio.com",
+                      "failure_reason": "",
+                      "friendly_name": "friendly name",
+                      "incoming_phone_number_sid": "PN11111111111111111111111111111111",
+                      "phone_number": "+14153608311",
+                      "sid": "HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "bulk_hosting_request_sid": "BH11111111111111111111111111111111",
+                      "next_step": "",
+                      "status": "pending-verification",
+                      "url": "https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "contact_title": "contact_title_test",
+                      "contact_phone_number": "+12344444444",
+                      "verification_attempts": 1,
+                      "verification_call_delay": 15,
+                      "verification_call_extension": "789",
+                      "verification_call_sids": [],
+                      "verification_code": "567890",
+                      "verification_type": "phone-call"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateHostedNumberOrder",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "UpdateHostedNumberOrderRequest",
+                "properties": {
+                  "Status": {
+                    "type": "string",
+                    "$ref": "#/components/schemas/hosted_number_order_enum_status",
+                    "description": "The new status of the resource. The user can only update this to `pending-verification`."
+                  },
+                  "VerificationCallDelay": {
+                    "type": "integer",
+                    "description": "The number of seconds to wait before initiating the ownership verification call. Can be a value between 0 and 60, inclusive."
+                  },
+                  "VerificationCallExtension": {
+                    "type": "string",
+                    "description": "The numerical extension to dial when making the ownership verification call."
+                  }
+                },
+                "required": [
+                  "Status"
+                ]
+              },
+              "examples": {
+                "updateStatus": {
+                  "value": {
+                    "Status": "pending-verification",
+                    "VerificationCallDelay": 15,
+                    "VerificationCallExtension": "789"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/v2/HostedNumber/Orders": {
@@ -5850,7 +6046,13 @@
                           "status": "received",
                           "url": "https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                           "contact_title": "contact_title_test",
-                          "contact_phone_number": "+12344444444"
+                          "contact_phone_number": "+12344444444",
+                          "verification_attempts": 0,
+                          "verification_call_sids": [],
+                          "verification_code": null,
+                          "verification_type": "phone-call",
+                          "verification_call_delay": 0,
+                          "verification_call_extension": null
                         }
                       ]
                     }
@@ -5940,7 +6142,13 @@
                       "status": "received",
                       "url": "https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "contact_title": "contact_title_test",
-                      "contact_phone_number": "+12344444444"
+                      "contact_phone_number": "+12344444444",
+                      "verification_attempts": 0,
+                      "verification_call_sids": [],
+                      "verification_code": null,
+                      "verification_type": "phone-call",
+                      "verification_call_delay": 0,
+                      "verification_call_extension": null
                     }
                   },
                   "createWithoutOptionalLoaFields": {
@@ -5966,7 +6174,13 @@
                       "signing_document_sid": null,
                       "status": "received",
                       "url": "https://numbers.twilio.com/v2/HostedNumber/Orders/HRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                      "contact_phone_number": "+12344444444"
+                      "contact_phone_number": "+12344444444",
+                      "verification_attempts": 0,
+                      "verification_call_sids": [],
+                      "verification_code": null,
+                      "verification_type": "phone-call",
+                      "verification_call_delay": 0,
+                      "verification_call_extension": null
                     }
                   }
                 }
