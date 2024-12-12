@@ -1,5 +1,11 @@
 twilio-oai changelog
 ====================
+[2024-12-12] Version 2.1.8
+--------------------------
+**Library - Chore**
+- [PR #126](https://github.com/twilio/twilio-oai/pull/126): release twilio-oai. Thanks to [@tiwarishubham635](https://github.com/tiwarishubham635)!
+
+
 [2024-12-05] Version 2.1.7
 --------------------------
 **Api**
