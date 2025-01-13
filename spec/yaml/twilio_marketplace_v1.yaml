@@ -29,6 +29,7 @@ components:
           description: How customers are charged for using this Add-on.
         configuration_schema:
           nullable: true
+          type: object
           description: The JSON object with the configuration that must be provided
             when installing a given Add-on.
         url:
@@ -108,6 +109,7 @@ components:
           description: A short description of the Add-on's functionality.
         configuration:
           nullable: true
+          type: object
           description: The JSON object that represents the current configuration of
             installed Add-on.
         unique_name:
@@ -246,36 +248,43 @@ components:
           description: ModuleSid that identifies this Listing.
         description:
           nullable: true
+          type: object
           description: A JSON object describing the module and is displayed under
             the Description tab of the Module detail page. You can define the main
             body of the description, highlight key features or aspects of the module
             and if applicable, provide code samples for developers
         support:
           nullable: true
+          type: object
           description: A JSON object containing information on how customers can obtain
             support for the module. Use this parameter to provide details such as
             contact information and support description.
         policies:
           nullable: true
+          type: object
           description: A JSON object describing the module's privacy and legal policies
             and is displayed under the Policies tab of the Module detail page. The
             maximum file size for Policies is 5MB
         module_info:
           nullable: true
+          type: object
           description: A JSON object containing essential attributes that define a
             module. This information is presented on the Module detail page in the
             Twilio Marketplace Catalog. You can pass the following attributes in the
             JSON object
         documentation:
           nullable: true
+          type: object
           description: A JSON object for providing comprehensive information, instructions,
             and resources related to the module
         configuration:
           nullable: true
+          type: object
           description: A JSON object for providing listing specific configuration.
             Contains button setup, notification url, among others.
         pricing:
           nullable: true
+          type: object
           description: A JSON object for providing Listing specific pricing information.
     marketplace.v1.referral_conversion:
       type: object
@@ -332,6 +341,26 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the resource.
+    marketplace.v1.TwilioServiceErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          nullable: false
+        message:
+          type: string
+          nullable: false
+        params:
+          type: object
+          nullable: true
+        more_info:
+          description: Link to Error Code References
+          type: string
+        status:
+          description: HTTP response status code
+          type: integer
+          format: int32
 info:
   title: Twilio - Marketplace
   description: This is the public Twilio REST API.
@@ -847,7 +876,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/marketplace.v1.TwilioServiceErrorResponse'
                 x-jvm-type: com.twilio.rest.TwilioServiceErrorResponse
       security:
       - accountSid_authToken: []
@@ -1641,7 +1670,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/marketplace.v1.TwilioServiceErrorResponse'
                 x-jvm-type: com.twilio.rest.TwilioServiceErrorResponse
           headers:
             Access-Control-Allow-Origin:
@@ -1689,6 +1718,188 @@ paths:
               create:
                 value:
                   referral_account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  /v1/Listings:
+    servers:
+    - url: https://marketplace.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties: []
+      mountName: module_data
+      pathType: list
+    post:
+      description: This endpoint creates a Listing based on the given data.
+      tags:
+      - MarketplaceModuleData
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/marketplace.v1.module_data_management'
+              examples:
+                created:
+                  value:
+                    sid: XBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://marketplace.twilio.com/v1/Listing/XBaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description:
+                      body: aBody
+                      highlights:
+                      - title: aTitle
+                        description: aDescription
+                      code_samples:
+                      - title: aTitle
+                        description: aDescription
+                        code: aCode
+                    support:
+                      customer_support_email: anEmail
+                      customer_support_phone: +1 888-888-8888
+                      support_description: aDescription
+                      billing_email: anEmail
+                      billing_phone: +1 888-888-8888
+                      technical_email: anEmail
+                      technical_phone: +1 888-888-8888
+                    policies:
+                      privacy: someUrl
+                      legal: someOtherUrl
+                    module_info:
+                      tag: Description
+                      tagline: aTagline
+                      logo_url: aUrl
+                      logo_bg_color_hex: '#ff5722'
+                    documentation:
+                      body: aBody
+                    pricing:
+                      body: Basic plan - $10/month
+                    configuration:
+                      buttons:
+                      - url: https://example.com
+                        label: Configurable button text
+                        help_text: The button text, url, and help text are now configurable
+                          via self service
+                      notification_configuration:
+                        callback_url: https://example.com
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: CreateModuleData
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateModuleDataRequest
+              properties:
+                ModuleInfo:
+                  type: string
+                  description: A JSON object containing essential attributes that
+                    define a Listing.
+                Configuration:
+                  type: string
+                  description: A JSON object for providing Listing-specific configuration.
+                    Contains button setup, notification URL, and more.
+            examples:
+              create:
+                value:
+                  ModuleInfo:
+                    name: My Company Marketplace Listing
+                    short_description: Short description on what the Company does.
+                    tagline: My Company Subheadline
+                    logo_url: https://mycompany.com/image.png
+                    provider_web_url: https://www.sampleurl.com
+                    provider_name: My Company Name
+                    logo_bg_color_hex: '#ff5722'
+                  Configuration:
+                    buttons:
+                    - url: https://mycompanysignup.com
+                      label: Setup Account
+                      help_text: Help caption for the button
+                    notification_configuration:
+                      callback_url: https://example.com
+                      notification_events:
+                      - module_install
+    get:
+      description: This endpoint returns the Listings owned by the authenticated Account.
+      tags:
+      - MarketplaceModuleData
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  listings:
+                    nullable: false
+                    description: ''
+                    type: array
+                    items:
+                      type: object
+              examples:
+                fetch:
+                  value:
+                    listings:
+                    - tag: Description1
+                      tagline: aTagline1
+                      logo_url: aUrl1
+                      logo_bg_color_hex: '#ff5722'
+                    - tag: Description2
+                      tagline: aTagline2
+                      logo_url: aUrl2
+                      logo_bg_color_hex: '#ff5722'
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchModuleDataForListingOwner
   /v1/Listing/{Sid}:
     servers:
     - url: https://marketplace.twilio.com
@@ -1981,6 +2192,7 @@ tags:
 - name: MarketplaceInstalledAddOnExtension
 - name: MarketplaceInstalledAddOnUsage
 - name: MarketplaceModuleDataManagement
+- name: MarketplaceModuleData
 - name: MarketplaceReferralConversion
 security:
 - accountSid_authToken: []
