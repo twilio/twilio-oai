@@ -396,6 +396,71 @@
           }
         }
       },
+      "messaging.v1.service.destination_alpha_sender": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AI[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the AlphaSender resource."
+          },
+          "account_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Account](https://www.twilio.com/docs/iam/api/account) that created the AlphaSender resource."
+          },
+          "service_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) the resource is associated with."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time in GMT when the resource was last updated specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
+          },
+          "alpha_sender": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Alphanumeric Sender ID string."
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "An array of values that describe whether the number can receive calls or messages. Can be: `SMS`."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the AlphaSender resource."
+          },
+          "iso_country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Two Character ISO Country Code the Alphanumeric Sender ID will be used for. For Default Alpha Senders that work across countries, this value will be an empty string"
+          }
+        }
+      },
       "messaging.v1.domain_cert_v4": {
         "type": "object",
         "properties": {
@@ -3959,6 +4024,472 @@
         "operationId": "FetchDeactivation"
       }
     },
+    "/v1/Services/{ServiceSid}/DestinationAlphaSenders": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "A Messaging Service resource to add, fetch or remove Destination and Default Alpha Sender IDs from a Messaging Service. Destination Alpha Sender can send to a particular ISO country code. Default Alpha Senders can send to all countries.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "alpha_sender"
+        ],
+        "parent": "/Services/{Sid}",
+        "pathType": "list"
+      },
+      "post": {
+        "description": "",
+        "tags": [
+          "MessagingV1DestinationAlphaSender"
+        ],
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to create the resource under.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.service.destination_alpha_sender"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "sid": "AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:12:31Z",
+                      "date_updated": "2015-07-30T20:12:33Z",
+                      "alpha_sender": "Twilio",
+                      "capabilities": [
+                        "SMS"
+                      ],
+                      "iso_country_code": "FR",
+                      "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateDestinationAlphaSender",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "title": "CreateDestinationAlphaSenderRequest",
+                "properties": {
+                  "AlphaSender": {
+                    "type": "string",
+                    "description": "The Alphanumeric Sender ID string. Can be up to 11 characters long. Valid characters are A-Z, a-z, 0-9, space, hyphen `-`, plus `+`, underscore `_` and ampersand `&`. This value cannot contain only numbers."
+                  },
+                  "IsoCountryCode": {
+                    "type": "string",
+                    "description": "The Optional Two Character ISO Country Code the Alphanumeric Sender ID will be used for. If the IsoCountryCode is not provided, a default Alpha Sender will be created that can be used across all countries."
+                  }
+                },
+                "required": [
+                  "AlphaSender"
+                ]
+              },
+              "examples": {
+                "create": {
+                  "value": {
+                    "AlphaSender": "Twilio",
+                    "IsoCountryCode": "FR"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "tags": [
+          "MessagingV1DestinationAlphaSender"
+        ],
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to read the resources from.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "alpha_senders": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/messaging.v1.service.destination_alpha_sender"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListDestinationAlphaSenderResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "meta": {
+                        "page": 0,
+                        "page_size": 20,
+                        "first_page_url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders?PageSize=20&Page=0",
+                        "previous_page_url": null,
+                        "next_page_url": null,
+                        "key": "alpha_senders",
+                        "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders?PageSize=20&Page=0"
+                      },
+                      "alpha_senders": [
+                        {
+                          "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "sid": "AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "date_created": "2015-07-30T20:12:31Z",
+                          "date_updated": "2015-07-30T20:12:33Z",
+                          "alpha_sender": "Twilio",
+                          "capabilities": [
+                            "SMS"
+                          ],
+                          "iso_country_code": "FR",
+                          "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListDestinationAlphaSender"
+      }
+    },
+    "/v1/Services/{ServiceSid}/DestinationAlphaSenders/{Sid}": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "A Messaging Service resource to add, fetch or remove Destination and Default Alpha Sender IDs from a Messaging Service. Destination Alpha Sender can send to a particular ISO country code. Default Alpha Senders can send to all countries.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "sid",
+          "alpha_sender"
+        ],
+        "parent": "/Services/{Sid}",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "",
+        "tags": [
+          "MessagingV1DestinationAlphaSender"
+        ],
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to fetch the resource from.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID of the AlphaSender resource to fetch.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.service.destination_alpha_sender"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "sid": "AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T20:12:31Z",
+                      "date_updated": "2015-07-30T20:12:33Z",
+                      "alpha_sender": "Twilio",
+                      "capabilities": [
+                        "SMS"
+                      ],
+                      "iso_country_code": "FR",
+                      "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders/AIaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchDestinationAlphaSender"
+      },
+      "delete": {
+        "description": "",
+        "tags": [
+          "MessagingV1DestinationAlphaSender"
+        ],
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The SID of the [Service](https://www.twilio.com/docs/chat/rest/service-resource) to delete the resource from.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^MG[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The SID of the AlphaSender resource to delete.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The resource was deleted successfully."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "DeleteDestinationAlphaSender"
+      }
+    },
     "/v1/LinkShortening/Domains/{DomainSid}/Certificate": {
       "servers": [
         {
@@ -5799,6 +6330,12 @@
               "messaging_service_sid": "sid"
             },
             "resource_url": "/v1/Services/{messaging_service_sid}/ChannelSenders"
+          },
+          "destination_alpha_senders": {
+            "mapping": {
+              "service_sid": "sid"
+            },
+            "resource_url": "/v1/Services/{service_sid}/DestinationAlphaSenders"
           }
         },
         "pathType": "list"
@@ -5847,7 +6384,8 @@
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
                         "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
-                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders",
+                        "destination_alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -6146,7 +6684,8 @@
                             "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                             "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
                             "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
-                            "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
+                            "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders",
+                            "destination_alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders"
                           },
                           "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                         }
@@ -6258,6 +6797,12 @@
               "messaging_service_sid": "sid"
             },
             "resource_url": "/v1/Services/{messaging_service_sid}/ChannelSenders"
+          },
+          "destination_alpha_senders": {
+            "mapping": {
+              "service_sid": "sid"
+            },
+            "resource_url": "/v1/Services/{service_sid}/DestinationAlphaSenders"
           }
         },
         "pathType": "instance"
@@ -6320,7 +6865,8 @@
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
                         "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
-                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders",
+                        "destination_alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -6534,7 +7080,8 @@
                         "messages": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages",
                         "us_app_to_person": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p",
                         "us_app_to_person_usecases": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/Usecases",
-                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders"
+                        "channel_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ChannelSenders",
+                        "destination_alpha_senders": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/DestinationAlphaSenders"
                       },
                       "url": "https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
                     }
@@ -9818,6 +10365,9 @@
     },
     {
       "name": "MessagingV1Deactivations"
+    },
+    {
+      "name": "MessagingV1DestinationAlphaSender"
     },
     {
       "name": "MessagingV1DomainCerts"
