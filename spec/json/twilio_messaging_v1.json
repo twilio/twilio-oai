@@ -144,7 +144,7 @@
             "type": "string",
             "$ref": "#/components/schemas/brand_registrations_enum_status",
             "nullable": true,
-            "description": "Brand Registration status. One of \"PENDING\", \"APPROVED\", \"FAILED\", \"IN_REVIEW\", \"DELETED\"."
+            "description": "Brand Registration status. One of \"PENDING\", \"APPROVED\", \"FAILED\", \"IN_REVIEW\", \"DELETION_PENDING\", \"DELETION_FAILED\", \"SUSPENDED\"."
           },
           "tcr_id": {
             "type": "string",
@@ -158,7 +158,9 @@
           },
           "errors": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "object"
+            },
             "nullable": true,
             "description": "A list of errors that occurred during the brand registration process."
           },
@@ -227,7 +229,9 @@
           "APPROVED",
           "FAILED",
           "IN_REVIEW",
-          "DELETED"
+          "DELETION_PENDING",
+          "DELETION_FAILED",
+          "SUSPENDED"
         ]
       },
       "brand_registrations_enum_identity_status": {
@@ -320,7 +324,8 @@
       "brand_vetting_enum_vetting_provider": {
         "type": "string",
         "enum": [
-          "campaign-verify"
+          "campaign-verify",
+          "aegis"
         ]
       },
       "messaging.v1.service.channel_sender": {
@@ -510,6 +515,7 @@
             "nullable": true
           },
           "cert_in_validation": {
+            "type": "object",
             "nullable": true,
             "description": "Optional JSON field describing the status and upload date of a new certificate in the process of validation"
           }
@@ -1279,11 +1285,14 @@
           },
           "rejection_reasons": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "object"
+            },
             "nullable": true,
             "description": "A list of rejection reasons and codes describing why a Tollfree Verification has been rejected."
           },
           "resource_links": {
+            "type": "object",
             "nullable": true,
             "description": "The URLs of the documents associated with the Tollfree Verification resource."
           },
@@ -1311,7 +1320,8 @@
           "PAPER_FORM",
           "VIA_TEXT",
           "MOBILE_QR_CODE",
-          "IMPORT"
+          "IMPORT",
+          "IMPORT_PLEASE_REPLACE"
         ]
       },
       "messaging.v1.service.us_app_to_person": {
@@ -1408,6 +1418,7 @@
             "description": "Indicates whether the campaign was registered externally or not."
           },
           "rate_limits": {
+            "type": "object",
             "nullable": true,
             "description": "Rate limit and/or classification set by each carrier, Ex. AT&T or T-Mobile."
           },
@@ -1480,7 +1491,9 @@
           },
           "errors": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "object"
+            },
             "nullable": true,
             "description": "Details indicating why a campaign registration failed. These errors can indicate one or more fields that were incorrect or did not meet review requirements."
           }
@@ -1491,7 +1504,9 @@
         "properties": {
           "us_app_to_person_usecases": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "object"
+            },
             "nullable": true,
             "description": "Human readable name, code, description and post_approval_required (indicates whether or not post approval is required for this Use Case) of A2P Campaign Use Cases."
           }
@@ -1502,7 +1517,9 @@
         "properties": {
           "usecases": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "object"
+            },
             "nullable": true,
             "description": "Human readable use case details (usecase, description and purpose) of Messaging Service Use Cases."
           }
@@ -1575,6 +1592,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1AlphaSender"
         ],
@@ -1691,6 +1709,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1AlphaSender"
         ],
@@ -1879,6 +1898,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1AlphaSender"
         ],
@@ -1978,6 +1998,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1AlphaSender"
         ],
@@ -2035,6 +2056,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandRegistrationOtp"
         ],
@@ -2146,6 +2168,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandRegistration"
         ],
@@ -2365,6 +2388,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandRegistration"
         ],
@@ -2529,6 +2553,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandRegistration"
         ],
@@ -2759,6 +2784,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandRegistration"
         ],
@@ -2964,6 +2990,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandVetting"
         ],
@@ -3043,6 +3070,68 @@
               }
             },
             "description": "Created"
+          },
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.brand_registrations.brand_vetting"
+                },
+                "examples": {
+                  "create202Response": {
+                    "value": {
+                      "account_sid": "AC78e8e67fc0246521490fb9907fd0c165",
+                      "brand_sid": "BN0044409f7e067e279523808d267e2d85",
+                      "brand_vetting_sid": "VT12445353",
+                      "vetting_provider": "campaign-verify",
+                      "vetting_id": "cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY",
+                      "vetting_class": "POLITICAL",
+                      "vetting_status": "IN_PROGRESS",
+                      "date_created": "2021-01-27T14:18:35Z",
+                      "date_updated": "2021-01-27T14:18:35Z",
+                      "url": "https://messaging.twilio.com/v1/a2p/BrandRegistrations/BN0044409f7e067e279523808d267e2d85/Vettings/VT12445353"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Accepted"
           }
         },
         "security": [
@@ -3078,6 +3167,12 @@
                     "VettingProvider": "campaign-verify",
                     "VettingId": "cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY"
                   }
+                },
+                "create202Response": {
+                  "value": {
+                    "VettingProvider": "campaign-verify",
+                    "VettingId": "cv|1.0|tcr|10dlc|9975c339-d46f-49b7-a399-EXAMPLETOKEN|GQ3EXAMPLETOKENAXXBUNBT2AgL-LdQuPveFhEyY"
+                  }
                 }
               }
             }
@@ -3086,6 +3181,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandVetting"
         ],
@@ -3289,6 +3385,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1BrandVetting"
         ],
@@ -3408,6 +3505,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ChannelSender"
         ],
@@ -3601,6 +3699,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ChannelSender"
         ],
@@ -3772,6 +3871,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ChannelSender"
         ],
@@ -3896,6 +3996,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ChannelSender"
         ],
@@ -3951,6 +4052,7 @@
       },
       "get": {
         "description": "Fetch a list of all United States numbers that have been deactivated on a specific date.",
+        "summary": "Fetch a list of all United States numbers that have been deactivated on a specific date.",
         "tags": [
           "MessagingV1Deactivations"
         ],
@@ -4045,6 +4147,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DestinationAlphaSender"
         ],
@@ -4167,6 +4270,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DestinationAlphaSender"
         ],
@@ -4356,6 +4460,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DestinationAlphaSender"
         ],
@@ -4456,6 +4561,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DestinationAlphaSender"
         ],
@@ -4518,6 +4624,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainCerts"
         ],
@@ -4703,6 +4810,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainCerts"
         ],
@@ -4794,6 +4902,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainCerts"
         ],
@@ -4847,6 +4956,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainConfig"
         ],
@@ -5045,6 +5155,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainConfig"
         ],
@@ -5157,6 +5268,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1DomainConfigMessagingService"
         ],
@@ -5262,6 +5374,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ExternalCampaign"
         ],
@@ -5390,6 +5503,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1LinkshorteningMessagingService"
         ],
@@ -5485,6 +5599,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1LinkshorteningMessagingService"
         ],
@@ -5545,6 +5660,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1LinkshorteningMessagingServiceDomainAssociation"
         ],
@@ -5645,6 +5761,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1PhoneNumber"
         ],
@@ -5785,6 +5902,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1PhoneNumber"
         ],
@@ -5973,6 +6091,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1PhoneNumber"
         ],
@@ -6013,6 +6132,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1PhoneNumber"
         ],
@@ -6132,6 +6252,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1RequestManagedCert"
         ],
@@ -6348,6 +6469,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Service"
         ],
@@ -6562,6 +6684,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Service"
         ],
@@ -6816,6 +6939,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Service"
         ],
@@ -7026,6 +7150,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Service"
         ],
@@ -7144,6 +7269,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Service"
         ],
@@ -7192,6 +7318,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ShortCode"
         ],
@@ -7312,6 +7439,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ShortCode"
         ],
@@ -7502,6 +7630,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ShortCode"
         ],
@@ -7542,6 +7671,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1ShortCode"
         ],
@@ -7658,6 +7788,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1TollfreeVerification"
         ],
@@ -7785,6 +7916,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1TollfreeVerification"
         ],
@@ -8045,6 +8177,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1TollfreeVerification"
         ],
@@ -8092,6 +8225,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1TollfreeVerification"
         ],
@@ -8345,6 +8479,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1TollfreeVerification"
         ],
@@ -8706,6 +8841,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPerson"
         ],
@@ -9112,6 +9248,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPerson"
         ],
@@ -9408,6 +9545,7 @@
       },
       "delete": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPerson"
         ],
@@ -9451,6 +9589,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPerson"
         ],
@@ -9695,6 +9834,7 @@
       },
       "post": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPerson"
         ],
@@ -9916,6 +10056,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1UsAppToPersonUsecase"
         ],
@@ -10274,6 +10415,7 @@
       },
       "get": {
         "description": "",
+        "summary": "",
         "tags": [
           "MessagingV1Usecase"
         ],
