@@ -1,5 +1,17 @@
 twilio-oai changelog
 ====================
+[2025-03-20] Version 2.2.1
+--------------------------
+**Accounts**
+- Update Safelist API docs as part of prefix supoort
+
+**Flex**
+- Removing `first_name`, `last_name`, and `friendly_name` from the Flex User API
+
+**Messaging**
+- Add missing tests under transaction/phone_numbers and transaction/short_code
+
+
 [2025-03-11] Version 2.2.0
 --------------------------
 **Api**

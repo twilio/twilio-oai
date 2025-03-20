@@ -75,34 +75,17 @@ components:
               handling: standard
               deleteSla: 30
         command_mode:
-          type: string
           $ref: '#/components/schemas/command_enum_command_mode'
-          nullable: true
-          description: 'The mode used to send the SMS message. Can be: `text` or `binary`.
-            The default SMS mode is `text`.'
         transport:
-          type: string
           $ref: '#/components/schemas/command_enum_transport'
-          nullable: true
-          description: 'The type of transport used. Can be: `sms` or `ip`.'
         delivery_receipt_requested:
           type: boolean
           nullable: true
           description: Whether to request a delivery receipt.
         status:
-          type: string
           $ref: '#/components/schemas/command_enum_status'
-          nullable: true
-          description: 'The status of the Command. Can be: `queued`, `sent`, `delivered`,
-            `received`, or `failed`. See [Status Values](https://www.twilio.com/docs/iot/wireless/api/command-resource#status-values)
-            for a description of each state.'
         direction:
-          type: string
           $ref: '#/components/schemas/command_enum_direction'
-          nullable: true
-          description: The direction of the Command. Can be `to_sim` or `from_sim`.
-            The value of `to_sim` is synonymous with the term `mobile terminated`,
-            and `from_sim` is synonymous with the term `mobile originated`.
         date_created:
           type: string
           format: date-time
@@ -127,6 +110,9 @@ components:
       enum:
       - from_sim
       - to_sim
+      description: The direction of the Command. Can be `to_sim` or `from_sim`. The
+        value of `to_sim` is synonymous with the term `mobile terminated`, and `from_sim`
+        is synonymous with the term `mobile originated`.
     command_enum_status:
       type: string
       enum:
@@ -135,16 +121,22 @@ components:
       - delivered
       - received
       - failed
+      description: 'The status of the Command. Can be: `queued`, `sent`, `delivered`,
+        `received`, or `failed`. See [Status Values](https://www.twilio.com/docs/iot/wireless/api/command-resource#status-values)
+        for a description of each state.'
     command_enum_command_mode:
       type: string
       enum:
       - text
       - binary
+      description: 'The mode used to send the SMS message. Can be: `text` or `binary`.
+        The default SMS mode is `text`.'
     command_enum_transport:
       type: string
       enum:
       - sms
       - ip
+      description: 'The type of transport used. Can be: `sms` or `ip`.'
     wireless.v1.sim.data_session:
       type: object
       properties:
@@ -341,6 +333,9 @@ components:
       enum:
       - block
       - throttle
+      description: The way the home network (T-Mobile USA) will behave after a SIM's
+        usage exceeds its `data_limit`. Can be either `block` or `throttle`. Default
+        is `block`.
     wireless.v1.sim:
       type: object
       properties:
@@ -399,20 +394,9 @@ components:
           nullable: true
           description: Deprecated.
         status:
-          type: string
           $ref: '#/components/schemas/sim_enum_status'
-          nullable: true
-          description: 'The status of the Sim resource. Can be: `new`, `ready`, `active`,
-            `deactivated`, `canceled`, `deleted`, `scheduled`, or `updating`. See
-            [Status Values](https://www.twilio.com/docs/iot/wireless/api/sim-resource#status-values)
-            for the description of each status.'
         reset_status:
-          type: string
           $ref: '#/components/schemas/sim_enum_reset_status'
-          nullable: true
-          description: 'The connectivity reset status of the SIM. Can be: null or
-            `resetting`. When a connectivity reset is initiated on a SIM, this property
-            is `resetting`. After the reset completes, it is null.'
         commands_callback_url:
           type: string
           format: uri
@@ -526,10 +510,17 @@ components:
       - canceled
       - scheduled
       - updating
+      description: 'The status of the Sim resource. Can be: `new`, `ready`, `active`,
+        `deactivated`, `canceled`, `deleted`, `scheduled`, or `updating`. See [Status
+        Values](https://www.twilio.com/docs/iot/wireless/api/sim-resource#status-values)
+        for the description of each status.'
     sim_enum_reset_status:
       type: string
       enum:
       - resetting
+      description: 'The connectivity reset status of the SIM. Can be: null or `resetting`.
+        When a connectivity reset is initiated on a SIM, this property is `resetting`.
+        After the reset completes, it is null.'
     wireless.v1.sim.usage_record:
       type: object
       properties:
@@ -622,7 +613,6 @@ paths:
           or `all`. A value of `all` returns one Usage Record that describes the usage
           for the entire period.'
         schema:
-          type: string
           $ref: '#/components/schemas/account_usage_record_enum_granularity'
       - name: PageSize
         in: query
@@ -919,7 +909,6 @@ paths:
         description: 'The status of the resources to read. Can be: `queued`, `sent`,
           `delivered`, `received`, or `failed`.'
         schema:
-          type: string
           $ref: '#/components/schemas/command_enum_status'
         examples:
           readEmpty:
@@ -932,7 +921,6 @@ paths:
         in: query
         description: Only return Commands with this direction value.
         schema:
-          type: string
           $ref: '#/components/schemas/command_enum_direction'
         examples:
           readEmpty:
@@ -946,7 +934,6 @@ paths:
         description: 'Only return Commands with this transport value. Can be: `sms`
           or `ip`.'
         schema:
-          type: string
           $ref: '#/components/schemas/command_enum_transport'
         examples:
           readIp:
@@ -1192,10 +1179,7 @@ paths:
                     has finished sending, whether the command was delivered or it
                     failed.
                 CommandMode:
-                  type: string
                   $ref: '#/components/schemas/command_enum_command_mode'
-                  description: 'The mode to use when sending the SMS message. Can
-                    be: `text` or `binary`. The default SMS mode is `text`.'
                 IncludeSid:
                   type: string
                   description: 'Whether to include the SID of the command in the message
@@ -1662,6 +1646,8 @@ paths:
                   description: The total data usage (download and upload combined)
                     in Megabytes that the Network allows during one month when roaming
                     outside the United States. Can be up to 2TB.
+                DataLimitStrategy:
+                  $ref: '#/components/schemas/rate_plan_enum_data_limit_strategy'
             examples:
               create:
                 value:
@@ -2146,10 +2132,7 @@ paths:
                   description: The SID or unique name of the [RatePlan resource](https://www.twilio.com/docs/iot/wireless/api/rateplan-resource)
                     to which the Sim resource should be assigned.
                 Status:
-                  type: string
                   $ref: '#/components/schemas/sim_enum_status'
-                  description: 'The new status of the Sim resource. Can be: `ready`,
-                    `active`, `suspended`, or `deactivated`.'
                 CommandsCallbackMethod:
                   type: string
                   format: http-method
@@ -2215,11 +2198,7 @@ paths:
                   format: uri
                   description: Deprecated.
                 ResetStatus:
-                  type: string
                   $ref: '#/components/schemas/sim_enum_reset_status'
-                  description: Initiate a connectivity reset on the SIM. Set to `resetting`
-                    to initiate a connectivity reset on the SIM. No other value is
-                    valid.
                 AccountSid:
                   type: string
                   description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
@@ -2304,7 +2283,6 @@ paths:
         in: query
         description: Only return Sim resources with this status.
         schema:
-          type: string
           $ref: '#/components/schemas/sim_enum_status'
         examples:
           readEmpty:
@@ -2532,7 +2510,6 @@ paths:
           or `all`. The default is `all`. A value of `all` returns one Usage Record
           that describes the usage for the entire period.'
         schema:
-          type: string
           $ref: '#/components/schemas/usage_record_enum_granularity'
       - name: PageSize
         in: query
