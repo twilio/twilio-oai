@@ -1,7 +1,7 @@
 twilio-oai changelog
 ====================
 
-[2025-03-27] Version 2.2.2
+[2025-03-26] Version 2.2.2
 --------------------------
 **Accounts**
 - Dummy update for cli-core release
