@@ -1,6 +1,18 @@
 twilio-oai changelog
 ====================
 
+[2025-04-07] Version 2.2.3
+--------------------------
+**Library - Chore**
+- [PR #131](https://github.com/twilio/twilio-oai/pull/131): Trigger cli core release. Thanks to [@sbansla](https://github.com/sbansla)!
+
+**Library - Fix**
+- [PR #130](https://github.com/twilio/twilio-oai/pull/130): added a commit to trigger cli-core release. Thanks to [@sbansla](https://github.com/sbansla)!
+
+**Studio**
+- Add documentation for parent_step_sid field in Step resource
+
+
 [2025-03-26] Version 2.2.2
 --------------------------
 **Accounts**
