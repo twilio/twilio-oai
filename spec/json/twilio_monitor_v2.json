@@ -24,6 +24,150 @@
   ],
   "paths": {
     "/v2/Alarms": {
+      "get": {
+        "summary": "Fetch list of Alarms",
+        "operationId": "ListAlarms",
+        "parameters": [
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Alarms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "ListAlarms",
+                  "properties": {
+                    "alarms": {
+                      "type": "array",
+                      "description": "List of basic parameters defined for alarms for an account.",
+                      "items": {
+                        "$ref": "#/components/schemas/monitor.v2.alarm_body"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
       "post": {
         "summary": "Create an alarm",
         "operationId": "CreateAlarm",
@@ -364,36 +508,6 @@
           }
         }
       },
-      "monitor.v2.alarm_list_response": {
-        "type": "object",
-        "description": "Representation of a list of alarms for an account",
-        "required": [
-          "alertConfigList"
-        ],
-        "properties": {
-          "alertConfigList": {
-            "type": "array",
-            "description": "List of basic parameters defined for alarms for an account.",
-            "items": {
-              "$ref": "#/components/schemas/alarm"
-            }
-          },
-          "nextPageOffset": {
-            "type": "object",
-            "description": "Page Offset for the next page of alarm.",
-            "additionalProperties": {
-              "type": "object"
-            }
-          },
-          "previousPageOffset": {
-            "type": "object",
-            "description": "Page Offset for the previous page of alarm.",
-            "additionalProperties": {
-              "type": "object"
-            }
-          }
-        }
-      },
       "alarm": {
         "type": "object",
         "description": "Basic user friendly view representation of an alarm.",
@@ -440,13 +554,16 @@
         "type": "object",
         "description": "Alarm response body",
         "required": [
+          "alertConfigSid",
+          "dateUpdated",
+          "dateCreated",
+          "enabled",
+          "product",
           "friendlyName",
           "queryType",
           "triggerValue",
           "timeWindow",
-          "description",
-          "enabled",
-          "product"
+          "description"
         ],
         "properties": {
           "friendlyName": {
@@ -494,7 +611,21 @@
           },
           "product": {
             "type": "string",
-            "description": "Product the alarm is related to"
+            "description": "Product the alarm is related to."
+          },
+          "alertConfigSid": {
+            "type": "string",
+            "description": "Sid for the alarm"
+          },
+          "dateUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time in UTC when the alarm was last updated specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time in UTC when the alarm was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format."
           }
         }
       },
