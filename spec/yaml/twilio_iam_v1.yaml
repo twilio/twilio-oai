@@ -259,6 +259,207 @@ components:
         numberOfAccounts:
           type: integer
           default: 0
+    iam.v1.SocialConnection:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Social Connection Name (e.g. google, github etc)
+        dateCreated:
+          type: string
+          format: date-time
+          description: The creation date and time of the social connection
+    iam.v1.User:
+      type: object
+      properties:
+        userSid:
+          pattern: US[0-9a-f]{32}
+          type: string
+          format: UserSid
+          example: USb51dccce9ac8e67b938253c7bcaa4f45
+          description: Unique Twilio user sid
+        firstName:
+          maxLength: 255
+          minLength: 2
+          type: string
+          description: User first name
+        lastName:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: User last name
+        email:
+          maxLength: 160
+          minLength: 2
+          type: string
+          format: email
+          description: User email address
+        emailVerified:
+          type: boolean
+          description: Whether the user email is verified or not
+        sso:
+          type: boolean
+          description: Whether the user has SSO enabled
+        organizationSid:
+          pattern: OR[0-9a-f]{32}
+          type: string
+          format: OrganizationSid
+          example: OR33f4f3aa6fffe840d000f8ef22e883db
+          description: Unique Twilio organization sid
+        organizationFriendlyName:
+          type: string
+          description: Organization friendly name
+        timeZone:
+          type: string
+          description: User time zone
+        socialConnections:
+          type: array
+          description: List of social connections associated with the user
+          items:
+            $ref: '#/components/schemas/iam.v1.SocialConnection'
+    iam.v1.UserPatchRequest:
+      type: object
+      properties:
+        firstName:
+          maxLength: 255
+          minLength: 2
+          type: string
+          description: User first name
+        lastName:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: User last name
+        timeZone:
+          type: string
+          description: The user's timezone in IANA Time Zone Database format
+          example: America/New_York
+    iam.v1.UserPatchResponse:
+      type: object
+      properties:
+        userSid:
+          pattern: US[0-9a-f]{32}
+          type: string
+          format: UserSid
+          example: USb51dccce9ac8e67b938253c7bcaa4f45
+          description: Unique Twilio user sid
+        firstName:
+          maxLength: 255
+          minLength: 2
+          type: string
+          description: User first name
+        lastName:
+          maxLength: 255
+          minLength: 0
+          type: string
+          description: User last name
+        timeZone:
+          type: string
+          description: The user's timezone in IANA Time Zone Database format
+          example: America/New_York
+    iam.v1.EmailChangeInitiateRequest:
+      type: object
+      properties:
+        newEmail:
+          maxLength: 160
+          minLength: 2
+          type: string
+          format: email
+          description: The new email address
+    iam.v1.EmailChangeInitiateResponse:
+      type: object
+      properties:
+        notificationSid:
+          pattern: NF[0-9a-f]{32}
+          type: string
+          format: IdentityNotificationSid
+          example: NFbfd75767416fbd8418bedafce743700a
+          description: Unique Twilio notification sid
+    iam.v1.EmailChangeVerifyRequest:
+      type: object
+      properties:
+        notificationSid:
+          pattern: NF[0-9a-f]{32}
+          type: string
+          format: IdentityNotificationSid
+          example: NFbfd75767416fbd8418bedafce743700a
+          description: Unique Twilio notification sid
+        code:
+          maxLength: 32
+          minLength: 2
+          type: string
+          pattern: ^[A-Z0-9]{6}$
+          description: The verification code sent to the new email address
+    iam.v1.EmailChangeResendRequest:
+      type: object
+      properties:
+        notificationSid:
+          pattern: NF[0-9a-f]{32}
+          type: string
+          format: IdentityNotificationSid
+          example: NFbfd75767416fbd8418bedafce743700a
+          description: Unique Twilio notification sid
+    iam.v1.MfaInfo:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: "The user\u2019s phone number."
+        phoneVerified:
+          type: boolean
+          description: Whether the phone number has been verified.
+        challengeMethod:
+          $ref: '#/components/schemas/iam.v1.ChallengeMethod'
+        totpVerified:
+          type: boolean
+          description: Whether TOTP setup has been verified.
+        enrolledInMfa:
+          type: boolean
+          description: Whether the user is enrolled in any MFA.
+        canEnrollInTotp:
+          type: boolean
+          description: Whether the user is allowed to enroll in TOTP.
+        isSSO:
+          type: boolean
+          description: Whether the user authenticated via SSO.
+        isMfaDisabled:
+          type: boolean
+          description: Whether MFA is disabled for this user.
+    iam.v1.ChallengeMethod:
+      type: string
+      enum:
+      - voice
+      - sms
+      - totp
+      description: "The method used to challenge the user (e.g. \u201CSMS\u201D, \u201C\
+        TOTP\u201D)."
+    iam.v1.OneConsoleProvisioningStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - pending
+          - in-progress
+          - completed
+          - failed
+    iam.v1.TwilioServiceErrorResponse:
+      type: object
+      properties:
+        code:
+          description: Twilio-specific error code
+          type: integer
+          format: int32
+        message:
+          description: Error message
+          type: string
+        more_info:
+          description: Link to Error Code References
+          type: string
+        status:
+          description: HTTP response status code
+          type: integer
+          format: int32
 info:
   title: Twilio - Iam
   description: This is the public Twilio REST API.
@@ -802,6 +1003,13 @@ paths:
   /v1/Accounts/Search: {}
   /v1/Accounts/{accountSid}/Roles: {}
   /v1/Accounts/Stats: {}
+  /v1/Users/Self: {}
+  /v1/Users/EmailChange/Initiate: {}
+  /v1/Users/EmailChange/Verify: {}
+  /v1/Users/EmailChange/Resend: {}
+  /v1/Users/OneConsoleProvisioningStatus: {}
+  /v1/Users/Mfa/ChallengeMethod: {}
+  /v1/Users/Mfa/PhoneNumber: {}
 servers:
 - url: https://iam.twilio.com
 tags:
