@@ -1,153 +1,4 @@
 {
-  "components": {
-    "securitySchemes": {
-      "accountSid_authToken": {
-        "scheme": "basic",
-        "type": "http"
-      }
-    },
-    "schemas": {
-      "lookups.v2.phone_number": {
-        "type": "object",
-        "properties": {
-          "calling_country_code": {
-            "type": "string",
-            "nullable": true,
-            "description": "International dialing prefix of the phone number defined in the E.164 standard."
-          },
-          "country_code": {
-            "type": "string",
-            "nullable": true,
-            "description": "The phone number's [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).",
-            "x-twilio": {
-              "pii": {
-                "handling": "standard",
-                "deleteSla": 30
-              }
-            }
-          },
-          "phone_number": {
-            "type": "string",
-            "format": "phone-number",
-            "nullable": true,
-            "description": "The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164) format, which consists of a + followed by the country code and subscriber number.",
-            "x-twilio": {
-              "pii": {
-                "handling": "standard",
-                "deleteSla": 30
-              }
-            }
-          },
-          "national_format": {
-            "type": "string",
-            "nullable": true,
-            "description": "The phone number in [national format](https://en.wikipedia.org/wiki/National_conventions_for_writing_telephone_numbers).",
-            "x-twilio": {
-              "pii": {
-                "handling": "standard",
-                "deleteSla": 30
-              }
-            }
-          },
-          "valid": {
-            "type": "boolean",
-            "nullable": true,
-            "description": "Boolean which indicates if the phone number is in a valid range that can be freely assigned by a carrier to a user."
-          },
-          "validation_errors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/phone_number_enum_validation_error"
-            },
-            "nullable": true,
-            "description": "Contains reasons why a phone number is invalid. Possible values: TOO_SHORT, TOO_LONG, INVALID_BUT_POSSIBLE, INVALID_COUNTRY_CODE, INVALID_LENGTH, NOT_A_NUMBER."
-          },
-          "caller_name": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains caller name information based on [CNAM](https://support.twilio.com/hc/en-us/articles/360051670533-Getting-Started-with-CNAM-Caller-ID).",
-            "x-twilio": {
-              "pii": {
-                "handling": "standard",
-                "deleteSla": 30
-              }
-            }
-          },
-          "sim_swap": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains information on the last date the subscriber identity module (SIM) was changed for a mobile phone number."
-          },
-          "call_forwarding": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains information on the unconditional call forwarding status of mobile phone number."
-          },
-          "line_status": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains line status information for a mobile phone number."
-          },
-          "line_type_intelligence": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains line type information including the carrier name, mobile country code, and mobile network code."
-          },
-          "identity_match": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains identity match information. The result of comparing user-provided information including name, address, date of birth, national ID, against authoritative phone-based data sources"
-          },
-          "reassigned_number": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains reassigned number information. Reassigned Numbers will return a phone number's reassignment status given a phone number and date"
-          },
-          "sms_pumping_risk": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains information on if a phone number has been currently or previously blocked by Verify Fraud Guard for receiving malicious SMS pumping traffic as well as other signals associated with risky carriers and low conversion rates."
-          },
-          "phone_number_quality_score": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains information of a mobile phone number quality score. Quality score will return a risk score about the phone number."
-          },
-          "pre_fill": {
-            "type": "object",
-            "nullable": true,
-            "description": "An object that contains pre fill information. pre_fill will return PII information associated with the phone number like first name, last name, address line, country code, state and postal code. "
-          },
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true,
-            "description": "The absolute URL of the resource."
-          }
-        }
-      },
-      "phone_number_enum_type": {
-        "type": "string",
-        "enum": [
-          "landline",
-          "mobile",
-          "voip"
-        ]
-      },
-      "phone_number_enum_validation_error": {
-        "type": "string",
-        "enum": [
-          "TOO_SHORT",
-          "TOO_LONG",
-          "INVALID_BUT_POSSIBLE",
-          "INVALID_COUNTRY_CODE",
-          "INVALID_LENGTH",
-          "NOT_A_NUMBER"
-        ],
-        "description": "Contains reasons why a phone number is invalid. Possible values: TOO_SHORT, TOO_LONG, INVALID_BUT_POSSIBLE, INVALID_COUNTRY_CODE, INVALID_LENGTH, NOT_A_NUMBER."
-      }
-    }
-  },
   "info": {
     "title": "Twilio - Lookups",
     "description": "This is the public Twilio REST API.",
@@ -1093,6 +944,1247 @@
         ],
         "operationId": "FetchPhoneNumber"
       }
+    },
+    "/v2/batch/query": {
+      "post": {
+        "summary": "In Request Bulk",
+        "operationId": "CreateBulkLookup",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "LookupResponse",
+                  "properties": {
+                    "phone_numbers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/LookupResponseWithCorId"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "LookupRequest",
+                "properties": {
+                  "phone_numbers": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/LookupRequestWithCorId"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Discussions made regarding how to help the customer to correlation request and response objects:\n- Respecting the natural order (requests vs. response)\n- Using phone numbers as unique key\n- Adding a correlation_id key",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "parameters": []
+      }
+    },
+    "/v2/Jobs": {},
+    "/v2/Jobs/{JobSid}": {},
+    "/v2/Jobs/{JobSid}/stop": {},
+    "/v2/RateLimits": {
+      "get": {
+        "summary": "Get account rate limits",
+        "tags": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "in": "query",
+            "name": "Fields"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "title": "RateLimitListResponse",
+                  "properties": {
+                    "rate_limits": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RateLimitResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FetchLookupAccountRateLimits",
+        "description": "Retrieve the list of rate limits for all fields (if any)\nIt returns also the twilio rate limits.",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v2/RateLimits/Fields/{Field}/Bucket/{Bucket}": {
+      "get": {
+        "summary": "Get rate limit",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Field",
+            "description": "bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Bucket",
+            "description": "bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FetchLookupRateLimit",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete rate limit",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Field",
+            "description": "bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Bucket",
+            "description": "bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteLookupRateLimit",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Upsert rate limit",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Field",
+            "description": "field name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "Bucket",
+            "description": "bucket name",
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "UpdateLookupRateLimit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RateLimitRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v2/PhoneNumbers/{PhoneNumber}/Overrides/{Field}": {
+      "x-twilio": {
+        "mountName": "lookupOverrides"
+      },
+      "get": {
+        "summary": "Get Overrides for a Phone Number for a specific field.",
+        "tags": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true,
+            "name": "Field"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "required": true,
+            "name": "PhoneNumber"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverridesResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "FetchLookupPhoneNumberOverrides",
+        "description": "Retrieve an Override for a specific package and phone number.",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Override for a Phone Number for a specific field",
+        "operationId": "CreateLookupPhoneNumberOverrides",
+        "description": "Create an Override for a specific package and phone number.",
+        "tags": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "Field",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "PhoneNumber",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverridesResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverridesRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update Override for a Phone Number for a specific field",
+        "operationId": "UpdateLookupPhoneNumberOverrides",
+        "description": "Update an Override for a specific package and phone number.",
+        "tags": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "Field",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "PhoneNumber",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OverridesResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OverridesRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete an Override for a Phone Number for a specific field",
+        "tags": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "Field",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "PhoneNumber",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "DeleteLookupPhoneNumberOverrides",
+        "description": "Delete an Override for a specific package and phone number.",
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
     }
   },
   "servers": [
@@ -1112,5 +2204,905 @@
     {
       "accountSid_authToken": []
     }
-  ]
+  ],
+  "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LookupRequest": {
+        "title": "Lookup request",
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "caller_name",
+                "sim_swap",
+                "call_forwarding",
+                "line_type_intelligence",
+                "line_status",
+                "identity_match",
+                "reassigned_number",
+                "sms_pumping_risk"
+              ]
+            }
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatchParameters"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberRequest"
+          }
+        },
+        "required": [
+          "phone_number"
+        ],
+        "description": ""
+      },
+      "LookupRequestWithCorId": {
+        "title": "LookupRequestWithCorId",
+        "type": "object",
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "Unique identifier used to match request with response"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "caller_name",
+                "sim_swap",
+                "call_forwarding",
+                "line_type_intelligence",
+                "line_status",
+                "identity_match",
+                "reassigned_number",
+                "sms_pumping_risk"
+              ]
+            }
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatchParameters"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberRequest"
+          },
+          "sms_pumping_risk": {
+            "$ref": "#/components/schemas/SmsPumpingRiskParameters"
+          }
+        },
+        "required": [
+          "phone_number"
+        ]
+      },
+      "LookupJobRequest": {
+        "title": "LookupJobRequest",
+        "type": "object",
+        "properties": {
+          "friendly_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds"
+          }
+        }
+      },
+      "LookupResponse": {
+        "title": "LookupResponse",
+        "type": "object",
+        "properties": {
+          "calling_country_code": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "national_format": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caller_name": {
+            "$ref": "#/components/schemas/CallerName"
+          },
+          "sim_swap": {
+            "$ref": "#/components/schemas/SimSwap"
+          },
+          "call_forwarding": {
+            "$ref": "#/components/schemas/CallForwarding"
+          },
+          "line_type_intelligence": {
+            "$ref": "#/components/schemas/LineTypeIntelligence"
+          },
+          "line_status": {
+            "$ref": "#/components/schemas/LineStatus"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatch"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberResponse"
+          },
+          "sms_pumping_risk": {
+            "$ref": "#/components/schemas/SmsPumpingRisk"
+          }
+        }
+      },
+      "LookupResponseWithCorId": {
+        "type": "object",
+        "properties": {
+          "correlation_id": {
+            "type": "string",
+            "description": "Unique identifier used to match request with response"
+          },
+          "twilio_error_code": {
+            "type": "integer",
+            "description": "Twilio error code in case that the request to downstream fails"
+          },
+          "calling_country_code": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "phone_number": {
+            "type": "string"
+          },
+          "national_format": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean"
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caller_name": {
+            "$ref": "#/components/schemas/CallerName"
+          },
+          "sim_swap": {
+            "$ref": "#/components/schemas/SimSwap"
+          },
+          "call_forwarding": {
+            "$ref": "#/components/schemas/CallForwarding"
+          },
+          "line_type_intelligence": {
+            "$ref": "#/components/schemas/LineTypeIntelligence"
+          },
+          "line_status": {
+            "$ref": "#/components/schemas/LineStatus"
+          },
+          "identity_match": {
+            "$ref": "#/components/schemas/IdentityMatch"
+          },
+          "reassigned_number": {
+            "$ref": "#/components/schemas/ReassignedNumberResponse"
+          },
+          "sms_pumping_risk": {
+            "$ref": "#/components/schemas/SmsPumpingRisk"
+          }
+        }
+      },
+      "LookupJobResponse": {
+        "title": "LookupJobResponse",
+        "type": "object",
+        "properties": {
+          "job_sid": {
+            "type": "string"
+          },
+          "friendly_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Result"
+          },
+          "twilio_error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "LookupFileJobResponse": {
+        "title": "LookupFileJobResponse",
+        "type": "object",
+        "properties": {
+          "job_sid": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "type": "object",
+            "properties": {
+              "file_url": {
+                "type": "string"
+              },
+              "total_count": {
+                "type": "integer"
+              },
+              "processed_count": {
+                "type": "integer"
+              },
+              "success_count": {
+                "type": "integer"
+              },
+              "error_count": {
+                "type": "integer"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CallerName": {
+        "title": "CallerName",
+        "type": "object",
+        "properties": {
+          "caller_name": {
+            "type": "string"
+          },
+          "caller_type": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "SimSwap": {
+        "title": "SimSwap",
+        "properties": {
+          "last_sim_swap": {
+            "$ref": "#/components/schemas/LastSimSwap"
+          },
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LastSimSwap": {
+        "title": "SimSwap",
+        "properties": {
+          "last_sim_swap_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "swapped_period": {
+            "type": "string"
+          },
+          "swapped_in_period": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CallForwarding": {
+        "title": "CallForwarding",
+        "type": "object",
+        "properties": {
+          "call_forwarding_enabled": {
+            "type": "boolean"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "ATOCarrier": {
+        "title": "ATOCarrier",
+        "type": "object",
+        "properties": {
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
+          }
+        }
+      },
+      "LineTypeIntelligence": {
+        "title": "Packages/LineTypeIntelligence",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "carrier_name": {
+            "type": "string"
+          },
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "LineStatus": {
+        "title": "LineStatus",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "Carrier": {
+        "title": "Carrier",
+        "type": "object",
+        "properties": {
+          "mobile_country_code": {
+            "type": "string"
+          },
+          "mobile_network_code": {
+            "type": "string"
+          }
+        }
+      },
+      "IdentityMatch": {
+        "title": "IdentityMatch",
+        "type": "object",
+        "properties": {
+          "first_name_match": {
+            "type": "string"
+          },
+          "last_name_match": {
+            "type": "string"
+          },
+          "address_line_match": {
+            "type": "string"
+          },
+          "city_match": {
+            "type": "string"
+          },
+          "state_match": {
+            "type": "string"
+          },
+          "postal_code_match": {
+            "type": "string"
+          },
+          "country_code_match": {
+            "type": "string"
+          },
+          "national_id_match": {
+            "type": "string"
+          },
+          "date_of_birth_match": {
+            "type": "string"
+          },
+          "summary_score": {
+            "type": "integer"
+          },
+          "error_code": {
+            "type": "integer"
+          },
+          "error_message": {
+            "type": "string"
+          }
+        }
+      },
+      "IdentityMatchParameters": {
+        "title": "IdentityMatchParameters",
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "address_line1": {
+            "type": "string"
+          },
+          "address_line2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "postal_code": {
+            "type": "string"
+          },
+          "address_country_code": {
+            "type": "string"
+          },
+          "national_id": {
+            "type": "string"
+          },
+          "date_of_birth": {
+            "type": "string"
+          }
+        }
+      },
+      "ReassignedNumberRequest": {
+        "title": "ReassignedNumberRequest",
+        "type": "object",
+        "properties": {
+          "last_verified_date": {
+            "type": "string",
+            "maxLength": 8
+          }
+        }
+      },
+      "ReassignedNumberResponse": {
+        "title": "ReassignedNumberResponse",
+        "type": "object",
+        "properties": {
+          "last_verified_date": {
+            "type": "string"
+          },
+          "is_number_reassigned": {
+            "type": "string"
+          },
+          "error_code": {
+            "type": "string"
+          }
+        }
+      },
+      "SmsPumpingRisk": {
+        "title": "SmsPumpingRisk",
+        "type": "object",
+        "properties": {
+          "carrier_risk_category": {
+            "type": "string"
+          },
+          "number_blocked": {
+            "type": "boolean"
+          },
+          "number_blocked_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "number_blocked_last_3_months": {
+            "type": "boolean"
+          },
+          "sms_pumping_risk_score": {
+            "type": "integer"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "SmsPumpingRiskParameters": {
+        "title": "SmsPumpingRiskParameters",
+        "type": "object",
+        "properties": {
+          "partner_sub_id": {
+            "type": "string",
+            "maxLength": 64
+          }
+        }
+      },
+      "JobStatus": {
+        "title": "JobStatus",
+        "enum": [
+          "CREATED",
+          "FILE_RECEIVED",
+          "QUEUED",
+          "IN_PROGRESS",
+          "COMPLETED",
+          "FAILED",
+          "STOPPED",
+          "STOP_REQUESTED"
+        ]
+      },
+      "Thresholds": {
+        "title": "Thresholds",
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "Result": {
+        "title": "Result",
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "total_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "processed_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "success_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "RateLimitResponse": {
+        "title": "RateLimitResponse",
+        "type": "object",
+        "description": "Rate limit response schema",
+        "properties": {
+          "field": {
+            "description": "Limit of requests for the bucket",
+            "type": "string"
+          },
+          "limit": {
+            "description": "Limit of requests for the bucket",
+            "type": "integer",
+            "format": "int32"
+          },
+          "bucket": {
+            "description": "Name of the bucket",
+            "type": "string"
+          },
+          "owner": {
+            "description": "Owner of the rule",
+            "type": "string"
+          },
+          "ttl": {
+            "description": "Time to live of the rule",
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RateLimitRequest": {
+        "title": "RateLimitRequest",
+        "type": "object",
+        "description": "Rate limit request schema",
+        "properties": {
+          "limit": {
+            "description": "Limit of requests for the bucket",
+            "type": "integer",
+            "format": "int32"
+          },
+          "ttl": {
+            "description": "Time to live of the rule",
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OverridesRequest": {
+        "title": "OverridesRequest",
+        "type": "object",
+        "properties": {
+          "line_type": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "landline",
+              "tollFree",
+              "fixedVoip",
+              "nonFixedVoip",
+              "personal",
+              "premium",
+              "voicemail",
+              "sharedCost",
+              "uan",
+              "pager",
+              "unknown"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "OverridesResponse": {
+        "title": "OverridesResponse",
+        "type": "object",
+        "properties": {
+          "phone_number": {
+            "type": "string"
+          },
+          "original_line_type": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "landline",
+              "tollFree",
+              "fixedVoip",
+              "nonFixedVoip",
+              "personal",
+              "premium",
+              "voicemail",
+              "sharedCost",
+              "uan",
+              "pager",
+              "unknown"
+            ]
+          },
+          "overridden_line_type": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "landline",
+              "tollFree",
+              "fixedVoip",
+              "nonFixedVoip",
+              "personal",
+              "premium",
+              "voicemail",
+              "sharedCost",
+              "uan",
+              "pager",
+              "unknown"
+            ]
+          },
+          "override_reason": {
+            "type": "string",
+            "description": "The reason for the override",
+            "example": "Customer has shown proof this is a mobile number"
+          },
+          "override_timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "overridden_by_account_sid": {
+            "type": "string",
+            "description": "The user who overrode the line type",
+            "example": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "TwilioServiceErrorResponse": {
+        "title": "Error with code Schema",
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "Twilio-specific error code",
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "description": "Error message",
+            "type": "string"
+          },
+          "more_info": {
+            "description": "Link to Error Code References",
+            "type": "string"
+          },
+          "status": {
+            "description": "HTTP response status code",
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "lookups.v2.phone_number": {
+        "type": "object",
+        "properties": {
+          "calling_country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "International dialing prefix of the phone number defined in the E.164 standard."
+          },
+          "country_code": {
+            "type": "string",
+            "nullable": true,
+            "description": "The phone number's [ISO country code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          },
+          "phone_number": {
+            "type": "string",
+            "format": "phone-number",
+            "nullable": true,
+            "description": "The phone number in [E.164](https://www.twilio.com/docs/glossary/what-e164) format, which consists of a + followed by the country code and subscriber number.",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          },
+          "national_format": {
+            "type": "string",
+            "nullable": true,
+            "description": "The phone number in [national format](https://en.wikipedia.org/wiki/National_conventions_for_writing_telephone_numbers).",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          },
+          "valid": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Boolean which indicates if the phone number is in a valid range that can be freely assigned by a carrier to a user."
+          },
+          "validation_errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/phone_number_enum_validation_error"
+            },
+            "nullable": true,
+            "description": "Contains reasons why a phone number is invalid. Possible values: TOO_SHORT, TOO_LONG, INVALID_BUT_POSSIBLE, INVALID_COUNTRY_CODE, INVALID_LENGTH, NOT_A_NUMBER."
+          },
+          "caller_name": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains caller name information based on [CNAM](https://support.twilio.com/hc/en-us/articles/360051670533-Getting-Started-with-CNAM-Caller-ID).",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
+          },
+          "sim_swap": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains information on the last date the subscriber identity module (SIM) was changed for a mobile phone number."
+          },
+          "call_forwarding": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains information on the unconditional call forwarding status of mobile phone number."
+          },
+          "line_status": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains line status information for a mobile phone number."
+          },
+          "line_type_intelligence": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains line type information including the carrier name, mobile country code, and mobile network code."
+          },
+          "identity_match": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains identity match information. The result of comparing user-provided information including name, address, date of birth, national ID, against authoritative phone-based data sources"
+          },
+          "reassigned_number": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains reassigned number information. Reassigned Numbers will return a phone number's reassignment status given a phone number and date"
+          },
+          "sms_pumping_risk": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains information on if a phone number has been currently or previously blocked by Verify Fraud Guard for receiving malicious SMS pumping traffic as well as other signals associated with risky carriers and low conversion rates."
+          },
+          "phone_number_quality_score": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains information of a mobile phone number quality score. Quality score will return a risk score about the phone number."
+          },
+          "pre_fill": {
+            "type": "object",
+            "nullable": true,
+            "description": "An object that contains pre fill information. pre_fill will return PII information associated with the phone number like first name, last name, address line, country code, state and postal code. "
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The absolute URL of the resource."
+          }
+        }
+      },
+      "phone_number_enum_type": {
+        "type": "string",
+        "enum": [
+          "landline",
+          "mobile",
+          "voip"
+        ]
+      },
+      "phone_number_enum_validation_error": {
+        "type": "string",
+        "enum": [
+          "TOO_SHORT",
+          "TOO_LONG",
+          "INVALID_BUT_POSSIBLE",
+          "INVALID_COUNTRY_CODE",
+          "INVALID_LENGTH",
+          "NOT_A_NUMBER"
+        ],
+        "description": "Contains reasons why a phone number is invalid. Possible values: TOO_SHORT, TOO_LONG, INVALID_BUT_POSSIBLE, INVALID_COUNTRY_CODE, INVALID_LENGTH, NOT_A_NUMBER."
+      }
+    },
+    "requestBodies": {}
+  }
 }
