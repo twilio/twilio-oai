@@ -1323,11 +1323,6 @@
           "status": {
             "$ref": "#/components/schemas/room_transcriptions_enum_status"
           },
-          "identity": {
-            "type": "string",
-            "nullable": true,
-            "description": "The application-defined string that uniquely identifies the resource's User within a Room. If a client joins with an existing Identity, the existing client is disconnected. See [access tokens](https://www.twilio.com/docs/video/tutorials/user-identity-access-tokens) and [limits](https://www.twilio.com/docs/video/programmable-video-limits) for more info. "
-          },
           "date_created": {
             "type": "string",
             "format": "date-time",
@@ -1362,13 +1357,23 @@
             "format": "uri",
             "nullable": true,
             "description": "The absolute URL of the resource."
+          },
+          "configuration": {
+            "type": "object",
+            "nullable": true,
+            "description": "An JSON object that describes the video layout of the composition in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts) for more info.",
+            "x-twilio": {
+              "pii": {
+                "handling": "standard",
+                "deleteSla": 30
+              }
+            }
           }
         }
       },
       "room_transcriptions_enum_status": {
         "type": "string",
         "enum": [
-          "created",
           "started",
           "stopped",
           "failed"
@@ -2050,7 +2055,6 @@
                     "description": "The SID of the Group Room with the media tracks to be used as composition sources."
                   },
                   "VideoLayout": {
-                    "type": "object",
                     "description": "An object that describes the video layout of the composition in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts) for more info. Please, be aware that either video_layout or audio_sources have to be provided to get a valid creation request"
                   },
                   "AudioSources": {
@@ -2461,7 +2465,6 @@
                     "description": "Whether the composition hook is active. When `true`, the composition hook will be triggered for every completed Group Room in the account. When `false`, the composition hook never triggers."
                   },
                   "VideoLayout": {
-                    "type": "object",
                     "description": "A JSON object that describes the video layout of the composition hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts) for more info."
                   },
                   "AudioSources": {
@@ -2958,7 +2961,6 @@
                     "description": "Whether the composition hook is active. When `true`, the composition hook will be triggered for every completed Group Room in the account. When `false`, the composition hook will never be triggered."
                   },
                   "VideoLayout": {
-                    "type": "object",
                     "description": "An object that describes the video layout of the composition hook in terms of regions. See [Specifying Video Layouts](https://www.twilio.com/docs/video/api/compositions-resource#specifying-video-layouts) for more info."
                   },
                   "AudioSources": {
@@ -4654,7 +4656,6 @@
                     "description": "The region for the Room's media server.  Can be one of the [available Media Regions](https://www.twilio.com/docs/video/ip-addresses#group-rooms-media-servers)."
                   },
                   "RecordingRules": {
-                    "type": "object",
                     "description": "A collection of Recording Rules that describe how to include or exclude matching tracks for recording"
                   },
                   "TranscriptionsConfiguration": {
@@ -6187,7 +6188,6 @@
                 "title": "UpdateRoomParticipantSubscribeRuleRequest",
                 "properties": {
                   "Rules": {
-                    "type": "object",
                     "description": "A JSON-encoded array of subscribe rules. See the [Specifying Subscribe Rules](https://www.twilio.com/docs/video/api/track-subscriptions#specifying-sr) section for further information."
                   }
                 }
@@ -7189,7 +7189,6 @@
                 "title": "UpdateRoomRecordingRuleRequest",
                 "properties": {
                   "Rules": {
-                    "type": "object",
                     "description": "A JSON-encoded array of recording rules."
                   }
                 }
@@ -7267,7 +7266,9 @@
                       "start_time": "2015-07-30T20:00:00Z",
                       "end_time": null,
                       "duration": null,
-                      "identity": "bob",
+                      "configuration": {
+                        "languageCode": "en-US"
+                      },
                       "status": "started",
                       "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions/video_extension_2c70be23-4788-423d-9351-df6705efa035"
                     }
@@ -7365,7 +7366,9 @@
                       "start_time": "2015-07-30T20:00:00Z",
                       "end_time": null,
                       "duration": null,
-                      "identity": "bob",
+                      "configuration": {
+                        "languageCode": "en-US"
+                      },
                       "status": "started",
                       "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions/video_extension_2c70be23-4788-423d-9351-df6705efa035"
                     }
@@ -7511,7 +7514,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "extensions": {
+                    "transcriptions": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/video.v1.room.room_transcriptions"
@@ -7555,7 +7558,7 @@
                 "examples": {
                   "readEmpty": {
                     "value": {
-                      "extensions": [],
+                      "transcriptions": [],
                       "meta": {
                         "page": 0,
                         "page_size": 50,
@@ -7563,13 +7566,13 @@
                         "previous_page_url": null,
                         "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions?PageSize=50&Page=0",
                         "next_page_url": null,
-                        "key": "extensions"
+                        "key": "transcriptions"
                       }
                     }
                   },
                   "readList": {
                     "value": {
-                      "extensions": [
+                      "transcriptions": [
                         {
                           "ttid": "video_extension_2c70be23-4788-423d-9351-df6705efa035",
                           "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -7579,7 +7582,9 @@
                           "start_time": "2015-07-30T20:00:00Z",
                           "end_time": null,
                           "duration": null,
-                          "identity": "bob",
+                          "configuration": {
+                            "languageCode": "en-US"
+                          },
                           "status": "started",
                           "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions/video_extension_2c70be23-4788-423d-9351-df6705efa035"
                         }
@@ -7591,7 +7596,7 @@
                         "previous_page_url": null,
                         "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions?PageSize=50&Page=0",
                         "next_page_url": null,
-                        "key": "extensions"
+                        "key": "transcriptions"
                       }
                     }
                   }
@@ -7679,6 +7684,9 @@
                       "start_time": "2015-07-30T20:00:00Z",
                       "end_time": null,
                       "duration": null,
+                      "configuration": {
+                        "languageCode": "en-US"
+                      },
                       "identity": "transcriptions",
                       "status": "started",
                       "url": "https://video.twilio.com/v1/Rooms/RMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Transcriptions/video_extension_2c70be23-4788-423d-9351-df6705efa035"

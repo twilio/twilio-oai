@@ -1,6 +1,12 @@
 twilio-oai changelog
 ====================
 
+[2025-07-10] Version 2.3.5
+--------------------------
+**Flex**
+- update team name for web_channel, webchat_init_token, webchat_refresh_token
+
+
 [2025-07-03] Version 2.3.4
 --------------------------
 **Bulkexports**
