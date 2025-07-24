@@ -4,6 +4,11 @@
       "accountSid_authToken": {
         "scheme": "basic",
         "type": "http"
+      },
+      "access_token_bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "access_token"
       }
     },
     "schemas": {
@@ -265,29 +270,6 @@
           }
         }
       },
-      "twilio.service_error_response": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "description": "Twilio-specific error code",
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "description": "Error message",
-            "type": "string"
-          },
-          "more_info": {
-            "description": "Link to Error Code References",
-            "type": "string"
-          },
-          "status": {
-            "description": "HTTP response status code",
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "iam.v1.account_search_request": {
         "type": "object",
         "properties": {
@@ -347,6 +329,30 @@
               "NO_MEMBERSHIP"
             ],
             "description": "User sign-up type for Organization domains"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation date of the organization"
+          }
+        }
+      },
+      "iam.v1.CreateDomainResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "description": "Unique Twilio domain sid",
+            "type": "string",
+            "pattern": "DN[0-9a-f]{32}",
+            "format": "DomainVerificationSid",
+            "example": "DN33f4f3aa6fffe840d000f8ef22e883db"
+          },
+          "token": {
+            "description": "Verification token for the domain",
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32,
+            "example": "c1b92294dfe76c592d5d77c24456aad2"
           }
         }
       },
@@ -738,6 +744,10 @@
           "isMfaDisabled": {
             "type": "boolean",
             "description": "Whether MFA is disabled for this user."
+          },
+          "isRecoveryCodeGenerated": {
+            "type": "boolean",
+            "description": "Whether a recovery code has been generated for the user."
           }
         }
       },
@@ -891,26 +901,166 @@
           }
         }
       },
-      "iam.v1.TwilioServiceErrorResponse": {
+      "iam.v1.InvitedUser": {
         "type": "object",
         "properties": {
-          "code": {
-            "description": "Twilio-specific error code",
-            "type": "integer",
-            "format": "int32"
+          "notificationSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^NF[0-9a-fA-F]{32}$"
           },
-          "message": {
-            "description": "Error message",
+          "email": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "format": "email"
+          },
+          "senderFirstName": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2
+          },
+          "senderLastName": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2
+          },
+          "senderEmail": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "format": "email"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalSends": {
+            "type": "integer"
+          },
+          "dateLastSent": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "tokenExpired": {
+            "type": "boolean"
+          },
+          "canResend": {
+            "type": "boolean"
+          },
+          "canResendReason": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "scopeRoleMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "iam.v1.ChangeAccountOwnerRequest": {
+        "type": "object",
+        "properties": {
+          "newOwnerSid": {
+            "pattern": "US[0-9a-f]{32}",
+            "type": "string",
+            "format": "UserSid",
+            "example": "USb51dccce9ac8e67b938253c7bcaa4f45",
+            "description": "The SID of the new owner to transfer the account to"
+          }
+        }
+      },
+      "iam.v1.ChangeAccountOwnerResponse": {
+        "type": "object",
+        "properties": {
+          "executionSid": {
+            "type": "string",
+            "pattern": "WX[0-9a-f]{32}",
+            "format": "WorkflowExecutionSid",
+            "example": "WXe0c97ff86651669fefcd6cc4ecd96e9a",
+            "description": "The SID of the workflow that will handle the account ownership change"
+          }
+        }
+      },
+      "iam.v1.vendoroauthapp": {
+        "type": "object",
+        "properties": {
+          "type": {
             "type": "string"
           },
-          "more_info": {
-            "description": "Link to Error Code References",
+          "sid": {
+            "type": "string",
+            "pattern": "^OQ[a-zA-Z0-9]{32}$"
+          },
+          "friendly_name": {
             "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time"
           },
           "status": {
-            "description": "HTTP response status code",
-            "type": "integer",
-            "format": "int32"
+            "type": "string"
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "allow": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Set of permissions explicitly allowed"
+              },
+              "deny": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Set of permissions explicitly denied"
+              }
+            }
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "company_name": {
+            "type": "string"
+          },
+          "homepage_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "tos_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "redirect_urls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "authorization_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "access_token_ttl": {
+            "type": "integer"
           }
         }
       }
@@ -1685,9 +1835,42 @@
     "/v1/Organizations/IndependentUsers": {},
     "/v1/Organizations/IndependentUsers/{userId}": {},
     "/v1/Organizations/ImportUsers": {},
-    "/v1/Oauth2/Vendor/Consent/List": {},
+    "/v1/Organization/AuthorizedApps": {},
+    "/v1/Account/OAuthApps/{id}": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ]
+    },
+    "/v1/Organization/OAuthApps/{id}": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ]
+    },
     "/v1/Organizations/InvitedAccounts": {},
-    "/v1/Organizations/ImportUsers/EligibleUsers/Count": {}
+    "/v1/Organizations/InvitedAccounts/Limit": {},
+    "/v1/Organizations/ImportUsers/EligibleUsers/Count": {},
+    "/v1/console/mfa/v3/device/verify": {},
+    "/v1/console/mfa/v3/recovery-code": {},
+    "/v1/Account/OAuthApps": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ]
+    },
+    "/v1/Organization/OAuthApps": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ]
+    },
+    "/v1/Organizations/InvitedUsers": {},
+    "/v1/Organizations/ManagedAccounts/{accountSid}/ChangeOwner": {}
   },
   "servers": [
     {

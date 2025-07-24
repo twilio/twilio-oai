@@ -1,6 +1,17 @@
 twilio-oai changelog
 ====================
 
+[2025-07-24] Version 2.4.0
+--------------------------
+**Events**
+- Remove `SinkSid` parameter when updating subscriptions. **(breaking change)**
+
+**Twiml**
+- Remove Duplicates.
+- Add Polly Generative voices.
+- Add Latest Google (Chirp3-HD) voices.
+
+
 [2025-07-10] Version 2.3.5
 --------------------------
 **Flex**
