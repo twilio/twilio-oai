@@ -7,7 +7,7 @@
       }
     },
     "schemas": {
-      "messaging.v2.channels_sender": {
+      "messaging.v2.channels_sender_response": {
         "type": "object",
         "properties": {
           "sid": {
@@ -31,7 +31,7 @@
             "$ref": "#/components/schemas/messaging.v2.channels_sender.webhook"
           },
           "profile": {
-            "$ref": "#/components/schemas/messaging.v2.channels_sender.profile-response"
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.profile_generic_response"
           },
           "properties": {
             "$ref": "#/components/schemas/messaging.v2.channels_sender.properties"
@@ -39,11 +39,75 @@
           "offline_reasons": {
             "$ref": "#/components/schemas/messaging.v2.channels_sender.offline_reasons"
           },
+          "compliance": {
+            "$ref": "#/components/schemas/messaging.v2.rcs_compliance_response"
+          },
           "url": {
             "type": "string",
             "format": "uri",
             "nullable": true,
             "description": "The URL of this resource, relative to `https://messaging.twilio.com`."
+          }
+        }
+      },
+      "messaging.v2.rcs_compliance_response": {
+        "description": "KYC compliance information.  This section consists of response to the request launch\n",
+        "type": "object",
+        "nullable": true,
+        "required": [
+          "registration_sid",
+          "countries"
+        ],
+        "properties": {
+          "registration_sid": {
+            "type": "string",
+            "description": "The default compliance registration SID (e.g., from CR-Google) that applies to all countries  unless overridden within the `countries` array.\n"
+          },
+          "countries": {
+            "type": "array",
+            "description": "A list of country-specific compliance details.  It consists of registration_sid, country iso code, country status and carriers information\n",
+            "items": {
+              "$ref": "#/components/schemas/messaging.v2.rcs_compliance_country_response"
+            }
+          }
+        }
+      },
+      "messaging.v2.rcs_compliance_country_response": {
+        "type": "object",
+        "required": [
+          "country",
+          "registration_sid",
+          "status"
+        ],
+        "properties": {
+          "country": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code (e.g., 'US', 'UK')."
+          },
+          "registration_sid": {
+            "type": "string",
+            "description": "The default compliance registration SID (e.g., from CR-Google) that applies to all countries  unless overridden within the `countries` array.\n"
+          },
+          "status": {
+            "$ref": "#/components/schemas/messaging.v2.rcs_country_status"
+          },
+          "carriers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/messaging.v2.rcs_carrier"
+            }
+          }
+        }
+      },
+      "messaging.v2.rcs_carrier": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "carrier in a country e.g. For US-Verizon, AT&T\n"
+          },
+          "status": {
+            "$ref": "#/components/schemas/messaging.v2.rcs_carrier_status"
           }
         }
       },
@@ -56,9 +120,32 @@
           "PENDING_VERIFICATION",
           "VERIFYING",
           "ONLINE:UPDATING",
-          "STUBBED"
+          "TWILIO_REVIEW",
+          "DRAFT"
         ],
-        "description": "The Status of this Sender. One of `CREATING`, `ONLINE`, `OFFLINE`, `PENDING_VERIFICATION`, `VERIFYING` or `ONLINE:UPDATING`."
+        "description": "The Status of this Sender\n"
+      },
+      "messaging.v2.rcs_country_status": {
+        "type": "string",
+        "description": "Country level status, it is an aggregation of Carrier level status",
+        "enum": [
+          "ONLINE",
+          "OFFLINE",
+          "TWILIO_REVIEW",
+          "PENDING_VERIFICATION"
+        ]
+      },
+      "messaging.v2.rcs_carrier_status": {
+        "type": "string",
+        "description": "Carrier level status",
+        "enum": [
+          "UNKNOWN",
+          "UNLAUNCHED",
+          "CARRIER_REVIEW",
+          "APPROVED",
+          "REJECTED",
+          "SUSPENDED"
+        ]
       },
       "messaging.v2.channels_sender.requests.create": {
         "type": "object",
@@ -179,6 +266,7 @@
       "messaging.v2.channels_sender.profile": {
         "type": "object",
         "nullable": true,
+        "description": "Sender profile configuration 1) RCS 2) Whatsapp\n",
         "properties": {
           "name": {
             "type": "string",
@@ -200,12 +288,29 @@
             "description": "The description of the sender.",
             "nullable": true
           },
-          "emails": {
-            "description": "The emails of the sender."
-          },
           "logo_url": {
             "type": "string",
             "description": "The logo URL of the sender.",
+            "nullable": true
+          },
+          "banner_url": {
+            "type": "string",
+            "description": "The banner URL of the sender.",
+            "nullable": true
+          },
+          "privacy_url": {
+            "type": "string",
+            "description": "The privacy URL of the sender. Publicly accessible URI associated with the Sender, must use the HTTP or HTTPS protocol\n",
+            "nullable": true
+          },
+          "terms_of_service_url": {
+            "type": "string",
+            "description": "The terms of service URL of the sender.",
+            "nullable": true
+          },
+          "accent_color": {
+            "type": "string",
+            "description": "string - Color theme of the Sender (required, in hex format, need to be a minimum 4.5:1 contrast ratio relative to white)\n",
             "nullable": true
           },
           "vertical": {
@@ -214,14 +319,20 @@
             "nullable": true
           },
           "websites": {
-            "description": "The websites of the sender."
+            "description": "The websites of the sender"
+          },
+          "emails": {
+            "description": "The emails of the sender"
+          },
+          "phone_numbers": {
+            "description": "The phone numbers of the sender"
           }
-        },
-        "description": "Sender profile specific configurations, e.g., {\"name\": \"xxx\", \"about\": \"xxx\", \"address\": \"xxx\", \"description\": \"xxx\", \"emails\": \"xxx@xxx\", \"logo_url\": \"https://xxx\", \"vertical\": \"xxx\", \"websites\": [\"https://xxx\", \"...\"]}"
+        }
       },
-      "messaging.v2.channels_sender.profile-response": {
+      "messaging.v2.channels_sender.profile_generic_response": {
         "type": "object",
         "nullable": true,
+        "description": "Sender profile configuration response 1) RCS 2) Whatsapp\n",
         "properties": {
           "name": {
             "type": "string",
@@ -243,25 +354,29 @@
             "description": "The description of the sender.",
             "nullable": true
           },
-          "emails": {
-            "description": "The emails of the sender.",
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "type": "string"
-                },
-                "label": {
-                  "type": "string"
-                }
-              }
-            }
-          },
           "logo_url": {
             "type": "string",
             "description": "The logo URL of the sender.",
+            "nullable": true
+          },
+          "banner_url": {
+            "type": "string",
+            "description": "The banner URL of the sender.",
+            "nullable": true
+          },
+          "privacy_url": {
+            "type": "string",
+            "description": "The privacy URL of the sender. Publicly accessible URI associated with the Sender, must use the HTTP or HTTPS protocol\n",
+            "nullable": true
+          },
+          "terms_of_service_url": {
+            "type": "string",
+            "description": "The terms of service URL of the sender.",
+            "nullable": true
+          },
+          "accent_color": {
+            "type": "string",
+            "description": "string - Color theme of the Sender (required, in hex format, need to be a minimum 4.5:1 contrast ratio relative to white)\n",
             "nullable": true
           },
           "vertical": {
@@ -284,9 +399,40 @@
                 }
               }
             }
+          },
+          "emails": {
+            "description": "The emails of the sender.",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "phone_numbers": {
+            "description": "The phone numbers of the sender.",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "phone_number": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        },
-        "description": "Sender profile specific configurations for create and update request, e.g., {\"name\": \"xxx\", \"about\": \"xxx\", \"address\": \"xxx\", \"description\": \"xxx\", \"emails\": [{\"label\": \"email 1\", \"email\": \"xxx@xxx\"}], \"logo_url\": \"https://xxx\", \"vertical\": \"xxx\", \"websites\": [{\"label\": \"email 1\", \"website\": \"https://xxx\"}]}"
+        }
       },
       "messaging.v2.channels_sender.properties": {
         "type": "object",
@@ -340,6 +486,401 @@
         "description": "The ID of this Sender prefixed with the channel, e.g., `whatsapp:E.164`",
         "nullable": true
       }
+    },
+    "examples": {
+      "whatsapp_create_request": {
+        "value": {
+          "sender_id": "whatsapp:+999999999XX",
+          "configuration": {
+            "waba_id": "1234567XXX",
+            "verification_method": "sms"
+          },
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "Example Profile Name",
+            "about": "This is an example about text.",
+            "address": "123 Example St, Example City, EX 12345",
+            "description": "This is an example description.",
+            "emails": [
+              {
+                "email": "example@example.com",
+                "label": "Email"
+              },
+              {
+                "email": "example2@example.com",
+                "label": "Email"
+              }
+            ],
+            "logo_url": "https://logo_url.com",
+            "vertical": "Automotive",
+            "websites": [
+              {
+                "website": "https://website1.com",
+                "label": "Website1"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website2"
+              }
+            ]
+          }
+        }
+      },
+      "whatsapp_create_response": {
+        "value": {
+          "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "status": "CREATING",
+          "sender_id": "whatsapp:+999999999XX",
+          "configuration": {
+            "waba_id": "1234567XXX",
+            "verification_method": "sms",
+            "verification_code": null,
+            "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          },
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "Example Profile Name",
+            "about": "This is an example about text.",
+            "address": "123 Example St, Example City, EX 12345",
+            "description": "This is an example description.",
+            "emails": [
+              {
+                "email": "example@example.com",
+                "label": "Email"
+              },
+              {
+                "email": "example2@example.com",
+                "label": "Email"
+              }
+            ],
+            "logo_url": "https://logo_url.com",
+            "vertical": "Automotive",
+            "websites": [
+              {
+                "website": "https://website1.com",
+                "label": "Website1"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website2"
+              }
+            ]
+          }
+        }
+      },
+      "rcs_create_request": {
+        "value": {
+          "sender_id": "rcs:twilio_agent",
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "RCS Profile Name",
+            "description": "RCS description.",
+            "accent_color": "#ffffff",
+            "logo_url": "https://logo_url.com",
+            "banner_url": "https://banner_url.com",
+            "privacy_url": "https://privacy_url.com",
+            "terms_of_service_url": "https://terms_of_service_url.com",
+            "phone_numbers": [
+              {
+                "phone_number": "+12125551212",
+                "label": "phone"
+              }
+            ],
+            "websites": [
+              {
+                "website": "https://website1.com",
+                "label": "Website1"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website2"
+              }
+            ],
+            "emails": [
+              {
+                "email": "example1@example.com",
+                "label": "example1"
+              },
+              {
+                "email": "example2@example.com",
+                "label": "example2"
+              }
+            ]
+          }
+        }
+      },
+      "rcs_create_response": {
+        "value": {
+          "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "status": "CREATING",
+          "sender_id": "rcs:twilio_agent",
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "RCS Profile Name",
+            "description": "RCS description.",
+            "accent_color": "#ffffff",
+            "logo_url": "https://logo_url.com",
+            "banner_url": "https://banner_url.com",
+            "privacy_url": "https://privacy_url.com",
+            "terms_of_service_url": "https://terms_of_service_url.com",
+            "phone_numbers": [
+              {
+                "phone_number": "+12125551212",
+                "label": "phone"
+              }
+            ],
+            "websites": [
+              {
+                "website": "https://website1.com",
+                "label": "Website1"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website2"
+              }
+            ],
+            "emails": [
+              {
+                "email": "example1@example.com",
+                "label": "example1"
+              },
+              {
+                "email": "example2@example.com",
+                "label": "example2"
+              }
+            ]
+          },
+          "compliance": {
+            "registration_sid": "",
+            "countries": []
+          }
+        }
+      },
+      "whatsapp_fetch": {
+        "value": {
+          "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "status": "ONLINE",
+          "sender_id": "whatsapp:+999999999XX",
+          "configuration": {
+            "waba_id": "1234567XXX",
+            "verification_method": null,
+            "verification_code": null,
+            "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          },
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "Example Profile Name",
+            "about": "This is an example about text.",
+            "address": "123 Example St, Example City, EX 12345",
+            "description": "This is an example description.",
+            "emails": [
+              {
+                "email": "email@email.com",
+                "label": "Email"
+              }
+            ],
+            "logo_url": "https://logo_url.com",
+            "vertical": "Automotive",
+            "websites": [
+              {
+                "website": "https://website.com",
+                "label": "Website"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website"
+              }
+            ],
+            "banner_url": null,
+            "privacy_url": null,
+            "terms_of_service_url": null,
+            "accent_color": null,
+            "phone_numbers": null
+          },
+          "compliance": null,
+          "properties": {
+            "quality_rating": "HIGH",
+            "messaging_limit": "10K Customers/24hr"
+          },
+          "offline_reasons": null,
+          "url": "https://messaging.twilio.com/v2/Channels/Senders/XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "whatsapp_fetch_offline_reasons": {
+        "value": {
+          "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "status": "OFFLINE",
+          "sender_id": "whatsapp:+999999999XX",
+          "configuration": {
+            "waba_id": "1234567XXX",
+            "verification_method": null,
+            "verification_code": null,
+            "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+          },
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "Example Profile Name",
+            "about": "This is an example about text.",
+            "address": "123 Example St, Example City, EX 12345",
+            "description": "This is an example description.",
+            "emails": [
+              {
+                "email": "email@email.com",
+                "label": "Email"
+              }
+            ],
+            "logo_url": "https://logo_url.com",
+            "vertical": "Automotive",
+            "websites": [
+              {
+                "website": "https://website.com",
+                "label": "Website"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website"
+              }
+            ],
+            "banner_url": null,
+            "privacy_url": null,
+            "terms_of_service_url": null,
+            "accent_color": null,
+            "phone_numbers": null
+          },
+          "compliance": null,
+          "properties": {
+            "quality_rating": "HIGH",
+            "messaging_limit": "10K Customers/24hr"
+          },
+          "offline_reasons": [
+            {
+              "code": "30008",
+              "message": "No delivery",
+              "more_info": "https://www.twilio.com/docs/api/errors/30008"
+            }
+          ],
+          "url": "https://messaging.twilio.com/v2/Channels/Senders/XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        }
+      },
+      "rcs_fetch": {
+        "value": {
+          "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "status": "PENDING_VERIFICATION",
+          "sender_id": "rcs:twilio_agent",
+          "webhook": {
+            "callback_url": "https://callback.com",
+            "callback_method": "POST",
+            "fallback_url": "https://fallback.com",
+            "fallback_method": "POST",
+            "status_callback_url": "https://statuscallback.com",
+            "status_callback_method": "POST"
+          },
+          "profile": {
+            "name": "RCS Profile Name",
+            "description": "RCS description.",
+            "accent_color": "#ffffff",
+            "logo_url": "https://logo_url.com",
+            "banner_url": "https://banner_url.com",
+            "privacy_url": "https://privacy_url.com",
+            "terms_of_service_url": "https://terms_of_service_url.com",
+            "phone_numbers": [
+              {
+                "phone_number": "+12125551212",
+                "label": "phone"
+              }
+            ],
+            "websites": [
+              {
+                "website": "https://website1.com",
+                "label": "Website1"
+              },
+              {
+                "website": "http://website2.com",
+                "label": "Website2"
+              }
+            ],
+            "emails": [
+              {
+                "email": "example1@example.com",
+                "label": "example1"
+              },
+              {
+                "email": "example2@example.com",
+                "label": "example2"
+              }
+            ]
+          },
+          "compliance": {
+            "registration_sid": "BUxxx",
+            "countries": [
+              {
+                "registration_sid": "BUyyy",
+                "country": "US",
+                "status": "PENDING_VERIFICATION",
+                "carriers": [
+                  {
+                    "name": "Verizon",
+                    "status": "CARRIER_REVIEW"
+                  }
+                ]
+              },
+              {
+                "registration_sid": "BUxx",
+                "country": "UK",
+                "status": "PENDING_VERIFICATION",
+                "carriers": [
+                  {
+                    "name": "OS",
+                    "status": "CARRIER_REVIEW"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
     }
   },
   "info": {
@@ -381,62 +922,43 @@
         "tags": [
           "MessagingV2ChannelsSender"
         ],
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateChannelsSender",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/messaging.v2.channels_sender.requests.create"
+              },
+              "examples": {
+                "whatsapp_create": {
+                  "$ref": "#/components/examples/whatsapp_create_request"
+                },
+                "rcs_create": {
+                  "$ref": "#/components/examples/rcs_create_request"
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "202": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/messaging.v2.channels_sender"
+                  "$ref": "#/components/schemas/messaging.v2.channels_sender_response"
                 },
                 "examples": {
-                  "create": {
-                    "value": {
-                      "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-                      "status": "CREATING",
-                      "sender_id": "whatsapp:+999999999XX",
-                      "configuration": {
-                        "waba_id": "1234567XXX",
-                        "verification_method": "sms",
-                        "verification_code": null,
-                        "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                      },
-                      "webhook": {
-                        "callback_url": "https://callback.com",
-                        "callback_method": "POST",
-                        "fallback_url": "https://fallback.com",
-                        "fallback_method": "POST",
-                        "status_callback_url": "https://statuscallback.com",
-                        "status_callback_method": "POST"
-                      },
-                      "profile": {
-                        "name": "Example Profile Name",
-                        "about": "This is an example about text.",
-                        "address": "123 Example St, Example City, EX 12345",
-                        "description": "This is an example description.",
-                        "emails": [
-                          {
-                            "email": "example@example.com",
-                            "label": "Email"
-                          },
-                          {
-                            "email": "example2@example.com",
-                            "label": "Email"
-                          }
-                        ],
-                        "logo_url": "https://logo_url.com",
-                        "vertical": "Automotive",
-                        "websites": [
-                          {
-                            "website": "https://website.com",
-                            "label": "Website"
-                          },
-                          {
-                            "website": "http://website2.com",
-                            "label": "Website"
-                          }
-                        ]
-                      }
-                    }
+                  "whatsapp_create": {
+                    "$ref": "#/components/examples/rcs_create_response"
+                  },
+                  "rcs_create": {
+                    "$ref": "#/components/examples/rcs_create_response"
                   }
                 }
               }
@@ -484,65 +1006,6 @@
             },
             "description": "Accepted"
           }
-        },
-        "security": [
-          {
-            "accountSid_authToken": []
-          }
-        ],
-        "operationId": "CreateChannelsSender",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/messaging.v2.channels_sender.requests.create"
-              },
-              "example": {
-                "sender_id": "whatsapp:+999999999XX",
-                "configuration": {
-                  "waba_id": "1234567XXX",
-                  "verification_method": "sms"
-                },
-                "webhook": {
-                  "callback_url": "https://callback.com",
-                  "callback_method": "POST",
-                  "fallback_url": "https://fallback.com",
-                  "fallback_method": "POST",
-                  "status_callback_url": "https://statuscallback.com",
-                  "status_callback_method": "POST"
-                },
-                "profile": {
-                  "name": "Example Profile Name",
-                  "about": "This is an example about text.",
-                  "address": "123 Example St, Example City, EX 12345",
-                  "description": "This is an example description.",
-                  "emails": [
-                    {
-                      "email": "example@example.com",
-                      "label": "Email"
-                    },
-                    {
-                      "email": "example2@example.com",
-                      "label": "Email"
-                    }
-                  ],
-                  "logo_url": "https://logo_url.com",
-                  "vertical": "Automotive",
-                  "websites": [
-                    {
-                      "website": "https://website.com",
-                      "label": "Website"
-                    },
-                    {
-                      "website": "http://website2.com",
-                      "label": "Website"
-                    }
-                  ]
-                }
-              }
-            }
-          }
         }
       },
       "get": {
@@ -557,7 +1020,8 @@
             "required": true,
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Filter result based on OTT Options 1) whatsapp 2) rcs\n"
             }
           },
           {
@@ -599,7 +1063,7 @@
                     "senders": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/messaging.v2.channels_sender"
+                        "$ref": "#/components/schemas/messaging.v2.channels_sender_response"
                       }
                     },
                     "meta": {
@@ -748,116 +1212,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/messaging.v2.channels_sender"
+                  "$ref": "#/components/schemas/messaging.v2.channels_sender_response"
                 },
                 "examples": {
-                  "fetch": {
-                    "value": {
-                      "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-                      "status": "ONLINE",
-                      "sender_id": "whatsapp:+999999999XX",
-                      "configuration": {
-                        "waba_id": "1234567XXX",
-                        "verification_method": null,
-                        "verification_code": null,
-                        "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                      },
-                      "webhook": {
-                        "callback_url": "https://callback.com",
-                        "callback_method": "POST",
-                        "fallback_url": "https://fallback.com",
-                        "fallback_method": "POST",
-                        "status_callback_url": "https://statuscallback.com",
-                        "status_callback_method": "POST"
-                      },
-                      "profile": {
-                        "name": "Example Profile Name",
-                        "about": "This is an example about text.",
-                        "address": "123 Example St, Example City, EX 12345",
-                        "description": "This is an example description.",
-                        "emails": [
-                          {
-                            "email": "email@email.com",
-                            "label": "Email"
-                          }
-                        ],
-                        "logo_url": "https://logo_url.com",
-                        "vertical": "Automotive",
-                        "websites": [
-                          {
-                            "website": "https://website.com",
-                            "label": "Website"
-                          },
-                          {
-                            "website": "http://website2.com",
-                            "label": "Website"
-                          }
-                        ]
-                      },
-                      "properties": {
-                        "quality_rating": "HIGH",
-                        "messaging_limit": "10K Customers/24hr"
-                      },
-                      "offline_reasons": null,
-                      "url": "https://messaging.twilio.com/v2/Channels/Senders/XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                    }
+                  "whatsapp_fetch": {
+                    "$ref": "#/components/examples/whatsapp_fetch"
                   },
-                  "fetchOfflineReasons": {
-                    "value": {
-                      "sid": "XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-                      "status": "OFFLINE",
-                      "sender_id": "whatsapp:+999999999XX",
-                      "configuration": {
-                        "waba_id": "1234567XXX",
-                        "verification_method": null,
-                        "verification_code": null,
-                        "voice_application_sid": "APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                      },
-                      "webhook": {
-                        "callback_url": "https://callback.com",
-                        "callback_method": "POST",
-                        "fallback_url": "https://fallback.com",
-                        "fallback_method": "POST",
-                        "status_callback_url": "https://statuscallback.com",
-                        "status_callback_method": "POST"
-                      },
-                      "profile": {
-                        "name": "Example Profile Name",
-                        "about": "This is an example about text.",
-                        "address": "123 Example St, Example City, EX 12345",
-                        "description": "This is an example description.",
-                        "emails": [
-                          {
-                            "email": "email@email.com",
-                            "label": "Email"
-                          }
-                        ],
-                        "logo_url": "https://logo_url.com",
-                        "vertical": "Automotive",
-                        "websites": [
-                          {
-                            "website": "https://website.com",
-                            "label": "Website"
-                          },
-                          {
-                            "website": "http://website2.com",
-                            "label": "Website"
-                          }
-                        ]
-                      },
-                      "properties": {
-                        "quality_rating": "HIGH",
-                        "messaging_limit": "10K Customers/24hr"
-                      },
-                      "offline_reasons": [
-                        {
-                          "code": "30008",
-                          "message": "No delivery",
-                          "more_info": "https://www.twilio.com/docs/api/errors/30008"
-                        }
-                      ],
-                      "url": "https://messaging.twilio.com/v2/Channels/Senders/XEXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                    }
+                  "whatsapp_fetch_offline_reasons": {
+                    "$ref": "#/components/examples/whatsapp_fetch_offline_reasons"
+                  },
+                  "rcs_fetch": {
+                    "$ref": "#/components/examples/rcs_fetch"
                   }
                 }
               }
@@ -938,7 +1303,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/messaging.v2.channels_sender"
+                  "$ref": "#/components/schemas/messaging.v2.channels_sender_response"
                 },
                 "examples": {
                   "update": {
@@ -946,6 +1311,7 @@
                       "sid": "XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                       "status": "VERIFYING",
                       "sender_id": "whatsapp:+999999999XX",
+                      "compliance": null,
                       "configuration": {
                         "waba_id": "1234567XXX",
                         "verification_method": "sms",
@@ -982,7 +1348,12 @@
                             "website": "http://example.org",
                             "label": "Website"
                           }
-                        ]
+                        ],
+                        "banner_url": null,
+                        "privacy_url": null,
+                        "terms_of_service_url": null,
+                        "accent_color": null,
+                        "phone_numbers": null
                       }
                     }
                   }
