@@ -1,6 +1,15 @@
 twilio-oai changelog
 ====================
 
+[2025-08-28] Version 2.4.2
+--------------------------
+**Studio**
+- Add `type` to Step resource APIs
+
+**Verify**
+- Allow to update all passkeys parameters in the service update
+
+
 [2025-08-18] Version 2.4.1
 --------------------------
 **Accounts**
