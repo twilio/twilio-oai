@@ -79,6 +79,44 @@ components:
       - retired
       description: 'Custom Operator availability status. Possible values: internal,
         beta, public, retired.'
+    intelligence.v2.transcript.encrypted_operator_results:
+      type: object
+      properties:
+        locations:
+          type: array
+          items:
+            type: string
+            format: uri
+          nullable: true
+          description: The locations of the encrypted operator results.
+        transcript_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GT[0-9a-fA-F]{32}$
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
+    intelligence.v2.transcript.encrypted_sentences:
+      type: object
+      properties:
+        location:
+          type: string
+          format: uri
+          nullable: true
+          description: The location of the encrypted sentences.
+        transcript_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GT[0-9a-fA-F]{32}$
+          nullable: true
+        url:
+          type: string
+          format: uri
+          nullable: true
     intelligence.v2.transcript.media:
       type: object
       properties:
@@ -628,6 +666,14 @@ components:
           type: integer
           default: 0
           description: The version number of this Service.
+        encryption_credential_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Public Key resource used to
+            encrypt the sentences and operator results.
     service_enum_http_method:
       type: string
       enum:
@@ -713,6 +759,14 @@ components:
           nullable: true
           description: If the transcript has been redacted, a redacted alternative
             of the transcript will be available.
+        encryption_credential_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^CR[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique SID identifier of the Public Key resource used to
+            encrypt the sentences and operator results.
         links:
           type: object
           format: uri-map
@@ -1235,6 +1289,173 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: FetchCustomOperator
+  /v2/Transcripts/{TranscriptSid}/OperatorResults/Encrypted:
+    servers:
+    - url: https://intelligence.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - locations
+      parent: /Transcripts/{Sid}
+      mountName: encrypted_operator_results
+      className: encrypted_operator_results
+      pathType: instance
+    get:
+      description: Fetch Public Key Encrypted Operator Results by TranscriptSid
+      summary: Fetch Public Key Encrypted Operator Results by TranscriptSid
+      tags:
+      - IntelligenceV2EncryptedOperatorResults
+      parameters:
+      - name: TranscriptSid
+        in: path
+        description: The unique SID identifier of the Transcript.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GT[0-9a-fA-F]{32}$
+        required: true
+      - name: Redacted
+        in: query
+        description: Grant access to PII Redacted/Unredacted Operator Results. If
+          redaction is enabled, the default is `true` to access redacted operator
+          results.
+        schema:
+          type: boolean
+        examples:
+          fetchRedacted:
+            value: 'True'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/intelligence.v2.transcript.encrypted_operator_results'
+              examples:
+                fetch:
+                  value:
+                    locations:
+                    - https://com.twilio.us1.operator_results.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults1
+                    - https://com.twilio.us1.operator_results.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults2
+                    transcript_sid: GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults/Encrypted
+                fetchRedacted:
+                  value:
+                    locations:
+                    - https://com.twilio.us1.operator_results.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults1
+                    - https://com.twilio.us1.operator_results.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults2
+                    transcript_sid: GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/OperatorResults/Encrypted
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchEncryptedOperatorResults
+  /v2/Transcripts/{TranscriptSid}/Sentences/Encrypted:
+    servers:
+    - url: https://intelligence.twilio.com
+    description: ''
+    x-twilio:
+      defaultOutputProperties:
+      - location
+      parent: /Transcripts/{Sid}
+      mountName: encrypted_sentences
+      className: encrypted_sentences
+      pathType: instance
+    get:
+      description: Fetch Public Key Encrypted Sentences by TranscriptSid
+      summary: Fetch Public Key Encrypted Sentences by TranscriptSid
+      tags:
+      - IntelligenceV2EncryptedSentences
+      parameters:
+      - name: TranscriptSid
+        in: path
+        description: The unique SID identifier of the Transcript.
+        schema:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^GT[0-9a-fA-F]{32}$
+        required: true
+      - name: Redacted
+        in: query
+        description: Grant access to PII Redacted/Unredacted Sentences. If redaction
+          is enabled, the default is `true` to access redacted sentences.
+        schema:
+          type: boolean
+        examples:
+          fetchRedacted:
+            value: 'True'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/intelligence.v2.transcript.encrypted_sentences'
+              examples:
+                fetch:
+                  value:
+                    location: https://com.twilio.us1.sentences.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    transcript_sid: GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
+                fetchRedacted:
+                  value:
+                    location: https://com.twilio.us1.sentences.s3.amazonaws.com/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    transcript_sid: GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+          description: OK
+      security:
+      - accountSid_authToken: []
+      operationId: FetchEncryptedSentences
   /v2/Transcripts/{Sid}/Media:
     servers:
     - url: https://intelligence.twilio.com
@@ -2749,6 +2970,7 @@ paths:
                     read_only_attached_operator_sids:
                     - LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     version: 1
+                    encryption_credential_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             ETag:
@@ -2841,6 +3063,13 @@ paths:
                   description: The URL Twilio will request when executing the Webhook.
                 WebhookHttpMethod:
                   $ref: '#/components/schemas/service_enum_http_method'
+                EncryptionCredentialSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^CR[0-9a-fA-F]{32}$
+                  description: The unique SID identifier of the Public Key resource
+                    used to encrypt the sentences and operator results.
               required:
               - UniqueName
             examples:
@@ -2932,6 +3161,7 @@ paths:
                       webhook_http_method: POST
                       read_only_attached_operator_sids:
                       - LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      encryption_credential_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       version: 1
                       url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     meta:
@@ -3071,6 +3301,7 @@ paths:
                     webhook_http_method: POST
                     read_only_attached_operator_sids:
                     - LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    encryption_credential_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     version: 1
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
@@ -3156,6 +3387,7 @@ paths:
                     read_only_attached_operator_sids:
                     - LYaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     version: 2
+                    encryption_credential_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://intelligence.twilio.com/v2/Services/GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             ETag:
@@ -3241,6 +3473,13 @@ paths:
                   description: The URL Twilio will request when executing the Webhook.
                 WebhookHttpMethod:
                   $ref: '#/components/schemas/service_enum_http_method'
+                EncryptionCredentialSid:
+                  type: string
+                  minLength: 34
+                  maxLength: 34
+                  pattern: ^CR[0-9a-fA-F]{32}$
+                  description: The unique SID identifier of the Public Key resource
+                    used to encrypt the sentences and operator results.
             examples:
               update:
                 value:
@@ -3312,6 +3551,7 @@ paths:
                     customer_key: aaaaaaaa
                     url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     redaction: true
+                    encryption_credential_sid: CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     links:
                       sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences
                       encrypted_sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
@@ -3336,6 +3576,7 @@ paths:
                     customer_key: null
                     url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     redaction: true
+                    encryption_credential_sid: null
                     links:
                       sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences
                       encrypted_sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
@@ -3557,6 +3798,7 @@ paths:
                       customer_key: null
                       url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       redaction: true
+                      encryption_credential_sid: null
                       links:
                         sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences
                         encrypted_sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
@@ -3599,6 +3841,7 @@ paths:
                       customer_key: null
                       url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       redaction: true
+                      encryption_credential_sid: null
                       links:
                         sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences
                         encrypted_sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
@@ -3722,6 +3965,7 @@ paths:
                     customer_key: null
                     url: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     redaction: true
+                    encryption_credential_sid: null
                     links:
                       sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences
                       encrypted_sentences: https://intelligence.twilio.com/v2/Transcripts/GTaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Sentences/Encrypted
