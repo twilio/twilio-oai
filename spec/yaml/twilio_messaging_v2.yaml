@@ -254,6 +254,30 @@ components:
           description: The HTTP method for the status callback.
           nullable: true
       description: The configuration settings for webhooks.
+    messaging.v2.whatsapp.typing.indicator:
+      type: object
+      description: '- Payload for typing indicator request
+
+        '
+      properties:
+        channel:
+          type: string
+          enum:
+          - whatsapp
+          description: Shared channel identifier
+          example: whatsapp
+        messageId:
+          type: string
+          pattern: ^(SM|MM)[0-9a-fA-F]{32}$
+          description: 'Message SID that identifies the conversation thread for the
+            typing indicator. Must be a valid Twilio Message SID (SM*) or Media SID
+            (MM*) from an existing WhatsApp conversation.
+
+            '
+          example: SM1234567890abcdef1234567890abcdef
+      required:
+      - channel
+      - messageId
     messaging.v2.channels_sender.profile:
       type: object
       nullable: true
@@ -991,6 +1015,82 @@ info:
   version: 1.0.0
 openapi: 3.0.1
 paths:
+  /v2/Indicators/Typing.json:
+    servers:
+    - url: https://messaging.twilio.com
+    description: Send a typing indicator event between OTT senders (e.g., WhatsApp,
+      RCS).
+    x-twilio:
+      defaultOutputProperties:
+      - success
+      mountName: typing_indicator
+      pathType: whatsapp_typing_indicator
+    post:
+      summary: Send a typing indicator
+      description: 'Send a typing indicator to notify the recipient that you are composing
+        a message. Currently supported for whatsapp channel only. For WhatsApp, `messageId`
+        is required.
+
+        '
+      tags:
+      - MessagingV2TypingIndicator
+      operationId: CreateTypingIndicator
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/messaging.v2.whatsapp.typing.indicator'
+            examples:
+              whatsapp_typing_indicator:
+                summary: WhatsApp Typing Indicator
+                description: Send a typing indicator for an active WhatsApp conversation
+                value:
+                  channel: whatsapp
+                  messageId: SM1234567890abcdef1234567890abcdef
+      responses:
+        '200':
+          description: Typing indicator was successfully sent to the recipient.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the typing indicator was sent successfully.
+                    example: true
+              examples:
+                success:
+                  value:
+                    success: true
+          headers:
+            Access-Control-Allow-Origin:
+              description: Specify the origin(s) allowed to access the resource
+              schema:
+                type: string
+              example: '*'
+            Access-Control-Allow-Methods:
+              description: Specify the HTTP methods allowed when accessing the resource
+              schema:
+                type: string
+              example: POST, OPTIONS
+            Access-Control-Allow-Headers:
+              description: Specify the headers allowed when accessing the resource
+              schema:
+                type: string
+              example: Content-Type, Authorization
+            Access-Control-Allow-Credentials:
+              description: Indicates whether the browser should include credentials
+              schema:
+                type: boolean
+            Access-Control-Expose-Headers:
+              description: Headers exposed to the client
+              schema:
+                type: string
+                example: X-Custom-Header1, X-Custom-Header2
+      security:
+      - accountSid_authToken: []
   /v2/Channels/Senders:
     servers:
     - url: https://messaging.twilio.com
@@ -1428,5 +1528,6 @@ servers:
 tags:
 - name: MessagingV2ChannelsSender
 - name: MessagingV2Version
+- name: MessagingV2TypingIndicator
 security:
 - accountSid_authToken: []

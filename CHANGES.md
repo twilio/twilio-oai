@@ -1,6 +1,13 @@
 twilio-oai changelog
 ====================
 
+[2025-09-25] Version 2.5.2
+--------------------------
+**Api**
+- Added optional parameter `CallerDisplayName` for conference participant outbound
+- Updated description for property `to` in the participant create request
+
+
 [2025-09-18] Version 2.5.1
 --------------------------
 **Api**

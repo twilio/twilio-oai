@@ -8307,6 +8307,92 @@
               }
             },
             "description": "Created"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                },
+                "examples": {
+                  "createVerificationRateLimitExceeded": {
+                    "value": {
+                      "code": 20429,
+                      "message": "Too many requests",
+                      "more_info": "https://www.twilio.com/docs/errors/20429",
+                      "status": 429
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Twilio-Reached-Rate-Limit": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Too Many Requests"
           }
         },
         "security": [
@@ -8462,6 +8548,12 @@
                     "To": "+15017122661",
                     "Channel": "auto",
                     "DeviceIp": "0.000.00.000"
+                  }
+                },
+                "createVerificationRateLimitExceeded": {
+                  "value": {
+                    "To": "+15017122661",
+                    "Channel": "sms"
                   }
                 }
               }
@@ -10558,6 +10650,331 @@
         ],
         "parent": "/Services/{Sid}",
         "pathType": "list"
+      },
+      "post": {
+        "description": "Verify a Passkeys Factor",
+        "summary": "Verify a Passkeys Factor",
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The unique SID identifier of the Service.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^VA[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^YF[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "A 34 character string that uniquely identifies this Factor.",
+                      "x-twilio": {
+                        "shortDescription": "A string that uniquely identifies this Factor."
+                      }
+                    },
+                    "account_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^AC[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Account.",
+                      "x-twilio": {
+                        "shortDescription": "Account Sid."
+                      }
+                    },
+                    "service_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^VA[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Service.",
+                      "x-twilio": {
+                        "shortDescription": "Service Sid."
+                      }
+                    },
+                    "entity_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^YE[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Entity.",
+                      "x-twilio": {
+                        "shortDescription": "Entity Sid."
+                      }
+                    },
+                    "identity": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Customer unique identity for the Entity owner of the Factor.",
+                      "x-twilio": {
+                        "shortDescription": "Unique external identifier of the Entity",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "date_created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date that this Factor was created, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date this Factor was created"
+                      }
+                    },
+                    "date_updated": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date that this Factor was updated, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date this Factor was updated"
+                      }
+                    },
+                    "friendly_name": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "A human readable description of this resource, up to 64 characters.",
+                      "x-twilio": {
+                        "shortDescription": "A human readable description of this resource."
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "unverified",
+                        "verified"
+                      ],
+                      "description": "The Status of this Factor. One of `unverified` or `verified`.",
+                      "x-twilio": {
+                        "shortDescription": "The Status of this Factor"
+                      }
+                    },
+                    "factor_type": {
+                      "type": "string",
+                      "enum": [
+                        "push",
+                        "totp",
+                        "passkeys"
+                      ],
+                      "description": "The Type of this Factor. Currently `push` and `totp` are supported.",
+                      "x-twilio": {
+                        "shortDescription": "The Type of this Factor"
+                      }
+                    },
+                    "config": {
+                      "nullable": true,
+                      "description": "An object that contains configurations specific to a `factor_type`.",
+                      "x-twilio": {
+                        "shortDescription": "Configurations for a `factor_type`."
+                      }
+                    },
+                    "metadata": {
+                      "nullable": true,
+                      "description": "Custom metadata associated with the factor.",
+                      "x-twilio": {
+                        "shortDescription": "Metadata of the factor.",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true,
+                      "description": "The URL of this resource.",
+                      "x-twilio": {
+                        "shortDescription": "The URL of this resource."
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "verifyPasskeys": {
+                    "value": {
+                      "sid": "YFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "entity_sid": "YEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "identity": "ff483d1ff591898a9942916050d2ca3f",
+                      "date_created": "2015-07-30T20:00:00Z",
+                      "date_updated": "2015-07-30T20:00:00Z",
+                      "friendly_name": "friendly_name",
+                      "status": "verified",
+                      "factor_type": "passkeys",
+                      "config": {
+                        "relying_party": {
+                          "id": "example.com",
+                          "name": "Example",
+                          "origins": [
+                            "https://example.com"
+                          ]
+                        },
+                        "authenticator_attachment": "platform",
+                        "discoverable_credentials": "preferred",
+                        "user_verification": "preferred"
+                      },
+                      "metadata": null,
+                      "url": "https://verify.twilio.com/v2/Services/VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Entities/ff483d1ff591898a9942916050d2ca3f/Factors/YFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdatePasskeysFactor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "VerifyPasskeysFactorRequest",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "A [base64url](https://base64.guru/standards/base64url) encoded representation of `rawId`."
+                  },
+                  "rawId": {
+                    "type": "string",
+                    "description": "The globally unique identifier for this `PublicKeyCredential`."
+                  },
+                  "authenticatorAttachment": {
+                    "type": "string",
+                    "description": "A string that indicates the mechanism by which the WebAuthn implementation is attached to the authenticator at the time the associated \n`navigator.credentials.create()` or `navigator.credentials.get()` call completes.",
+                    "enum": [
+                      "platform",
+                      "cross-platform"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The valid credential types supported by the API.\nThe values of this enumeration are used for versioning the `AuthenticatorAssertion` and `AuthenticatorAttestation` structures according to the type of the authenticator.",
+                    "enum": [
+                      "public-key"
+                    ],
+                    "default": "public-key"
+                  },
+                  "response": {
+                    "type": "object",
+                    "description": "The result of a WebAuthn credential registration via `navigator.credentials.create()`, as specified in [AuthenticatorAttestationResponse](https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse).",
+                    "properties": {
+                      "attestationObject": {
+                        "type": "string",
+                        "description": "The authenticator data and an attestation statement for a new key pair generated by the authenticator."
+                      },
+                      "clientDataJSON": {
+                        "type": "string",
+                        "description": "This property contains the JSON-compatible serialization of the data passed from the browser to the authenticator in order to generate this credential."
+                      },
+                      "transports": {
+                        "type": "array",
+                        "description": "An array of strings providing hints as to the methods the client could use to communicate with the relevant authenticator of the public key credential to retrieve.",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "usb",
+                            "nfc",
+                            "ble",
+                            "smart-card",
+                            "internal",
+                            "hybrid"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "response"
+                ]
+              },
+              "examples": {
+                "verifyPasskeys": {
+                  "value": {
+                    "id": "6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ",
+                    "rawId": "eb24a684977aa8650c0ad862aaccf26f839de14e93167d2fdc32f3fb5119acd4",
+                    "authenticatorAttachment": "platform",
+                    "response": {
+                      "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViko3mm9u6vuaVeN4wRgDTidR5oL6ufLTCrE9ISVYbOGUdFAAAAAAAAAAAAAAAAAAAAAAAAAAAAIOskpoSXeqhlDArYYqrM8m-DneFOkxZ9L9wy8_tRGazUpQECAyYgASFYIOP8op-6gZJ1H0wHNLe2k7cgBqaSUR4pdcBqtOHPaYUhIlggsXZWuWfZS-6YpbeU9dsB2UoroACSKXJOrdE_auaUIf4",
+                      "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiV1VZd05EaGtNV0UzWldNellUSmhOamszTURBMU9XTXlOelkyWW1Kak4yVXdaZyIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                      "transports": [
+                        "internal"
+                      ]
+                    },
+                    "type": "public-key"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-twilio": {
+          "mountName": "new_factors"
+        }
       }
     },
     "/v2/Services/{ServiceSid}/Passkeys/Factors": {
@@ -10970,7 +11387,7 @@
           "status",
           "factor_type"
         ],
-        "parent": "/Services/{ServiceSid}",
+        "parent": "/Services/{Sid}",
         "pathType": "instance"
       },
       "post": {
@@ -11400,8 +11817,469 @@
           "status",
           "factor_type"
         ],
-        "parent": "/Services/{ServiceSid}",
+        "parent": "/Services/{Sid}",
         "pathType": "list"
+      },
+      "post": {
+        "description": "Approve a Passkeys challenge",
+        "summary": "Approve a Passkeys Challenge",
+        "parameters": [
+          {
+            "name": "ServiceSid",
+            "in": "path",
+            "description": "The unique SID identifier of the Service.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^VA[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "options": {
+                      "type": "object",
+                      "description": "An object that contains challenge options. Currently only used for `passkeys`.",
+                      "x-twilio": {
+                        "shortDescription": "Options for a `challenge`."
+                      }
+                    },
+                    "sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^YC[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "A 34 character string that uniquely identifies this Challenge.",
+                      "x-twilio": {
+                        "shortDescription": "A string that uniquely identifies this Challenge."
+                      }
+                    },
+                    "account_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^AC[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Account.",
+                      "x-twilio": {
+                        "shortDescription": "Account Sid."
+                      }
+                    },
+                    "service_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^VA[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Service.",
+                      "x-twilio": {
+                        "shortDescription": "Service Sid."
+                      }
+                    },
+                    "entity_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^YE[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Entity.",
+                      "x-twilio": {
+                        "shortDescription": "Entity Sid."
+                      }
+                    },
+                    "identity": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Customer unique identity for the Entity owner of the Challenge.",
+                      "x-twilio": {
+                        "shortDescription": "Unique external identifier of the Entity",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "factor_sid": {
+                      "type": "string",
+                      "minLength": 34,
+                      "maxLength": 34,
+                      "pattern": "^YF[0-9a-fA-F]{32}$",
+                      "nullable": true,
+                      "description": "The unique SID identifier of the Factor.",
+                      "x-twilio": {
+                        "shortDescription": "Factor Sid."
+                      }
+                    },
+                    "date_created": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date that this Challenge was created, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date this Challenge was created"
+                      }
+                    },
+                    "date_updated": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date that this Challenge was updated, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date this Challenge was updated"
+                      }
+                    },
+                    "date_responded": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date that this Challenge was responded, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date this Challenge was responded"
+                      }
+                    },
+                    "expiration_date": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true,
+                      "description": "The date-time when this Challenge expires, given in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+                      "x-twilio": {
+                        "shortDescription": "The date-time when this Challenge expires"
+                      }
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "expired",
+                        "approved",
+                        "denied"
+                      ],
+                      "description": "The Status of this Challenge. One of `pending`, `expired`, `approved` or `denied`.",
+                      "x-twilio": {
+                        "shortDescription": "The Status of this Challenge"
+                      }
+                    },
+                    "responded_reason": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "not_needed",
+                        "not_requested"
+                      ],
+                      "description": "Reason for the Challenge to be in certain `status`. One of `none`, `not_needed` or `not_requested`.",
+                      "x-twilio": {
+                        "shortDescription": "The Reason of this Challenge `status`"
+                      }
+                    },
+                    "details": {
+                      "nullable": true,
+                      "description": "Details provided to give context about the Challenge.",
+                      "x-twilio": {
+                        "shortDescription": "Details about the Challenge.",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "hidden_details": {
+                      "nullable": true,
+                      "description": "Details provided to give context about the Challenge.",
+                      "x-twilio": {
+                        "shortDescription": "Hidden details about the Challenge",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "nullable": true,
+                      "description": "Custom metadata associated with the challenge.",
+                      "x-twilio": {
+                        "shortDescription": "Metadata of the challenge.",
+                        "pii": {
+                          "handling": "standard",
+                          "deleteSla": 30
+                        }
+                      }
+                    },
+                    "factor_type": {
+                      "type": "string",
+                      "enum": [
+                        "push",
+                        "totp",
+                        "passkeys"
+                      ],
+                      "description": "The Factor Type of this Challenge. Currently `push` and `totp` are supported.",
+                      "x-twilio": {
+                        "shortDescription": "The Factor Type of this Challenge"
+                      }
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true,
+                      "description": "The URL of this resource.",
+                      "x-twilio": {
+                        "shortDescription": "The URL of this resource."
+                      }
+                    },
+                    "links": {
+                      "type": "object",
+                      "format": "uri-map",
+                      "nullable": true,
+                      "description": "Contains a dictionary of URL links to nested resources of this Challenge.",
+                      "x-twilio": {
+                        "shortDescription": "Nested resource URLs."
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "approvedChallengeResponse": {
+                    "value": {
+                      "sid": "YCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "entity_sid": "",
+                      "identity": "",
+                      "factor_sid": "",
+                      "factor_type": "passkeys",
+                      "status": "approved",
+                      "date_created": "2025-07-30T20:00:00Z",
+                      "date_updated": "2025-07-30T20:00:00Z",
+                      "date_responded": null,
+                      "details": null,
+                      "expiration_date": null,
+                      "hidden_details": null,
+                      "links": null,
+                      "metadata": null,
+                      "responded_reason": "none",
+                      "url": "https://verify.twilio.com/v2/Services/VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Passkeys/ApproveChallenge",
+                      "options": {
+                        "publicKey": {
+                          "rp": {
+                            "id": "example.com",
+                            "name": "Example"
+                          },
+                          "user": {
+                            "id": "WUU0ZmQzYWFmNGU0NTMyNGQwZjNlMTM0NjA3YjIxOTEyYg",
+                            "name": "friendly_name",
+                            "displayName": "friendly_name"
+                          },
+                          "challenge": "WUYwNDhkMWE3ZWMzYTJhNjk3MDA1OWMyNzY2YmJjN2UwZg",
+                          "pubKeyCredParams": {
+                            "type": "public-key",
+                            "alg": -7
+                          },
+                          "timeout": 600000,
+                          "excludeCredentials": [],
+                          "authenticatorSelection": {
+                            "authenticatorAttachment": "platform",
+                            "requireResidentKey": false,
+                            "residentKey": "preferred",
+                            "userVerification": "preferred"
+                          },
+                          "attestation": "none"
+                        }
+                      }
+                    }
+                  },
+                  "approvedChallengeNonDiscoverableResponse": {
+                    "value": {
+                      "sid": "YCaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "service_sid": "VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "entity_sid": "YEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "identity": "ff483d1ff591898a9942916050d2ca3f",
+                      "factor_sid": "YFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "factor_type": "passkeys",
+                      "status": "approved",
+                      "date_created": "2025-07-30T20:00:00Z",
+                      "date_updated": "2025-07-30T20:00:00Z",
+                      "date_responded": null,
+                      "details": null,
+                      "expiration_date": null,
+                      "hidden_details": null,
+                      "links": null,
+                      "metadata": null,
+                      "responded_reason": "none",
+                      "url": "https://verify.twilio.com/v2/Services/VAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Passkeys/ApproveChallenge",
+                      "options": {
+                        "publicKey": {
+                          "rp": {
+                            "id": "example.com",
+                            "name": "Example"
+                          },
+                          "user": {
+                            "id": "WUU0ZmQzYWFmNGU0NTMyNGQwZjNlMTM0NjA3YjIxOTEyYg",
+                            "name": "friendly_name",
+                            "displayName": "friendly_name"
+                          },
+                          "challenge": "WUYwNDhkMWE3ZWMzYTJhNjk3MDA1OWMyNzY2YmJjN2UwZg",
+                          "pubKeyCredParams": {
+                            "type": "public-key",
+                            "alg": -7
+                          },
+                          "timeout": 600000,
+                          "excludeCredentials": [],
+                          "authenticatorSelection": {
+                            "authenticatorAttachment": "platform",
+                            "requireResidentKey": false,
+                            "residentKey": "preferred",
+                            "userVerification": "preferred"
+                          },
+                          "attestation": "none"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Approved"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateChallengePasskeys",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "ApprovePasskeysChallengeRequest",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "A [base64url](https://base64.guru/standards/base64url) encoded representation of `rawId`."
+                  },
+                  "rawId": {
+                    "type": "string",
+                    "description": "The globally unique identifier for this `PublicKeyCredential`."
+                  },
+                  "authenticatorAttachment": {
+                    "type": "string",
+                    "description": "A string that indicates the mechanism by which the WebAuthn implementation is attached to the authenticator at the time the associated `navigator.credentials.create()` or `navigator.credentials.get()` call completes.",
+                    "enum": [
+                      "platform",
+                      "cross-platform"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The valid credential types supported by the API. The values of this enumeration are used for versioning the `AuthenticatorAssertion` and `AuthenticatorAttestation` structures according to the type of the authenticator.",
+                    "enum": [
+                      "public-key"
+                    ],
+                    "default": "public-key"
+                  },
+                  "response": {
+                    "type": "object",
+                    "description": "The result of a WebAuthn authentication via a `navigator.credentials.get()` request, as specified in [AuthenticatorAttestationResponse](https://developer.mozilla.org/en-US/docs/Web/API/AuthenticatorAttestationResponse).",
+                    "properties": {
+                      "authenticatorData": {
+                        "type": "string",
+                        "description": "The [authenticator data](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/Authenticator_data) structure contains information from the authenticator about the processing of a credential creation or authentication request."
+                      },
+                      "clientDataJSON": {
+                        "type": "string",
+                        "description": "This property contains the JSON-compatible serialization of the data passed from the browser to the authenticator in order to generate this credential."
+                      },
+                      "signature": {
+                        "type": "string",
+                        "description": "An assertion signature over `authenticatorData` and `clientDataJSON`. The assertion signature is created with the private key of the key pair that was created during the originating `navigator.credentials.create()` call and verified using the public key of that same key pair."
+                      },
+                      "userHandle": {
+                        "type": "string",
+                        "description": "The user handle stored in the authenticator, specified as `user.id` in the options passed to the originating `navigator.credentials.create()` call. This property should contain a base64url-encoded entity SID."
+                      }
+                    },
+                    "required": [
+                      "authenticatorData",
+                      "clientDataJSON",
+                      "signature"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "rawId",
+                  "authenticatorAttachment",
+                  "response"
+                ]
+              },
+              "examples": {
+                "ApproveChallenge": {
+                  "value": {
+                    "id": "6ySmhJd6qGUMCthiqszyb4Od4U6TFn0v3DLz-1EZrNQ",
+                    "rawId": "eb24a684977aa8650c0ad862aaccf26f839de14e93167d2fdc32f3fb5119acd4",
+                    "authenticatorAttachment": "platform",
+                    "type": "public-key",
+                    "response": {
+                      "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiV1VZd05EaGtNV0UzWldNellUSmhOamszTURBMU9XTXlOelkyWW1Kak4yVXdaZyIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9",
+                      "signature": "MEYCIQDDs662ykELzpmxkQaOR6HY5GwO7n",
+                      "userHandle": "WUU0ZmQzYWFmNGU0NT",
+                      "authenticatorData": "o3mm9u6vuaVeN4wRgDTid"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-twilio": {
+          "mountName": "approve_challenge"
+        }
       }
     }
   },

@@ -225,13 +225,15 @@ components:
             Required, and Canceled.'
         losing_carrier_information:
           nullable: true
+          $ref: '#/components/schemas/numbers.v1.porting_losing_carrier_information'
           description: "Details regarding the customer\u2019s information with the\
             \ losing carrier. These values will be used to generate the letter of\
             \ authorization and should match the losing carrier\u2019s data as closely\
             \ as possible to ensure the port is accepted."
         phone_numbers:
           type: array
-          items: {}
+          items:
+            $ref: '#/components/schemas/numbers.v1.porting_port_in_phone_number_result'
           nullable: true
         bundle_sid:
           type: string
@@ -570,6 +572,267 @@ components:
           type: string
           format: uri
           nullable: true
+    numbers.v1.porting_port_in_create:
+      title: PortIn request
+      type: object
+      properties:
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          description: Account Sid or subaccount where the phone number(s) will be
+            Ported
+        documents:
+          type: array
+          items:
+            type: string
+            minItems: 1
+          description: List of document SIDs for all phone numbers included in the
+            port in request. At least one document SID referring to a document of
+            the type Utility Bill is required.
+        phone_numbers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              phone_number:
+                type: string
+                description: Phone number to be ported. This must be in the E164 Format.
+                x-twilio:
+                  shortDescription: Phone number to be ported. This must be in the
+                    E164 Format.
+              pin:
+                type: string
+                description: Some losing carriers require a PIN to authorize the port
+                  of a phone number. If the phone number is a US mobile phone number,
+                  the PIN is mandatory to process a porting request. Other carriers
+                  and number types may also require a PIN, you'll need to contact
+                  the losing carrier to determine what your phone number's PIN is.
+                x-twilio:
+                  shortDescription: The port out pin from the losing carrier.
+            required:
+            - phone_number
+          description: List of phone numbers to be ported. Maximum of 1,000 phone
+            numbers per request.
+        losing_carrier_information:
+          $ref: '#/components/schemas/numbers.v1.porting_losing_carrier_information'
+          description: Details regarding the customer's information with the losing
+            carrier. These values will be used to generate the letter of authorization
+            and should match the losing carrier's data as closely as possible to ensure
+            the port is accepted.
+        notification_emails:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Additional emails to send a copy of the signed LOA to.
+        target_port_in_date:
+          type: string
+          format: date
+          nullable: true
+          description: "Target date to port the number. We cannot guarantee that this\
+            \ date will be honored by the other carriers, please work with Ops to\
+            \ get a confirmation of the firm order commitment (FOC) date. Expected\
+            \ format is ISO Local Date, example: \u20182011-12-03`. This date must\
+            \ be at least 7 days in the future for US ports and 10 days in the future\
+            \ for Japanese ports. We can't guarantee the exact date and time, as this\
+            \ depends on the losing carrier"
+        target_port_in_time_range_start:
+          type: string
+          nullable: true
+          description: "The earliest time that the port should occur on the target\
+            \ port in date. Expected format is ISO Offset Time, example: \u201810:15:00-08:00'.\
+            \ We can't guarantee the exact date and time, as this depends on the losing\
+            \ carrier"
+        target_port_in_time_range_end:
+          type: string
+          nullable: true
+          description: "The latest time that the port should occur on the target port\
+            \ in date. Expected format is ISO Offset Time, example: \u201810:15:00-08:00'.\
+            \ We can't guarantee the exact date and time, as this depends on the losing\
+            \ carrier"
+        bundle_sid:
+          type: string
+          nullable: true
+          description: The bundle sid is an optional identifier to reference a group
+            of regulatory documents for a port request.
+        portability_advance_carrier:
+          type: string
+          nullable: true
+          description: A field only required for Japan port in requests. It is a unique
+            identifier for the donor carrier service the line is being ported from.
+        auto_cancel_approval_numbers:
+          type: string
+          minLength: 0
+          nullable: true
+          description: Japan specific field, indicates the number of phone numbers
+            to automatically approve for cancellation.
+      required:
+      - account_sid
+      - documents
+      - losing_carrier_information
+    numbers.v1.porting_losing_carrier_information:
+      title: Losing carrier information
+      type: object
+      properties:
+        customer_name:
+          type: string
+          description: Customer name as it is registered with the losing carrier.
+            This can be an individual or a business name depending on the customer
+            type selected.
+        account_number:
+          type: string
+          description: The account number of the customer for the losing carrier.
+            Only require for mobile phone numbers.
+        account_telephone_number:
+          type: string
+          description: The account phone number of the customer for the losing carrier.
+        address_sid:
+          type: string
+          description: If you already have an Address SID that represents the address
+            needed for the LOA, you can provide an Address SID instead of providing
+            the address object in the request body. This will copy the address into
+            the port in request. If changes are made to the Address SID after port
+            in request creation, those changes will not be reflected in the port in
+            request.
+        address:
+          $ref: '#/components/schemas/numbers.v1.porting_address'
+          description: "The customer\u2019s billing address with the losing carrier.\
+            \ It must match the address they have registered with the losing carrier."
+        authorized_representative:
+          type: string
+          description: The first and last name of the person listed with the losing
+            carrier who is authorized to make changes on the account.
+        authorized_representative_email:
+          type: string
+          format: email
+          description: Email address of the person (owner of the number) who will
+            sign the letter of authorization for the port in request. This email address
+            should belong to the person named in as the authorized representative.
+        customer_type:
+          type: string
+          enum:
+          - Business
+          - Individual
+          description: 'The type of customer account in the losing carrier. This should
+            either be: ''Individual'' or ''Business''.'
+        authorized_representative_katakana:
+          type: string
+        sub_municipality:
+          type: string
+        building:
+          type: string
+        katakana_name:
+          type: string
+      required:
+      - customer_name
+      - authorized_representative
+      - authorized_representative_email
+    numbers.v1.porting_address:
+      title: Address
+      type: object
+      properties:
+        street:
+          type: string
+          description: 'The street address, ex: 101 Spear St'
+        street_2:
+          type: string
+          description: 'The building information, ex : 5th floor.'
+        city:
+          type: string
+          description: 'The city name, ex: San Francisco.'
+        state:
+          type: string
+          description: "The state name, ex: CA or California. Note this should match\
+            \ the losing carrier\u2019s information exactly. So if they spell out\
+            \ the entire state\u2019s name instead of abbreviating it, please do so."
+        zip:
+          type: string
+          description: 'The zip code, ex: 94105.'
+        country:
+          type: string
+          description: 'The country, ex: USA.'
+      required:
+      - street
+      - city
+      - state
+      - zip
+      - country
+    numbers.v1.porting_port_in_phone_number_result:
+      title: Phone number result
+      type: object
+      properties:
+        not_portability_reason:
+          type: string
+          nullable: true
+          description: The not portability reason code description. This field may
+            be null if the number is portable or if the portability for a number has
+            not yet been evaluated.
+        not_portability_reason_code:
+          type: integer
+          nullable: true
+          description: The not portability reason code. This field may be null if
+            the number is portable or if the portability for a number has not yet
+            been evaluated.
+        number_type:
+          type: string
+          nullable: true
+          description: 'The number type of the phone number. This can be: toll-free,
+            local, mobile or unknown. This field may be null if the number is not
+            portable or if the portability for a number has not yet been evaluated.'
+        phone_number:
+          type: string
+          nullable: false
+          description: Phone number to be ported. This will be in the E164 Format.
+        port_date:
+          type: string
+          nullable: true
+          format: date-time
+          description: The timestamp the phone number will be ported. This will only
+            be set once a port date has been confirmed. Not all carriers can guarantee
+            a specific time on the port date. Twilio will try its best to get the
+            port completed by this time on the port date. Please subscribe to webhooks
+            for confirmation on when a port has actually been completed.
+        port_in_phone_number_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PU[0-9a-fA-F]{32}$
+          description: The SID of the Phone number. This is a unique identifier of
+            the phone number.
+        port_in_phone_number_status:
+          type: string
+          nullable: false
+          description: The status of the port in phone number.
+        portable:
+          type: boolean
+          nullable: true
+          description: Whether the number is portable by Twilio or not. This field
+            may be null if the number portability has not yet been evaluated. If a
+            number is not portable reference the `not_portability_reason_code` and
+            `not_portability_reason` fields for more details
+        rejection_reason:
+          type: string
+          nullable: true
+          description: The description of the rejection reason provided by the losing
+            carrier. This field may be null if the number has not been rejected by
+            the losing carrier.
+        rejection_reason_code:
+          type: string
+          nullable: true
+          description: The code for the rejection reason provided by the losing carrier.
+            This field may be null if the number has not been rejected by the losing
+            carrier.
+        status_last_time_updated_timestamp:
+          type: string
+          nullable: true
+          description: Timestamp indicating when the Port In Phone Number resource
+            was last modified.
+        external_porting_vendor_phone_number_id:
+          type: string
+          nullable: true
 info:
   title: Twilio - Numbers
   description: This is the public Twilio REST API.
@@ -854,7 +1117,7 @@ paths:
                     port_in_request_status: pending
                     date_created: '2023-09-10T06:52:21Z'
                     losing_carrier_information:
-                      customer_type: Business/Individual
+                      customer_type: Business
                       customer_name: Customer name for carrier
                       authorized_representative: John Smith
                       authorized_representative_email: signer@domain.com
@@ -870,17 +1133,17 @@ paths:
                         country: US
                     phone_numbers:
                     - phone_number: '+16175551212'
-                      pin: '123456'
                       portable: true
                       not_portability_reason: string
                       port_in_phone_number_sid: PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       port_in_phone_number_status: In Review
                       not_portability_reason_code: 0
+                      external_porting_vendor_phone_number_id: null
                     bundle_sid: null
                     portability_advance_carrier: null
                     auto_cancel_approval_numbers: null
                     documents:
-                    - ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    - RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                     url: https://numbers.twilio.com/v1/Porting/PortIn/KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             Access-Control-Allow-Origin:
@@ -915,9 +1178,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              title: CreatePortingPortInRequest
-              properties: {}
+              $ref: '#/components/schemas/numbers.v1.porting_port_in_create'
+        required: true
   /v1/Porting/PortIn/{PortInRequestSid}:
     servers:
     - url: https://numbers.twilio.com
@@ -988,13 +1250,18 @@ paths:
                     port_in_request_status: pending
                     date_created: '2023-09-10T06:52:21Z'
                     losing_carrier_information:
-                      customer_type: Business/Individual
+                      customer_type: Business
                       customer_name: Customer name for carrier
                       authorized_representative: John Smith
                       authorized_representative_email: signer@domain.com
                       account_number: '123456'
                       account_telephone_number: '+133232323'
                       address_sid: ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      authorized_representative_katakana: "\u30B8\u30E7\u30F3 \u30B9\
+                        \u30DF\u30B9"
+                      building: null
+                      katakana_name: null
+                      sub_municipality: null
                       address:
                         street: Your Street
                         street_2: Other Street or null
@@ -1004,15 +1271,19 @@ paths:
                         country: US
                     phone_numbers:
                     - phone_number: '+16175551212'
-                      pin: '123456'
+                      number_type: LOCAL
+                      rejection_reason: null
+                      rejection_reason_code: null
+                      status_last_time_updated_timestamp: '2025-01-01T00:52:21Z'
                       portable: true
                       not_portability_reason: string
                       not_portability_reason_code: 0
                       port_in_phone_number_sid: PUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       port_in_phone_number_status: In Review
                       port_date: '2023-09-17T00:00:00Z'
+                      external_porting_vendor_phone_number_id: null
                     documents:
-                    - ADaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    - RDaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
           headers:
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
