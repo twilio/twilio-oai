@@ -1,6 +1,12 @@
 twilio-oai changelog
 ====================
 
+[2025-09-30] Version 2.5.3
+--------------------------
+**Insights**
+- Replace `field` with `key` in Request Filters and Response Metadata Filters and  for Reports API
+
+
 [2025-09-25] Version 2.5.2
 --------------------------
 **Api**

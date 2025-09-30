@@ -219,6 +219,11 @@
             "nullable": true,
             "description": "The status of the port in request. The possible values are: In progress, Completed, Expired, In review, Waiting for Signature, Action Required, and Canceled."
           },
+          "order_cancellation_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "If the order is cancelled this field will provide further context on the cause of the cancellation."
+          },
           "losing_carrier_information": {
             "nullable": true,
             "$ref": "#/components/schemas/numbers.v1.porting_losing_carrier_information",
@@ -582,6 +587,54 @@
           "url": {
             "type": "string",
             "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "numbers.v1.port_in_request_list": {
+        "type": "object",
+        "properties": {
+          "port_in_request_sid": {
+            "type": "string",
+            "nullable": false,
+            "description": "The SID of the Port-in request"
+          },
+          "port_in_request_status": {
+            "type": "string",
+            "nullable": true,
+            "description": "Status of the Port In Request"
+          },
+          "status_last_updated_timestamp": {
+            "type": "string",
+            "nullable": true,
+            "description": "The last updated timestamp of the request"
+          },
+          "phone_numbers_requested": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Amount of phone numbers requested"
+          },
+          "phone_numbers_ported": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Amount of phone numbers ported"
+          },
+          "suggested_action": {
+            "type": "string",
+            "nullable": true,
+            "description": "Suggested action on this ticket"
+          }
+        }
+      },
+      "numbers.v1.port_in_request_list_meta": {
+        "type": "object",
+        "properties": {
+          "previous_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "next_token": {
+            "type": "string",
             "nullable": true
           }
         }
@@ -1247,6 +1300,7 @@
                       "target_port_in_time_range_start": "10:00:00+01:00",
                       "target_port_in_time_range_end": "20:00:00+01:00",
                       "port_in_request_status": "pending",
+                      "order_cancellation_reason": null,
                       "date_created": "2023-09-10T06:52:21Z",
                       "losing_carrier_information": {
                         "customer_type": "Business",
@@ -1434,6 +1488,7 @@
                       "target_port_in_time_range_start": "10:00:00+01:00",
                       "target_port_in_time_range_end": "20:00:00+01:00",
                       "port_in_request_status": "pending",
+                      "order_cancellation_reason": null,
                       "date_created": "2023-09-10T06:52:21Z",
                       "losing_carrier_information": {
                         "customer_type": "Business",
@@ -1525,6 +1580,185 @@
           }
         ],
         "operationId": "FetchPortingPortIn"
+      }
+    },
+    "/v1/Porting/PortIn/PortInRequests": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "port_in_request_sid"
+        ],
+        "mountName": "porting_all_port_ins",
+        "pathType": "list"
+      },
+      "get": {
+        "description": "Retrieve a list of all PortInRequests for a user",
+        "summary": "Fetch all PortInRequests for a user",
+        "tags": [
+          "NumbersV1PortingPortIn"
+        ],
+        "parameters": [
+          {
+            "name": "Token",
+            "in": "query",
+            "required": false,
+            "description": "Page start token, if null then it will start from the beginning",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Size",
+            "in": "query",
+            "description": "Number of items per page",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "PortInRequestSid",
+            "in": "query",
+            "description": "Filter by Port in request SID, supports multiple values separated by comma",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "PortInRequestStatus",
+            "in": "query",
+            "description": "Filter by Port In request status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "CreatedBefore",
+            "in": "query",
+            "description": "Find all created before a certain date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "CreatedAfter",
+            "in": "query",
+            "description": "Find all created after a certain date",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "port_in_requests": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/numbers.v1.port_in_request_list"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/numbers.v1.port_in_request_list_meta"
+                    }
+                  },
+                  "title": "ListPortInRequestsResponse"
+                },
+                "examples": {
+                  "readFull": {
+                    "value": {
+                      "port_in_requests": [
+                        {
+                          "port_in_request_sid": "KWaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "port_in_request_status": "In Review",
+                          "status_last_updated_timestamp": "2025-07-30T05:21:12Z",
+                          "phone_numbers_requested": 1,
+                          "phone_numbers_ported": 0,
+                          "suggested_action": null
+                        }
+                      ],
+                      "meta": {
+                        "next_token": null,
+                        "previous_token": null
+                      }
+                    }
+                  },
+                  "readEmpty": {
+                    "value": {
+                      "port_in_requests": [],
+                      "meta": {
+                        "next_token": null,
+                        "previous_token": null
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListPortInRequests"
       }
     },
     "/v1/Porting/PortIn/{PortInRequestSid}/PhoneNumber/{PhoneNumberSid}": {
