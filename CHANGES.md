@@ -1,6 +1,12 @@
 twilio-oai changelog
 ====================
 
+[2025-10-14] Version 2.5.4
+--------------------------
+**Api**
+- Updated description for property `CallerDisplayName` for participant create request
+
+
 [2025-09-30] Version 2.5.3
 --------------------------
 **Insights**
