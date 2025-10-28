@@ -1155,6 +1155,133 @@ components:
           format: uri
           nullable: true
           description: The absolute URL of the Supporting Document Type resource.
+    SenderId:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          description: Account that owns the Sender ID.
+          example: ACe467eeebbd10517a4ec52611902de52a
+        date_created:
+          type: string
+          format: date-time
+          description: The date and time when the Sender ID was created.
+        date_updated:
+          type: string
+          format: date-time
+          description: The date and time when the Sender ID was last updated.
+        sender_id:
+          type: string
+          description: The alphanumeric sender ID.
+        sid:
+          type: string
+          description: The unique identifier of the Sender ID.
+      required:
+      - account_sid
+      - date_created
+      - date_updated
+      - sender_id
+      - sid
+    SenderIdCountry:
+      type: object
+      properties:
+        routing_table_sid:
+          type: string
+          description: The unique identifier of the Sender ID Country.
+        iso_country:
+          type: string
+          description: The ISO country code.
+        date_created:
+          type: string
+          format: date-time
+          description: The date and time when the country routing table was created.
+        date_updated:
+          type: string
+          format: date-time
+          description: The date and time when the country routing table was last updated.
+        default:
+          type: boolean
+          description: Indicates if this is the default routing table for the country.
+        status:
+          type: string
+          enum:
+          - LIVE
+          - NOT_LIVE
+          description: The status of the country for the sender Id
+        status_override_info:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+              - LIVE
+              - NOT_LIVE
+          description: The override status of the country for the sender Id
+      required:
+      - date_created
+      - date_updated
+      - default
+      - status
+      - routing_table_sid
+      - iso_country
+    SenderIdResponsePage:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SenderId'
+          description: List of Sender IDs.
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    SenderIdCountriesResponsePage:
+      type: object
+      properties:
+        results:
+          description: List of countries associated with the Sender ID.
+          type: array
+          items:
+            $ref: '#/components/schemas/SenderIdCountry'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    PaginationMeta:
+      type: object
+      properties:
+        previous_token:
+          type: string
+        next_token:
+          type: string
+  parameters:
+    pageSizeQueryParam:
+      in: query
+      name: pageSize
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 10
+    pageTokenQueryParam:
+      in: query
+      name: pageToken
+      required: false
+      schema:
+        type: string
+  responses:
+    SenderIdResponse:
+      description: Response schema for listing Sender IDs.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SenderIdResponsePage'
+    SenderIdCountriesResponse:
+      description: Response schema for listing countries associated with a Sender
+        ID.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SenderIdCountriesResponsePage'
 info:
   title: Twilio - Numbers
   description: This is the public Twilio REST API.
@@ -6249,6 +6376,8 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: FetchSupportingDocumentType
+  /v2/SenderIds: {}
+  /v2/SenderIds/{senderIdSid}/Countries: {}
 servers:
 - url: https://numbers.twilio.com
 tags:
@@ -6268,5 +6397,7 @@ tags:
 - name: NumbersV2SupportingDocument
 - name: NumbersV2SupportingDocumentType
 - name: NumbersV2Version
+- name: V2SenderIds
+- name: V2SenderIdsCountries
 security:
 - accountSid_authToken: []
