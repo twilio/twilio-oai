@@ -1350,6 +1350,227 @@ components:
       - roaming
       - umatilla
       - tokyo
+    insights.v1.query_request:
+      type: object
+      required:
+      - namespace
+      - query
+      properties:
+        namespace:
+          type: string
+          example: Omnichannel
+        clientQueryId:
+          type: string
+          example: ConversationsCount
+        query:
+          type: object
+          required:
+          - cube
+          properties:
+            cube:
+              type: string
+              example: Conversations
+            measures:
+              type: array
+              items:
+                type: string
+              example:
+              - '#:'
+              - '#: OperatorResults'
+            dimensions:
+              type: array
+              items:
+                type: string
+              example:
+              - DateCreated
+              - OperatorResults
+            filters:
+              type: array
+              description: Nested filter conditions. Always use `op` and `expressions`.
+              items:
+                type: object
+                required:
+                - op
+                - expressions
+                properties:
+                  op:
+                    type: string
+                    enum:
+                    - and
+                    - or
+                    - eq
+                    - ne
+                    - gt
+                    - lt
+                    - in
+                    example: and
+                  expressions:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - op
+                      - field
+                      properties:
+                        op:
+                          type: string
+                          enum:
+                          - and
+                          - or
+                          - eq
+                          - ne
+                          - gt
+                          - lt
+                          - in
+                          example: in
+                        field:
+                          type: string
+                          example: OperatorResult.Value
+                        values:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                          - positive
+                          - negative
+            granularity:
+              type: string
+              enum:
+              - day
+              - week
+              - month
+              - quarter
+              example: day
+            pagination:
+              type: object
+              description: Pagination options
+              properties:
+                pageSize:
+                  type: integer
+                  minimum: 1
+                  example: 20
+                nextToken:
+                  type: string
+                  nullable: true
+                  example: eyJwYWdlIjoyLCJxdWVyeSI6ImJvb2tzIn0=
+                previousToken:
+                  type: string
+                  nullable: true
+                  example: eyJwYWdlIjoyLCJxdWVyeSI6eyJzZWFyY2giOlt7Im9wIjoiYW5kIiwi
+            orderBy:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    example: '#: OperatorResults'
+                  direction:
+                    type: string
+                    enum:
+                    - asc
+                    - desc
+                    example: desc
+    insights.v1.query_response:
+      type: object
+      properties:
+        namespace:
+          type: string
+          example: Insights
+        queryKey:
+          type: string
+          example: ConvSentimentDetails
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          example:
+          - Id: conv1
+            Languages:
+            - en
+            Channels:
+            - voice
+            OperatorResult.Value: positive
+          - Id: conv2
+            Languages:
+            - en
+            - es
+            Channels:
+            - chat
+            OperatorResult.Value: negative
+        meta:
+          type: object
+          properties:
+            pagination:
+              type: object
+              description: Pagination options
+              properties:
+                pageSize:
+                  type: integer
+                  minimum: 1
+                  example: 20
+                nextToken:
+                  type: string
+                  nullable: true
+                  example: eyJwYWdlIjoyLCJxdWVyeSI6ImJvb2tzIn0=
+                previousToken:
+                  type: string
+                  nullable: true
+                  example: eyJwYWdlIjoyLCJxdWVyeSI6eyJzZWFyY2giOlt7Im9wIjoiYW5kIiwi
+    insights.v1.metadata_response:
+      type: object
+      properties:
+        namespace:
+          type: string
+          example: Insights
+        cubes:
+          type: array
+          items:
+            type: object
+            required:
+            - name
+            - measures
+            - dimensions
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              measures:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - name
+                  - type
+                  properties:
+                    name:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    type:
+                      type: string
+                    aggregation:
+                      type: string
+              dimensions:
+                type: array
+                items:
+                  type: object
+                  required:
+                  - name
+                  - type
+                  properties:
+                    name:
+                      type: string
+                    title:
+                      type: string
+                    description:
+                      type: string
+                    type:
+                      type: string
 info:
   title: Twilio - Insights
   description: This is the public Twilio REST API.
@@ -5145,6 +5366,12 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: ListVideoRoomSummary
+  /v1/Namespaces/{NamespaceName}/Query:
+    servers:
+    - url: https://insights.twilio.com
+  /v1/Namespaces/{NamespaceName}/Metadata:
+    servers:
+    - url: https://insights.twilio.com
 servers:
 - url: https://insights.twilio.com
 tags:
@@ -5159,5 +5386,6 @@ tags:
 - name: InsightsV1Participant
 - name: InsightsV1Room
 - name: InsightsV1Setting
+- name: InsightsV1DataMart
 security:
 - accountSid_authToken: []
