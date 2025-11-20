@@ -712,6 +712,33 @@
           "types"
         ]
       },
+      "ContentUpdateRequest": {
+        "type": "object",
+        "description": "Content update request body",
+        "properties": {
+          "friendly_name": {
+            "description": "User defined name of the content",
+            "type": "string"
+          },
+          "variables": {
+            "description": "Key value pairs of variable name to value",
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "language": {
+            "description": "Language code for the content",
+            "type": "string"
+          },
+          "types": {
+            "$ref": "#/components/schemas/types"
+          }
+        },
+        "required": [
+          "types"
+        ]
+      },
       "types": {
         "description": "Content types",
         "type": "object",
@@ -1429,6 +1456,121 @@
           }
         ],
         "operationId": "DeleteContent"
+      },
+      "put": {
+        "description": "Update a Content resource",
+        "summary": "Update Content",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentUpdateRequest"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Contentv1Content"
+        ],
+        "parameters": [
+          {
+            "name": "Sid",
+            "in": "path",
+            "description": "The Twilio-provided string that uniquely identifies the Content resource to update.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/content.v1.content"
+                },
+                "examples": {
+                  "update": {
+                    "value": {
+                      "sid": "HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "friendly_name": "",
+                      "language": "en",
+                      "variables": {
+                        "name": "foo"
+                      },
+                      "types": {
+                        "twilio/text": {
+                          "body": "Foo Bar Co is located at 39.7392, 104.9903"
+                        },
+                        "twilio/location": {
+                          "longitude": 104.9903,
+                          "latitude": 39.7392,
+                          "label": "Foo Bar Co"
+                        }
+                      },
+                      "url": "https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "date_created": "2015-07-30T19:00:00Z",
+                      "date_updated": "2015-07-30T19:00:00Z",
+                      "links": {
+                        "approval_create": "https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests/whatsapp",
+                        "approval_fetch": "https://content.twilio.com/v1/Content/HXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ApprovalRequests"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateContent"
       }
     },
     "/v1/Content": {

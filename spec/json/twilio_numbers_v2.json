@@ -1341,6 +1341,11 @@
             "maxLength": 34,
             "pattern": "^SU[0-9a-fA-F]{32}$",
             "description": "The unique identifier of the Sender ID."
+          },
+          "mps": {
+            "type": "integer",
+            "description": "Messages per second (throughput) for the Sender ID.",
+            "example": 10
           }
         },
         "required": [
@@ -1348,7 +1353,8 @@
           "date_created",
           "date_updated",
           "sender_id",
-          "sid"
+          "sid",
+          "mps"
         ]
       },
       "SenderIdCountry": {
@@ -1456,6 +1462,206 @@
             "type": "string"
           }
         }
+      },
+      "CreateShortCodeApplicationRequest": {
+        "type": "object",
+        "required": [
+          "friendly_name",
+          "iso_country",
+          "business_information",
+          "setup"
+        ],
+        "properties": {
+          "friendly_name": {
+            "type": "string",
+            "description": "The friendly name for the short code application."
+          },
+          "iso_country": {
+            "type": "string",
+            "description": "The ISO country code."
+          },
+          "business_information": {
+            "type": "object",
+            "required": [
+              "customer_facing_profile"
+            ],
+            "description": "Business information associated with the application.",
+            "properties": {
+              "customer_facing_profile": {
+                "type": "string",
+                "description": "The Compliance Profile SID for the customer-facing business profile."
+              }
+            }
+          },
+          "setup": {
+            "type": "object",
+            "required": [
+              "charges_apply"
+            ],
+            "properties": {
+              "charges_apply": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "CreateShortCodeApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "description": "The unique identifier of the Short Code Application."
+          },
+          "bundle_sid": {
+            "type": "string",
+            "description": "The Bundle SID for regulatory compliance."
+          },
+          "application_requirements_sid": {
+            "type": "string",
+            "description": "The Application Requirements SID."
+          },
+          "friendly_name": {
+            "type": "string",
+            "description": "The friendly name of the application."
+          },
+          "iso_country": {
+            "type": "string",
+            "description": "The ISO country code."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "TWILIO_REVIEW",
+              "PENDING_PAYMENT",
+              "PAYMENT_FAILED",
+              "IN_PROVISIONING",
+              "PENDING_CARRIER",
+              "APPROVED",
+              "CORRECTIONS_NEEDED",
+              "CANCELED",
+              "ARCHIVED"
+            ],
+            "description": "The state of the application."
+          }
+        }
+      },
+      "CreateShortCodeApplicationBundleInquiryRequest": {
+        "type": "object",
+        "required": [
+          "application_sid"
+        ],
+        "properties": {
+          "application_sid": {
+            "type": "string",
+            "description": "The unique identifier of the Short Code Application.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WF[0-9a-fA-F]{32}$"
+          }
+        }
+      },
+      "CreateShortCodeApplicationBundleInquiryResponse": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "description": "The unique identifier of the inquiry."
+          },
+          "inquiry_session_token": {
+            "type": "string",
+            "description": "The session token for the inquiry."
+          },
+          "application_sid": {
+            "type": "string",
+            "description": "The unique identifier of the Short Code Application.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WF[0-9a-fA-F]{32}$"
+          },
+          "bundle_sid": {
+            "type": "string",
+            "description": "The Bundle SID associated with the inquiry.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$"
+          }
+        }
+      },
+      "ShortCodeApplication": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "description": "The unique identifier of the Short Code Application.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AP[0-9a-fA-F]{32}$"
+          },
+          "bundle_sid": {
+            "type": "string",
+            "description": "The Bundle SID for regulatory compliance."
+          },
+          "friendly_name": {
+            "type": "string",
+            "description": "The friendly name of the application."
+          },
+          "iso_country": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2,
+            "description": "The ISO country code."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "TWILIO_REVIEW",
+              "PENDING_PAYMENT",
+              "PAYMENT_FAILED",
+              "IN_PROVISIONING",
+              "PENDING_CARRIER",
+              "APPROVED",
+              "CORRECTIONS_NEEDED",
+              "CANCELED",
+              "ARCHIVED"
+            ],
+            "description": "The state of the application."
+          }
+        }
+      },
+      "ShortCodeApplicationResponsePage": {
+        "type": "object",
+        "properties": {
+          "total_elements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "current_page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "has_next": {
+            "type": "boolean"
+          },
+          "has_prev": {
+            "type": "boolean"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortCodeApplication"
+            },
+            "description": "List of Short Code Applications."
+          }
+        }
       }
     },
     "parameters": {
@@ -1477,48 +1683,6 @@
         "required": false,
         "schema": {
           "type": "string"
-        }
-      }
-    },
-    "responses": {
-      "SenderIdResponse": {
-        "description": "Response schema for listing Sender IDs.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/SenderIdResponsePage"
-            }
-          }
-        }
-      },
-      "SenderIdInstanceResponse": {
-        "description": "Response schema for a single Sender ID instance.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/SenderId"
-            }
-          }
-        }
-      },
-      "SenderIdCountriesResponse": {
-        "description": "Response schema for listing countries associated with a Sender ID.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/SenderIdCountriesResponsePage"
-            }
-          }
-        }
-      },
-      "SenderIdCountryResponse": {
-        "description": "Response schema for SenderId Country",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/SenderIdCountry"
-            }
-          }
         }
       }
     }
@@ -8575,7 +8739,136 @@
     "/v2/SenderIds": {},
     "/v2/SenderIds/{senderIdSid}": {},
     "/v2/SenderIds/{senderIdSid}/Countries": {},
-    "/v2/SenderIds/{senderIdSid}/Countries/{routingTableSid}": {}
+    "/v2/SenderIds/{senderIdSid}/Countries/{routingTableSid}": {},
+    "/v2/ShortCodes/Applications": {
+      "get": {
+        "description": "list of all short code applications for an account",
+        "summary": "List Short Code Applications",
+        "tags": [
+          "V2ShortCodeApplications"
+        ],
+        "parameters": [
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 50.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The current page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response schema for listing Short Code Applications.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortCodeApplicationResponsePage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "ListShortCodeApplications"
+      },
+      "post": {
+        "description": "Create a new short code application for an account",
+        "summary": "Create a new short code application",
+        "tags": [
+          "V2ShortCodeApplications"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShortCodeApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Response schema for creating a Short Code Application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateShortCodeApplicationResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateShortCodeApplication"
+      }
+    },
+    "/v2/ShortCodes/Applications/{sid}": {
+      "description": "Fetch a specific Short Code Application instance",
+      "get": {
+        "description": "Fetch a specific Short Code Application instance.",
+        "summary": "Fetch a specific Short Code Application instance.",
+        "tags": [
+          "V2ShortCodeApplications"
+        ],
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "description": "The unique string that identifies the Short Code Application resource.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^WF[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Response schema for a single Short Code Application instance.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortCodeApplication"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchShortCodeApplication"
+      }
+    },
+    "/v2/ShortCodes/Applications/Bundles/{BundleSid}/Inquiries": {
+      "description": "Initialize a Persona inquiry session for a shortcodes application"
+    }
   },
   "servers": [
     {
@@ -8583,6 +8876,9 @@
     }
   ],
   "tags": [
+    {
+      "name": "NumbersV2AccountsInventory"
+    },
     {
       "name": "NumbersV2AuthorizationDocument"
     },
@@ -8639,6 +8935,12 @@
     },
     {
       "name": "V2SenderIdsCountryUpdate"
+    },
+    {
+      "name": "V2ShortCodeApplications"
+    },
+    {
+      "name": "V2ShortCodeApplicationBundleInquiries"
     }
   ],
   "security": [
