@@ -1662,6 +1662,417 @@
             "description": "List of Short Code Applications."
           }
         }
+      },
+      "CountryRequirementList": {
+        "description": "List the Sender ID registration requirements for the countries supporting Sender ID",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CountryRequirement"
+        }
+      },
+      "CountryRequirement": {
+        "type": "object",
+        "required": [
+          "iso_country",
+          "registration_required",
+          "sla_in_days"
+        ],
+        "properties": {
+          "iso_country": {
+            "description": "Iso country code as per ISO 3166-1 alpha-2 standard",
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "registration_required": {
+            "description": "Whether Sender ID needs to be pre-registered for the country",
+            "type": "boolean"
+          },
+          "sla_in_days": {
+            "description": "Twilio SLA for Sender Id Registration process in business days. For countries requiring dynamic registration, it will be set to 0.",
+            "type": "integer"
+          },
+          "promotional_supported": {
+            "description": "Whether promotional usage for Sender ID is supported",
+            "type": "boolean"
+          },
+          "promotional_sender_id_prefix": {
+            "description": "Mandatory prefix string for Sender ID when used for promotional purpose in the country",
+            "type": "string",
+            "nullable": true
+          },
+          "promotional_sender_id_suffix": {
+            "description": "Mandatory suffix string for Sender ID when used for promotional purpose in the country",
+            "type": "string",
+            "nullable": true
+          },
+          "pricing_scheme": {
+            "description": "Represents pricing requirements for country with free-flowing string format",
+            "type": "string",
+            "nullable": true,
+            "example": "Due to market regulations, there is $250 charge per month for the Sender ID."
+          },
+          "documentation_url": {
+            "description": "Represents public Twilio support URL which has information regarding the instructions and documents required for registration",
+            "type": "string",
+            "nullable": true
+          },
+          "documentation_template_url": {
+            "description": "Represents the Twilio public URL for documentation template required to be filled for the Sender ID registration",
+            "type": "string",
+            "nullable": true
+          },
+          "document_type_machine_names": {
+            "description": "List of document type machine names",
+            "type": "array",
+            "items": {
+              "description": "Document Type Machine Name",
+              "type": "string"
+            }
+          },
+          "domestic_document_type_machine_names": {
+            "description": "List of document type machine names for Domestic traffic reach",
+            "type": "array",
+            "items": {
+              "description": "Document Type Machine Name",
+              "type": "string"
+            }
+          },
+          "international_document_type_machine_names": {
+            "description": "List of document type machine names for International traffic reach",
+            "type": "array",
+            "items": {
+              "description": "Document Type Machine Name",
+              "type": "string"
+            }
+          },
+          "sender_id_registration_rules": {
+            "description": "Sender ID string rules for the country",
+            "type": "string",
+            "nullable": true,
+            "example": "Enter between 2 - 11 characters.\nInclude at least one letter."
+          }
+        }
+      },
+      "ValidateSenderId": {
+        "type": "object",
+        "required": [
+          "iso_country",
+          "purpose",
+          "sender_id"
+        ],
+        "properties": {
+          "iso_country": {
+            "description": "ISO 3166-1 alpha-2 standard Country Code",
+            "type": "string"
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/SenderIdPurpose"
+          },
+          "sender_id": {
+            "description": "Sender ID string",
+            "type": "string"
+          }
+        }
+      },
+      "SenderIdValidationResult": {
+        "type": "object",
+        "required": [
+          "iso_country",
+          "purpose",
+          "sender_id",
+          "failures"
+        ],
+        "properties": {
+          "iso_country": {
+            "description": "ISO 3166-1 alpha-2 standard Country Code",
+            "type": "string"
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/SenderIdPurpose"
+          },
+          "sender_id": {
+            "description": "Sender ID string",
+            "type": "string"
+          },
+          "failures": {
+            "description": "List of failures during the validation",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SenderIdValidationFailure"
+            }
+          }
+        }
+      },
+      "SenderIdValidationFailure": {
+        "type": "object",
+        "required": [
+          "error_code",
+          "reason"
+        ],
+        "properties": {
+          "error_code": {
+            "description": "Associated error code with validation failure",
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "description": "Friendly description of error for validation failure",
+            "type": "string"
+          }
+        }
+      },
+      "SenderIdPurpose": {
+        "description": "Purpose for using Sender ID",
+        "type": "string",
+        "enum": [
+          "TRANSACTIONAL",
+          "PROMOTIONAL"
+        ]
+      },
+      "CreateSenderIdRegistration": {
+        "type": "object",
+        "required": [
+          "company_subsidiary",
+          "purpose"
+        ],
+        "properties": {
+          "iso_countries": {
+            "description": "List of Iso countries",
+            "type": "array",
+            "items": {
+              "description": "Iso country code as per ISO 3166-1 alpha-2 standard",
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2,
+              "minItems": 0
+            }
+          },
+          "company_subsidiary": {
+            "description": "Whether registering on behalf of subsidiary",
+            "type": "boolean"
+          },
+          "business_profile_sid": {
+            "description": "Business profile Bundle sid used for the application",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$"
+          },
+          "identity_sid": {
+            "description": "Identity sid used for the application. It must be of IdentityType 'sender_id_customer_profile'",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34
+          },
+          "address_sid": {
+            "description": "Address sid used for the application",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/SenderIdPurpose"
+          }
+        }
+      },
+      "SenderIdRegistration": {
+        "type": "object",
+        "required": [
+          "application_sid",
+          "account_sid",
+          "status",
+          "registration_info",
+          "emails_for_notification"
+        ],
+        "properties": {
+          "application_sid": {
+            "description": "Sender ID Registration Application SID",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WF[0-9a-fA-F]{32}$"
+          },
+          "account_sid": {
+            "description": "Owning Account SID of the Sender ID",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$"
+          },
+          "status": {
+            "description": "Status of the Sender ID Registration Application",
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PENDING_REVIEW",
+              "IN_REVIEW",
+              "TWILIO_APPROVED",
+              "TWILIO_REJECTED"
+            ]
+          },
+          "registration_info": {
+            "description": "List of Sender ID Registration information",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "purpose": {
+            "$ref": "#/components/schemas/SenderIdPurpose"
+          },
+          "company_subsidiary": {
+            "description": "Whether registering on behalf of subsidiary",
+            "type": "boolean"
+          },
+          "emails_for_notification": {
+            "description": "List of emails to send Sender ID Application updates",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5
+          }
+        }
+      },
+      "CreateSenderIdRegistrationBundleInquiryResponse": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "description": "The unique identifier of the inquiry."
+          },
+          "inquiry_session_token": {
+            "type": "string",
+            "description": "The session token for the inquiry."
+          },
+          "application_sid": {
+            "type": "string",
+            "description": "The unique identifier of the Sender ID Registration Application.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^WF[0-9a-fA-F]{32}$"
+          },
+          "bundle_sid": {
+            "type": "string",
+            "description": "The Bundle SID associated with the inquiry.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$"
+          }
+        }
+      },
+      "CreateRegistrationRequest": {
+        "type": "object",
+        "required": [
+          "global_hq_country",
+          "target_country",
+          "message_purpose",
+          "sender_id",
+          "business_identity",
+          "is_subassigned",
+          "friendly_name",
+          "customer_profile_bundle_sid"
+        ],
+        "properties": {
+          "global_hq_country": {
+            "type": "string",
+            "description": "Global HQ country code (ISO 3166-1 alpha-2)",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "target_country": {
+            "type": "string",
+            "description": "Target country for sender ID registration",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "message_purpose": {
+            "type": "string",
+            "enum": [
+              "TRANSACTIONAL",
+              "PROMOTIONAL"
+            ],
+            "description": "Purpose of SMS messages"
+          },
+          "sender_id": {
+            "type": "string",
+            "description": "Requested alphanumeric sender ID value"
+          },
+          "business_identity": {
+            "type": "string",
+            "enum": [
+              "DIRECT",
+              "ISV"
+            ],
+            "description": "Business customer type"
+          },
+          "is_subassigned": {
+            "type": "boolean",
+            "description": "Whether sender ID will be subassigned to other accounts"
+          },
+          "friendly_name": {
+            "type": "string",
+            "description": "Human-readable name for the registration"
+          },
+          "customer_profile_bundle_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$",
+            "description": "Bundle SID of customer's profile"
+          }
+        }
+      },
+      "CreateRegistrationResponse": {
+        "type": "object",
+        "required": [
+          "bundle_sid",
+          "inquiry_id",
+          "inquiry_session_token"
+        ],
+        "properties": {
+          "bundle_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$",
+            "description": "Bundle SID (same as bundle_sid in KYC Orchestration)"
+          },
+          "inquiry_id": {
+            "type": "string",
+            "description": "Persona inquiry ID"
+          },
+          "inquiry_session_token": {
+            "type": "string",
+            "description": "Persona session token for embedding Persona UI"
+          }
+        }
+      },
+      "ResumeInquiryResponse": {
+        "type": "object",
+        "required": [
+          "inquiry_id",
+          "inquiry_session_token",
+          "bundle_sid"
+        ],
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "description": "Persona inquiry ID (existing or new)"
+          },
+          "inquiry_session_token": {
+            "type": "string",
+            "description": "Persona session token (always new, expires in 24 hours)"
+          },
+          "bundle_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$",
+            "description": "Bundle SID"
+          }
+        }
       }
     },
     "parameters": {
@@ -8740,6 +9151,12 @@
     "/v2/SenderIds/{senderIdSid}": {},
     "/v2/SenderIds/{senderIdSid}/Countries": {},
     "/v2/SenderIds/{senderIdSid}/Countries/{routingTableSid}": {},
+    "/v2/CountryRequirements": {},
+    "/v2/ValidateSenderIdApplicationCountry": {},
+    "/v2/SenderIdRegistrations": {},
+    "/v2/SenderIdRegistrations/{BundleSid}/Inquiries": {
+      "description": "Resume or Resubmit Inquiry"
+    },
     "/v2/ShortCodes/Applications": {
       "get": {
         "description": "list of all short code applications for an account",
@@ -8926,6 +9343,18 @@
     },
     {
       "name": "NumbersV2Version"
+    },
+    {
+      "name": "V2CountryRequirements"
+    },
+    {
+      "name": "V2ValidateSenderIdApplicationCountry"
+    },
+    {
+      "name": "V2SenderIdRegistrations"
+    },
+    {
+      "name": "V2SenderIdRegistrationBundleInquiries"
     },
     {
       "name": "V2SenderIds"

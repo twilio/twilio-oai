@@ -1,6 +1,19 @@
 twilio-oai changelog
 ====================
 
+[2025-12-03] Version 2.5.8
+--------------------------
+**Api**
+- Add `twiml_session` resource for calls
+- Add `twiml_session` resource for calls
+
+**Monitor**
+- Update default output properties
+
+**Trusthub**
+- Added customer_profile_sid in toll-free initialize api payload.
+
+
 [2025-11-20] Version 2.5.7
 --------------------------
 **Memory**

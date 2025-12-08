@@ -568,6 +568,32 @@
           }
         }
       },
+      "messaging.v1.domain_dns_validation": {
+        "type": "object",
+        "properties": {
+          "domain_sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^DN[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that we created to identify the Domain resource."
+          },
+          "is_valid": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
       "messaging.v1.domain_config": {
         "type": "object",
         "properties": {
@@ -5543,6 +5569,107 @@
           }
         ],
         "operationId": "FetchDomainConfigMessagingService"
+      }
+    },
+    "/v1/LinkShortening/Domains/{DomainSid}/ValidateDns": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "is_valid",
+          "reason",
+          "url"
+        ],
+        "mountName": "domain_validate_dns",
+        "pathType": "instance"
+      },
+      "get": {
+        "description": "",
+        "summary": "",
+        "tags": [
+          "MessagingV1DomainValidateDns"
+        ],
+        "parameters": [
+          {
+            "name": "DomainSid",
+            "in": "path",
+            "description": "Unique string used to identify the domain.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^DN[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messaging.v1.domain_dns_validation"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "is_valid": true,
+                      "reason": "",
+                      "url": "https://messaging.twilio.com/v1/LinkShortening/Domains/DNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/ValidateDns"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "FetchDomainDnsValidation"
       }
     },
     "/v1/Services/PreregisteredUsa2p": {
