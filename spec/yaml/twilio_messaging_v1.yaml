@@ -3,6 +3,16 @@ components:
     accountSid_authToken:
       scheme: basic
       type: http
+  parameters:
+    XTwilioApiVersion:
+      name: X-Twilio-Api-Version
+      in: header
+      description: The version of the Messaging API to use for this request
+      required: false
+      schema:
+        type: string
+      x-twilio:
+        shortDescription: The Messaging API version
   schemas:
     messaging.v1.service.alpha_sender:
       type: object
@@ -1260,12 +1270,7 @@ components:
           description: The email address to receive the notification about the verification
             result. .
         use_case_categories:
-          type: array
-          items:
-            type: string
-          nullable: true
-          description: The category of the use case for the Tollfree Number. List
-            as many are applicable..
+          $ref: '#/components/schemas/tollfree_verification_enum_use_case_categories'
         use_case_summary:
           type: string
           nullable: true
@@ -1338,24 +1343,13 @@ components:
           nullable: true
           description: A legally recognized business registration number
         business_registration_authority:
-          type: string
-          nullable: true
-          description: The organizational authority for business registrations
+          $ref: '#/components/schemas/tollfree_verification_enum_business_registration_authority'
         business_registration_country:
           type: string
           nullable: true
           description: Country business is registered in
         business_type:
-          type: string
-          enum:
-          - PRIVATE_PROFIT
-          - PUBLIC_PROFIT
-          - SOLE_PROPRIETOR
-          - NON_PROFIT
-          - GOVERNMENT
-          nullable: true
-          description: The type of business, valid values are PRIVATE_PROFIT, PUBLIC_PROFIT,
-            NON_PROFIT, SOLE_PROPRIETOR, GOVERNMENT
+          $ref: '#/components/schemas/tollfree_verification_enum_business_type'
         business_registration_phone_number:
           type: string
           nullable: true
@@ -1419,6 +1413,41 @@ components:
           type: string
           nullable: true
           format: date-time
+    tollfree_verification_enum_business_type:
+      type: string
+      enum:
+      - PRIVATE_PROFIT
+      - PUBLIC_PROFIT
+      - SOLE_PROPRIETOR
+      - NON_PROFIT
+      - GOVERNMENT
+      nullable: true
+      description: The type of business, valid values are PRIVATE_PROFIT, PUBLIC_PROFIT,
+        NON_PROFIT, SOLE_PROPRIETOR, GOVERNMENT. Required field.
+    tollfree_verification_enum_business_registration_authority:
+      type: string
+      nullable: true
+      enum:
+      - EIN
+      - CBN
+      - CRN
+      - PROVINCIAL_NUMBER
+      - VAT
+      - ACN
+      - ABN
+      - BRN
+      - SIREN
+      - SIRET
+      - NZBN
+      - USt-IdNr
+      - CIF
+      - NIF
+      - CNPJ
+      - UID
+      - NEQ
+      - OTHER
+      description: The organizational authority for business registrations. Required
+        for all business types except SOLE_PROPRIETOR.
     tollfree_verification_enum_vetting_provider:
       type: string
       nullable: true
@@ -1433,6 +1462,28 @@ components:
       - TWILIO_APPROVED
       - TWILIO_REJECTED
       description: The compliance status of the Tollfree Verification record.
+    tollfree_verification_enum_use_case_categories:
+      type: array
+      items:
+        type: string
+        enum:
+        - TWO_FACTOR_AUTHENTICATION
+        - ACCOUNT_NOTIFICATIONS
+        - CUSTOMER_CARE
+        - CHARITY_NONPROFIT
+        - DELIVERY_NOTIFICATIONS
+        - FRAUD_ALERT_MESSAGING
+        - EVENTS
+        - HIGHER_EDUCATION
+        - K12
+        - MARKETING
+        - POLLING_AND_VOTING_NON_POLITICAL
+        - POLITICAL_ELECTION_CAMPAIGNS
+        - PUBLIC_SERVICE_ANNOUNCEMENT
+        - SECURITY_ALERT
+      nullable: true
+      description: The category of the use case for the Tollfree Number. List as many
+        as are applicable.
     tollfree_verification_enum_opt_in_type:
       type: string
       enum:
@@ -1444,6 +1495,10 @@ components:
       - IMPORT
       - IMPORT_PLEASE_REPLACE
       description: Describe how a user opts-in to text messages.
+    messaging.v1.service.us_app_to_person_response:
+      oneOf:
+      - $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+      - $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_v2'
     messaging.v1.service.us_app_to_person:
       type: object
       properties:
@@ -1634,6 +1689,7 @@ components:
           description: Details indicating why a campaign registration failed. These
             errors can indicate one or more fields that were incorrect or did not
             meet review requirements.
+      additionalProperties: false
     messaging.v1.service.us_app_to_person_usecase:
       type: object
       properties:
@@ -1644,6 +1700,209 @@ components:
           description: Human readable name, code, description and post_approval_required
             (indicates whether or not post approval is required for this Use Case)
             of A2P Campaign Use Cases.
+    messaging.v1.service.us_app_to_person_v2:
+      type: object
+      required:
+      - privacy_policy_url
+      - terms_and_conditions_url
+      properties:
+        sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^QE[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string that identifies a US A2P Compliance resource
+            `QE2c6890da8086d771620e9b13fadeba0b`.
+        account_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Account](https://www.twilio.com/docs/iam/api/account)
+            that the Campaign belongs to.
+        brand_registration_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^BN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The unique string to identify the A2P brand.
+        messaging_service_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^MG[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the [Messaging Service](https://www.twilio.com/docs/messaging/api/service-resource)
+            that the resource is associated with.
+        description:
+          type: string
+          nullable: true
+          description: 'A short description of what this SMS campaign does. Min length:
+            40 characters. Max length: 4096 characters.'
+        message_samples:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: 'An array of sample message strings, min two and max five.
+            Min length for each sample: 20 chars. Max length for each sample: 1024
+            chars.'
+        us_app_to_person_usecase:
+          type: string
+          nullable: true
+          description: 'A2P Campaign Use Case. Examples: [ 2FA, EMERGENCY, MARKETING,
+            SOLE_PROPRIETOR...]. SOLE_PROPRIETOR campaign use cases can only be created
+            by SOLE_PROPRIETOR Brands, and there can only be one SOLE_PROPRIETOR campaign
+            created per SOLE_PROPRIETOR Brand.'
+        has_embedded_links:
+          type: boolean
+          nullable: true
+          description: Indicate that this SMS campaign will send messages that contain
+            links.
+        has_embedded_phone:
+          type: boolean
+          nullable: true
+          description: Indicates that this SMS campaign will send messages that contain
+            phone numbers.
+        subscriber_opt_in:
+          type: boolean
+          nullable: true
+          description: A boolean that specifies whether campaign has Subscriber Optin
+            or not.
+        age_gated:
+          type: boolean
+          nullable: true
+          description: A boolean that specifies whether campaign is age gated or not.
+        direct_lending:
+          type: boolean
+          nullable: true
+          description: A boolean that specifies whether campaign allows direct lending
+            or not.
+        campaign_status:
+          type: string
+          nullable: true
+          description: 'Campaign status. Examples: IN_PROGRESS, VERIFIED, FAILED.'
+        campaign_id:
+          type: string
+          nullable: true
+          description: The Campaign Registry (TCR) Campaign ID.
+        is_externally_registered:
+          type: boolean
+          nullable: true
+          description: Indicates whether the campaign was registered externally or
+            not.
+        rate_limits:
+          nullable: true
+          description: Rate limit and/or classification set by each carrier, Ex. AT&T
+            or T-Mobile.
+        message_flow:
+          type: string
+          nullable: true
+          description: Details around how a consumer opts-in to their campaign, therefore
+            giving consent to receive their messages. If multiple opt-in methods can
+            be used for the same campaign, they must all be listed. 40 character minimum.
+            2048 character maximum.
+        opt_in_message:
+          type: string
+          nullable: true
+          description: If end users can text in a keyword to start receiving messages
+            from this campaign, the auto-reply messages sent to the end users must
+            be provided. The opt-in response should include the Brand name, confirmation
+            of opt-in enrollment to a recurring message campaign, how to get help,
+            and clear description of how to opt-out. This field is required if end
+            users can text in a keyword to start receiving messages from this campaign.
+            20 character minimum. 320 character maximum.
+        opt_out_message:
+          type: string
+          nullable: true
+          description: Upon receiving the opt-out keywords from the end users, Twilio
+            customers are expected to send back an auto-generated response, which
+            must provide acknowledgment of the opt-out request and confirmation that
+            no further messages will be sent. It is also recommended that these opt-out
+            messages include the brand name. This field is required if managing opt
+            out keywords yourself (i.e. not using Twilio's Default or Advanced Opt
+            Out features). 20 character minimum. 320 character maximum.
+        help_message:
+          type: string
+          nullable: true
+          description: When customers receive the help keywords from their end users,
+            Twilio customers are expected to send back an auto-generated response;
+            this may include the brand name and additional support contact information.
+            This field is required if managing help keywords yourself (i.e. not using
+            Twilio's Default or Advanced Opt Out features). 20 character minimum.
+            320 character maximum.
+        opt_in_keywords:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: If end users can text in a keyword to start receiving messages
+            from this campaign, those keywords must be provided. This field is required
+            if end users can text in a keyword to start receiving messages from this
+            campaign. Values must be alphanumeric. 255 character maximum.
+        opt_out_keywords:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: End users should be able to text in a keyword to stop receiving
+            messages from this campaign. Those keywords must be provided. This field
+            is required if managing opt out keywords yourself (i.e. not using Twilio's
+            Default or Advanced Opt Out features). Values must be alphanumeric. 255
+            character maximum.
+        help_keywords:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: End users should be able to text in a keyword to receive help.
+            Those keywords must be provided as part of the campaign registration request.
+            This field is required if managing help keywords yourself (i.e. not using
+            Twilio's Default or Advanced Opt Out features). Values must be alphanumeric.
+            255 character maximum.
+        date_created:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was created specified
+            in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        date_updated:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date and time in GMT when the resource was last updated
+            specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.
+        url:
+          type: string
+          format: uri
+          nullable: true
+          description: The absolute URL of the US App to Person resource.
+        mock:
+          type: boolean
+          nullable: true
+          description: A boolean that specifies whether campaign is a mock or not.
+            Mock campaigns will be automatically created if using a mock brand. Mock
+            campaigns should only be used for testing purposes.
+        errors:
+          type: array
+          items: {}
+          nullable: true
+          description: Details indicating why a campaign registration failed. These
+            errors can indicate one or more fields that were incorrect or did not
+            meet review requirements.
+        privacy_policy_url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the privacy policy for the campaign.
+        terms_and_conditions_url:
+          type: string
+          format: uri
+          nullable: true
+          description: The URL of the terms and conditions for the campaign.
     messaging.v1.usecase:
       type: object
       properties:
@@ -6709,11 +6968,7 @@ paths:
                   description: The email address to receive the notification about
                     the verification result. .
                 UseCaseCategories:
-                  type: array
-                  items:
-                    type: string
-                  description: The category of the use case for the Tollfree Number.
-                    List as many are applicable..
+                  $ref: '#/components/schemas/tollfree_verification_enum_use_case_categories'
                 UseCaseSummary:
                   type: string
                   description: Use this to further explain how messaging is used by
@@ -6785,17 +7040,14 @@ paths:
                     should be set to something similar to 'Website fixed'.
                 BusinessRegistrationNumber:
                   type: string
-                  description: A legaly recognized business registration number
+                  description: A legally recognized business registration number
                 BusinessRegistrationAuthority:
-                  type: string
-                  description: The organizational authority for business registrations
+                  $ref: '#/components/schemas/tollfree_verification_enum_business_registration_authority'
                 BusinessRegistrationCountry:
                   type: string
                   description: Country business is registered in
                 BusinessType:
-                  type: string
-                  description: The type of business, valid values are PRIVATE_PROFIT,
-                    PUBLIC_PROFIT, NON_PROFIT, SOLE_PROPRIETOR, GOVERNMENT
+                  $ref: '#/components/schemas/tollfree_verification_enum_business_type'
                 BusinessRegistrationPhoneNumber:
                   type: string
                   description: The E.164 formatted number associated with the business.
@@ -7295,11 +7547,7 @@ paths:
                   description: The email address to receive the notification about
                     the verification result. .
                 UseCaseCategories:
-                  type: array
-                  items:
-                    type: string
-                  description: The category of the use case for the Tollfree Number.
-                    List as many are applicable..
+                  $ref: '#/components/schemas/tollfree_verification_enum_use_case_categories'
                 UseCaseSummary:
                   type: string
                   description: Use this to further explain how messaging is used by
@@ -7385,18 +7633,13 @@ paths:
                   description: A legally recognized business registration number.
                     Required for all business types except SOLE_PROPRIETOR.
                 BusinessRegistrationAuthority:
-                  type: string
-                  description: The organizational authority for business registrations.
-                    Required for all business types except SOLE_PROPRIETOR.
+                  $ref: '#/components/schemas/tollfree_verification_enum_business_registration_authority'
                 BusinessRegistrationCountry:
                   type: string
                   description: The country where the business is registered. Required
                     for all business types except SOLE_PROPRIETOR.
                 BusinessType:
-                  type: string
-                  description: The type of business, valid values are PRIVATE_PROFIT,
-                    PUBLIC_PROFIT, NON_PROFIT, SOLE_PROPRIETOR, GOVERNMENT. Required
-                    field.
+                  $ref: '#/components/schemas/tollfree_verification_enum_business_type'
                 BusinessRegistrationPhoneNumber:
                   type: string
                   description: The E.164 formatted number associated with the business.
@@ -7549,12 +7792,13 @@ paths:
           maxLength: 34
           pattern: ^MG[0-9a-fA-F]{32}$
         required: true
+      - $ref: '#/components/parameters/XTwilioApiVersion'
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_response'
               examples:
                 create:
                   value:
@@ -7710,6 +7954,56 @@ paths:
                     url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
                     mock: false
                     errors: []
+                createWithExtendedFieldsAndHeader:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: MARKETING
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    subscriber_opt_in: false
+                    age_gated: false
+                    direct_lending: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      Acme Corporation. You will not receive any more messages from
+                      this number.
+                    help_message: 'Acme Corporation: Please visit www.example.com
+                      to get support. To opt-out, reply STOP.'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    privacy_policy_url: https://example.com/privacy
+                    terms_and_conditions_url: https://example.com/terms
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
           headers:
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
@@ -7850,6 +8144,14 @@ paths:
                   type: boolean
                   description: A boolean that specifies whether campaign allows direct
                     lending or not.
+                PrivacyPolicyUrl:
+                  type: string
+                  format: uri
+                  description: The URL of the privacy policy for the campaign.
+                TermsAndConditionsUrl:
+                  type: string
+                  format: uri
+                  description: The URL of the terms and conditions for the campaign.
               required:
               - BrandRegistrationSid
               - Description
@@ -7929,6 +8231,38 @@ paths:
                   HasEmbeddedPhone: false
                   AgeGated: false
                   DirectLending: false
+              createWithExtendedFieldsAndHeader:
+                value:
+                  BrandRegistrationSid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  Description: Send marketing messages about sales to opted in customers.
+                  MessageSamples:
+                  - 'EXPRESS: Denim Days Event is ON'
+                  - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                  UsAppToPersonUsecase: MARKETING
+                  MessageFlow: End users opt-in by visiting www.example.com and adding
+                    their phone number. They then check a box agreeing to receive
+                    text messages from Example Brand. Additionally, end users can
+                    also opt-in by texting START to (111) 222-3333 to opt in.
+                  OptInMessage: 'Acme Corporation: You are now opted-in. For help,
+                    reply HELP. To opt-out, reply STOP'
+                  OptOutMessage: You have successfully been unsubscribed from Acme
+                    Corporation. You will not receive any more messages from this
+                    number.
+                  HelpMessage: 'Acme Corporation: Please visit www.example.com to
+                    get support. To opt-out, reply STOP.'
+                  OptInKeywords:
+                  - START
+                  OptOutKeywords:
+                  - STOP
+                  HelpKeywords:
+                  - HELP
+                  PrivacyPolicyUrl: https://example.com/privacy
+                  TermsAndConditionsUrl: https://example.com/terms
+                  HasEmbeddedLinks: true
+                  HasEmbeddedPhone: false
+                  SubscriberOptIn: false
+                  AgeGated: false
+                  DirectLending: false
     get:
       description: ''
       summary: ''
@@ -7965,6 +8299,7 @@ paths:
         description: The page token. This is provided by the API.
         schema:
           type: string
+      - $ref: '#/components/parameters/XTwilioApiVersion'
       responses:
         '200':
           content:
@@ -7975,7 +8310,7 @@ paths:
                   compliance:
                     type: array
                     items:
-                      $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+                      $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_response'
                   meta:
                     properties:
                       first_page_url:
@@ -8123,6 +8458,66 @@ paths:
                       next_page_url: null
                       url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=20&Page=0
                       key: compliance
+                readFullWithExtendedFieldsAndHeader:
+                  value:
+                    compliance:
+                    - sid: QE2c6890da8086d771620e9b13fadeba0b
+                      account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      description: Send marketing messages about sales to opted in
+                        customers.
+                      message_samples:
+                      - 'EXPRESS: Denim Days Event is ON'
+                      - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                      us_app_to_person_usecase: MARKETING
+                      has_embedded_links: true
+                      has_embedded_phone: false
+                      subscriber_opt_in: true
+                      age_gated: false
+                      direct_lending: false
+                      campaign_status: PENDING
+                      campaign_id: CFOOBAR
+                      is_externally_registered: false
+                      rate_limits:
+                        att:
+                          mps: 600
+                          msg_class: A
+                        tmobile:
+                          brand_tier: TOP
+                      message_flow: End users opt-in by visiting www.example.com and
+                        adding their phone number. They then check a box agreeing
+                        to receive text messages from Example Brand. Additionally,
+                        end users can also opt-in by texting START to (111) 222-3333
+                        to opt in.
+                      opt_in_message: 'Acme Corporation: You are now opted-in. For
+                        help, reply HELP. To opt-out, reply STOP'
+                      opt_out_message: You have successfully been unsubscribed from
+                        Acme Corporation. You will not receive any more messages from
+                        this number.
+                      help_message: 'Acme Corporation: Please visit www.example.com
+                        to get support. To opt-out, reply STOP.'
+                      opt_in_keywords:
+                      - START
+                      opt_out_keywords:
+                      - STOP
+                      help_keywords:
+                      - HELP
+                      privacy_policy_url: https://example.com/privacy
+                      terms_and_conditions_url: https://example.com/terms
+                      date_created: '2021-02-18T14:48:52Z'
+                      date_updated: '2021-02-18T14:48:52Z'
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                      mock: false
+                      errors: []
+                    meta:
+                      page: 0
+                      page_size: 20
+                      first_page_url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=20&Page=0
+                      previous_page_url: null
+                      next_page_url: null
+                      url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p?PageSize=20&Page=0
+                      key: compliance
           headers:
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
@@ -8221,12 +8616,13 @@ paths:
           maxLength: 34
           pattern: ^QE[0-9a-fA-F]{32}$
         required: true
+      - $ref: '#/components/parameters/XTwilioApiVersion'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_response'
               examples:
                 fetch:
                   value:
@@ -8376,6 +8772,56 @@ paths:
                       url: https://www.twilio.com/docs/api/errors/30897
                       description: The campaign submission has been reviewed and it
                         was rejected due to Disallowed Content.
+                fetchWithExtendedFields:
+                  value:
+                    sid: QE2c6890da8086d771620e9b13fadeba0b
+                    account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    brand_registration_sid: BNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    messaging_service_sid: MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                    description: Send marketing messages about sales to opted in customers.
+                    message_samples:
+                    - 'EXPRESS: Denim Days Event is ON'
+                    - 'LAST CHANCE: Book your next flight for just 1 (ONE) EUR'
+                    us_app_to_person_usecase: MARKETING
+                    has_embedded_links: true
+                    has_embedded_phone: false
+                    subscriber_opt_in: true
+                    age_gated: false
+                    direct_lending: false
+                    campaign_status: PENDING
+                    campaign_id: CFOOBAR
+                    is_externally_registered: false
+                    rate_limits:
+                      att:
+                        mps: 600
+                        msg_class: A
+                      tmobile:
+                        brand_tier: TOP
+                    message_flow: End users opt-in by visiting www.example.com and
+                      adding their phone number. They then check a box agreeing to
+                      receive text messages from Example Brand. Additionally, end
+                      users can also opt-in by texting START to (111) 222-3333 to
+                      opt in.
+                    opt_in_message: 'Acme Corporation: You are now opted-in. For help,
+                      reply HELP. To opt-out, reply STOP'
+                    opt_out_message: You have successfully been unsubscribed from
+                      Acme Corporation. You will not receive any more messages from
+                      this number.
+                    help_message: 'Acme Corporation: Please visit www.example.com
+                      to get support. To opt-out, reply STOP.'
+                    opt_in_keywords:
+                    - START
+                    opt_out_keywords:
+                    - STOP
+                    help_keywords:
+                    - HELP
+                    privacy_policy_url: https://example.com/privacy
+                    terms_and_conditions_url: https://example.com/terms
+                    date_created: '2021-02-18T14:48:52Z'
+                    date_updated: '2021-02-18T14:48:52Z'
+                    url: https://messaging.twilio.com/v1/Services/MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Compliance/Usa2p/QE2c6890da8086d771620e9b13fadeba0b
+                    mock: false
+                    errors: []
           headers:
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
@@ -8430,12 +8876,13 @@ paths:
           maxLength: 34
           pattern: ^QE[0-9a-fA-F]{32}$
         required: true
+      - $ref: '#/components/parameters/XTwilioApiVersion'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person'
+                $ref: '#/components/schemas/messaging.v1.service.us_app_to_person_response'
               examples:
                 update:
                   value:
@@ -8481,6 +8928,8 @@ paths:
                     - STOP
                     help_keywords:
                     - HELP
+                    privacy_policy_url: https://example.com/privacy
+                    terms_and_conditions_url: https://example.com/terms
                     help_message: 'Acme Corporation: Please visit www.example.com
                       to get support. To opt-out, reply STOP.'
                     mock: false
@@ -8555,6 +9004,14 @@ paths:
                   type: boolean
                   description: A boolean that specifies whether campaign allows direct
                     lending or not.
+                PrivacyPolicyUrl:
+                  type: string
+                  format: uri
+                  description: The URL of the privacy policy for the campaign.
+                TermsAndConditionsUrl:
+                  type: string
+                  format: uri
+                  description: The URL of the terms and conditions for the campaign.
               required:
               - HasEmbeddedLinks
               - HasEmbeddedPhone

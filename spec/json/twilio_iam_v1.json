@@ -347,6 +347,21 @@
           }
         }
       },
+      "iam.v1.OrganizationFeatures": {
+        "type": "object",
+        "properties": {
+          "enabledFeatures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of features enabled for the organization",
+            "example": [
+              "sso"
+            ]
+          }
+        }
+      },
       "iam.v1.OrganizationUpdateRequest": {
         "type": "object",
         "required": [
@@ -942,6 +957,10 @@
             "format": "AccountSid",
             "description": "Unique Twilio account sid"
           },
+          "friendlyName": {
+            "type": "string",
+            "description": "Friendly name of the account"
+          },
           "senderFirstName": {
             "type": "string",
             "description": "First name of the sender who invited the account"
@@ -1162,6 +1181,60 @@
           }
         }
       },
+      "iam.v1.create-consent": {
+        "type": "object",
+        "required": [
+          "csrf_token",
+          "csrf_token_session_state",
+          "redirect_uri",
+          "client_sid",
+          "vendor_client_id",
+          "response",
+          "owner_sid",
+          "actor_sid",
+          "issuer"
+        ],
+        "properties": {
+          "csrf_token": {
+            "type": "string"
+          },
+          "csrf_token_session_state": {
+            "type": "string"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "client_sid": {
+            "type": "string"
+          },
+          "vendor_client_id": {
+            "type": "string"
+          },
+          "response": {
+            "type": "string",
+            "enum": [
+              "allow",
+              "deny"
+            ]
+          },
+          "owner_sid": {
+            "type": "string"
+          },
+          "actor_sid": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "allow": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "iam.v1.organization.vendoroauthapp": {
         "type": "object",
         "properties": {
@@ -1229,6 +1302,16 @@
             "type": "string",
             "format": "uri"
           },
+          "presigned_image_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned URL for temporary direct access to the image. Valid for 5 minutes."
+          },
+          "presigned_image_url_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the presigned image URL expires"
+          },
           "authorization_url": {
             "type": "string",
             "format": "uri"
@@ -1287,6 +1370,9 @@
             "type": "string",
             "format": "uri"
           },
+          "image_key": {
+            "type": "string"
+          },
           "company_name": {
             "type": "string"
           },
@@ -1313,10 +1399,6 @@
       "iam.v1.organization.VendorOauthAppUpdateRequest": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
           "friendly_name": {
             "type": "string",
             "nullable": true
@@ -1365,6 +1447,15 @@
               "type": "string",
               "format": "uri"
             },
+            "nullable": true
+          },
+          "image_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "image_key": {
+            "type": "string",
             "nullable": true
           },
           "access_token_ttl": {
@@ -1449,6 +1540,25 @@
           },
           "access_token_ttl": {
             "type": "integer"
+          }
+        }
+      },
+      "iam.v1.organization.GeneratePresignedImageUploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "presigned_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned S3 URL for uploading the image (PUT request). Valid for 5 minutes."
+          },
+          "image_key": {
+            "type": "string",
+            "description": "S3 key where the image will be stored."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the presigned URL expires"
           }
         }
       },
@@ -1899,6 +2009,18 @@
             "format": "IdentityNotificationSid",
             "example": "NFbfd75767416fbd8418bedafce743700a",
             "description": "Unique Twilio notification sid of the invitation"
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "Friendly name of the account"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Account",
+              "Subaccount"
+            ],
+            "description": "Type of the account"
           },
           "email": {
             "type": "string",
@@ -2727,6 +2849,7 @@
     "/v1/Operations/{operationId}": {},
     "/v1/Operations/{operationId}/ChildOperations": {},
     "/v1/Organizations/Info": {},
+    "/v1/Organizations/Features": {},
     "/v1/Organizations/Domains": {},
     "/v1/Organizations/Domains/{domainSid}": {},
     "/v1/Organizations/Domains/Limit": {},
@@ -3091,6 +3214,13 @@
         }
       ]
     },
+    "/v1/Organization/OAuthApps/image/presigned-url": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ]
+    },
     "/v1/Organizations/InvitedAccounts": {},
     "/v1/Organizations/InvitedAccounts/Limit": {},
     "/v1/Organizations/ImportUsers/EligibleUsers/Count": {},
@@ -3257,6 +3387,11 @@
     "/v1/Users/SendPasswordResetEmail": {},
     "/v1/Accounts/ChangeOwner": {},
     "/v1/Accounts/Invitations": {},
+    "/v1/console/api/ipam/acr_list": {},
+    "/v1/console/api/ipam/add_ip": {},
+    "/v1/console/api/ipam/edit_ip": {},
+    "/v1/console/api/ipam/remove_ip": {},
+    "/v1/console/api/ipam/set_ipam_status": {},
     "/v1/Authorize": {}
   },
   "servers": [

@@ -4230,9 +4230,14 @@ components:
       - postal-code
       - bank-routing-number
       - bank-account-number
+      - payment-card-number-matcher
+      - expiration-date-matcher
+      - security-code-matcher
+      - postal-code-matcher
       description: The piece of payment information that you wish the caller to enter.
         Must be one of `payment-card-number`, `expiration-date`, `security-code`,
-        `postal-code`, `bank-routing-number`, or `bank-account-number`.
+        `postal-code`, `bank-routing-number`, `bank-account-number`, or their `-matcher`
+        variants for input confirmation when `RequireMatchingInputs` is enabled.
     payments_enum_status:
       type: string
       enum:
@@ -23709,6 +23714,22 @@ paths:
                   type: string
                   description: Credit card types separated by space that Pay should
                     accept. The default value is `visa mastercard amex`
+                RequireMatchingInputs:
+                  type: string
+                  description: A comma-separated list of payment information fields
+                    that require the caller to enter the same value twice for confirmation.
+                    Supported values are `payment-card-number`, `expiration-date`,
+                    `security-code`, and `postal-code`.
+                Confirmation:
+                  type: string
+                  description: Whether to prompt the caller to confirm their payment
+                    information before submitting to the payment gateway. If `true`,
+                    the caller will hear the last 4 digits of their card or account
+                    number and must press 1 to confirm or 2 to cancel. Default is
+                    `false`.
+                  enum:
+                  - 'true'
+                  - 'false'
               required:
               - IdempotencyKey
               - StatusCallback
@@ -24482,6 +24503,14 @@ paths:
                   type: string
                   description: The SID or unique name of the [Intelligence Service](https://www.twilio.com/docs/conversational-intelligence/api/service-resource)
                     for persisting transcripts and running post-call Language Operators
+                ConversationConfiguration:
+                  type: string
+                  description: The ID of the Conversations Configuration for customizing
+                    conversation behavior in Intelligence Service
+                ConversationId:
+                  type: string
+                  description: The ID of the Conversation for associating this Transcription
+                    with an existing Conversation in Intelligence Service
                 EnableProviderData:
                   type: boolean
                   description: Whether the callback includes raw provider data.
@@ -24504,6 +24533,8 @@ paths:
                   Hints: this is a hint
                   EnableAutomaticPunctuation: true
                   IntelligenceService: GAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                  ConversationConfiguration: conv_configuration_01k1etk2y5f1y9fpe2epfdtvv2
+                  ConversationId: conv_01k1etk2y5f1y9fpe2epfdtvv2
                   EnableProviderData: false
   /2010-04-01/Accounts/{AccountSid}/Calls/{CallSid}/Transcriptions/{Sid}.json:
     servers:
