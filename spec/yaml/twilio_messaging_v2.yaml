@@ -212,6 +212,15 @@ components:
           type: string
           description: The SID of the Twilio Voice application.
           nullable: true
+        account_type:
+          type: string
+          enum:
+          - ISV
+          - ISVSubAccount
+          description: The account type for ISV Account Type Migration. Set to 'ISV'
+            or 'ISVSubAccount' to configure, null or empty string to clear, or omit
+            to preserve the existing value.
+          nullable: true
       description: The configuration settings for creating a sender.
     messaging.v2.channels_sender.webhook:
       type: object
@@ -607,6 +616,48 @@ components:
           nullable: true
           description: Optional JSON field describing the status and upload date of
             a new certificate in the process of validation
+    messaging.v2.presigned_url.request:
+      type: object
+      properties:
+        imageContentMd5:
+          type: string
+          description: Base64-encoded MD5 hash of the image
+        imageContentType:
+          type: string
+          description: MIME type of the image (e.g., image/png, image/jpeg)
+        imageKind:
+          type: string
+          description: Type of image (logo, hero, etc.)
+        imageName:
+          type: string
+          description: Name of the image file
+        imageSizeBytes:
+          type: integer
+          description: Size of the image in bytes
+        imageHeight:
+          type: integer
+          description: Height of the image in pixels
+        imageWidth:
+          type: integer
+          description: Width of the image in pixels
+      required:
+      - imageContentMd5
+      - imageContentType
+      - imageKind
+      - imageName
+      - imageSizeBytes
+    messaging.v2.presigned_url.response:
+      type: object
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+        fetchUrl:
+          type: string
+        uploadUrl:
+          type: string
+        uploadFields:
+          type: object
   examples:
     whatsapp_create_request:
       value:
@@ -648,6 +699,7 @@ components:
           verification_method: sms
           verification_code: null
           voice_application_sid: APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          account_type: null
         webhook:
           callback_url: https://callback.example.com
           callback_method: POST
@@ -749,6 +801,7 @@ components:
           verification_method: null
           verification_code: null
           voice_application_sid: APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          account_type: null
         webhook:
           callback_url: https://callback.example.com
           callback_method: POST
@@ -792,6 +845,7 @@ components:
           verification_method: null
           verification_code: null
           voice_application_sid: APXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          account_type: null
         webhook:
           callback_url: https://callback.example.com
           callback_method: POST
@@ -906,6 +960,7 @@ components:
         configuration:
           verification_code: '123456'
           voice_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          account_type: null
     whatsapp_patch_update_webhook_request:
       value:
         webhook:
@@ -998,6 +1053,7 @@ components:
         configuration:
           verification_code: '123456'
           voice_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          account_type: null
     whatsapp_patch_update_profile_response:
       value:
         sid: XEaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -1474,6 +1530,7 @@ paths:
                       verification_method: sms
                       verification_code: null
                       voice_application_sid: APaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                      account_type: null
                     webhook:
                       callback_url: https://callback.example.com
                       callback_method: POST

@@ -385,6 +385,123 @@
           }
         }
       },
+      "numbers.v1.porting_bulk_update_status_request": {
+        "type": "object",
+        "required": [
+          "new_status",
+          "port_in_phone_number_requests"
+        ],
+        "properties": {
+          "new_status": {
+            "type": "string",
+            "enum": [
+              "in_review",
+              "waiting_for_signature",
+              "port_submitted",
+              "port_rejected",
+              "port_pending",
+              "canceled",
+              "completed",
+              "canceling"
+            ],
+            "nullable": false,
+            "description": "The new status to set for the port in request."
+          },
+          "port_in_phone_number_requests": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "nullable": false,
+            "items": {
+              "type": "object",
+              "required": [
+                "port_in_phone_number_sid"
+              ],
+              "properties": {
+                "port_in_phone_number_sid": {
+                  "type": "string",
+                  "description": "The SID of the Port In Phone Number resource that is being updated.",
+                  "nullable": false,
+                  "minLength": 34,
+                  "pattern": "^PU[0-9a-fA-F]{32}$"
+                },
+                "port_date": {
+                  "type": "string",
+                  "description": "The timestamp the phone number will be ported. This will only be set once a port date has been confirmed. Not all carriers can guarantee a specific time on the port date. Twilio will try its best to get the port completed by this time on the port date.",
+                  "nullable": true,
+                  "format": "date-time"
+                },
+                "rejection_reason": {
+                  "type": "string",
+                  "description": "The description of the rejection reason provided by the losing carrier. This field may be null if the number has not been rejected by the losing carrier.",
+                  "nullable": true,
+                  "enum": [
+                    "CONTACT_SUPPORT_REQUIRED",
+                    "PHONE_NUMBER_WITH_CARRIER_RESTRICTION",
+                    "PHONE_NUMBER_INACTIVE_OR_DISCONNECTED",
+                    "INVALID_END_USER_NAME",
+                    "INVALID_ADDRESS",
+                    "INVALID_PIN",
+                    "INVALID_ACCOUNT_NUMBER"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v1.porting_bulk_update_status_response": {
+        "type": "object",
+        "required": [
+          "successful_updates",
+          "failed_updates"
+        ],
+        "properties": {
+          "successful_updates": {
+            "type": "array",
+            "nullable": false,
+            "minItems": 0,
+            "items": {
+              "$ref": "#/components/schemas/numbers.v1.porting_bulk_phone_number_update_detail"
+            }
+          },
+          "failed_updates": {
+            "type": "array",
+            "nullable": false,
+            "minItems": 0,
+            "items": {
+              "$ref": "#/components/schemas/numbers.v1.porting_bulk_phone_number_update_detail"
+            }
+          }
+        }
+      },
+      "numbers.v1.porting_bulk_phone_number_update_detail": {
+        "type": "object",
+        "required": [
+          "port_in_phone_number_sid",
+          "current_status",
+          "requested_status"
+        ],
+        "properties": {
+          "port_in_phone_number_sid": {
+            "type": "string",
+            "nullable": false
+          },
+          "current_status": {
+            "type": "string",
+            "nullable": false
+          },
+          "requested_status": {
+            "type": "string",
+            "nullable": false
+          },
+          "error_message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message explaining why the update failed"
+          }
+        }
+      },
       "numbers.v1.porting_portability": {
         "type": "object",
         "properties": {
@@ -1222,6 +1339,186 @@
             "type": "string",
             "nullable": true,
             "description": "Token for pagination to retrieve the next page of results"
+          }
+        }
+      },
+      "numbers.v1.create_embedded_registration_request": {
+        "type": "object",
+        "required": [
+          "regulationId",
+          "regulationVersion",
+          "friendlyName",
+          "data"
+        ],
+        "properties": {
+          "regulationId": {
+            "type": "string",
+            "description": "The regulation for this registration.",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^RN[0-9a-fA-F]{32}$"
+          },
+          "regulationVersion": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The regulation version."
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "Human-readable name for the registration.",
+            "maxLength": 255
+          },
+          "statusNotificationEmail": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address for registration status notifications.",
+            "maxLength": 255
+          },
+          "statusCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of this resource."
+          },
+          "comments": {
+            "type": "string",
+            "description": "Additional comments about the registration.",
+            "maxLength": 255
+          },
+          "themeSetId": {
+            "type": "string",
+            "description": "Theme ID for the Compliance Embeddable UI.",
+            "maxLength": 255
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Registration data organized by section (alphanumericSender, business, useCase, authorizedRepresentative, officer, businessAddress)."
+          }
+        }
+      },
+      "numbers.v1.create_embedded_registration_response": {
+        "type": "object",
+        "required": [
+          "id",
+          "regulationId",
+          "regulationVersion",
+          "friendlyName",
+          "status",
+          "embeddedSession",
+          "data",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Registration identifier (BU-prefixed).",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$"
+          },
+          "regulationId": {
+            "type": "string",
+            "description": "The regulation ID for this registration."
+          },
+          "regulationVersion": {
+            "type": "integer",
+            "description": "The regulation version."
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "The friendly name provided in the request."
+          },
+          "status": {
+            "type": "string",
+            "description": "Registration status. Always DRAFT on creation."
+          },
+          "statusNotificationEmail": {
+            "type": "string",
+            "format": "email",
+            "nullable": true,
+            "description": "Email address for status notifications."
+          },
+          "statusCallbackUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Callback URL for status webhooks."
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true,
+            "description": "Additional comments."
+          },
+          "embeddedSession": {
+            "$ref": "#/components/schemas/numbers.v1.embedded_session"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Registration data echoed from the request."
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of creation."
+          },
+          "dateUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of last update."
+          }
+        }
+      },
+      "numbers.v1.embedded_session": {
+        "type": "object",
+        "required": [
+          "sessionId",
+          "sessionToken"
+        ],
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID for the compliance embeddable."
+          },
+          "sessionToken": {
+            "type": "string",
+            "description": "Ephemeral session token for the compliance embeddable."
+          }
+        }
+      },
+      "numbers.v1.create_embedded_session_request": {
+        "type": "object",
+        "properties": {
+          "themeSetId": {
+            "type": "string",
+            "description": "Theme ID for the Compliance Embeddable UI. Overrides the theme set during registration creation.",
+            "maxLength": 255
+          }
+        }
+      },
+      "numbers.v1.create_embedded_session_response": {
+        "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "sessionToken"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Registration identifier (BU-prefixed).",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BU[0-9a-fA-F]{32}$"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Session ID for the compliance embeddable."
+          },
+          "sessionToken": {
+            "type": "string",
+            "description": "Ephemeral session token for the compliance embeddable."
           }
         }
       }
@@ -2979,6 +3276,417 @@
         ],
         "operationId": "ListSigningRequestConfiguration"
       }
+    },
+    "/v1/SenderIdRegistrations": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "Create a Sender ID Registration and initialize an embedded session",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "id",
+          "status",
+          "friendlyName"
+        ],
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Creates a new sender ID registration and initializes an embedded Persona inquiry session. Returns registration details and embedded session credentials for rendering the Compliance Embeddable UI.",
+        "summary": "Create Sender ID Registration",
+        "tags": [
+          "NumbersV1SenderIdRegistration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/numbers.v1.create_embedded_registration_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.create_embedded_registration_response"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "id": "BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "regulationId": "RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "regulationVersion": 1,
+                      "friendlyName": "AU Registration - MyBrand",
+                      "status": "DRAFT",
+                      "statusNotificationEmail": "registrations@example.com",
+                      "statusCallbackUrl": "https://example.com/webhooks/sender-id-status",
+                      "comments": null,
+                      "embeddedSession": {
+                        "sessionId": "inq_aJK3bb5ti4Cj1PvQz7ZLTXXX",
+                        "sessionToken": "eyJhbGciOiJIUzI1NiJ9..."
+                      },
+                      "data": {
+                        "alphanumericSender": {
+                          "senderId": "MyBrand",
+                          "proofOfSenderId": "Company Extract"
+                        },
+                        "business": {
+                          "businessIdentity": "ISV",
+                          "isSubassigned": "NO",
+                          "headquartersCountry": "AU",
+                          "businessName": "Acme Corp Pty Ltd"
+                        },
+                        "useCase": {
+                          "category": "TRANSACTIONAL"
+                        }
+                      },
+                      "dateCreated": "2026-02-17T10:00:00Z",
+                      "dateUpdated": "2026-02-17T10:00:00Z"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateSenderIdRegistration"
+      }
+    },
+    "/v1/SenderIdRegistrations/{BundleSid}/EmbeddedSessions": {
+      "servers": [
+        {
+          "url": "https://numbers.twilio.com"
+        }
+      ],
+      "description": "Create a new Embedded Session for an existing Sender ID Registration",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "id",
+          "sessionId"
+        ],
+        "pathType": "list"
+      },
+      "post": {
+        "description": "Creates a new embedded Persona inquiry session for an existing registration in DRAFT or TWILIO_REJECTED status. Use this to resume an incomplete registration or resubmit a rejected one.",
+        "summary": "Create Embedded Session",
+        "tags": [
+          "NumbersV1SenderIdRegistrationEmbeddedSession"
+        ],
+        "parameters": [
+          {
+            "name": "BundleSid",
+            "in": "path",
+            "description": "The unique identifier of the registration (BU-prefixed).",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^BU[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/numbers.v1.create_embedded_session_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v1.create_embedded_session_response"
+                },
+                "examples": {
+                  "create": {
+                    "value": {
+                      "id": "BUaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                      "sessionId": "inq_aJK3bb5ti4Cj1PvQz7ZLTXXX",
+                      "sessionToken": "eyJhbGciOiJIUzI1NiJ9..."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Conflict - Registration not in editable state"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateSenderIdRegistrationEmbeddedSession"
+      }
     }
   },
   "servers": [
@@ -3034,6 +3742,12 @@
     },
     {
       "name": "NumbersV1A2pRegistrationDetails"
+    },
+    {
+      "name": "NumbersV1SenderIdRegistration"
+    },
+    {
+      "name": "NumbersV1SenderIdRegistrationEmbeddedSession"
     }
   ],
   "security": [
