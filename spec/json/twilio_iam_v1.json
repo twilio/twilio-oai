@@ -165,6 +165,44 @@
           "RESOURCE"
         ]
       },
+      "iam.v1.role_permission": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^IZ[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The unique string that identifies the Permission resource."
+          },
+          "namespace": {
+            "type": "string",
+            "nullable": true,
+            "description": "The namespace of the permission (e.g., twilio)."
+          },
+          "product": {
+            "type": "string",
+            "nullable": true,
+            "description": "The product the permission belongs to (e.g., iam)."
+          },
+          "resource": {
+            "type": "string",
+            "nullable": true,
+            "description": "The resource the permission applies to (e.g., roles)."
+          },
+          "action": {
+            "type": "string",
+            "nullable": true,
+            "description": "The action granted by the permission (e.g., read)."
+          },
+          "externalDescription": {
+            "type": "string",
+            "nullable": true,
+            "description": "The external description of the permission."
+          }
+        }
+      },
       "oauth.v1.token": {
         "type": "object",
         "properties": {
@@ -734,6 +772,13 @@
             "type": "string",
             "description": "Organization friendly name"
           },
+          "currentAccountSid": {
+            "pattern": "AC[0-9a-f]{32}",
+            "type": "string",
+            "format": "AccountSid",
+            "example": "AC33f4f3aa6fffe840d000f8ef22e883db",
+            "description": "Unique Twilio account sid"
+          },
           "timeZone": {
             "type": "string",
             "description": "User time zone"
@@ -1135,7 +1180,8 @@
                   "enum": [
                     "organization",
                     "account",
-                    "subaccount"
+                    "subaccount",
+                    "resource"
                   ]
                 },
                 "scopeName": {
@@ -2735,6 +2781,198 @@
           }
         ],
         "operationId": "DeleteKey"
+      }
+    },
+    "/v1/Roles/{RoleSid}/Permissions": {
+      "servers": [
+        {
+          "url": "https://iam.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [],
+        "mountName": "role_permission",
+        "parent": "/v1/Roles/{Sid}",
+        "pathType": "list"
+      },
+      "get": {
+        "description": "List resolved permissions for a role",
+        "tags": [
+          "IamV1RolePermission"
+        ],
+        "parameters": [
+          {
+            "name": "RoleSid",
+            "in": "path",
+            "description": "The SID of the Role for which Permissions will be fetched.",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^IX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 100.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "PageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "permissions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/iam.v1.role_permission"
+                      }
+                    },
+                    "meta": {
+                      "properties": {
+                        "first_page_url": {
+                          "format": "uri",
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        },
+                        "next_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "page": {
+                          "type": "integer"
+                        },
+                        "page_size": {
+                          "type": "integer"
+                        },
+                        "previous_page_url": {
+                          "format": "uri",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "url": {
+                          "format": "uri",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "title": "ListRolePermissionResponse"
+                },
+                "examples": {
+                  "readEmpty": {
+                    "value": {
+                      "permissions": [],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://iam.twilio.com/v1/Roles/IXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Permissions?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://iam.twilio.com/v1/Roles/IXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Permissions?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "permissions"
+                      }
+                    }
+                  },
+                  "readFull": {
+                    "value": {
+                      "permissions": [
+                        {
+                          "sid": "IZaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "namespace": "twilio",
+                          "product": "iam",
+                          "resource": "roles",
+                          "action": "read",
+                          "externalDescription": "Read access to IAM roles"
+                        }
+                      ],
+                      "meta": {
+                        "page": 0,
+                        "page_size": 50,
+                        "first_page_url": "https://iam.twilio.com/v1/Roles/IXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Permissions?PageSize=50&Page=0",
+                        "previous_page_url": null,
+                        "url": "https://iam.twilio.com/v1/Roles/IXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Permissions?PageSize=50&Page=0",
+                        "next_page_url": null,
+                        "key": "permissions"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [],
+        "operationId": "ListRolePermission"
       }
     },
     "/v1/token": {

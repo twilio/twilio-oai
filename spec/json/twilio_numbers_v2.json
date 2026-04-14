@@ -89,15 +89,79 @@
       },
       "numbers.v2.a2p_registration_details_fetch": {
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/numbers.v2.a2p_registration_details"
+        "description": "Single A2P registration details response including brand and campaign identifiers",
+        "properties": {
+          "accountSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "nullable": false,
+            "description": "Account Sid that the phone number belongs to in Twilio. This is only returned for phone numbers that already exist in Twilio's inventory and belong to your account or sub account."
           },
-          {
-            "$ref": "#/components/schemas/numbers.v2.a2p_brand_sids"
+          "phoneNumberSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PN[0-9a-fA-F]{32}$",
+            "nullable": false,
+            "description": "Phone Number SID for the requested phone number resource"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": false
+          },
+          "externalPhoneNumberStatus": {
+            "type": "string",
+            "nullable": false
+          },
+          "campaignSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^CM[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Campaign Sid associated with the phone number"
+          },
+          "messagingServiceSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "Messaging Service Sid that the number is associated with"
+          },
+          "externalCampaignId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The identifier for a campaign in the registrar. Typically, this is the TCR Campaign Id."
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time when the A2P registration details were last updated"
+          },
+          "brandRegistrationSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^BN[0-9a-f]{32}$",
+            "nullable": true,
+            "description": "Sid associated with campaign's brand"
+          },
+          "externalBrandId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The external brand identifier (e.g., TCR Brand ID)"
           }
-        ],
-        "description": "Single A2P registration details response including brand and campaign identifiers"
+        },
+        "required": [
+          "phoneNumberSid",
+          "accountSid",
+          "externalPhoneNumberStatus",
+          "phoneNumber"
+        ]
       },
       "numbers.v2.address": {
         "type": "object",
@@ -2581,6 +2645,41 @@
           }
         }
       },
+      "ShortCodeApplicationDocument": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "description": "The unique identifier of the document."
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "SC_LETTER_OF_AUTHORIZATION",
+              "CALL_TO_ACTION_OR_OPT_IN_MOCKUP",
+              "SMS_CAMPAIGN_TERMS_OF_SERVICE",
+              "SMS_PRIVACY_POLICY",
+              "MIGRATION_REQUEST_LETTER",
+              "SHORT_CODE_LEASE_RECEIPT",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_1",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_2",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_3",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_4",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_5",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_6",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_7",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_8",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_9",
+              "ADDITIONAL_SUPPORTING_DOCUMENTS_10"
+            ],
+            "description": "The type of document."
+          },
+          "friendly_name": {
+            "type": "string",
+            "description": "The friendly name of the document."
+          }
+        }
+      },
       "CountryRequirementList": {
         "description": "List the Sender ID registration requirements for the countries supporting Sender ID",
         "type": "array",
@@ -2944,6 +3043,11 @@
             "maxLength": 34,
             "pattern": "^BU[0-9a-fA-F]{32}$",
             "description": "Bundle SID of customer's profile"
+          },
+          "isv_opt_in_consent": {
+            "type": "boolean",
+            "default": true,
+            "description": "ISV opt-in consent flag. Defaults to true if not provided. Only rejected when explicitly set to false for ISV customers registering in Australia.\n"
           }
         }
       },
@@ -10284,6 +10388,9 @@
     },
     "/v2/ShortCodes/Applications/Bundles/{BundleSid}/Inquiries": {
       "description": "Initialize a Persona inquiry session for a shortcodes application"
+    },
+    "/v2/ShortCodes/Applications/{Sid}/Documents": {
+      "description": "Manage documents for a Short Code Application"
     }
   },
   "servers": [
@@ -10372,6 +10479,9 @@
     },
     {
       "name": "V2ShortCodeApplicationBundleInquiries"
+    },
+    {
+      "name": "V2ShortCodeDocuments"
     }
   ],
   "security": [

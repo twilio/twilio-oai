@@ -28,6 +28,12 @@
       "url": "https://messaging.twilio.com"
     }
   ],
+  "tags": [
+    {
+      "name": "MessagingV3TypingIndicator",
+      "description": "Send typing indicators to OTT channel recipients (WhatsApp, Apple Messages for Business).\n"
+    }
+  ],
   "paths": {
     "/v3/OptOuts/DefaultKeywordsMessages": {},
     "/v3/OptOuts": {},
@@ -36,7 +42,217 @@
     "/v3/OptOuts/Configurations/MessageTypes": {},
     "/v3/OptOuts/{OptOutSid}/MessageTypes": {},
     "/v3/OptOuts/{OptOutSid}/Messages": {},
-    "/v3/OptOuts/{OptOutSid}/Keywords": {}
+    "/v3/OptOuts/{OptOutSid}/Keywords": {},
+    "/v3/Indicators/Typing.json": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "Send a typing indicator event for OTT channels (e.g., WhatsApp, Apple Messages for Business).",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "success"
+        ],
+        "mountName": "typing_indicator",
+        "pathType": "list"
+      },
+      "post": {
+        "summary": "Send a typing indicator",
+        "description": "Send a typing indicator to notify the recipient that you are composing a message. Supported channels: WhatsApp, Apple Messages for Business. The request body varies by channel \u2014 use the `channel` field as the discriminator.\n",
+        "tags": [
+          "MessagingV3TypingIndicator"
+        ],
+        "operationId": "CreateV3TypingIndicator",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TypingIndicatorRequest"
+              },
+              "examples": {
+                "whatsapp_typing_indicator": {
+                  "summary": "WhatsApp Typing Indicator",
+                  "description": "Send a typing indicator for an active WhatsApp conversation",
+                  "value": {
+                    "channel": "WHATSAPP",
+                    "messageId": "SM1234567890abcdef1234567890abcdef"
+                  }
+                },
+                "apple_typing_indicator": {
+                  "summary": "Apple Typing Indicator",
+                  "description": "Send a typing indicator for an Apple Messages for Business conversation",
+                  "value": {
+                    "channel": "APPLE",
+                    "from": "apple:a89a691c-15c0-4fd1-a589-1ded34b59c39",
+                    "to": "apple:urn:mbid:AQAAYyUbut6E4B3T9FLv5EbG",
+                    "event": "START"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Typing indicator was successfully sent to the recipient.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indicates if the typing indicator was sent successfully.",
+                      "example": true
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "value": {
+                      "success": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. The request body is missing required fields or contains invalid values.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account is not authorized to send typing indicators for this channel.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    }
   },
   "components": {
     "securitySchemes": {
@@ -553,6 +769,90 @@
             "minLength": 1,
             "maxLength": 34,
             "example": "STOP"
+          }
+        }
+      },
+      "TypingIndicatorRequest": {
+        "type": "object",
+        "description": "Request body for sending a typing indicator. The schema varies by channel. Use the `channel` field to determine which properties are required.\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/WhatsAppTypingIndicatorRequest"
+          },
+          {
+            "$ref": "#/components/schemas/AppleTypingIndicatorRequest"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "channel",
+          "mapping": {
+            "WHATSAPP": "#/components/schemas/WhatsAppTypingIndicatorRequest",
+            "APPLE": "#/components/schemas/AppleTypingIndicatorRequest"
+          }
+        }
+      },
+      "WhatsAppTypingIndicatorRequest": {
+        "type": "object",
+        "description": "Typing indicator request for WhatsApp channel. Requires a messageId from a recent inbound message.",
+        "additionalProperties": false,
+        "required": [
+          "channel",
+          "messageId"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "WHATSAPP"
+            ],
+            "description": "The messaging channel. Must be \"WHATSAPP\".",
+            "example": "WHATSAPP"
+          },
+          "messageId": {
+            "type": "string",
+            "pattern": "^(SM|MM)[0-9a-fA-F]{32}$",
+            "description": "The SID of a recent inbound message from the recipient. Must be an SM or MM SID format.\n",
+            "example": "SM1234567890abcdef1234567890abcdef"
+          }
+        }
+      },
+      "AppleTypingIndicatorRequest": {
+        "type": "object",
+        "description": "Typing indicator request for Apple Messages for Business channel.",
+        "additionalProperties": false,
+        "required": [
+          "channel",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "APPLE"
+            ],
+            "description": "The messaging channel. Must be \"APPLE\".",
+            "example": "APPLE"
+          },
+          "from": {
+            "type": "string",
+            "description": "The Apple Messages for Business identifier of the sender (business).",
+            "example": "apple:a89a691c-15c0-4fd1-a589-1ded34b59c39"
+          },
+          "to": {
+            "type": "string",
+            "description": "The Apple Messages for Business identifier of the recipient (customer).",
+            "example": "apple:urn:mbid:AQAAYyUbut6E4B3T9FLv5EbG"
+          },
+          "event": {
+            "type": "string",
+            "enum": [
+              "START",
+              "END"
+            ],
+            "default": "START",
+            "description": "The type of typing event. \"START\" indicates the agent began typing, \"END\" indicates the agent stopped typing. Defaults to \"START\".\n",
+            "example": "START"
           }
         }
       }
