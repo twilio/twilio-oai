@@ -1,0 +1,1929 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Twilio Knowledge API",
+    "description": "APIs for managing knowledge bases and knowledge content for AI-powered applications.",
+    "version": "1.0",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "x-twilio": {
+      "apiStandards": "v1.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://knowledge.twilio.com"
+    }
+  ],
+  "paths": {
+    "/v2/KnowledgeBases/{kbId}/Knowledge": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/KbId"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "knowledge"
+        ],
+        "pathType": "list"
+      },
+      "get": {
+        "operationId": "ListKnowledge",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "List Knowledge Sources",
+        "description": "Retrieve a paginated list of all knowledge sources for a specific knowledge base.  Knowledge sources represent\nunstructured data sources such as documents,  websites, or text content that can be used for context and information\nretrieval.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page index. This value is simply for client state.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/PageToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "knowledge": {
+                      "type": "array",
+                      "maxItems": 1000,
+                      "items": {
+                        "$ref": "#/components/schemas/Knowledge"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/KnowledgeMeta"
+                    }
+                  },
+                  "title": "ListKnowledgeResponse",
+                  "example": {
+                    "knowledge": [
+                      {
+                        "id": "know_knowledge_00000000000000000000000000",
+                        "name": "Company FAQ Knowledge Base",
+                        "description": "Frequently asked questions and answers for customer support",
+                        "status": "COMPLETED",
+                        "source": {
+                          "type": "Web",
+                          "url": "https://example.com/faq",
+                          "crawlDepth": 2,
+                          "crawlPeriod": "NEVER"
+                        },
+                        "createdAt": "2026-01-15T10:30:00Z",
+                        "updatedAt": "2026-01-15T11:45:00Z"
+                      }
+                    ],
+                    "meta": {
+                      "pageSize": 50,
+                      "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
+                      "previousToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
+                      "key": "knowledge"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateKnowledge",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Create Knowledge Source",
+        "description": "Create a new knowledge source from various data sources such as web content,  files, or raw text. The\nknowledge source will be processed and indexed to enable semantic search and retrieval.\n\n## Best practices\n\nTo maximize the effectiveness of Knowledge, consider the following best practices:\n\n**Assess and optimize content:** Regularly evaluate your existing Knowledge sources for accuracy, relevance, and coverage.\nIdentify any gaps or outdated information that could hinder the Assistant's performance.\n\n**Simplify and structure content:** Ensure that the content is clear and concise. Use headings, bullet points, and metadata to make information straightforward\nto navigate for both the AI Assistant and your users.\n\n**Prioritize high-impact content:** Focus on updating and\nmaintaining content that is frequently accessed or critical to customer interactions. Consider using analytics to\ndetermine which Knowledge entries are most valuable.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeCore"
+              },
+              "example": {
+                "name": "Product Documentation",
+                "description": "Comprehensive product documentation and user guides",
+                "source": {
+                  "type": "Web",
+                  "url": "https://docs.example.com",
+                  "crawlDepth": 3
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Knowledge"
+                },
+                "examples": {
+                  "webSource": {
+                    "summary": "Web-based knowledge source",
+                    "value": {
+                      "id": "know_knowledge_00000000000000000000000000",
+                      "name": "Product Documentation",
+                      "description": "Comprehensive product documentation and user guides",
+                      "status": "QUEUED",
+                      "source": {
+                        "type": "Web",
+                        "url": "https://docs.example.com",
+                        "crawlDepth": 3
+                      },
+                      "createdAt": "2026-01-15T12:00:00Z",
+                      "updatedAt": "2026-01-15T12:00:00Z"
+                    }
+                  },
+                  "fileSource": {
+                    "summary": "File-based knowledge source with presigned upload URL",
+                    "value": {
+                      "id": "know_knowledge_00000000000000000000000000",
+                      "name": "Company Handbook",
+                      "description": "Employee handbook and policies",
+                      "status": "SCHEDULED",
+                      "source": {
+                        "type": "File",
+                        "fileName": "company-handbook.pdf",
+                        "fileSize": 2048576,
+                        "mimeType": "application/pdf",
+                        "importUrl": "https://s3.amazonaws.com/knowledge/uploads/abc123.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...",
+                        "uploadExpiration": "2026-01-15T13:00:00Z"
+                      },
+                      "createdAt": "2026-01-15T12:00:00Z",
+                      "updatedAt": "2026-01-15T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/KnowledgeBases/{kbId}/Search": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/KbId"
+        }
+      ],
+      "x-twilio": {
+        "pathType": "instance"
+      },
+      "post": {
+        "operationId": "CreateKnowledgeSearch",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Search Knowledge Chunks",
+        "description": "Perform semantic search across knowledge sources within a knowledge base to find the most relevant content\nchunks based on a natural language query.  Returns ranked chunks with similarity scores, allowing you to retrieve\ncontextually relevant information for AI applications, chatbots, or  information retrieval systems. You can filter\nresults by specific knowledge sources.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeSearch"
+              },
+              "example": {
+                "query": "How do I reset my password?",
+                "top": 5,
+                "knowledgeIds": [
+                  "know_knowledge_00000000000000000000000000"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "chunks": {
+                      "type": "array",
+                      "maxItems": 100,
+                      "items": {
+                        "$ref": "#/components/schemas/KnowledgeChunkResult"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "chunks": [
+                    {
+                      "content": "To reset your password, go to the login page and click 'Forgot Password'. Enter your email address and follow the instructions in the reset email.",
+                      "knowledgeId": "know_knowledge_00000000000000000000000001",
+                      "createdAt": "2026-01-15T10:30:00Z"
+                    },
+                    {
+                      "content": "If you're having trouble with password reset, contact support at help@example.com or call 1-800-HELP.",
+                      "knowledgeId": "know_knowledge_00000000000000000000000002",
+                      "createdAt": "2026-01-15T10:30:00Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/KnowledgeBases/{kbId}/Knowledge/{knowledgeId}": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/KbId"
+        },
+        {
+          "$ref": "#/components/parameters/KnowledgeIdPath"
+        }
+      ],
+      "x-twilio": {
+        "pathType": "instance"
+      },
+      "get": {
+        "operationId": "FetchKnowledge",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Retrieve Knowledge Source",
+        "description": "Fetch detailed information about a specific knowledge source by its ID.  This returns the complete knowledge\nsource object including  processing status, source details, and configuration information.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Knowledge"
+                },
+                "example": {
+                  "id": "know_knowledge_00000000000000000000000000",
+                  "name": "Company FAQ Knowledge Base",
+                  "description": "Frequently asked questions and answers for customer support",
+                  "status": "COMPLETED",
+                  "source": {
+                    "type": "Web",
+                    "url": "https://example.com/faq",
+                    "crawlDepth": 2
+                  },
+                  "createdAt": "2026-01-15T10:30:00Z",
+                  "updatedAt": "2026-01-15T11:45:00Z"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateKnowledge",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Update Knowledge Source",
+        "description": "Partially update mutable fields of an existing knowledge source such as name, description, tags, or source-specific\nconfiguration. Only the fields provided in the request body will be updated. Some changes (e.g., KnowledgeSourceTypes)\nmay trigger asynchronous reprocessing of the underlying content. Fields omitted from the request remain unchanged.\nImmutable fields (id, type, status, url, createdAt, updatedAt) cannot be modified directly.\n\n## Refresh ##\n\nTo request reprocessing without changing fields, pass the query parameter `refresh=true`. When `refresh=true` is provided,\nthe server will re-queue processing for this knowledge resource (transitioning the persisted status to `QUEUED`) and\nreturn 202 Accepted. This query parameter is idempotent while the resource is already QUEUED or PROCESSING.",
+        "parameters": [
+          {
+            "name": "refresh",
+            "in": "query",
+            "description": "When true, re-queues processing for this knowledge resource. Idempotent while the resource is already QUEUED or PROCESSING.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeCore"
+              },
+              "example": {
+                "name": "Updated FAQ Knowledge Base",
+                "description": "Updated frequently asked questions and answers for customer support",
+                "source": {
+                  "type": "Web",
+                  "url": "https://example.com/faq",
+                  "crawlDepth": 2
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Knowledge"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "202": {
+            "description": "Knowledge update accepted and is being processed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "example": "Knowledge update accepted"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteKnowledge",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Delete Knowledge Source",
+        "description": "Permanently delete knowledge source and all its associated data, including  processed chunks and embeddings. This action cannot be undone. The knowledge  resource will no longer be available for search or retrieval operations.",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/KnowledgeBases/{kbId}/Knowledge/{knowledgeId}/Chunks": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/KbId"
+        },
+        {
+          "$ref": "#/components/parameters/KnowledgeIdPath"
+        }
+      ],
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "chunks"
+        ],
+        "pathType": "list"
+      },
+      "get": {
+        "operationId": "ListKnowledgeChunks",
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "List Knowledge Chunks",
+        "description": "Retrieve a paginated list of all processed content chunks from a specific knowledge source.  Chunks are smaller segments of content that have been extracted and processed from the original  knowledge source. Each chunk contains content text and associated metadata that can be used  for semantic search and retrieval operations.",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "How many resources to return in each list page. The default is 50, and the maximum is 1000.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "The page token. This is provided by the API.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2048
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "chunks": {
+                      "type": "array",
+                      "maxItems": 1000,
+                      "items": {
+                        "$ref": "#/components/schemas/KnowledgeChunk"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/KnowledgeMeta"
+                    }
+                  }
+                },
+                "example": {
+                  "chunks": [
+                    {
+                      "id": "chunk_00000000000000000000000000",
+                      "content": "To reset your password, go to the login page and click 'Forgot Password'. Enter your email address and follow the instructions in the reset email.",
+                      "metadata": {
+                        "sourceType": "Web",
+                        "sourceUrl": "https://example.com/faq",
+                        "createdAt": "2026-01-15T10:30:00Z"
+                      }
+                    }
+                  ],
+                  "meta": {
+                    "key": "chunks",
+                    "pageSize": 50,
+                    "nextToken": "eyJlYXN0"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/ControlPlane/KnowledgeBases": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "pathType": "list"
+      },
+      "get": {
+        "operationId": "ListKnowledgeBases",
+        "tags": [
+          "KnowledgeBases"
+        ],
+        "summary": "List Knowledge Bases",
+        "description": "Get a list of knowledge bases for the Twilio account.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ControlPlanePageSize"
+          },
+          {
+            "$ref": "#/components/parameters/PageToken"
+          },
+          {
+            "$ref": "#/components/parameters/OrderBy"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Knowledge Bases retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBaseList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateKnowledgeBase",
+        "tags": [
+          "KnowledgeBases"
+        ],
+        "summary": "Create a Knowledge Base",
+        "description": "Create a new Knowledge Base for the Twilio account. Accounts can have multiple knowledge bases. Each knowledge base can contain multiple knowledge resources such as documents, websites, or text content that can be used for context and information retrieval.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeBaseCore"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Knowledge Base creation request accepted.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "example": "Knowledge Base creation request accepted for processing."
+                    },
+                    "statusUrl": {
+                      "type": "string",
+                      "description": "URI to check operation status.",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/ControlPlane/KnowledgeBases/{kbId}": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/KbId"
+        }
+      ],
+      "x-twilio": {
+        "pathType": "instance"
+      },
+      "get": {
+        "operationId": "FetchKnowledgeBase",
+        "tags": [
+          "KnowledgeBases"
+        ],
+        "summary": "Retrieve a Knowledge Base",
+        "description": "Retrieve the details of a specific Knowledge Base by its unique ID.",
+        "responses": {
+          "200": {
+            "description": "Knowledge Base details retrieved successfully",
+            "headers": {
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeBase"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateKnowledgeBase",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IfMatchHeader"
+          }
+        ],
+        "tags": [
+          "KnowledgeBases"
+        ],
+        "summary": "Update a Knowledge Base",
+        "description": "Partially update a Knowledge Base. Only the fields provided in the request body will be updated.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "displayName": {
+                    "type": "string",
+                    "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
+                    "pattern": "^[a-zA-Z0-9-]+$",
+                    "example": "product-docs"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A human readable description of this resource, up to 128 characters.",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "example": "Product documentation knowledge base for customer support"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Knowledge Base update request accepted.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "example": "Knowledge Base update request accepted for processing."
+                    },
+                    "statusUrl": {
+                      "type": "string",
+                      "description": "URI to check operation status.",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteKnowledgeBase",
+        "tags": [
+          "KnowledgeBases"
+        ],
+        "summary": "Delete a Knowledge Base",
+        "description": "Delete a Knowledge Base and all associated knowledge resources. This action cannot be undone.",
+        "responses": {
+          "202": {
+            "description": "Knowledge Base deletion request accepted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "example": "Knowledge Base deletion request accepted for processing."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/ControlPlane/Operations/{operationId}": {
+      "servers": [
+        {
+          "url": "https://knowledge.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "operationId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "description": "The operation ID returned from a write endpoint."
+        }
+      ],
+      "x-twilio": {
+        "pathType": "instance"
+      },
+      "get": {
+        "operationId": "FetchOperation",
+        "summary": "Get Operation Status",
+        "description": "Retrieve the status and result of an asynchronous operation.",
+        "tags": [
+          "Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation status retrieved successfully.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "KnowledgeMeta": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Pagination metadata for list operations",
+        "example": {
+          "key": "knowledge",
+          "pageSize": 50,
+          "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
+          "previousToken": ""
+        },
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": false,
+            "maxLength": 64,
+            "description": "The key of the list property contains the actual data items.\nThis enables programmatic iteration over paginated results.\n",
+            "example": "knowledge"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 50
+          },
+          "nextToken": {
+            "type": "string",
+            "maxLength": 4096,
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ"
+          },
+          "previousToken": {
+            "type": "string",
+            "maxLength": 4096,
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ"
+          }
+        }
+      },
+      "KnowledgeId": {
+        "type": "string",
+        "pattern": "^know_knowledge_[0-7][0-9a-z]{25}$",
+        "description": "The unique identifier of knowledge source.",
+        "example": "know_knowledge_00000000000000000000000000"
+      },
+      "KnowledgeCore": {
+        "type": "object",
+        "description": "Core properties for knowledge source that can be set at creation time. Regularly update and organize your\nKnowledge sources to ensure it contains the most accurate and relevant information. This includes adding new entries,\nupdating existing ones, and removing outdated content.",
+        "properties": {
+          "name": {
+            "description": "The name of the knowledge source.",
+            "example": "Company FAQ Knowledge Base",
+            "type": "string",
+            "maxLength": 30
+          },
+          "description": {
+            "description": "A detailed description of the knowledge source and when to use it.  This helps provide context about the content and its intended purpose.",
+            "type": "string",
+            "maxLength": 1024
+          },
+          "source": {
+            "$ref": "#/components/schemas/KnowledgeSourceTypes"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Knowledge": {
+        "example": {
+          "id": "know_knowledge_00000000000000000000000000",
+          "name": "Company FAQ Knowledge Base",
+          "description": "Frequently asked questions and answers for customer support",
+          "status": "COMPLETED",
+          "source": {
+            "type": "Web",
+            "url": "https://example.com/faq",
+            "crawlDepth": 2,
+            "crawlPeriod": "NEVER"
+          },
+          "createdAt": "2026-01-15T10:30:00Z",
+          "updatedAt": "2026-01-15T11:45:00Z"
+        },
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the knowledge source.",
+            "example": "Company FAQ Knowledge Base",
+            "type": "string",
+            "maxLength": 30
+          },
+          "description": {
+            "description": "A detailed description of the knowledge source and when to use it.  This helps provide context about the content and its intended purpose.",
+            "type": "string",
+            "maxLength": 1024
+          },
+          "source": {
+            "$ref": "#/components/schemas/KnowledgeSourceTypes"
+          },
+          "id": {
+            "$ref": "#/components/schemas/KnowledgeId"
+          },
+          "status": {
+            "description": "The status of processing the knowledge source ('SCHEDULED', 'QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED').",
+            "example": "COMPLETED",
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "QUEUED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "createdAt": {
+            "description": "The date and time in GMT when the Knowledge was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+            "format": "date-time",
+            "example": "2025-01-15T10:30:00Z",
+            "type": "string"
+          },
+          "updatedAt": {
+            "description": "The date and time in GMT when the Knowledge was last updated specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format.",
+            "format": "date-time",
+            "example": "2025-01-15T11:45:00Z",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "createdAt",
+          "status",
+          "name",
+          "updatedAt"
+        ]
+      },
+      "KnowledgeChunk": {
+        "type": "object",
+        "description": "Represents a processed content chunk extracted from knowledge source.  Chunks are smaller segments of content that have been parsed and indexed  for semantic search operations, containing the original text content.",
+        "example": {
+          "content": "To reset your password, go to the login page and click 'Forgot Password'.",
+          "createdAt": "2026-01-15T10:30:00Z"
+        },
+        "properties": {
+          "content": {
+            "description": "The chunk content.",
+            "type": "string",
+            "maxLength": 65536
+          },
+          "createdAt": {
+            "description": "The date and time in GMT when the Chunk was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat.",
+            "format": "date-time",
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeSearch": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Request payload for performing semantic search across knowledge sources within the knowledge base..  Allows\nquerying with natural language text and filtering by specific knowledge  sources to find the most relevant content\nchunks.",
+        "example": {
+          "query": "How do I reset my password?",
+          "top": 5,
+          "knowledgeIds": [
+            "know_knowledge_00000000000000000000000000"
+          ]
+        },
+        "properties": {
+          "query": {
+            "description": "The query to search the knowledge source.",
+            "type": "string",
+            "maxLength": 2048
+          },
+          "top": {
+            "description": "The top K results to return.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "knowledgeIds": {
+            "description": "The list of knowledge IDs to search.",
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeId"
+            }
+          }
+        },
+        "required": [
+          "query",
+          "top"
+        ]
+      },
+      "KnowledgeChunkResult": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "description": "The chunk content.",
+            "type": "string",
+            "maxLength": 65536
+          },
+          "createdAt": {
+            "description": "The date and time in GMT when the Chunk was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "score": {
+            "description": "The score associated with the chunk.",
+            "type": "number",
+            "format": "float"
+          },
+          "knowledgeId": {
+            "$ref": "#/components/schemas/KnowledgeId"
+          }
+        }
+      },
+      "KnowledgeSourceTypes": {
+        "type": "object",
+        "description": "Details specific to the knowledge source type. Each knowledge source type has  its own set of configuration\nparameters and source specific properties.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextSourceDetails"
+          },
+          {
+            "$ref": "#/components/schemas/WebSourceDetails"
+          },
+          {
+            "$ref": "#/components/schemas/FileSourceDetails"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Text": "#/components/schemas/TextSourceDetails",
+            "Web": "#/components/schemas/WebSourceDetails",
+            "File": "#/components/schemas/FileSourceDetails"
+          }
+        }
+      },
+      "WebSourceDetails": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration details for web based knowledge sources",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Web"
+            ],
+            "description": "Web based knowledge sources",
+            "example": "Web"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL to crawl for web content",
+            "example": "https://docs.example.com"
+          },
+          "crawlDepth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 2,
+            "description": "The maximum depth to crawl from the source URL",
+            "example": 3
+          },
+          "crawlPeriod": {
+            "type": "string",
+            "enum": [
+              "WEEKLY",
+              "BIWEEKLY",
+              "MONTHLY",
+              "NEVER"
+            ],
+            "default": "NEVER",
+            "description": "Frequency of re-crawling the website for updated content",
+            "example": "WEEKLY"
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ],
+        "example": {
+          "type": "Web",
+          "url": "https://docs.example.com",
+          "crawlDepth": 3
+        }
+      },
+      "TextSourceDetails": {
+        "type": "object",
+        "description": "Configuration details for raw text knowledge sources",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Text"
+            ],
+            "description": "Raw text knowledge sources",
+            "example": "Text"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 185000,
+            "description": "The raw text content to be processed",
+            "example": "This is the raw text content that will be processed as knowledge."
+          }
+        },
+        "required": [
+          "type",
+          "content"
+        ],
+        "example": {
+          "type": "Text",
+          "content": "This is the raw text content that will be processed as knowledge."
+        }
+      },
+      "TwilioError": {
+        "type": "object",
+        "additionalProperties": false,
+        "maxProperties": 10,
+        "description": "A generic error object communicating client and server side API errors.",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 99999,
+            "description": "The Twilio error code.",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "A human readable message describing the error."
+          },
+          "more_info": {
+            "type": "string",
+            "description": "A URL to a [Twilio error directory](https://www.twilio.com/docs/api/errors) page with more information about the error code."
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599,
+            "description": "The HTTP status code for the error.",
+            "format": "int32"
+          }
+        },
+        "example": {
+          "code": 21614,
+          "message": "The address specified in the request is not a valid phone number.",
+          "more_info": "https://www.twilio.com/docs/api/errors/21614",
+          "status": 400
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": false,
+            "maxLength": 64,
+            "description": "The key of the list property contains the actual data items.\nThis enables programmatic iteration over paginated results.\n"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 50
+          },
+          "nextToken": {
+            "type": "string",
+            "maxLength": 4096,
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ"
+          },
+          "previousToken": {
+            "type": "string",
+            "maxLength": 4096,
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ"
+          }
+        }
+      },
+      "KnowledgeBaseCore": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned\nby the developer and can be used in addition to the ID. It is intended to be human-readable and unique within\nthe account.",
+            "pattern": "^[a-zA-Z0-9-]+$",
+            "example": "product-docs"
+          },
+          "description": {
+            "type": "string",
+            "description": "A human readable description of this resource, up to 128 characters.",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "Product documentation knowledge base for customer support"
+          }
+        },
+        "required": [
+          "displayName"
+        ]
+      },
+      "KnowledgeBase": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned\nby the developer and can be used in addition to the ID. It is intended to be human-readable and unique within\nthe account.",
+            "pattern": "^[a-zA-Z0-9-]+$",
+            "example": "product-docs"
+          },
+          "description": {
+            "type": "string",
+            "description": "A human readable description of this resource, up to 128 characters.",
+            "minLength": 1,
+            "maxLength": 128,
+            "example": "Product documentation knowledge base for customer support"
+          },
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the Knowledge Base",
+            "pattern": "^know_knowledgebase_[0-7][0-9a-z]{25}$",
+            "example": "know_knowledgebase_00000000000000000000000000"
+          },
+          "status": {
+            "type": "string",
+            "description": "The provisioning status of the Knowledge Base",
+            "enum": [
+              "QUEUED",
+              "PROVISIONING",
+              "ACTIVE",
+              "FAILED",
+              "DELETING"
+            ],
+            "example": "ACTIVE"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO 8601 timestamp when the Knowledge Base was created.",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO 8601 timestamp when the Knowledge Base was last updated.",
+            "example": "2024-01-15T11:45:00Z"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The current version number of the Knowledge Base. Incremented on each successful mutable update.",
+            "example": 3
+          }
+        },
+        "required": [
+          "version",
+          "id",
+          "createdAt",
+          "displayName",
+          "status",
+          "updatedAt"
+        ]
+      },
+      "KnowledgeBaseList": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "knowledgeBases": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeBase"
+            },
+            "description": "List of Knowledge Bases associated with the Twilio account."
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta",
+            "example": {
+              "key": "knowledgeBases",
+              "pageSize": 50,
+              "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
+            }
+          }
+        }
+      },
+      "SupportedFileMimeType": {
+        "type": "string",
+        "description": "Supported MIME types for knowledge file imports. Maximum file size for any file is 16MB (16 * 1024 * 1024 bytes). Extensions \u2192 MIME:\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .mdx \u2192 text/mdx\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain",
+        "enum": [
+          "text/csv",
+          "text/markdown",
+          "text/mdx",
+          "application/pdf",
+          "text/tab-separated-values",
+          "text/plain"
+        ]
+      },
+      "FileSourceDetails": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration details for file based knowledge sources. Supported file formats (extension \u2192 MIME type):\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .mdx \u2192 text/mdx\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain\nMaximum file size: 16MB (16 * 1024 * 1024 bytes).",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "File"
+            ],
+            "description": "File based knowledge sources",
+            "example": "File"
+          },
+          "fileName": {
+            "type": "string",
+            "maxLength": 256,
+            "description": "Name of the file to be uploaded",
+            "example": "company-handbook.pdf"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "Expected size of the file in bytes",
+            "example": 2048576
+          },
+          "mimeType": {
+            "$ref": "#/components/schemas/SupportedFileMimeType"
+          },
+          "importUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned S3 URL for file upload (when status is SCHEDULED) or the permanent S3 location after upload completes.\nUse PUT method to upload the file to this URL when status is SCHEDULED.",
+            "example": "https://s3.amazonaws.com/knowledge/uploads/abc123.pdf",
+            "readOnly": true
+          },
+          "uploadExpiration": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Expiration time of the presigned upload URL in ISO 8601 format (only present when status is SCHEDULED)",
+            "example": "2026-01-15T13:00:00Z",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "type",
+          "fileName",
+          "fileSize",
+          "mimeType"
+        ],
+        "example": {
+          "type": "File",
+          "fileName": "company-handbook.pdf",
+          "fileSize": 2048576,
+          "mimeType": "application/pdf",
+          "importUrl": "https://s3.amazonaws.com/knowledge/uploads/abc123.pdf",
+          "uploadExpiration": "2026-01-15T13:00:00Z"
+        }
+      },
+      "OperationStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "description": "The unique identifier for this operation.",
+            "maxLength": 512
+          },
+          "status": {
+            "type": "string",
+            "description": "The current status of the operation.",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "CANCELLED",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "example": "COMPLETED"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the operation was created.",
+            "example": "2025-11-14T20:29:21Z"
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI to check operation status."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the operation completed or failed."
+          },
+          "result": {
+            "$ref": "#/components/schemas/OperationResult"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "format": "uri",
+                "description": "A URI reference identifying the problem type."
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 128,
+                "description": "A short, human-readable summary of the problem type."
+              },
+              "code": {
+                "type": "integer",
+                "description": "The numeric Twilio error code."
+              },
+              "detail": {
+                "type": "string",
+                "maxLength": 1024,
+                "description": "A human-readable explanation specific to this occurrence of the problem."
+              }
+            }
+          },
+          "resultUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to fetch the resulting resource."
+          }
+        }
+      },
+      "OperationResult": {
+        "description": "Operation-specific output. Present when status is COMPLETED.",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "RESOURCE_ID": "#/components/schemas/OperationResultResourceId"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OperationResultResourceId"
+          }
+        ]
+      },
+      "OperationResultResourceId": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "RESOURCE_ID"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 128,
+            "description": "The identifier of the created or affected resource."
+          }
+        }
+      }
+    },
+    "parameters": {
+      "KbId": {
+        "name": "kbId",
+        "in": "path",
+        "required": true,
+        "description": "A unique Knowledge Base ID using Twilio Type ID (TTID) format",
+        "schema": {
+          "type": "string",
+          "pattern": "^know_knowledgebase_[0-7][0-9a-z]{25}$",
+          "example": "know_knowledgebase_00000000000000000000000000"
+        }
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of items to return per page, maximum of 1000.",
+        "schema": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "PageToken": {
+        "name": "pageToken",
+        "in": "query",
+        "required": false,
+        "description": "The token for the page of results to retrieve.",
+        "schema": {
+          "type": "string",
+          "maxLength": 500
+        }
+      },
+      "KnowledgeIdPath": {
+        "name": "knowledgeId",
+        "in": "path",
+        "required": true,
+        "description": "A unique Knowledge resource ID using Twilio Type ID (TTID) format",
+        "schema": {
+          "type": "string",
+          "pattern": "^know_knowledge_[0-7][0-9a-z]{25}$",
+          "example": "know_knowledge_00000000000000000000000000"
+        }
+      },
+      "ControlPlanePageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of items to return per page, maximum of 100.",
+        "schema": {
+          "type": "integer",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "OrderBy": {
+        "name": "orderBy",
+        "in": "query",
+        "required": false,
+        "description": "Either 'ASC' or 'DESC' to sort results ascending or descending respectively.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "default": "DESC"
+        }
+      },
+      "IfMatchHeader": {
+        "in": "header",
+        "name": "If-Match",
+        "description": "Allows for optimistic concurrency control by making the request conditional.\nServer will only act if the resource's current Entity Tag (ETag) matches\nthe one provided, preventing accidental overwrites.",
+        "schema": {
+          "type": "string",
+          "maxLength": 100,
+          "example": "\"eyJpZCI6ImFuX2lkIiwidiI6MX0\""
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad Request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 400,
+              "message": "Failed to complete request due to a bad request",
+              "more_info": "https://www.twilio.com/docs/api/errors/400",
+              "status": 400
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Not Found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20404,
+              "message": "Not Found",
+              "more_info": "https://www.twilio.com/docs/api/errors/20404",
+              "status": 404
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "This error indicates that you have sent too many requests to the API. You should retry according to the `Retry-After` response header.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20429,
+              "message": "Too many requests. Please retry according to the Retry-After response header.",
+              "more_info": "https://www.twilio.com/docs/api/errors/20429",
+              "status": 429
+            }
+          }
+        },
+        "headers": {
+          "Retry-After": {
+            "description": "The amount of time in seconds that the customer should wait before issuing a new request towards the API.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]+$"
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20500,
+              "message": "Internal Server Error",
+              "more_info": "https://www.twilio.com/docs/api/errors/20500",
+              "status": 500
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "Service Unavailable",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20503,
+              "message": "Service Unavailable",
+              "more_info": "https://www.twilio.com/docs/api/errors/20503",
+              "status": 503
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20003,
+              "message": "Failed to complete request due to lack of authentication credentials",
+              "more_info": "https://www.twilio.com/docs/api/errors/20003",
+              "status": 401
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 403,
+              "message": "Permission to access resource denied",
+              "more_info": "https://www.twilio.com/docs/api/errors/403",
+              "status": 403
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20409,
+              "message": "Conflict",
+              "more_info": "https://www.twilio.com/docs/api/errors/20409",
+              "status": 409
+            }
+          }
+        }
+      }
+    },
+    "headers": {
+      "ETag": {
+        "description": "Entity tag that acts as a unique identifier for a specific version of the resource.\nSend updates with If-Match conditional headers for optimistic concurrency control.",
+        "schema": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "example": "eyJpZCI6ImFuX2lkIiwidiI6MX0"
+      },
+      "OperationId": {
+        "description": "The operation identifier.",
+        "schema": {
+          "type": "string",
+          "maxLength": 512
+        }
+      },
+      "OperationLocation": {
+        "description": "URI to check operation status.",
+        "schema": {
+          "type": "string",
+          "maxLength": 512
+        }
+      },
+      "OperationRetryAfter": {
+        "description": "Suggested number of seconds to wait before checking status again.",
+        "schema": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "accountSid_authToken": []
+    }
+  ]
+}
