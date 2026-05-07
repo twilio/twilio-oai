@@ -102,6 +102,60 @@
           }
         }
       },
+      "get": {
+        "operationId": "FetchProfile",
+        "summary": "Get Profile",
+        "description": "Retrieve profile traits by profile ID. Use the `traitGroups` query parameter to restrict results to a comma-separated allow list of trait group names. For large sets of traits, prefer using the dedicated `/Traits` endpoint for pagination.",
+        "tags": [
+          "Profile"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TraitGroupsQueryParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            },
+            "headers": {
+              "Canonical-Profile-Id": {
+                "$ref": "#/components/headers/Canonical-Profile-Id"
+              }
+            }
+          },
+          "301": {
+            "$ref": "#/components/responses/MovedPermanently"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
       "patch": {
         "operationId": "PatchProfileTraits",
         "summary": "Patch Profile Traits",
@@ -2507,6 +2561,65 @@
             "$ref": "#/components/responses/ServiceUnavailable"
           }
         }
+      },
+      "delete": {
+        "operationId": "DeleteStore",
+        "summary": "Delete a Memory Store",
+        "description": "Deletes the Memory Store and all associated resources including identity resolution settings, trait groups, profiles, traits, observations, and summaries.",
+        "tags": [
+          "Store"
+        ],
+        "responses": {
+          "202": {
+            "description": "Memory Store deletion request accepted.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "maxLength": 512,
+                      "example": "Memory Store deletion request accepted for processing."
+                    },
+                    "statusUrl": {
+                      "type": "string",
+                      "description": "URI to check operation status.",
+                      "maxLength": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
       }
     },
     "/v1/ControlPlane/Stores/{storeId}/IdentityResolutionSettings": {
@@ -4510,12 +4623,12 @@
           }
         },
         "required": [
-          "content",
-          "id",
           "createdAt",
-          "source",
           "occurredAt",
-          "updatedAt"
+          "content",
+          "source",
+          "updatedAt",
+          "id"
         ]
       },
       "SummaryCore": {
@@ -4596,12 +4709,12 @@
           }
         },
         "required": [
-          "content",
-          "id",
-          "conversationId",
           "createdAt",
+          "conversationId",
           "occurredAt",
-          "updatedAt"
+          "content",
+          "updatedAt",
+          "id"
         ]
       },
       "Participant": {
@@ -4775,9 +4888,9 @@
               },
               "required": [
                 "channel",
+                "address",
                 "name",
-                "id",
-                "address"
+                "id"
               ]
             }
           }
@@ -5408,11 +5521,11 @@
           }
         },
         "required": [
-          "version",
-          "id",
-          "displayName",
           "intelligenceServiceId",
-          "status"
+          "displayName",
+          "version",
+          "status",
+          "id"
         ]
       },
       "ServiceList": {
@@ -5729,8 +5842,8 @@
           }
         },
         "required": [
-          "displayName",
-          "version"
+          "version",
+          "displayName"
         ]
       },
       "TraitGroupRequest": {
@@ -6207,9 +6320,9 @@
           }
         },
         "required": [
-          "displayName",
+          "mappingTo",
           "mappingFrom",
-          "mappingTo"
+          "displayName"
         ]
       },
       "DataMapping": {
@@ -6264,13 +6377,13 @@
           }
         },
         "required": [
-          "mappingFrom",
-          "version",
-          "id",
           "createdAt",
           "displayName",
+          "mappingFrom",
+          "updatedAt",
           "mappingTo",
-          "updatedAt"
+          "version",
+          "id"
         ]
       },
       "DataMappingList": {
@@ -6348,12 +6461,12 @@
           }
         },
         "required": [
-          "content",
-          "id",
           "createdAt",
-          "source",
           "occurredAt",
-          "updatedAt"
+          "content",
+          "source",
+          "updatedAt",
+          "id"
         ]
       },
       "RecallSummaryInfo": {
@@ -6408,12 +6521,12 @@
           }
         },
         "required": [
-          "content",
-          "id",
-          "conversationId",
           "createdAt",
+          "conversationId",
           "occurredAt",
-          "updatedAt"
+          "content",
+          "updatedAt",
+          "id"
         ]
       },
       "SummaryCorePatch": {

@@ -69,6 +69,43 @@ paths:
           $ref: '#/components/responses/InternalServerError'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+    get:
+      operationId: FetchProfile
+      summary: Get Profile
+      description: Retrieve profile traits by profile ID. Use the `traitGroups` query
+        parameter to restrict results to a comma-separated allow list of trait group
+        names. For large sets of traits, prefer using the dedicated `/Traits` endpoint
+        for pagination.
+      tags:
+      - Profile
+      parameters:
+      - $ref: '#/components/parameters/TraitGroupsQueryParam'
+      responses:
+        '200':
+          description: A profile.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          headers:
+            Canonical-Profile-Id:
+              $ref: '#/components/headers/Canonical-Profile-Id'
+        '301':
+          $ref: '#/components/responses/MovedPermanently'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
     patch:
       operationId: PatchProfileTraits
       summary: Patch Profile Traits
@@ -1703,6 +1740,48 @@ paths:
           $ref: '#/components/responses/InternalServerError'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      operationId: DeleteStore
+      summary: Delete a Memory Store
+      description: Deletes the Memory Store and all associated resources including
+        identity resolution settings, trait groups, profiles, traits, observations,
+        and summaries.
+      tags:
+      - Store
+      responses:
+        '202':
+          description: Memory Store deletion request accepted.
+          headers:
+            Operation-Id:
+              $ref: '#/components/headers/OperationId'
+            Location:
+              $ref: '#/components/headers/OperationLocation'
+            Retry-After:
+              $ref: '#/components/headers/OperationRetryAfter'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  message:
+                    type: string
+                    maxLength: 512
+                    example: Memory Store deletion request accepted for processing.
+                  statusUrl:
+                    type: string
+                    description: URI to check operation status.
+                    maxLength: 512
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /v1/ControlPlane/Stores/{storeId}/IdentityResolutionSettings:
     servers:
     - url: https://memory.twilio.com
@@ -3128,12 +3207,12 @@ components:
           description: The timestamp when the observation was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - createdAt
       - source
-      - id
       - updatedAt
       - occurredAt
       - content
+      - id
+      - createdAt
     SummaryCore:
       type: object
       description: Core mutable properties for creating summary objects.
@@ -3203,12 +3282,12 @@ components:
           description: The timestamp when the summary was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - conversationId
-      - createdAt
-      - id
       - updatedAt
       - occurredAt
       - content
+      - id
+      - conversationId
+      - createdAt
     Participant:
       type: object
       required:
@@ -3351,10 +3430,10 @@ components:
                 - COMPLETED
                 - FAILED
             required:
-            - channel
-            - name
-            - id
             - address
+            - channel
+            - id
+            - name
       required:
       - id
       - author
@@ -3886,11 +3965,11 @@ components:
             on each successful update.
           example: 3
       required:
-      - displayName
       - status
+      - displayName
+      - version
       - id
       - intelligenceServiceId
-      - version
     ServiceList:
       type: object
       additionalProperties: false
@@ -4229,8 +4308,8 @@ components:
             on each successful update.
           example: 3
       required:
-      - version
       - displayName
+      - version
     TraitGroupRequest:
       type: object
       additionalProperties: false
@@ -4643,9 +4722,9 @@ components:
         mappingFrom:
           $ref: '#/components/schemas/DataMappingFromTypes'
       required:
+      - mappingTo
       - displayName
       - mappingFrom
-      - mappingTo
     DataMapping:
       type: object
       additionalProperties: false
@@ -4695,13 +4774,13 @@ components:
             on each successful update.
           example: 3
       required:
-      - mappingFrom
-      - mappingTo
-      - displayName
-      - createdAt
-      - id
       - updatedAt
+      - displayName
+      - mappingTo
+      - mappingFrom
       - version
+      - id
+      - createdAt
     DataMappingList:
       type: object
       additionalProperties: false
@@ -4769,12 +4848,12 @@ components:
           maximum: 1
           example: 0.82
       required:
-      - createdAt
       - source
-      - id
       - updatedAt
       - occurredAt
       - content
+      - id
+      - createdAt
     RecallSummaryInfo:
       type: object
       description: A summary memory derived from conversations.
@@ -4825,12 +4904,12 @@ components:
           maximum: 1
           example: 0.78
       required:
-      - conversationId
-      - createdAt
-      - id
       - updatedAt
       - occurredAt
       - content
+      - id
+      - conversationId
+      - createdAt
     SummaryCorePatch:
       type: object
       description: Core mutable properties for updating summary objects. All fields

@@ -4002,6 +4002,370 @@
         }
       }
     },
+    "/v2/Conversations/{ConversationId}/Actions": {
+      "servers": [
+        {
+          "url": "https://conversations.twilio.com"
+        }
+      ],
+      "x-twilio": {
+        "pathType": "list"
+      },
+      "parameters": [
+        {
+          "name": "ConversationId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "x-twilio": {
+            "shortDescription": "Conversation ID",
+            "normalizeSid": true
+          }
+        }
+      ],
+      "post": {
+        "summary": "Create an Action",
+        "description": "Creates an Action within a Conversation. Currently supports SEND_MESSAGE,\nwhich sends a message to recipients via the configured channel.\n\nReturns 202 Accepted with the Action in PENDING status. Poll\n`GET /v2/Conversations/{ConversationId}/Actions/{ActionId}` to check completion.\n",
+        "tags": [
+          "ConversationsV2Action"
+        ],
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ],
+        "operationId": "CreateConversationAction",
+        "requestBody": {
+          "description": "The action to perform.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "payload"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "Action type discriminator. Accepted values: SEND_MESSAGE.",
+                        "example": "SEND_MESSAGE"
+                      },
+                      "payload": {
+                        "$ref": "#/components/schemas/conversations.v2.send_message_payload"
+                      }
+                    }
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type"
+                }
+              },
+              "examples": {
+                "sendMessage": {
+                  "summary": "Send a message",
+                  "value": {
+                    "type": "SEND_MESSAGE",
+                    "payload": {
+                      "from": {
+                        "address": "+18005550100",
+                        "channel": "SMS"
+                      },
+                      "to": [
+                        {
+                          "address": "+18005550199",
+                          "channel": "SMS"
+                        }
+                      ],
+                      "content": {
+                        "text": "Hello from the Actions API!"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Action accepted. Returns the Action in PENDING status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "type",
+                    "status",
+                    "conversationId",
+                    "createdAt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for this Action.",
+                      "example": "conv_action_01k1etx3jbfx88476ccja0889e"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "The type of action. Accepted values: SEND_MESSAGE.",
+                      "example": "SEND_MESSAGE"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "COMPLETED",
+                        "FAILED"
+                      ],
+                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action\n- FAILED: Downstream backend reported a failure\n",
+                      "example": "PENDING"
+                    },
+                    "conversationId": {
+                      "type": "string",
+                      "description": "The conversation this action belongs to.",
+                      "example": "conv_conversation_01k1etx3jbfx88476ccja0889c"
+                    },
+                    "related": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\n",
+                      "example": {
+                        "messageSid": "SM1234567890abcdef1234567890abcdef",
+                        "communicationId": "conv_communication_01k1etx3jbfx88476ccja0889c"
+                      }
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action was created.",
+                      "example": "2026-03-30T10:30:00Z"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action was last updated.",
+                      "example": "2026-03-30T10:30:02Z"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action reached a terminal status.",
+                      "example": "2026-03-30T10:30:02Z"
+                    }
+                  },
+                  "example": {
+                    "id": "conv_action_01k1etx3jbfx88476ccja0889e",
+                    "type": "SEND_MESSAGE",
+                    "status": "COMPLETED",
+                    "conversationId": "conv_conversation_01k1etx3jbfx88476ccja0889c",
+                    "related": {
+                      "messageSid": "SM1234567890abcdef1234567890abcdef",
+                      "communicationId": "conv_communication_01k1etx3jbfx88476ccja0889c"
+                    },
+                    "createdAt": "2026-03-30T10:30:00Z",
+                    "completedAt": "2026-03-30T10:30:02Z"
+                  }
+                },
+                "example": {
+                  "id": "conv_action_01k1etx3jbfx88476ccja0889e",
+                  "type": "SEND_MESSAGE",
+                  "status": "PENDING",
+                  "conversationId": "conv_conversation_01k1etx3jbfx88476ccja0889c",
+                  "related": {
+                    "messageSid": "SM1234567890abcdef1234567890abcdef"
+                  },
+                  "createdAt": "2026-03-30T10:30:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v2/Conversations/{ConversationId}/Actions/{ActionId}": {
+      "servers": [
+        {
+          "url": "https://conversations.twilio.com"
+        }
+      ],
+      "parameters": [
+        {
+          "name": "ConversationId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "x-twilio": {
+            "shortDescription": "Conversation ID",
+            "normalizeSid": true
+          }
+        },
+        {
+          "name": "ActionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "x-twilio": {
+            "shortDescription": "Action ID",
+            "normalizeSid": true
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get Action Status",
+        "description": "Retrieve the current status of an Action.",
+        "tags": [
+          "ConversationsV2Action"
+        ],
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ],
+        "operationId": "FetchConversationAction",
+        "responses": {
+          "200": {
+            "description": "Action status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "type",
+                    "status",
+                    "conversationId",
+                    "createdAt"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Unique identifier for this Action.",
+                      "example": "conv_action_01k1etx3jbfx88476ccja0889e"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "The type of action. Accepted values: SEND_MESSAGE.",
+                      "example": "SEND_MESSAGE"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "COMPLETED",
+                        "FAILED"
+                      ],
+                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action\n- FAILED: Downstream backend reported a failure\n",
+                      "example": "PENDING"
+                    },
+                    "conversationId": {
+                      "type": "string",
+                      "description": "The conversation this action belongs to.",
+                      "example": "conv_conversation_01k1etx3jbfx88476ccja0889c"
+                    },
+                    "related": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\n",
+                      "example": {
+                        "messageSid": "SM1234567890abcdef1234567890abcdef",
+                        "communicationId": "conv_communication_01k1etx3jbfx88476ccja0889c"
+                      }
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action was created.",
+                      "example": "2026-03-30T10:30:00Z"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action was last updated.",
+                      "example": "2026-03-30T10:30:02Z"
+                    },
+                    "completedAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Timestamp when the action reached a terminal status.",
+                      "example": "2026-03-30T10:30:02Z"
+                    }
+                  },
+                  "example": {
+                    "id": "conv_action_01k1etx3jbfx88476ccja0889e",
+                    "type": "SEND_MESSAGE",
+                    "status": "COMPLETED",
+                    "conversationId": "conv_conversation_01k1etx3jbfx88476ccja0889c",
+                    "related": {
+                      "messageSid": "SM1234567890abcdef1234567890abcdef",
+                      "communicationId": "conv_communication_01k1etx3jbfx88476ccja0889c"
+                    },
+                    "createdAt": "2026-03-30T10:30:00Z",
+                    "completedAt": "2026-03-30T10:30:02Z"
+                  }
+                },
+                "example": {
+                  "id": "conv_action_01k1etx3jbfx88476ccja0889e",
+                  "type": "SEND_MESSAGE",
+                  "status": "COMPLETED",
+                  "conversationId": "conv_conversation_01k1etx3jbfx88476ccja0889c",
+                  "related": {
+                    "messageSid": "SM1234567890abcdef1234567890abcdef",
+                    "communicationId": "conv_communication_01k1etx3jbfx88476ccja0889c"
+                  },
+                  "createdAt": "2026-03-30T10:30:00Z",
+                  "completedAt": "2026-03-30T10:30:02Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/v2/Conversations/{ConversationSid}/Participants": {
       "servers": [
         {
