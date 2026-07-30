@@ -17,4 +17,3 @@ This project is currently in **GA**. We expect the spec to be accurate, and it i
 ## Contributing
 
 Because this document is used across Twilio's whole API development experience, these documents are automatically kept up to date and used to validate Twilio API requests.
-
