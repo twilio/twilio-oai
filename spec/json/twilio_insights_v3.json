@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Twilio - Insights",
-    "description": "Insights Domain V3 API.",
+    "description": "Insights Domain V3 API. Includes synchronous Query, Metadata, and\nAsync Query (long-running operation) endpoints.\n",
     "termsOfService": "https://www.twilio.com/legal/tos",
     "contact": {
       "name": "Twilio Support",
@@ -13,7 +13,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "x-twilio": {
       "apiStandards": "v1.0"
     }
@@ -31,7 +31,11 @@
   "tags": [
     {
       "name": "TwilioInsights",
-      "description": "Twilio Insights API."
+      "description": "Twilio Insights Sync API."
+    },
+    {
+      "name": "TwilioInsightsAsync",
+      "description": "Twilio Insights Async Query Jobs API (long-running query operations)."
     }
   ],
   "components": {
@@ -43,6 +47,48 @@
       }
     },
     "responses": {
+      "UnprocessableContentError": {
+        "description": "Unprocessable content (idempotency key payload mismatch)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "Twilio-specific error code",
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "message": {
+                  "description": "A human readable error message",
+                  "type": "string"
+                },
+                "httpStatusCode": {
+                  "description": "HTTP response status code",
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "userError": {
+                  "description": "Whether the error is a user error (true) or a system error (false)",
+                  "type": "boolean"
+                },
+                "params": {
+                  "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "httpStatusCode"
+              ]
+            }
+          }
+        }
+      },
       "NotFoundError": {
         "description": "Resource not found",
         "content": {
@@ -255,6 +301,38 @@
       },
       "RateLimitError": {
         "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+        "headers": {
+          "X-RateLimit-Limit": {
+            "description": "Maximum number of requests allowed in the time window",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 5
+          },
+          "X-RateLimit-Remaining": {
+            "description": "Number of requests remaining in the current time window",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 0
+          },
+          "X-RateLimit-Reset": {
+            "description": "Time in seconds until the rate limit resets",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 45
+          },
+          "X-Rate-Limit-Limit": {
+            "$ref": "#/components/headers/X-Rate-Limit-Limit"
+          },
+          "X-Rate-Limit-Remaining": {
+            "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+          },
+          "X-Rate-Limit-Config": {
+            "$ref": "#/components/headers/X-Rate-Limit-Config"
+          }
+        },
         "content": {
           "application/json": {
             "schema": {
@@ -611,6 +689,164 @@
             }
           }
         }
+      },
+      "LongRunningOperationStatus": {
+        "description": "Valid status values for long-running operations.",
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "RUNNING",
+          "CANCELLED",
+          "COMPLETED",
+          "FAILED"
+        ]
+      },
+      "OperationError": {
+        "description": "Error details for a failed operation, embedded inside a 200 OK operation envelope.",
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "httpStatusCode"
+        ],
+        "properties": {
+          "code": {
+            "description": "Twilio-specific error code",
+            "type": "integer",
+            "format": "int32",
+            "example": 50001
+          },
+          "message": {
+            "description": "A human readable error message",
+            "type": "string",
+            "example": "Query execution timeout exceeded"
+          },
+          "httpStatusCode": {
+            "description": "HTTP status code that would have been returned for a synchronous failure",
+            "type": "integer",
+            "format": "int32",
+            "example": 504
+          },
+          "detail": {
+            "description": "Additional context about the failure",
+            "type": "string",
+            "nullable": true,
+            "example": "ClickHouse query exceeded the 120s execution limit."
+          }
+        }
+      },
+      "QueryJobSubmitResponse": {
+        "description": "Initial 202 response for an async query submission.\nConforms to LongRunningOperation202Response from Twilio API Standards.\n",
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "operationId",
+          "status",
+          "statusUrl",
+          "createdAt"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "Proc_JobTtid",
+            "description": "Unique identifier for the async query operation.",
+            "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LongRunningOperationStatus"
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI to poll for operation status.",
+            "example": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the operation was accepted (RFC 3339 UTC).",
+            "example": "2026-05-25T14:30:00Z"
+          }
+        }
+      },
+      "QueryJobStatusResponse": {
+        "description": "Status response for an async query operation.\nConforms to LongRunningOperationStatusResponse from Twilio API Standards.\n",
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "operationId",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "Proc_JobTtid",
+            "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LongRunningOperationStatus"
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-05-25T14:30:00Z"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the operation reached a terminal state.",
+            "example": "2026-05-25T14:32:17Z"
+          },
+          "error": {
+            "nullable": true,
+            "description": "Error details. Present only when status is FAILED.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OperationError"
+              }
+            ]
+          },
+          "resultUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "URL to retrieve query results. Present only when status is COMPLETED.\nSupports pagination via pageSize and pageToken query parameters.\n",
+            "example": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r/Results"
+          },
+          "resultRetentionPeriod": {
+            "type": "string",
+            "format": "duration",
+            "nullable": true,
+            "description": "ISO 8601 duration for how long results are retained.",
+            "example": "P7D"
+          }
+        }
+      },
+      "QueryJobListResponse": {
+        "description": "Paginated list of async query operations for the account.",
+        "type": "object",
+        "required": [
+          "items",
+          "meta"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueryJobStatusResponse"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
       }
     }
   },
@@ -622,8 +858,8 @@
         }
       ],
       "post": {
-        "summary": "Execute a semantic query",
-        "description": "Execute a semantic query against the Conversations domain.",
+        "summary": "Execute a synchronous semantic query",
+        "description": "Execute a semantic query against the Conversations domain.\nReturns results inline. For long-running queries, use the QueryJobs endpoint.\n",
         "tags": [
           "TwilioInsights"
         ],
@@ -707,6 +943,38 @@
           },
           "429": {
             "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -797,7 +1065,8 @@
         ]
       },
       "get": {
-        "summary": "Fetch semantic query results",
+        "summary": "Fetch paginated query results",
+        "description": "Retrieve subsequent pages of a synchronous query using a page token.",
         "tags": [
           "TwilioInsights"
         ],
@@ -869,6 +1138,38 @@
           },
           "429": {
             "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -966,8 +1267,8 @@
         }
       ],
       "get": {
-        "summary": "Fetch Metadata for the Conversations domain",
-        "description": "Fetch Metadata for the Conversations domain.",
+        "summary": "Fetch domain metadata",
+        "description": "Returns available cubes, measures, and dimensions for the Conversations domain.",
         "tags": [
           "TwilioInsights"
         ],
@@ -1027,6 +1328,1050 @@
           },
           "429": {
             "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      }
+    },
+    "/v3/InsightsDomains/Conversations/QueryJobs": {
+      "servers": [
+        {
+          "url": "https://insights.twilio.com"
+        }
+      ],
+      "post": {
+        "summary": "Submit an async query",
+        "description": "Submit a long-running semantic query. Returns 202 Accepted with an\noperationId that can be polled for status and results.\n",
+        "tags": [
+          "TwilioInsightsAsync"
+        ],
+        "operationId": "CreateQueryJob",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "description": "Client-generated UUIDv7 key to ensure idempotent behavior.\nSubmitting the same key for identical requests returns the same operation\nwithout re-execution. Scoped to Account + Region. Retained for 24 hours.\n",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "01890a5d-aa0f-7c80-b8e6-0242ac140004"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InsightsQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Async query accepted",
+            "headers": {
+              "Location": {
+                "description": "URI to poll for operation status.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "example": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds before the client should first poll.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryJobSubmitResponse"
+                },
+                "example": {
+                  "operationId": "proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                  "status": "PENDING",
+                  "statusUrl": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                  "createdAt": "2026-05-25T14:30:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable content (idempotency key payload mismatch)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "List async queries for the account",
+        "description": "Returns a paginated list of async query operations for the authenticated account.\nOptionally filter by status.\n",
+        "tags": [
+          "TwilioInsightsAsync"
+        ],
+        "operationId": "ListQueryJobs",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The maximum number of resources to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Token for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by operation status.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/LongRunningOperationStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of async query operations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryJobListResponse"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "operationId": "proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "status": "RUNNING",
+                      "createdAt": "2026-05-25T14:30:00Z",
+                      "statusUrl": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+                    }
+                  ],
+                  "meta": {
+                    "key": "items",
+                    "pageSize": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      }
+    },
+    "/v3/InsightsDomains/Conversations/QueryJobs/{operationId}": {
+      "servers": [
+        {
+          "url": "https://insights.twilio.com"
+        }
+      ],
+      "get": {
+        "summary": "Get async query status and results",
+        "description": "Poll operation status. When status is COMPLETED, the response includes\nquery results inline. When FAILED, the response includes error details\nconforming to the OperationError schema.\n",
+        "tags": [
+          "TwilioInsightsAsync"
+        ],
+        "operationId": "FetchQueryJobStatus",
+        "parameters": [
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the async query operation (TTID format).",
+            "schema": {
+              "type": "string",
+              "format": "Proc_JobTtid",
+              "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation status (may include results if COMPLETED)",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds before the client should poll again (present while PENDING/RUNNING).",
+                "schema": {
+                  "type": "integer",
+                  "example": 10
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueryJobStatusResponse"
+                },
+                "examples": {
+                  "running": {
+                    "summary": "Operation still running",
+                    "value": {
+                      "operationId": "proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "status": "RUNNING",
+                      "createdAt": "2026-05-25T14:30:00Z",
+                      "statusUrl": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+                    }
+                  },
+                  "completed": {
+                    "summary": "Operation completed",
+                    "value": {
+                      "operationId": "proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "status": "COMPLETED",
+                      "createdAt": "2026-05-25T14:30:00Z",
+                      "completedAt": "2026-05-25T14:32:17Z",
+                      "statusUrl": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "resultRetentionPeriod": "P7D"
+                    }
+                  },
+                  "failed": {
+                    "summary": "Operation failed",
+                    "value": {
+                      "operationId": "proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "status": "FAILED",
+                      "createdAt": "2026-05-25T14:30:00Z",
+                      "completedAt": "2026-05-25T14:30:12Z",
+                      "statusUrl": "https://insights.twilio.com/v3/InsightsDomains/Conversations/QueryJobs/proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                      "error": {
+                        "code": 50001,
+                        "message": "Query execution timeout exceeded",
+                        "httpStatusCode": 504,
+                        "detail": "ClickHouse query exceeded the 120s execution limit for this account."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      }
+    },
+    "/v3/InsightsDomains/Conversations/QueryJobs/{operationId}/Results": {
+      "servers": [
+        {
+          "url": "https://insights.twilio.com"
+        }
+      ],
+      "get": {
+        "summary": "Fetch async query results",
+        "description": "Retrieve paginated results for a completed async query operation.\nThe resultUrl in the status response points to this endpoint.\nReturns 404 if the operation is not yet COMPLETED or has expired.\n",
+        "tags": [
+          "TwilioInsightsAsync"
+        ],
+        "operationId": "FetchQueryJobResults",
+        "parameters": [
+          {
+            "name": "operationId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the async query operation.",
+            "schema": {
+              "type": "string",
+              "format": "Proc_JobTtid",
+              "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The maximum number of resources to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Token for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsightsQueryResponse"
+                },
+                "example": {
+                  "domain": "Conversations",
+                  "items": [
+                    {
+                      "Id": "conv1",
+                      "Languages": [
+                        "en"
+                      ],
+                      "Channels": [
+                        "voice"
+                      ],
+                      "OperatorResult.Value": "positive"
+                    },
+                    {
+                      "Id": "conv2",
+                      "Languages": [
+                        "en",
+                        "es"
+                      ],
+                      "Channels": [
+                        "chat"
+                      ],
+                      "OperatorResult.Value": "negative"
+                    }
+                  ],
+                  "meta": {
+                    "key": "items",
+                    "pageSize": 2,
+                    "nextToken": "eyJwYWdlIjoyLCJxdWVyeSI6ImJvb2tzIn0="
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {

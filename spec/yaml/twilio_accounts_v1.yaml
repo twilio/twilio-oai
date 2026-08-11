@@ -177,6 +177,81 @@ components:
             an error; and `error_messages`, an array of strings describing specific
             validation errors encountered. If the request is successful, the error_messages
             array will be empty.'
+    accounts.v1.messaging_sms_pumping_protection:
+      type: object
+      properties:
+        protection_mode:
+          type: string
+          nullable: true
+          description: Protection mode for SMS pumping protection (basic or advanced).
+          example: advanced
+        default_protection_level:
+          type: string
+          nullable: true
+          description: 'Required when protection_mode is "advanced". Default SMS pumping
+            protection level. Note: disable is NOT allowed for default protection
+            level. Options: low, medium, high. Must be omitted when protection_mode
+            is "basic".'
+          example: medium
+        message_intent:
+          type: string
+          nullable: true
+          description: 'Required when protection_mode is "advanced". Message intent/purpose
+            for SMS pumping protection. Example: otp, marketing, etc. Options: otp,
+            notifications, fraud, security, customercare, delivery, education, events,
+            polling, announcement, marketing, ai_classification. Must be omitted when
+            protection_mode is "basic".'
+          example: otp
+        country_specific_protection_level:
+          type: object
+          nullable: true
+          description: Required when protection_mode is "advanced". Object mapping
+            protection levels to country arrays. Must contain all four keys (low,
+            medium, high, disabled) with their respective country arrays. Must be
+            omitted when protection_mode is "basic".
+          properties:
+            low:
+              type: array
+              nullable: true
+              description: ISO 3166-1 alpha-2 country codes for low protection level
+              example:
+              - IN
+              - GB
+              items:
+                type: string
+                pattern: ^[A-Z]{2}$
+            medium:
+              type: array
+              nullable: true
+              description: ISO 3166-1 alpha-2 country codes for medium protection
+                level
+              example:
+              - BD
+              - SL
+              items:
+                type: string
+                pattern: ^[A-Z]{2}$
+            high:
+              type: array
+              nullable: true
+              description: ISO 3166-1 alpha-2 country codes for high protection level
+              example:
+              - PK
+              - AF
+              items:
+                type: string
+                pattern: ^[A-Z]{2}$
+            disabled:
+              type: array
+              nullable: true
+              description: ISO 3166-1 alpha-2 country codes for disabled protection
+                level
+              example:
+              - US
+              - CA
+              items:
+                type: string
+                pattern: ^[A-Z]{2}$
     accounts.v1.safelist:
       type: object
       properties:
@@ -312,6 +387,23 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: UpdateAuthTokenPromotion
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: UpdateAuthTokenPromotionRequest
+              properties:
+                SuppressEmailNotification:
+                  type: boolean
+                  description: Whether to suppress the email notification that Twilio
+                    sends to the owners and administrators of the account about this
+                    Auth Token change. Defaults to `false`, so Twilio sends the email.
+                    Set to `true` when rotating Auth Tokens across many subaccounts.
+            examples:
+              updateWithoutNotification:
+                value:
+                  SuppressEmailNotification: true
   /v1/Consents/Bulk:
     servers:
     - url: https://accounts.twilio.com
@@ -1633,11 +1725,37 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: CreateSecondaryAuthToken
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              title: CreateSecondaryAuthTokenRequest
+              properties:
+                SuppressEmailNotification:
+                  type: boolean
+                  description: Whether to suppress the email notification that Twilio
+                    sends to the owners and administrators of the account about this
+                    Auth Token change. Defaults to `false`, so Twilio sends the email.
+                    Set to `true` when rotating Auth Tokens across many subaccounts.
+            examples:
+              createWithoutNotification:
+                value:
+                  SuppressEmailNotification: true
     delete:
       description: Delete the secondary Auth Token from your account
       summary: Delete the secondary Auth Token from your account
       tags:
       - AccountsV1SecondaryAuthToken
+      parameters:
+      - name: SuppressEmailNotification
+        in: query
+        description: Whether to suppress the email notification that Twilio sends
+          to the owners and administrators of the account about this Auth Token change.
+          Defaults to `false`, so Twilio sends the email. Set to `true` when rotating
+          Auth Tokens across many subaccounts.
+        schema:
+          type: boolean
       responses:
         '204':
           description: The resource was deleted successfully.
@@ -1653,6 +1771,7 @@ tags:
 - name: AccountsV1BulkContacts
 - name: AccountsV1Index
 - name: AccountsV1MessagingGeopermissions
+- name: AccountsV1MessagingSmsPumpingProtection
 - name: AccountsV1PublicKey
 - name: AccountsV1Safelist
 - name: AccountsV1SecondaryAuthToken
