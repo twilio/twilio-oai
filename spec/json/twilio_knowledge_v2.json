@@ -23,6 +23,12 @@
       "url": "https://knowledge.twilio.com"
     }
   ],
+  "tags": [
+    {
+      "name": "Operations",
+      "description": "Retrieve the status and result of asynchronous operations. Write endpoints that trigger long-running processes return an operation ID that can be used here to check status.\n"
+    }
+  ],
   "paths": {
     "/v2/KnowledgeBases/{kbId}/Knowledge": {
       "servers": [
@@ -106,7 +112,7 @@
                       "pageSize": 50,
                       "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
                       "previousToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
-                      "key": "knowledge"
+                      "key": null
                     }
                   }
                 }
@@ -234,7 +240,7 @@
         }
       ],
       "x-twilio": {
-        "pathType": "instance"
+        "pathType": "list"
       },
       "post": {
         "operationId": "CreateKnowledgeSearch",
@@ -281,12 +287,18 @@
                     {
                       "content": "To reset your password, go to the login page and click 'Forgot Password'. Enter your email address and follow the instructions in the reset email.",
                       "knowledgeId": "know_knowledge_00000000000000000000000001",
-                      "createdAt": "2026-01-15T10:30:00Z"
+                      "createdAt": "2026-01-15T10:30:00Z",
+                      "chunkIndex": 3,
+                      "documentTitle": "Account Help \u2014 Example Docs",
+                      "documentUrl": "https://docs.example.com/account/password-reset"
                     },
                     {
                       "content": "If you're having trouble with password reset, contact support at help@example.com or call 1-800-HELP.",
                       "knowledgeId": "know_knowledge_00000000000000000000000002",
-                      "createdAt": "2026-01-15T10:30:00Z"
+                      "createdAt": "2026-01-15T10:30:00Z",
+                      "chunkIndex": 7,
+                      "documentTitle": "Contact Support \u2014 Example Docs",
+                      "documentUrl": "https://docs.example.com/support/contact"
                     }
                   ]
                 }
@@ -574,24 +586,6 @@
                       "$ref": "#/components/schemas/KnowledgeMeta"
                     }
                   }
-                },
-                "example": {
-                  "chunks": [
-                    {
-                      "id": "chunk_00000000000000000000000000",
-                      "content": "To reset your password, go to the login page and click 'Forgot Password'. Enter your email address and follow the instructions in the reset email.",
-                      "metadata": {
-                        "sourceType": "Web",
-                        "sourceUrl": "https://example.com/faq",
-                        "createdAt": "2026-01-15T10:30:00Z"
-                      }
-                    }
-                  ],
-                  "meta": {
-                    "key": "chunks",
-                    "pageSize": 50,
-                    "nextToken": "eyJlYXN0"
-                  }
                 }
               }
             },
@@ -824,6 +818,7 @@
                     "type": "string",
                     "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
                     "pattern": "^[a-zA-Z0-9-]+$",
+                    "maxLength": 64,
                     "example": "product-docs"
                   },
                   "description": {
@@ -900,6 +895,17 @@
         "responses": {
           "202": {
             "description": "Knowledge Base deletion request accepted.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -910,6 +916,11 @@
                       "type": "string",
                       "maxLength": 512,
                       "example": "Knowledge Base deletion request accepted for processing."
+                    },
+                    "statusUrl": {
+                      "type": "string",
+                      "description": "URI to check operation status.",
+                      "maxLength": 512
                     }
                   }
                 }
@@ -1000,6 +1011,11 @@
       }
     }
   },
+  "security": [
+    {
+      "accountSid_authToken": []
+    }
+  ],
   "components": {
     "securitySchemes": {
       "accountSid_authToken": {
@@ -1028,7 +1044,7 @@
           },
           "pageSize": {
             "type": "integer",
-            "default": 50
+            "description": "The number of items returned in this page of results."
           },
           "nextToken": {
             "type": "string",
@@ -1131,20 +1147,15 @@
           }
         },
         "required": [
-          "createdAt",
-          "name",
           "updatedAt",
+          "createdAt",
           "status",
-          "id"
+          "id",
+          "name"
         ]
       },
       "KnowledgeChunk": {
         "type": "object",
-        "description": "Represents a processed content chunk extracted from knowledge source.  Chunks are smaller segments of content that have been parsed and indexed  for semantic search operations, containing the original text content.",
-        "example": {
-          "content": "To reset your password, go to the login page and click 'Forgot Password'.",
-          "createdAt": "2026-01-15T10:30:00Z"
-        },
         "properties": {
           "content": {
             "description": "The chunk content.",
@@ -1155,6 +1166,28 @@
             "description": "The date and time in GMT when the Chunk was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat.",
             "format": "date-time",
             "type": "string"
+          },
+          "chunkIndex": {
+            "type": "integer",
+            "description": "0-based position of this chunk within its source document for a single ingestion run.",
+            "example": 2
+          },
+          "documentTitle": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable title of the source document.\nWeb: HTML <title> from the crawled page.\nFile: filename from Unstructured metadata.\nText: knowledge name from the knowledge source.",
+            "example": "Authentication \u2014 Twilio Docs"
+          },
+          "documentUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Specific page URL this chunk was crawled from. Web sources only; null for File and Text sources.",
+            "example": "https://docs.twilio.com/en/api/authentication"
+          },
+          "documentNumber": {
+            "type": "integer",
+            "description": "Physical page number (1-based). PDF sources only; omitted for all other source types.",
+            "example": 12
           }
         }
       },
@@ -1207,6 +1240,28 @@
             "description": "The date and time in GMT when the Chunk was created specified in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601)\nformat.",
             "format": "date-time",
             "type": "string"
+          },
+          "chunkIndex": {
+            "type": "integer",
+            "description": "0-based position of this chunk within its source document for a single ingestion run.",
+            "example": 2
+          },
+          "documentTitle": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable title of the source document.\nWeb: HTML <title> from the crawled page.\nFile: filename from Unstructured metadata.\nText: knowledge name from the knowledge source.",
+            "example": "Authentication \u2014 Twilio Docs"
+          },
+          "documentUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Specific page URL this chunk was crawled from. Web sources only; null for File and Text sources.",
+            "example": "https://docs.twilio.com/en/api/authentication"
+          },
+          "documentNumber": {
+            "type": "integer",
+            "description": "Physical page number (1-based). PDF sources only; omitted for all other source types.",
+            "example": 12
           },
           "score": {
             "description": "The score associated with the chunk.",
@@ -1329,7 +1384,7 @@
           "code": {
             "type": "integer",
             "minimum": 100,
-            "maximum": 99999,
+            "maximum": 999999,
             "description": "The Twilio error code.",
             "format": "int32"
           },
@@ -1369,7 +1424,7 @@
           },
           "pageSize": {
             "type": "integer",
-            "default": 50
+            "description": "The number of items returned in this page of results."
           },
           "nextToken": {
             "type": "string",
@@ -1390,6 +1445,7 @@
             "type": "string",
             "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned\nby the developer and can be used in addition to the ID. It is intended to be human-readable and unique within\nthe account.",
             "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 64,
             "example": "product-docs"
           },
           "description": {
@@ -1406,12 +1462,12 @@
       },
       "KnowledgeBase": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "displayName": {
             "type": "string",
             "description": "Provides a unique and addressable name to be assigned to this Knowledge Base. This name is assigned\nby the developer and can be used in addition to the ID. It is intended to be human-readable and unique within\nthe account.",
             "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 64,
             "example": "product-docs"
           },
           "description": {
@@ -1459,11 +1515,11 @@
           }
         },
         "required": [
-          "createdAt",
           "displayName",
           "updatedAt",
-          "version",
+          "createdAt",
           "status",
+          "version",
           "id"
         ]
       },
@@ -1480,22 +1536,16 @@
             "description": "List of Knowledge Bases associated with the Twilio account."
           },
           "meta": {
-            "$ref": "#/components/schemas/Meta",
-            "example": {
-              "key": "knowledgeBases",
-              "pageSize": 50,
-              "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
-            }
+            "$ref": "#/components/schemas/Meta"
           }
         }
       },
       "SupportedFileMimeType": {
         "type": "string",
-        "description": "Supported MIME types for knowledge file imports. Maximum file size for any file is 16MB (16 * 1024 * 1024 bytes). Extensions \u2192 MIME:\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .mdx \u2192 text/mdx\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain",
+        "description": "Supported MIME types for knowledge file imports. Maximum file size for any file is 16MB (16 * 1024 * 1024 bytes). Extensions \u2192 MIME:\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain",
         "enum": [
           "text/csv",
           "text/markdown",
-          "text/mdx",
           "application/pdf",
           "text/tab-separated-values",
           "text/plain"
@@ -1504,7 +1554,7 @@
       "FileSourceDetails": {
         "type": "object",
         "additionalProperties": false,
-        "description": "Configuration details for file based knowledge sources. Supported file formats (extension \u2192 MIME type):\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .mdx \u2192 text/mdx\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain\nMaximum file size: 16MB (16 * 1024 * 1024 bytes).",
+        "description": "Configuration details for file based knowledge sources. Supported file formats (extension \u2192 MIME type):\n  .csv \u2192 text/csv\n  .md \u2192 text/markdown\n  .pdf \u2192 application/pdf\n  .tsv \u2192 text/tab-separated-values\n  .txt \u2192 text/plain\nMaximum file size: 16MB (16 * 1024 * 1024 bytes).",
         "properties": {
           "type": {
             "type": "string",
@@ -1531,7 +1581,7 @@
           "importUrl": {
             "type": "string",
             "format": "uri",
-            "description": "Presigned S3 URL for file upload (when status is SCHEDULED) or the permanent S3 location after upload completes.\nUse PUT method to upload the file to this URL when status is SCHEDULED.",
+            "description": "Presigned S3 URL for file upload (when status is SCHEDULED). \nUse PUT method to upload the file to this URL when status is SCHEDULED.",
             "example": "https://s3.amazonaws.com/knowledge/uploads/abc123.pdf",
             "readOnly": true
           },
@@ -1667,6 +1717,34 @@
             "description": "The identifier of the created or affected resource."
           }
         }
+      },
+      "ChunkProvenanceFields": {
+        "type": "object",
+        "description": "Structural and provenance fields shared across chunk representations for chunks sourced from different knowledge source types.\nThese fields provide context about the origin of each chunk, such as its position within the source document, the title of the document it was extracted from, and the URL (for web sources) or page number (for PDF sources).\nFields that are not applicable for a given source type are null.",
+        "properties": {
+          "chunkIndex": {
+            "type": "integer",
+            "description": "0-based position of this chunk within its source document for a single ingestion run.",
+            "example": 2
+          },
+          "documentTitle": {
+            "type": "string",
+            "maxLength": 512,
+            "description": "Human-readable title of the source document.\nWeb: HTML <title> from the crawled page.\nFile: filename from Unstructured metadata.\nText: knowledge name from the knowledge source.",
+            "example": "Authentication \u2014 Twilio Docs"
+          },
+          "documentUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Specific page URL this chunk was crawled from. Web sources only; null for File and Text sources.",
+            "example": "https://docs.twilio.com/en/api/authentication"
+          },
+          "documentNumber": {
+            "type": "integer",
+            "description": "Physical page number (1-based). PDF sources only; omitted for all other source types.",
+            "example": 12
+          }
+        }
       }
     },
     "parameters": {
@@ -1700,7 +1778,7 @@
         "description": "The token for the page of results to retrieve.",
         "schema": {
           "type": "string",
-          "maxLength": 500
+          "maxLength": 4096
         }
       },
       "KnowledgeIdPath": {
@@ -1872,22 +1950,6 @@
             }
           }
         }
-      },
-      "Conflict": {
-        "description": "Conflict",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/TwilioError"
-            },
-            "example": {
-              "code": 20409,
-              "message": "Conflict",
-              "more_info": "https://www.twilio.com/docs/api/errors/20409",
-              "status": 409
-            }
-          }
-        }
       }
     },
     "headers": {
@@ -1920,10 +1982,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "accountSid_authToken": []
-    }
-  ]
+  }
 }

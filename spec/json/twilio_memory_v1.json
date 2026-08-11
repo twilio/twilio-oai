@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Twilio Memory API",
-    "description": "APIs for managing memory stores, profiles, events, and conversational intelligence capabilities.",
+    "description": "APIs for managing memory stores, profiles, and conversational intelligence capabilities.",
     "version": "1.0",
     "termsOfService": "https://www.twilio.com/legal/tos",
     "contact": {
@@ -23,6 +23,52 @@
       "url": "https://memory.twilio.com"
     }
   ],
+  "tags": [
+    {
+      "name": "Store",
+      "description": "The Memory Store is the parent container for all Conversation Memory data. Profiles, identifiers, traits, observations, and summaries all live inside a specific store, and that store defines the boundary for how data is organized and resolved. A store must be created before you create a conversation configuration, because the conversation configuration needs to know where profiles and memory should be written. \n"
+    },
+    {
+      "name": "TraitGroup",
+      "description": "Trait Groups are the organized containers used to group related facts about a profile, such as contact details or account preferences. Trait schemas within each Trait Group must be defined before customer information is ingested into profiles.\n\nOut-of-the-box trait groups like \"Contacts\" are available by default to help store identity information consistently across channels. Custom groups can also be created to store industry-specific information or satisfy unique business needs.\n"
+    },
+    {
+      "name": "IdentityResolutionSettings",
+      "description": "The Identity Resolution Settings endpoints allow you to define and manage the logic used to identify, merge, and resolve customer profiles within a specific Memory Store. These settings ensure that incoming data is accurately attributed to the correct individual across different communication channels.\n\nThrough these configurations, you can define specific identifiers like email or phone numbers and apply normalization to ensure data consistency. Each identifier uses an exact matching algorithm and is set to enforce uniqueness, which automatically triggers a profile merge if a duplicate is found.\n\nYou can also manage data storage by setting a limit on the number of values retained per identifier, with a `first-in-first-out (FIFO)` or `last-in-first-out (LIFO)` policy to remove the oldest entries upon crossing the set limit.\n\nFinally, a prioritized list of matching rules determines if an incoming interaction should create a new profile, update a single record, or consolidate multiple existing profiles into one.\n"
+    },
+    {
+      "name": "DataMapping",
+      "description": "A Data Mapping connects an external data source to a Memory Store by mapping fields from the data source to Traits in a Trait Group. This allows for the enrichment of profiles with data from external sources, and can be used to sync customer data from a CRM or Warehouse.\n"
+    },
+    {
+      "name": "Operations",
+      "description": "Retrieve the status and result of asynchronous operations. Write endpoints that trigger long-running processes return an operation ID that can be used here to check status.\n"
+    },
+    {
+      "name": "Profile",
+      "description": "Profiles are the canonical customer records in a Memory Store. Each profile holds traits, organized into trait groups, that identify and describe a customer and let Twilio attach future conversation data to the right person. Every profile is scoped to a single Memory Store, so profile resolution, trait updates, and imports all happen within that store.\n\nConversation Memory passively hydrates profiles from your existing Twilio SMS channels via Conversation Orchestrator. Conversations formed by Conversation Orchestrator create profiles in the store, and automatically enrich profiles with observations and conversation summaries.\n\nThe Profiles API gives you two main ways to work with profile data. You can manage profiles one at a time with create, read, update, and delete endpoints, or you can load them at scale with bulk upserts and CSV imports. Which path you choose depends on whether you are handling live application traffic or backfilling data from an existing system.\n"
+    },
+    {
+      "name": "Retrieval",
+      "description": "The Retrieval APIs resolve profiles and return relevant memory at the moment an agent needs them. Profile lookup is leveraged by the Conversation Orchestrator. When an inbound message arrives on a configured channel, Twilio resolves the sender's identity and either attaches the conversation to an existing profile or creates a new one if no match is found. The Lookup Profiles endpoint also supports direct lookup by identifier, applying the store's identity resolution rules and normalized values.\n\nFor memory retrieval, the Recall endpoint uses hybrid semantic and lexical search to return only the most relevant observations and summaries, minimizing token usage by avoiding transmission of the full profile history into the prompt. When a `conversationId` is provided without a query, Twilio derives a query from the conversation context and applies it to search the profile store.\n"
+    },
+    {
+      "name": "Identifiers",
+      "description": "Every customer interaction must be attached to the correct profile. Conversation Memory manages this through Identifiers which are normalized, unique values like phone numbers or email addresses. When a new interaction arrives, Twilio uses these identifiers to search for an existing profile. A successful match attaches the interaction to that profile's history, while a failed match triggers the creation of a new profile.\n\nIdentifiers are derived from traits. The `idTypePromotion` field on a trait maps its value to a configured identifier type, such as `email` or `phone`, as defined in the store's Identity Resolution Settings. Once mapped, the trait value becomes a searchable key. If no profile is found, Twilio creates a new profile and records the value as both a trait and an identifier.\n"
+    },
+    {
+      "name": "Traits",
+      "description": "Traits are key value pairs that store facts about a profile such as firstName, lastName, or dietaryRestrictions. Trait values can only be written to a profile if the trait definition already exists and assigned to a Trait Group. Trait names are normalized to lowerCamelCase naming conventions.\n"
+    },
+    {
+      "name": "Observations",
+      "description": "Observations are small contextual text snippets automatically extracted from conversations that run through Conversation Orchestrator. They capture useful details like customer preferences, stated needs, and plans/intentions discussed in the conversation, then write that context back to the customer\u2019s profile. Observations evolve with each new conversation, updating and enhancing existing details.\n\nObservation generation is triggered when a conversation reaches the `Closed` or `Inactive` state. To adjust when conversations reach those states, update the lifecycle rules in the Conversation Orchestrator configuration.\n"
+    },
+    {
+      "name": "ConversationSummaries",
+      "description": "Conversation summaries are high-level recaps automatically generated from conversations that run through Conversation Orchestrator. Like observations, they are created when a conversation reaches the configured `Closed` state and are written back to the customer's profile.\n\nSummaries focus on the overall conversation, such as the main topics discussed, the outcome, and the broader context of the interaction. They are less focused on specific customer preferences or durable user details, which is what observations are meant to capture.\n\nOver time, new conversations add new summaries to the profile, giving agents a quick way to understand past interactions without reading every transcript."
+    }
+  ],
   "paths": {
     "/v1/Stores/{storeId}/Profiles/{profileId}": {
       "servers": [
@@ -39,6 +85,10 @@
         }
       ],
       "x-twilio": {
+        "defaultOutputProperties": [
+          "id",
+          "createdAt"
+        ],
         "pathType": "instance"
       },
       "delete": {
@@ -158,8 +208,8 @@
       },
       "patch": {
         "operationId": "PatchProfileTraits",
-        "summary": "Patch Profile Traits",
-        "description": "Merge one or more trait groups into an existing profile. Only the traits provided are added or updated; unspecified traits remain unchanged. Only pre-defined trait groups and traits configured for the memory store can be patched. To remove a trait entirely, set its value to null.",
+        "summary": "Patch Profile",
+        "description": "Update or add specific traits to an existing profile. Only the traits provided are added or updated; unspecified traits remain unchanged. Only pre-defined trait groups and traits configured for the memory store can be patched. To remove a trait entirely, set its value to null.",
         "tags": [
           "Profile"
         ],
@@ -928,6 +978,9 @@
             "$ref": "#/components/parameters/CreatedBefore"
           },
           {
+            "$ref": "#/components/parameters/ConversationId"
+          },
+          {
             "$ref": "#/components/parameters/AcceptEncoding"
           }
         ],
@@ -983,8 +1036,7 @@
                   ],
                   "meta": {
                     "pageSize": 2,
-                    "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
-                    "key": "observations"
+                    "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
                   }
                 }
               }
@@ -1209,7 +1261,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ObservationCore"
+                "$ref": "#/components/schemas/ObservationBase"
               },
               "examples": {
                 "Update Content Only": {
@@ -1432,8 +1484,7 @@
                       ],
                       "meta": {
                         "pageSize": 2,
-                        "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
-                        "key": "revisions"
+                        "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
                       }
                     }
                   }
@@ -1500,6 +1551,9 @@
             "$ref": "#/components/parameters/PageToken"
           },
           {
+            "$ref": "#/components/parameters/ConversationId"
+          },
+          {
             "$ref": "#/components/parameters/AcceptEncoding"
           }
         ],
@@ -1554,8 +1608,7 @@
                   ],
                   "meta": {
                     "pageSize": 2,
-                    "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ",
-                    "key": "summaries"
+                    "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
                   }
                 }
               }
@@ -1706,7 +1759,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of profile IDs up to a maximum of 100.",
+            "description": "A list of profile IDs up to a maximum of 1000.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1714,9 +1767,9 @@
                   "properties": {
                     "profiles": {
                       "type": "array",
-                      "maxItems": 100,
+                      "maxItems": 1000,
                       "items": {
-                        "$ref": "#/components/schemas/ProfileID"
+                        "$ref": "#/components/schemas/IdentityProfileID"
                       },
                       "example": [
                         "mem_profile_00000000000000000000000000",
@@ -1732,7 +1785,7 @@
                       ]
                     },
                     "meta": {
-                      "$ref": "#/components/schemas/ProfilesMeta"
+                      "$ref": "#/components/schemas/IdentityProfilesMeta"
                     }
                   },
                   "maxProperties": 2
@@ -1911,7 +1964,7 @@
         }
       ],
       "x-twilio": {
-        "pathType": "instance"
+        "pathType": "list"
       },
       "put": {
         "operationId": "UpdateProfilesBulk",
@@ -2075,7 +2128,16 @@
                       }
                     },
                     "meta": {
-                      "$ref": "#/components/schemas/ProfilesMeta"
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ProfilesMeta"
+                        }
+                      ],
+                      "properties": {
+                        "key": {
+                          "example": "traits"
+                        }
+                      }
                     }
                   },
                   "maxProperties": 2
@@ -2111,8 +2173,7 @@
                         }
                       ],
                       "meta": {
-                        "pageSize": 4,
-                        "key": "traits"
+                        "pageSize": 4
                       }
                     }
                   },
@@ -2140,8 +2201,7 @@
                         }
                       ],
                       "meta": {
-                        "pageSize": 3,
-                        "key": "traits"
+                        "pageSize": 3
                       }
                     }
                   }
@@ -2388,6 +2448,7 @@
                     "type": "string",
                     "description": "Provides a unique and addressable name to be assigned to this Store. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
                     "pattern": "^[a-zA-Z0-9-]+$",
+                    "maxLength": 64,
                     "example": "sandbox-updated"
                   },
                   "description": {
@@ -2441,6 +2502,9 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
@@ -2529,12 +2593,12 @@
           "identifierConfigs",
           "matchingRules"
         ],
-        "pathType": "instance"
+        "pathType": "list"
       },
       "get": {
         "operationId": "FetchIdentityResolutionSettings",
         "summary": "Retrieve Identity Resolution Settings.",
-        "description": "These settings determine how Customer Memory will use identifiers for searching, \nmerging, and resolving profiles. \n> Some settings can only take on their default values and are not yet available to change, but coming soon.",
+        "description": "These settings determine how Customer Memory will use identifiers for searching, merging, and resolving profiles. \n> Some settings can only take on their default values and are not yet available to change, but coming soon.",
         "tags": [
           "IdentityResolutionSettings"
         ],
@@ -2693,6 +2757,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "412": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
@@ -2773,8 +2840,7 @@
                 "example": {
                   "traitGroups": [
                     {
-                      "id": "mem_store_00000000000000000000000000_trait_group_00000000000000000000000000",
-                      "displayName": "Contact Information",
+                      "displayName": "Contact",
                       "description": "Traits related to contact information.",
                       "traits": {
                         "email": {
@@ -2791,7 +2857,7 @@
                   ],
                   "meta": {
                     "key": "traitGroups",
-                    "pageSize": 50
+                    "pageSize": 1
                   }
                 }
               }
@@ -3349,8 +3415,8 @@
                   "dataMappings": [
                     {
                       "id": "mem_datamapping_00000000000000000000000000",
-                      "createAt": "2024-01-01T00:00:00Z",
-                      "updateAt": "2024-01-01T00:00:00Z",
+                      "createdAt": "2024-01-01T00:00:00Z",
+                      "updatedAt": "2024-01-01T00:00:00Z",
                       "version": 1,
                       "displayName": "crm-contacts",
                       "description": "Syncs customer data from CRM dataset to profile traits",
@@ -3359,7 +3425,7 @@
                         "type": "TRAITS",
                         "mappings": [
                           {
-                            "fieldName": "primary_email",
+                            "expression": "primary_email",
                             "traitGroup": "Contact",
                             "traitName": "email"
                           }
@@ -3373,7 +3439,7 @@
                   ],
                   "meta": {
                     "key": "dataMappings",
-                    "pageSize": 50
+                    "pageSize": 1
                   }
                 }
               }
@@ -3891,7 +3957,7 @@
       "get": {
         "operationId": "ListProfileImportsV2",
         "summary": "Get a list of imports",
-        "description": "Retrieve a list of profile import task IDs that have been submitted for this service. Use these IDs to query individual import status details.",
+        "description": "Retrieve a paginated list of profile import task IDs submitted for this service, ordered by import recency. Use the returned IDs to query individual import status details, and the paging parameters to iterate through larger sets. `orderBy` defaults to `DESC`; omitting `pageSize`/`pageToken` returns a default first page.",
         "tags": [
           "Profile"
         ],
@@ -3909,9 +3975,37 @@
                       "items": {
                         "$ref": "#/components/schemas/ImportID"
                       }
+                    },
+                    "meta": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/ProfilesMeta"
+                        }
+                      ],
+                      "properties": {
+                        "key": {
+                          "example": "imports"
+                        }
+                      }
                     }
                   },
-                  "maxProperties": 1
+                  "maxProperties": 2
+                },
+                "examples": {
+                  "All Imports": {
+                    "summary": "A page of import IDs for a store",
+                    "value": {
+                      "imports": [
+                        "mem_import_00000000000000000000000000",
+                        "mem_import_11234567890123456789012345"
+                      ],
+                      "meta": {
+                        "key": "imports",
+                        "pageSize": 2,
+                        "nextToken": "eyJlYXN0ZXIiOiJlZ2cifQ"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -3937,7 +4031,18 @@
           "503": {
             "$ref": "#/components/responses/ServiceUnavailable"
           }
-        }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/PageToken"
+          },
+          {
+            "$ref": "#/components/parameters/OrderBy"
+          }
+        ]
       },
       "post": {
         "operationId": "CreateProfilesImportV2",
@@ -4026,7 +4131,7 @@
                     "url": {
                       "type": "string",
                       "description": "Pre-signed URL to upload the CSV via a single PUT request.",
-                      "example": "https://unified-profiles-csv-upload-stage-us-east-1.s3.amazonaws.com/object.txt?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Signature=vjbyNxybdZaMmLa%2ByT372YEAiv4%3D&Expires=1741978496",
+                      "example": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234...",
                       "maxLength": 2048
                     }
                   },
@@ -4037,7 +4142,7 @@
                     "summary": "Example created import",
                     "value": {
                       "importId": "mem_import_00000000000000000000000000",
-                      "url": "https://unified-profiles-csv-upload-stage-us-east-1.s3.amazonaws.com/object.txt?AWSAccessKeyId=AKIA..."
+                      "url": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234..."
                     }
                   }
                 }
@@ -4265,6 +4370,11 @@
       }
     }
   },
+  "security": [
+    {
+      "accountSid_authToken": []
+    }
+  ],
   "components": {
     "securitySchemes": {
       "basic_apikey_or_accountsid": {
@@ -4287,7 +4397,7 @@
           "code": {
             "type": "integer",
             "minimum": 100,
-            "maximum": 99999,
+            "maximum": 999999,
             "description": "The Twilio error code.",
             "format": "int32"
           },
@@ -4320,6 +4430,33 @@
         "pattern": "^mem_profile_[0-7][0-9a-z]{25}$",
         "example": "mem_profile_00000000000000000000000000",
         "description": "The canonical profile ID."
+      },
+      "IdentityProfilesMeta": {
+        "type": "object",
+        "maxProperties": 4,
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": false,
+            "maxLength": 64,
+            "description": "The key of the list property contains the actual data items.\nThis enables programmatic iteration over paginated results.\n",
+            "example": "profiles"
+          },
+          "pageSize": {
+            "type": "integer",
+            "default": 50
+          },
+          "nextToken": {
+            "type": "string",
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ",
+            "maxLength": 4096
+          },
+          "previousToken": {
+            "type": "string",
+            "example": "eyJlYXN0ZXIiOiJlZ2cifQ",
+            "maxLength": 4096
+          }
+        }
       },
       "Identifier": {
         "type": "object",
@@ -4515,9 +4652,6 @@
         },
         "required": [
           "createdAt",
-          "occurredAt",
-          "content",
-          "source",
           "updatedAt",
           "id"
         ]
@@ -4600,12 +4734,12 @@
           }
         },
         "required": [
-          "createdAt",
-          "conversationId",
-          "occurredAt",
-          "content",
           "updatedAt",
-          "id"
+          "conversationId",
+          "createdAt",
+          "occurredAt",
+          "id",
+          "content"
         ]
       },
       "Participant": {
@@ -4778,9 +4912,9 @@
                 }
               },
               "required": [
+                "name",
                 "channel",
                 "address",
-                "name",
                 "id"
               ]
             }
@@ -4948,7 +5082,7 @@
             "minItems": 1,
             "maxItems": 10,
             "items": {
-              "$ref": "#/components/schemas/ObservationCore"
+              "$ref": "#/components/schemas/ObservationCreateRequest"
             }
           }
         },
@@ -5179,147 +5313,6 @@
         },
         "maxProperties": 3
       },
-      "CommunicationLifecycleEvent": {
-        "type": "object",
-        "description": "A communication lifecycle event associated with a profile.",
-        "properties": {
-          "timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The time the event occurred in ISO8601 format with millisecond resolution. Defaults to received time if not provided.",
-            "example": "2025-01-01T12:00:00.000Z"
-          },
-          "lifecycle": {
-            "type": "string",
-            "maxLength": 50,
-            "description": "The lifecycle event type of the communication.",
-            "example": "COMMUNICATION_SENT"
-          },
-          "conversationId": {
-            "type": "string",
-            "pattern": "^conv_conversation_[0-7][0-9a-z]{25}$",
-            "description": "The unique identifier for the conversation.",
-            "example": "conv_conversation_00000000000000000000000000"
-          },
-          "communicationId": {
-            "type": "string",
-            "pattern": "^comms_communication_[0-7][0-9a-z]{25}$",
-            "description": "The unique identifier for the communication.",
-            "example": "comms_communication_00000000000000000000000000"
-          },
-          "communicationType": {
-            "type": "string",
-            "maxLength": 20,
-            "description": "The communication channel type.",
-            "example": "SMS"
-          },
-          "communicationStatus": {
-            "type": "string",
-            "maxLength": 20,
-            "description": "The lifecycle status of the communication.",
-            "example": "SENT"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "INBOUND",
-              "OUTBOUND"
-            ],
-            "description": "The direction of the communication.",
-            "example": "OUTBOUND"
-          },
-          "sender": {
-            "type": "object",
-            "properties": {
-              "address": {
-                "type": "string",
-                "maxLength": 320,
-                "description": "The sender's address. Must be a valid address matching the channel type such as E.164 format for phone numbers.",
-                "example": "+12345556789"
-              },
-              "participantId": {
-                "type": "string",
-                "description": "The unique identifier for the sender participant.",
-                "pattern": "^comms_participant_[0-7][0-9a-z]{25}$",
-                "example": "comms_participant_00000000000000000000000000"
-              }
-            },
-            "required": [
-              "address",
-              "participantId"
-            ]
-          },
-          "recipient": {
-            "type": "object",
-            "properties": {
-              "address": {
-                "type": "string",
-                "maxLength": 320,
-                "description": "The recipient's address. Must be a valid address matching the channel type such as E.164 format for phone numbers.",
-                "example": "+13175557890"
-              },
-              "participantId": {
-                "type": "string",
-                "description": "The unique identifier for the recipient participant.",
-                "pattern": "^comms_participant_[0-7][0-9a-z]{25}$",
-                "example": "comms_participant_00000000000000000000000000"
-              }
-            },
-            "required": [
-              "address",
-              "participantId"
-            ]
-          },
-          "errorCode": {
-            "type": "string",
-            "maxLength": 10,
-            "description": "Error code for FAILED communication status.",
-            "example": "30001"
-          },
-          "errorMessage": {
-            "type": "string",
-            "maxLength": 512,
-            "description": "Error message for FAILED communication status.",
-            "example": "phone number is invalid"
-          }
-        },
-        "required": [
-          "timestamp",
-          "communicationType",
-          "conversationId",
-          "lifecycle"
-        ]
-      },
-      "ProfileEventRequest": {
-        "type": "object",
-        "description": "Request body for adding events to a specific profile. This request can contain multiple events.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "twilio-communication-event",
-              "twilio-comms-lifecycle"
-            ],
-            "description": "The type of event being sent.",
-            "example": "twilio-comms-lifecycle"
-          },
-          "events": {
-            "type": "array",
-            "maxItems": 1000,
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/CommunicationLifecycleEvent"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "type",
-          "events"
-        ]
-      },
       "StoreBase": {
         "type": "object",
         "properties": {
@@ -5327,6 +5320,7 @@
             "type": "string",
             "description": "Provides a unique and addressable name to be assigned to this Store. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
             "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 64,
             "example": "sandbox"
           },
           "description": {
@@ -5343,12 +5337,12 @@
       },
       "ServiceRequest": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "displayName": {
             "type": "string",
             "description": "Provides a unique and addressable name to be assigned to this Store. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
             "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 64,
             "example": "sandbox"
           },
           "description": {
@@ -5365,12 +5359,12 @@
       },
       "Store": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "displayName": {
             "type": "string",
             "description": "Provides a unique and addressable name to be assigned to this Store. This name is assigned by the developer and can be used in addition to the ID. It is intended to be human-readable and unique within the account.",
             "pattern": "^[a-zA-Z0-9-]+$",
+            "maxLength": 64,
             "example": "sandbox"
           },
           "description": {
@@ -5412,10 +5406,10 @@
           }
         },
         "required": [
-          "intelligenceServiceId",
           "displayName",
-          "version",
+          "intelligenceServiceId",
           "status",
+          "version",
           "id"
         ]
       },
@@ -5446,6 +5440,10 @@
       "IdentityResolutionSettingsCore": {
         "type": "object",
         "description": "Identity Resolution settings help determine if a new profile should be created,\nor if the incoming conversation should be added to an existing profile. These\nsettings resolve how profiles are looked up and which profiles should merge together.",
+        "required": [
+          "identifierConfigs",
+          "matchingRules"
+        ],
         "properties": {
           "identifierConfigs": {
             "type": "array",
@@ -5465,11 +5463,11 @@
               "whatsapp",
               "phone"
             ],
-            "description": "Priority list of identifiers to locate profiles to apply new data to, or for \ndetermining if two existing profiles should merge. Rules are evaluated in order.\n- If no rule matches against existing profiles, a new profile will be created. \n- If a rule matches to a single existing profile, the profile will be updated. \n- If a rule matches to multiple existing profiles, those existing profiles will be merged.",
+            "description": "Priority list of identifiers to locate profiles to apply new data to, or for determining if two existing profiles should merge. \n\nIndividual rules are evaluated with `OR` logic between them, meaning that satisfying any single rule will trigger a match. Each rule is a single identifier type; compound rules are not supported.\n\nRules are evaluated in order.\n- If no rule matches against existing profiles, a new profile will be created. \n- If a rule matches to a single existing profile, the profile will be updated. \n- If a rule matches to multiple existing profiles, those existing profiles will be merged.",
             "items": {
               "type": "string",
               "maxLength": 30,
-              "description": "Name of the identifier type, compound identifiers are combined with `AND` such as \"phone AND lastName\"."
+              "description": "Name of a single identifier type, such as \"email\" or \"phone\". Compound rules (e.g. joining identifiers with `AND`) are not supported."
             }
           }
         }
@@ -5495,11 +5493,11 @@
               "whatsapp",
               "phone"
             ],
-            "description": "Priority list of identifiers to locate profiles to apply new data to, or for \ndetermining if two existing profiles should merge. Rules are evaluated in order.\n- If no rule matches against existing profiles, a new profile will be created. \n- If a rule matches to a single existing profile, the profile will be updated. \n- If a rule matches to multiple existing profiles, those existing profiles will be merged.",
+            "description": "Priority list of identifiers to locate profiles to apply new data to, or for determining if two existing profiles should merge. \n\nIndividual rules are evaluated with `OR` logic between them, meaning that satisfying any single rule will trigger a match. Each rule is a single identifier type; compound rules are not supported.\n\nRules are evaluated in order.\n- If no rule matches against existing profiles, a new profile will be created. \n- If a rule matches to a single existing profile, the profile will be updated. \n- If a rule matches to multiple existing profiles, those existing profiles will be merged.",
             "items": {
               "type": "string",
               "maxLength": 30,
-              "description": "Name of the identifier type, compound identifiers are combined with `AND` such as \"phone AND lastName\"."
+              "description": "Name of a single identifier type, such as \"email\" or \"phone\". Compound rules (e.g. joining identifiers with `AND`) are not supported."
             }
           },
           "version": {
@@ -5510,7 +5508,9 @@
           }
         },
         "required": [
-          "version"
+          "identifierConfigs",
+          "version",
+          "matchingRules"
         ]
       },
       "IdentifierConfig": {
@@ -5603,6 +5603,7 @@
             "description": "Map of traits that are part of this Trait Group, where the key is the trait name and the value is the trait's definition.",
             "additionalProperties": {
               "type": "object",
+              "title": "TraitGroupCoreTraits",
               "additionalProperties": false,
               "description": "A Trait is a single attribute or characteristic of a profile, such as age, location, or preferences.",
               "properties": {
@@ -5657,7 +5658,6 @@
       },
       "TraitGroup": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "displayName": {
             "type": "string",
@@ -5678,6 +5678,7 @@
             "description": "Map of traits that are part of this Trait Group, where the key is the trait name and the value is the trait's definition.",
             "additionalProperties": {
               "type": "object",
+              "title": "TraitGroupCoreTraits",
               "additionalProperties": false,
               "description": "A Trait is a single attribute or characteristic of a profile, such as age, location, or preferences.",
               "properties": {
@@ -5733,8 +5734,8 @@
           }
         },
         "required": [
-          "version",
-          "displayName"
+          "displayName",
+          "version"
         ]
       },
       "TraitGroupRequest": {
@@ -5763,6 +5764,7 @@
               "type": "object",
               "additionalProperties": false,
               "description": "A Trait is a single attribute or characteristic of a profile, such as age, location, or preferences.",
+              "title": "TraitGroupRequestTraits",
               "properties": {
                 "dataType": {
                   "type": "string",
@@ -5835,6 +5837,9 @@
             "maxLength": 1024,
             "description": "Description of the Trait, providing additional context or information.",
             "example": "The user's primary email address"
+          },
+          "validationRule": {
+            "$ref": "#/components/schemas/ValidationRule"
           },
           "idTypePromotion": {
             "type": "string",
@@ -5985,7 +5990,7 @@
           },
           "pageSize": {
             "type": "integer",
-            "default": 50
+            "description": "The number of items returned in this page of results."
           },
           "nextToken": {
             "type": "string",
@@ -6003,9 +6008,9 @@
         "type": "string",
         "description": "The type of data mapping defining how data flows into the Memory Store.",
         "enum": [
+          "CSV",
           "DATASET"
         ],
-        "default": "DATASET",
         "example": "DATASET"
       },
       "DataMappingFromTypes": {
@@ -6013,12 +6018,16 @@
         "description": "Details of where to map data items from. Each data mapping from type has its own set of configuration\nparameters and source specific properties.",
         "oneOf": [
           {
+            "$ref": "#/components/schemas/DataMappingFromCSV"
+          },
+          {
             "$ref": "#/components/schemas/DataMappingFromDataSet"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
+            "CSV": "#/components/schemas/DataMappingFromCSV",
             "DATASET": "#/components/schemas/DataMappingFromDataSet"
           }
         },
@@ -6071,7 +6080,7 @@
           "type": "TRAITS",
           "mappings": [
             {
-              "fieldName": "primary_email",
+              "expression": "primary_email",
               "traitGroup": "Contact",
               "traitName": "email"
             }
@@ -6112,14 +6121,6 @@
         "additionalProperties": false,
         "description": "Maps a field from a source to a Trait in the Memory Store.",
         "properties": {
-          "fieldName": {
-            "type": "string",
-            "description": "The name of the field/column in the source. Deprecated in favor of expression.",
-            "deprecated": true,
-            "minLength": 1,
-            "maxLength": 64,
-            "example": "primary_email"
-          },
           "expression": {
             "type": "string",
             "description": "The expression identifying the field/column in the source.",
@@ -6145,7 +6146,7 @@
           }
         },
         "required": [
-          "fieldName",
+          "expression",
           "traitGroup",
           "traitName"
         ]
@@ -6153,9 +6154,9 @@
       "DataMappingName": {
         "type": "string",
         "description": "Name of the data mapping.",
-        "pattern": "^[a-zA-Z][a-zA-Z0-9-_.]*$",
+        "pattern": "^[a-zA-Z][a-zA-Z0-9-.]*$",
         "minLength": 1,
-        "maxLength": 128,
+        "maxLength": 64,
         "example": "crm-contacts"
       },
       "DataMappingCore": {
@@ -6211,14 +6212,13 @@
           }
         },
         "required": [
+          "displayName",
           "mappingTo",
-          "mappingFrom",
-          "displayName"
+          "mappingFrom"
         ]
       },
       "DataMapping": {
         "type": "object",
-        "additionalProperties": false,
         "properties": {
           "displayName": {
             "$ref": "#/components/schemas/DataMappingName"
@@ -6268,12 +6268,12 @@
           }
         },
         "required": [
-          "createdAt",
           "displayName",
-          "mappingFrom",
           "updatedAt",
           "mappingTo",
+          "createdAt",
           "version",
+          "mappingFrom",
           "id"
         ]
       },
@@ -6352,12 +6352,12 @@
           }
         },
         "required": [
+          "updatedAt",
           "createdAt",
           "occurredAt",
-          "content",
+          "id",
           "source",
-          "updatedAt",
-          "id"
+          "content"
         ]
       },
       "RecallSummaryInfo": {
@@ -6412,12 +6412,12 @@
           }
         },
         "required": [
-          "createdAt",
-          "conversationId",
-          "occurredAt",
-          "content",
           "updatedAt",
-          "id"
+          "conversationId",
+          "createdAt",
+          "occurredAt",
+          "id",
+          "content"
         ]
       },
       "SummaryCorePatch": {
@@ -6558,6 +6558,312 @@
             "description": "The identifier of the created or affected resource."
           }
         }
+      },
+      "ObservationBase": {
+        "type": "object",
+        "description": "Core mutable properties for creating observation objects.",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The main content of the observation.",
+            "minLength": 1,
+            "maxLength": 4096,
+            "example": "Customer expressed satisfaction with recent product update during support call."
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the observation originally occurred.",
+            "example": "2025-01-15T10:15:30Z"
+          },
+          "source": {
+            "type": "string",
+            "description": "The source system that generated this observation. Allows letters, numbers, spaces, and URL-safe symbols. Excludes URL-unsafe characters like quotes, angle brackets, and control characters.",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9 _.-]+$",
+            "example": "conversational-intelligence"
+          },
+          "conversationIds": {
+            "type": "array",
+            "description": "Array of conversation IDs associated with this observation.",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/ConversationID"
+            }
+          }
+        }
+      },
+      "ObservationCreateRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The main content of the observation.",
+            "minLength": 1,
+            "maxLength": 4096,
+            "example": "Customer expressed satisfaction with recent product update during support call."
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the observation originally occurred.",
+            "example": "2025-01-15T10:15:30Z"
+          },
+          "source": {
+            "type": "string",
+            "description": "The source system that generated this observation. Allows letters, numbers, spaces, and URL-safe symbols. Excludes URL-unsafe characters like quotes, angle brackets, and control characters.",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9 _.-]+$",
+            "example": "conversational-intelligence"
+          },
+          "conversationIds": {
+            "type": "array",
+            "description": "Array of conversation IDs associated with this observation.",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/ConversationID"
+            }
+          }
+        },
+        "required": [
+          "source",
+          "content",
+          "occurredAt"
+        ]
+      },
+      "DataMappingFromCSV": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration for mapping from CSV column names provided directly in the request.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
+            "enum": [
+              "CSV"
+            ],
+            "example": "CSV"
+          },
+          "columns": {
+            "type": "array",
+            "description": "The list of CSV column names that serve as the source fields.",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "example": [
+              "first_name",
+              "last_name",
+              "email",
+              "favorite_color"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "columns"
+        ]
+      },
+      "DataMappingSuggestionToTypes": {
+        "type": "object",
+        "description": "Destination configuration for a suggested mapping request.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DataMappingSuggestionToTraits"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "TRAITS": "#/components/schemas/DataMappingSuggestionToTraits"
+          }
+        },
+        "example": {
+          "type": "TRAITS"
+        }
+      },
+      "DataMappingSuggestionToTraits": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration for generating suggestions that map to traits in a Memory Store.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The destination type.",
+            "enum": [
+              "TRAITS"
+            ],
+            "default": "TRAITS",
+            "example": "TRAITS"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "CreateDataMappingSuggestionInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Request to generate suggested mappings from a set of source fields to the requested\ndestination type.",
+        "properties": {
+          "mappingFrom": {
+            "$ref": "#/components/schemas/DataMappingFromTypes"
+          },
+          "mappingTo": {
+            "$ref": "#/components/schemas/DataMappingSuggestionToTypes"
+          }
+        },
+        "required": [
+          "mappingFrom",
+          "mappingTo"
+        ]
+      },
+      "DataMappingSuggestionResultTypes": {
+        "type": "object",
+        "description": "Details of the generated suggestions. Each destination type has its own set of\nconfiguration parameters and destination specific properties.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DataMappingSuggestionToTraitsResult"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "TRAITS": "#/components/schemas/DataMappingSuggestionToTraitsResult"
+          }
+        },
+        "example": {
+          "type": "TRAITS",
+          "mappings": [
+            {
+              "mapping": {
+                "expression": "primary_email",
+                "traitGroup": "Contact",
+                "traitName": "email"
+              },
+              "confidence": 1,
+              "rationale": "Column 'primary_email' is a direct match for the email trait."
+            }
+          ]
+        }
+      },
+      "DataMappingSuggestionToTraitsResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "AI-generated suggestions that map source fields to traits in a Memory Store.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The destination type.",
+            "enum": [
+              "TRAITS"
+            ],
+            "default": "TRAITS",
+            "example": "TRAITS"
+          },
+          "mappings": {
+            "type": "array",
+            "description": "The list of AI-generated mapping suggestions with confidence scores.",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/DataMappingSuggestionTraitItem"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "mappings"
+        ]
+      },
+      "DataMappingSuggestionTraitItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A suggested field-to-trait mapping with its confidence score and rationale.",
+        "properties": {
+          "mapping": {
+            "$ref": "#/components/schemas/MappingTraitItem"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "description": "Confidence score for this suggestion. Higher values indicate a stronger match.",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 1
+          },
+          "rationale": {
+            "type": "string",
+            "description": "A concise explanation of why the source field was matched to this trait.",
+            "minLength": 1,
+            "maxLength": 512,
+            "example": "Column 'primary_email' is a direct match for the email trait."
+          }
+        },
+        "required": [
+          "mapping",
+          "confidence",
+          "rationale"
+        ]
+      },
+      "DataMappingSuggestion": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A suggested mapping of source fields to the requested destination type.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this suggestion.",
+            "pattern": "^mem_mapsuggestion_[0-7][0-9a-z]{25}$",
+            "example": "mem_mapsuggestion_00000000000000000000000000"
+          },
+          "mappingFrom": {
+            "$ref": "#/components/schemas/DataMappingFromTypes"
+          },
+          "mappingTo": {
+            "$ref": "#/components/schemas/DataMappingSuggestionResultTypes"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO 8601 timestamp when the suggestion was created.",
+            "example": "2026-05-04T12:00:00Z"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO 8601 timestamp when the suggestion expires and is no longer retrievable.",
+            "example": "2026-05-11T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "mappingFrom",
+          "mappingTo",
+          "createdAt",
+          "expiresAt"
+        ]
+      },
+      "DataMappingSuggestionList": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "dataMappingSuggestions": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/DataMappingSuggestion"
+            },
+            "description": "List of suggested mappings generated for the Memory Store."
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
       }
     },
     "parameters": {
@@ -6580,7 +6886,7 @@
         "description": "The token for the page of results to retrieve.",
         "schema": {
           "type": "string",
-          "maxLength": 500
+          "maxLength": 4096
         }
       },
       "ImportId": {
@@ -6777,6 +7083,26 @@
           "type": "string",
           "pattern": "^mem_datamapping_[0-7][0-9a-z]{25}$",
           "example": "mem_datamapping_00000000000000000000000000"
+        }
+      },
+      "ConversationId": {
+        "name": "conversationId",
+        "in": "query",
+        "required": false,
+        "description": "Filter by conversation ID. Returns only items associated with the specified conversation.",
+        "schema": {
+          "$ref": "#/components/schemas/ConversationID"
+        }
+      },
+      "SuggestionId": {
+        "name": "suggestionId",
+        "in": "path",
+        "required": true,
+        "description": "A unique Data Mapping suggestion ID using Twilio Type ID (TTID) format",
+        "schema": {
+          "type": "string",
+          "pattern": "^mem_mapsuggestion_[0-7][0-9a-z]{25}$",
+          "example": "mem_mapsuggestion_00000000000000000000000000"
         }
       }
     },
@@ -6989,6 +7315,22 @@
             "$ref": "#/components/headers/Location"
           }
         }
+      },
+      "PreconditionFailed": {
+        "description": "Precondition Failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioError"
+            },
+            "example": {
+              "code": 20412,
+              "message": "Precondition Failed",
+              "more_info": "https://www.twilio.com/docs/api/errors/20412",
+              "status": 412
+            }
+          }
+        }
       }
     },
     "headers": {
@@ -7052,10 +7394,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "accountSid_authToken": []
-    }
-  ]
+  }
 }

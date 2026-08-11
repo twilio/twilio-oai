@@ -1,0 +1,1381 @@
+openapi: 3.0.1
+info:
+  title: Twilio API definition for public-api voice
+  description: Powers Twilio public-api voice
+  contact:
+    name: voice-services
+    email: voice-services@twilio.com
+  license:
+    name: Proprietary and protected
+    url: https://www.twilio.com/
+  version: 0.0.1
+  x-twilio:
+    apiStandards: v0.1
+security:
+- accountSid_authToken: []
+components:
+  securitySchemes:
+    accountSid_authToken:
+      scheme: basic
+      type: http
+  schemas:
+    VoiceErrorCode:
+      type: object
+      required:
+      - code
+      properties:
+        code:
+          type: integer
+          format: int64
+    pn_sid:
+      type: string
+      minLength: 34
+      maxLength: 34
+      pattern: ^PN[0-9a-fA-F]{32}$
+    bundle_sid:
+      type: string
+      minLength: 34
+      maxLength: 34
+      pattern: ^BU[0-9a-fA-F]{32}$
+    pn_did:
+      type: string
+      minLength: 2
+      maxLength: 15
+      pattern: ^\+[1-9]\d{1,14}$
+    account_sid:
+      type: string
+      minLength: 34
+      maxLength: 34
+      pattern: ^AC[0-9a-fA-F]{32}$
+    regulation_sid:
+      type: string
+      minLength: 34
+      maxLength: 34
+      pattern: ^RN[0-9a-fA-F]{32}$
+    pn_sid_or_did:
+      type: string
+      pattern: ^PN[0-9A-Fa-f]{32}$|^\+[1-9][0-9]{1,14}$
+      minLength: 2
+      maxLength: 34
+    voice.v2.configuration.TwilioServiceErrorResponse:
+      description: Twilio error response
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          format: int32
+          description: Twilio error code
+        status:
+          type: integer
+          format: int32
+          description: status code
+        more_info:
+          type: string
+          description: More information about the error
+      required:
+      - message
+      - code
+      - status
+      - more_info
+    voice.v2.account_default_configuration.TwilioServiceErrorResponse:
+      description: Twilio error response
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: integer
+          format: int32
+          description: Twilio error code
+        status:
+          type: integer
+          format: int32
+          description: status code
+        more_info:
+          type: string
+          description: More information about the error
+      required:
+      - message
+      - code
+      - status
+      - more_info
+    voice.v2.account_default_configuration.request:
+      type: object
+      properties:
+        description:
+          description: The description
+          type: string
+          nullable: true
+        configuration:
+          type: object
+          properties: {}
+    voice.v2.account_default_configuration.response:
+      type: object
+      properties:
+        account_sid:
+          description: Account sid
+          type: string
+          nullable: false
+        description:
+          description: The description
+          type: string
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time
+        configuration:
+          type: object
+          properties: {}
+    voice.v2.configuration.request:
+      type: object
+      properties:
+        unique_name:
+          description: The unique name
+          type: string
+          nullable: true
+        description:
+          description: The description
+          type: string
+          nullable: true
+        configuration:
+          type: object
+          properties: {}
+    voice.v2.configuration.response:
+      type: object
+      properties:
+        id:
+          description: Configuration Identifier
+          type: string
+          nullable: false
+        account_sid:
+          description: Account sid
+          type: string
+          nullable: false
+        unique_name:
+          description: The unique name
+          type: string
+          nullable: true
+        description:
+          description: The description
+          type: string
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time
+        configuration:
+          type: object
+          properties: {}
+    voice.v2.paginated_configuration_response:
+      type: object
+      properties:
+        content:
+          type: array
+          description: The list of Client Configurations
+          nullable: false
+          items:
+            $ref: '#/components/schemas/voice.v2.configuration.response'
+        meta:
+          nullable: false
+          type: object
+          properties:
+            list_key:
+              type: string
+            previous_token:
+              type: string
+            next_token:
+              type: string
+            direct_token:
+              type: boolean
+            page_size:
+              type: integer
+    voice.v2.configuration.transcription.participant_default:
+      type: object
+      description: Default participant role and channel mapping for diarization and
+        implicit participant creation.
+      properties:
+        audioChannelIndex:
+          type: integer
+          description: One-based index of the audio channel in a multi-channel recording
+            associated with this role.
+          nullable: false
+        type:
+          type: string
+          description: The participant role to apply when inferring participants.
+          nullable: false
+          enum:
+          - CUSTOMER
+          - HUMAN_AGENT
+          - AI_AGENT
+      required:
+      - audioChannelIndex
+      - type
+    voice.v2.configuration.transcription.status_callback:
+      type: object
+      description: Callback configuration for notifications when transcription is
+        complete.
+      properties:
+        url:
+          type: string
+          description: The webhook callback URL.
+          nullable: true
+        method:
+          type: string
+          description: The HTTP method to use for the webhook callback.
+          nullable: true
+          enum:
+          - POST
+          default: POST
+    voice.v2.configuration.transcription.configuration:
+      type: object
+      description: Configuration for Twilio Voice Transcription Service. Either transcriptionStatusCallback
+        or conversationConfigurationId (or both) must be provided.
+      properties:
+        configurationType:
+          type: string
+          description: The configuration type discriminator. Always "Transcription"
+            for this resource.
+          enum:
+          - Transcription
+        transcriptionEngine:
+          type: string
+          description: 'The transcription engine provider. Supported values: ''google'',
+            ''deepgram'', ''twilio_managed''. When using ''twilio_managed'', do not
+            specify a speechModel.'
+          nullable: false
+        speechModel:
+          type: string
+          description: 'The specific speech model to use for transcription. Valid
+            models depend on transcriptionEngine: For ''google'': chirp_2. For ''deepgram'':
+            nova-3, nova-2. For ''twilio_managed'': twilio_managed.'
+          nullable: true
+        language:
+          type: string
+          description: 'Controls how the ASR handles language. Can be a supported
+            BCP-47 language code, or ''multi'' for multilingual code switching (Deepgram
+            engine only). Supported language codes: en-US, en-GB, en-AU, de-DE, fr-FR,
+            it-IT, es-MX, es-ES, es-US, pt-BR, pt-PT, nl-NL, no-NO, pl-PL, sv-SE,
+            da-DK.'
+          nullable: false
+        transcriptionStatusCallback:
+          $ref: '#/components/schemas/voice.v2.configuration.transcription.status_callback'
+        conversationConfigurationId:
+          type: string
+          description: The ID of the Maestro Conversations Configuration for transcription
+            storage and optional add-ons.
+          nullable: true
+        participantDefaults:
+          type: array
+          description: Default participant roles and channel mappings for diarization
+            and implicit participant creation. Must include exactly 2 participants
+            mapping audioChannelIndex 1 and 2.
+          nullable: false
+          items:
+            $ref: '#/components/schemas/voice.v2.configuration.transcription.participant_default'
+      required:
+      - configurationType
+      - transcriptionEngine
+      - language
+      - participantDefaults
+    voice.v2.configuration.transcription.request:
+      type: object
+      description: Request body for creating or updating a Transcription Configuration.
+      properties:
+        unique_name:
+          description: The unique name.
+          type: string
+          nullable: true
+        description:
+          description: The description.
+          type: string
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.transcription.configuration'
+      required:
+      - configuration
+    voice.v2.configuration.transcription.response:
+      type: object
+      description: Response body for a Transcription Configuration.
+      properties:
+        id:
+          description: Configuration Identifier.
+          type: string
+          nullable: false
+        account_sid:
+          description: Account sid.
+          type: string
+          nullable: false
+        unique_name:
+          description: The unique name.
+          type: string
+          nullable: true
+        description:
+          description: The description.
+          type: string
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.transcription.configuration'
+    voice.v2.configuration.recording.composition_policy:
+      type: object
+      description: The composition configuration for recordings.
+      properties:
+        channels:
+          type: string
+          description: The number of channels to be composed.
+          nullable: true
+          enum:
+          - dual
+          - mono
+        trim:
+          type: string
+          description: Trim the silence in the recordings.
+          nullable: true
+          enum:
+          - trim-silence
+          - do-not-trim
+        track:
+          type: string
+          description: The audio track to record for the call.
+          nullable: true
+          enum:
+          - inbound
+          - outbound
+          - both
+    voice.v2.configuration.recording.status_callback:
+      type: object
+      description: Callback configuration for a recording status.
+      properties:
+        url:
+          type: string
+          description: The recording status callback URL.
+          nullable: true
+        method:
+          type: string
+          description: The recording status callback method.
+          nullable: true
+          enum:
+          - GET
+          - POST
+        events:
+          type: array
+          description: The recording status callback events.
+          nullable: true
+          items:
+            type: string
+            enum:
+            - in-progress
+            - completed
+            - absent
+            - failed
+    voice.v2.configuration.recording.feature:
+      type: object
+      description: A feature to apply to a recording.
+      properties:
+        type:
+          type: string
+          description: The type of feature.
+          nullable: false
+          enum:
+          - transcriptionConfiguration
+        featureId:
+          type: string
+          description: The ID of the feature.
+          nullable: false
+        description:
+          type: string
+          description: The description of the feature.
+          nullable: true
+      required:
+      - type
+      - featureId
+    voice.v2.configuration.recording.configuration:
+      type: object
+      description: Configuration for Twilio Voice Recording Service.
+      properties:
+        configurationType:
+          type: string
+          description: The configuration type discriminator. Always "Recording" for
+            this resource.
+          enum:
+          - Recording
+        compositionPolicy:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.composition_policy'
+        callRecordingStatusCallback:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.status_callback'
+        conferenceRecordingStatusCallback:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.status_callback'
+        features:
+          type: array
+          description: The features to apply to this recording.
+          nullable: true
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/voice.v2.configuration.recording.feature'
+      required:
+      - configurationType
+    voice.v2.configuration.recording.request:
+      type: object
+      description: Request body for creating or updating a Recording Configuration.
+      properties:
+        unique_name:
+          description: The unique name.
+          type: string
+          nullable: true
+        description:
+          description: The description.
+          type: string
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.configuration'
+      required:
+      - configuration
+    voice.v2.configuration.recording.response:
+      type: object
+      description: Response body for a Recording Configuration.
+      properties:
+        id:
+          description: Configuration Identifier.
+          type: string
+          nullable: false
+        account_sid:
+          description: Account sid.
+          type: string
+          nullable: false
+        unique_name:
+          description: The unique name.
+          type: string
+          nullable: true
+        description:
+          description: The description.
+          type: string
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+        date_updated:
+          type: string
+          format: date-time
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.configuration'
+    voice.v2.paginated_recording_configuration_response:
+      type: object
+      description: Paginated list of Recording Configurations.
+      properties:
+        content:
+          type: array
+          description: The list of Recording Configurations.
+          nullable: false
+          items:
+            $ref: '#/components/schemas/voice.v2.configuration.recording.response'
+        meta:
+          nullable: false
+          type: object
+          properties:
+            list_key:
+              type: string
+            previous_token:
+              type: string
+            next_token:
+              type: string
+            direct_token:
+              type: boolean
+            page_size:
+              type: integer
+    voice.v2.paginated_transcription_configuration_response:
+      type: object
+      description: Paginated list of Transcription Configurations.
+      properties:
+        content:
+          type: array
+          description: The list of Transcription Configurations.
+          nullable: false
+          items:
+            $ref: '#/components/schemas/voice.v2.configuration.transcription.response'
+        meta:
+          nullable: false
+          type: object
+          properties:
+            list_key:
+              type: string
+            previous_token:
+              type: string
+            next_token:
+              type: string
+            direct_token:
+              type: boolean
+            page_size:
+              type: integer
+    voice.v2.account_default_configuration.recording.request:
+      type: object
+      description: Request to create or update an account-wide default Recording configuration.
+      properties:
+        description:
+          type: string
+          description: Optional description.
+          nullable: true
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.configuration'
+      required:
+      - configuration
+    voice.v2.account_default_configuration.recording.response:
+      type: object
+      description: Response for an account-wide default Recording configuration.
+      properties:
+        account_sid:
+          type: string
+          description: Account SID.
+          nullable: false
+        description:
+          type: string
+          description: The description.
+          nullable: true
+        date_created:
+          type: string
+          format: date-time
+          description: The created date.
+        date_updated:
+          type: string
+          format: date-time
+          description: The updated date.
+        configuration:
+          $ref: '#/components/schemas/voice.v2.configuration.recording.configuration'
+servers:
+- url: https://voice.twilio.com
+paths:
+  /v2/Configurations/Recording:
+    x-twilio:
+      pathType: list
+    post:
+      tags:
+      - RecordingConfiguration
+      summary: Create a Recording Configuration
+      operationId: CreateRecordingConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.recording.request'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.recording.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/Recording/{IdOrUniqueName}:
+    x-twilio:
+      pathType: instance
+    delete:
+      tags:
+      - RecordingConfiguration
+      summary: Delete a Recording Configuration by Id
+      operationId: DeleteRecordingConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    put:
+      tags:
+      - RecordingConfiguration
+      summary: Update a Recording Configuration by Id
+      operationId: UpdateRecordingConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.recording.request'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.recording.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    get:
+      tags:
+      - RecordingConfiguration
+      summary: Get a Recording Configuration by Id or UniqueName
+      operationId: FetchRecordingConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        description: Config id or unique name
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.recording.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/Transcription:
+    x-twilio:
+      pathType: list
+    post:
+      tags:
+      - TranscriptionConfiguration
+      summary: Create a Transcription Configuration
+      operationId: CreateTranscriptionConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.transcription.request'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.transcription.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/Transcription/{IdOrUniqueName}:
+    x-twilio:
+      pathType: instance
+    delete:
+      tags:
+      - TranscriptionConfiguration
+      summary: Delete a Transcription Configuration by Id
+      operationId: DeleteTranscriptionConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    put:
+      tags:
+      - TranscriptionConfiguration
+      summary: Update a Transcription Configuration by Id
+      operationId: UpdateTranscriptionConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.transcription.request'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.transcription.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    get:
+      tags:
+      - TranscriptionConfiguration
+      summary: Get a Transcription Configuration by Id or UniqueName
+      operationId: FetchTranscriptionConfiguration
+      parameters:
+      - name: IdOrUniqueName
+        in: path
+        description: Config id or unique name
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.transcription.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/{Type}/{IdOrUniqueName}:
+    delete:
+      tags:
+      - Configuration
+      summary: Delete a Configuration by Id
+      operationId: DeleteConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    put:
+      tags:
+      - Configuration
+      summary: Update a Configuration by Id
+      operationId: UpdateConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: IdOrUniqueName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.request'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    get:
+      tags:
+      - Configuration
+      summary: Get a Configuration by Id or UniqueName
+      operationId: FetchConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: IdOrUniqueName
+        in: path
+        description: Config id or unique name
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/{Type}:
+    post:
+      tags:
+      - Configuration
+      summary: Create a Configuration
+      operationId: CreateConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.configuration.request'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/Configurations/{Type}/Default:
+    x-twilio:
+      parent: /Configurations/{Type}
+    get:
+      tags:
+      - Get Default Configuration
+      summary: Get the Default Configuration
+      operationId: FetchDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+    post:
+      tags:
+      - Create or Update Default Configuration
+      summary: Create/Update a Default Configuration
+      operationId: CreateOrUpdateDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: DefaultConfigurationRequest
+              properties:
+                configuration_id:
+                  type: string
+                  nullable: false
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.configuration.TwilioServiceErrorResponse'
+  /v2/AccountDefaultConfiguration/{Type}:
+    post:
+      tags:
+      - AccountDefaultConfiguration
+      summary: Create an Account Default Configuration
+      operationId: CreateAccountDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.account_default_configuration.request'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '409':
+          description: Conflict - Account Default Configuration already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+    get:
+      tags:
+      - AccountDefaultConfiguration
+      summary: Get the Account Default Configuration
+      operationId: FetchAccountDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+    put:
+      tags:
+      - AccountDefaultConfiguration
+      summary: Update the Account Default Configuration
+      operationId: UpdateAccountDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/voice.v2.account_default_configuration.request'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.response'
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '412':
+          description: Precondition Failed - ETag mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+    delete:
+      tags:
+      - AccountDefaultConfiguration
+      summary: Delete the Account Default Configuration
+      operationId: DeleteAccountDefaultConfiguration
+      parameters:
+      - name: Type
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/voice.v2.account_default_configuration.TwilioServiceErrorResponse'

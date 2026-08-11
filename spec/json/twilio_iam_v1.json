@@ -150,12 +150,6 @@
           }
         }
       },
-      "new_key_enum_keytype": {
-        "type": "string",
-        "enum": [
-          "restricted"
-        ]
-      },
       "role_enum_scope_type": {
         "type": "string",
         "enum": [
@@ -707,6 +701,73 @@
             "format": "date-time",
             "description": "Finish date and time of the import run",
             "example": "2024-06-27T09:31:38.283Z"
+          }
+        }
+      },
+      "iam.v1.ImportUsersRunUser": {
+        "type": "object",
+        "properties": {
+          "userSid": {
+            "pattern": "US[0-9a-f]{32}",
+            "type": "string",
+            "format": "UserSid",
+            "example": "USb51dccce9ac8e67b938253c7bcaa4f45",
+            "description": "Unique Twilio user sid"
+          },
+          "imported": {
+            "type": "boolean",
+            "description": "Whether the user was successfully imported"
+          },
+          "details": {
+            "type": "string",
+            "description": "Additional details about the import result for this user, e.g. a failure reason"
+          }
+        }
+      },
+      "iam.v1.ImportableUser": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "pattern": "US[0-9a-f]{32}",
+            "type": "string",
+            "format": "UserSid",
+            "example": "USb51dccce9ac8e67b938253c7bcaa4f45",
+            "description": "Unique Twilio user sid"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Display name of the eligible user"
+          },
+          "primaryEmailAddress": {
+            "type": "string",
+            "description": "Primary email address of the eligible user"
+          }
+        }
+      },
+      "iam.v1.ImportUsersRequest": {
+        "type": "object",
+        "properties": {
+          "userSids": {
+            "type": "array",
+            "items": {
+              "pattern": "US[0-9a-f]{32}",
+              "type": "string",
+              "format": "UserSid"
+            },
+            "description": "SIDs of the users to import"
+          },
+          "domainSids": {
+            "type": "array",
+            "items": {
+              "pattern": "DN[0-9a-f]{32}",
+              "type": "string",
+              "format": "DomainVerificationSid"
+            },
+            "description": "SIDs of the organization domains whose eligible users should be imported"
+          },
+          "notifyUsers": {
+            "type": "boolean",
+            "description": "Whether to notify imported users by email"
           }
         }
       },
@@ -1337,6 +1398,18 @@
           "created_by": {
             "type": "string"
           },
+          "creator_sid": {
+            "type": "string",
+            "pattern": "^US[0-9a-fA-F]{32}$",
+            "description": "The unique identifier (SID) of the user who created this OAuth app."
+          },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ],
+            "description": "Determines how the client authenticates. Organization OAuth apps only support 'client_secret_basic'."
+          },
           "company_name": {
             "type": "string"
           },
@@ -1404,6 +1477,13 @@
             "pattern": "^OQ[0-9a-fA-F]{32}$",
             "nullable": true
           },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ],
+            "description": "Determines how the client authenticates. Organization OAuth apps only support 'client_secret_basic'."
+          },
           "policy": {
             "type": "object",
             "properties": {
@@ -1463,6 +1543,14 @@
           "description": {
             "type": "string",
             "nullable": true
+          },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ],
+            "nullable": true,
+            "description": "Determines how the client authenticates. Organization OAuth apps only support 'client_secret_basic'."
           },
           "policy": {
             "type": "object",
@@ -1544,8 +1632,21 @@
           "created_by": {
             "type": "string"
           },
+          "creator_sid": {
+            "type": "string",
+            "pattern": "^US[0-9a-fA-F]{32}$",
+            "description": "The unique identifier (SID) of the user who created this OAuth app."
+          },
           "secret": {
-            "type": "string"
+            "type": "string",
+            "nullable": true,
+            "description": "Client secret. Only present for confidential apps (token_endpoint_auth_method=client_secret_basic) and only returned at creation time."
+          },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ]
           },
           "status": {
             "type": "string"
@@ -1882,6 +1983,11 @@
           "created_by": {
             "type": "string"
           },
+          "creator_sid": {
+            "type": "string",
+            "pattern": "^US[0-9a-fA-F]{32}$",
+            "description": "The unique identifier (SID) of the user who created this OAuth app."
+          },
           "access_token_ttl": {
             "type": "integer"
           }
@@ -1912,6 +2018,13 @@
             "maxLength": 34,
             "pattern": "^OQ[0-9a-fA-F]{32}$",
             "nullable": true
+          },
+          "token_endpoint_auth_method": {
+            "type": "string",
+            "enum": [
+              "client_secret_basic"
+            ],
+            "description": "Determines how the client authenticates. Account OAuth apps on v1 only support 'client_secret_basic'. For PKCE (none), use the v2 API."
           },
           "policy": {
             "type": "object",
@@ -1959,6 +2072,11 @@
           },
           "created_by": {
             "type": "string"
+          },
+          "creator_sid": {
+            "type": "string",
+            "pattern": "^US[0-9a-fA-F]{32}$",
+            "description": "The unique identifier (SID) of the user who created this OAuth app."
           },
           "secret": {
             "type": "string"
@@ -2121,6 +2239,19 @@
             "description": "Indicates whether the invitation token has expired"
           }
         }
+      },
+      "iam.v1.DisconnectSocialIdentityRequest": {
+        "type": "object",
+        "description": "Request to disconnect a social identity provider from the authenticated user's account",
+        "required": [
+          "provider"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "The social identity provider to disconnect (e.g. google-oauth2, github, apple)"
+          }
+        }
       }
     }
   },
@@ -2144,8 +2275,6 @@
   },
   "openapi": "3.0.1",
   "paths": {
-    "/v1/Accounts": {},
-    "/v1/Subaccounts": {},
     "/v1/Keys": {
       "servers": [
         {
@@ -2471,7 +2600,6 @@
                   },
                   "KeyType": {
                     "type": "string",
-                    "$ref": "#/components/schemas/new_key_enum_keytype",
                     "description": "The \\`KeyType\\` form parameter is used to specify the type of key you want to create.\n\n**Default Behavior**: If \\`KeyType\\` is not specified, the API will generate a standard key.\n\n**Restricted Key**: If \\`KeyType\\` is set to \\`restricted\\`, the API will create a new restricted key. In this case, a policy object is required to define the permissions."
                   },
                   "Policy": {
@@ -3080,33 +3208,6 @@
         }
       }
     },
-    "/v1/Accounts/Search": {},
-    "/v1/Accounts/{accountSid}/Roles": {},
-    "/v1/Accounts/Stats": {},
-    "/v1/Users/Self": {},
-    "/v1/Users/EmailChange/Initiate": {},
-    "/v1/Users/EmailChange/Verify": {},
-    "/v1/Users/EmailChange/Resend": {},
-    "/v1/Users/OneConsoleProvisioningStatus": {},
-    "/v1/Users/Mfa/ChallengeMethod": {},
-    "/v1/Users/Mfa/PhoneNumber": {},
-    "/v1/Users/Mfa/VerifyInitialTotpToken": {},
-    "/v1/Users/Mfa/AddTotpFactor": {},
-    "/v1/Users/Mfa/DeleteTotpFactor": {},
-    "/v1/Users/Mfa/RegenerateRecoveryToken": {},
-    "/v1/Users/Mfa/InvalidateRememberedBrowsers": {},
-    "/v1/Operations/{operationId}": {},
-    "/v1/Operations/{operationId}/ChildOperations": {},
-    "/v1/Organizations/Info": {},
-    "/v1/Organizations/Features": {},
-    "/v1/Organizations/Domains": {},
-    "/v1/Organizations/Domains/{domainSid}": {},
-    "/v1/Organizations/Domains/Limit": {},
-    "/v1/Organizations/ManagedUsers": {},
-    "/v1/Organizations/ManagedUsers/{userSid}": {},
-    "/v1/Organizations/ExternalUsers": {},
-    "/v1/Organizations/ExternalUsers/{userSid}": {},
-    "/v1/Organizations/ImportUsers": {},
     "/v1/Account/OAuthApps/{sid}": {
       "servers": [
         {
@@ -3449,32 +3550,6 @@
         }
       }
     },
-    "/v1/Account/OAuthApps/{sid}/secret": {
-      "servers": [
-        {
-          "url": "https://iam.twilio.com"
-        }
-      ]
-    },
-    "/v1/Organization/OAuthApps/{sid}/secret": {
-      "servers": [
-        {
-          "url": "https://iam.twilio.com"
-        }
-      ]
-    },
-    "/v1/Organization/OAuthApps/image/presigned-url": {
-      "servers": [
-        {
-          "url": "https://iam.twilio.com"
-        }
-      ]
-    },
-    "/v1/Organizations/InvitedAccounts": {},
-    "/v1/Organizations/InvitedAccounts/Limit": {},
-    "/v1/Organizations/ImportUsers/EligibleUsers/Count": {},
-    "/v1/console/mfa/v3/device/verify": {},
-    "/v1/console/mfa/v3/recovery-code": {},
     "/v1/Account/OAuthApps": {
       "servers": [
         {
@@ -3630,19 +3705,7 @@
           }
         }
       }
-    },
-    "/v1/Organizations/InvitedUsers": {},
-    "/v1/Organizations/ManagedAccounts/{accountSid}/ChangeOwner": {},
-    "/v1/Organizations/ManagedAccounts/{accountSid}/Organization": {},
-    "/v1/Users/SendPasswordResetEmail": {},
-    "/v1/Accounts/ChangeOwner": {},
-    "/v1/Accounts/Invitations": {},
-    "/v1/console/api/ipam/acr_list": {},
-    "/v1/console/api/ipam/add_ip": {},
-    "/v1/console/api/ipam/edit_ip": {},
-    "/v1/console/api/ipam/remove_ip": {},
-    "/v1/console/api/ipam/set_ipam_status": {},
-    "/v1/Authorize": {}
+    }
   },
   "servers": [
     {
@@ -3664,6 +3727,9 @@
     },
     {
       "name": "IamV1Index"
+    },
+    {
+      "name": "IamV1Jwks"
     },
     {
       "name": "IamV1NewApiKey"

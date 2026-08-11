@@ -31,18 +31,10 @@
   "tags": [
     {
       "name": "MessagingV3TypingIndicator",
-      "description": "Send typing indicators to OTT channel recipients (WhatsApp, Apple Messages for Business).\n"
+      "description": "Send typing indicators to OTT channel recipients (WhatsApp, Apple Messages for Business, RCS).\n"
     }
   ],
   "paths": {
-    "/v3/OptOuts/DefaultKeywordsMessages": {},
-    "/v3/OptOuts": {},
-    "/v3/OptOuts/{OptOutSid}": {},
-    "/v3/OptOuts/Configurations/Languages": {},
-    "/v3/OptOuts/Configurations/MessageTypes": {},
-    "/v3/OptOuts/{OptOutSid}/MessageTypes": {},
-    "/v3/OptOuts/{OptOutSid}/Messages": {},
-    "/v3/OptOuts/{OptOutSid}/Keywords": {},
     "/v3/Indicators/Typing.json": {
       "servers": [
         {
@@ -59,7 +51,7 @@
       },
       "post": {
         "summary": "Send a typing indicator",
-        "description": "Send a typing indicator to notify the recipient that you are composing a message. Supported channels: WhatsApp, Apple Messages for Business. The request body varies by channel \u2014 use the `channel` field as the discriminator.\n",
+        "description": "Send a typing indicator to notify the recipient that you are composing a message. Supported channels: WhatsApp, Apple Messages for Business, RCS. The request body varies by channel \u2014 use the `channel` field as the discriminator.\n",
         "tags": [
           "MessagingV3TypingIndicator"
         ],
@@ -87,6 +79,16 @@
                     "channel": "APPLE",
                     "from": "apple:a89a691c-15c0-4fd1-a589-1ded34b59c39",
                     "to": "apple:urn:mbid:AQAAYyUbut6E4B3T9FLv5EbG",
+                    "event": "START"
+                  }
+                },
+                "rcs_typing_indicator": {
+                  "summary": "RCS Typing Indicator",
+                  "description": "Send a typing indicator for an RCS conversation",
+                  "value": {
+                    "channel": "RCS",
+                    "from": "rcs:agent_id",
+                    "to": "rcs:+18001234567",
                     "event": "START"
                   }
                 }
@@ -217,6 +219,66 @@
           },
           "403": {
             "description": "The account is not authorized to send typing indicators for this channel.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource was not found. The channel, sender, or recipient may not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. The rate limit for typing indicators has been exceeded.",
             "content": {
               "application/json": {
                 "schema": {
@@ -781,13 +843,17 @@
           },
           {
             "$ref": "#/components/schemas/AppleTypingIndicatorRequest"
+          },
+          {
+            "$ref": "#/components/schemas/RcsTypingIndicatorRequest"
           }
         ],
         "discriminator": {
           "propertyName": "channel",
           "mapping": {
             "WHATSAPP": "#/components/schemas/WhatsAppTypingIndicatorRequest",
-            "APPLE": "#/components/schemas/AppleTypingIndicatorRequest"
+            "APPLE": "#/components/schemas/AppleTypingIndicatorRequest",
+            "RCS": "#/components/schemas/RcsTypingIndicatorRequest"
           }
         }
       },
@@ -852,6 +918,45 @@
             ],
             "default": "START",
             "description": "The type of typing event. \"START\" indicates the agent began typing, \"END\" indicates the agent stopped typing. Defaults to \"START\".\n",
+            "example": "START"
+          }
+        }
+      },
+      "RcsTypingIndicatorRequest": {
+        "type": "object",
+        "description": "Typing indicator request for RCS channel.",
+        "additionalProperties": false,
+        "required": [
+          "channel",
+          "from",
+          "to"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "RCS"
+            ],
+            "description": "The messaging channel. Must be \"RCS\".",
+            "example": "RCS"
+          },
+          "from": {
+            "type": "string",
+            "description": "The RCS agent identifier of the sender (business).",
+            "example": "rcs:agent_id"
+          },
+          "to": {
+            "type": "string",
+            "description": "The RCS recipient identifier in E.164 format prefixed with \"rcs:\".",
+            "example": "rcs:+18001234567"
+          },
+          "event": {
+            "type": "string",
+            "enum": [
+              "START"
+            ],
+            "default": "START",
+            "description": "The type of typing event. Currently only \"START\" is supported for RCS, indicating the agent began typing. Defaults to \"START\".\n",
             "example": "START"
           }
         }

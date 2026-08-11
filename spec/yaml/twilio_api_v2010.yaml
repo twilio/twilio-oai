@@ -6661,6 +6661,67 @@ components:
           nullable: true
           description: The 6 digit validation code that someone must enter to validate
             the Caller ID  when `phone_number` is called.
+    api.v2010.account.outgoing_caller_id.sms_verification:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number being verified in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format.
+          x-twilio:
+            pii:
+              handling: standard
+              deleteSla: 30
+        verification_sid:
+          type: string
+          nullable: true
+          description: The SID that uniquely identifies the verification.
+        send_code_attempts:
+          type: array
+          nullable: true
+          description: An array of verification attempt objects containing the channel
+            attempted and the channel-specific transaction SID.
+          items:
+            type: object
+            properties:
+              attempt_sid:
+                type: string
+                description: The SID of the verification attempt.
+              time:
+                type: string
+                description: The date and time of the attempt in ISO 8601 format.
+    api.v2010.account.outgoing_caller_id.verification_check:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          format: phone-number
+          nullable: true
+          description: The phone number being verified in [E.164](https://www.twilio.com/docs/glossary/what-e164)
+            format.
+          x-twilio:
+            pii:
+              handling: standard
+              deleteSla: 30
+        verification_sid:
+          type: string
+          nullable: true
+          description: The SID that uniquely identifies the verification.
+        status:
+          type: string
+          nullable: true
+          description: 'The status of the verification. Can be: `pending`, `approved`,
+            or `failed`.'
+        caller_id_sid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          nullable: true
+          description: The SID of the OutgoingCallerId resource created when verification
+            is approved.
 info:
   title: Twilio - Api
   description: This is the public Twilio REST API.
@@ -7352,6 +7413,35 @@ paths:
                 type: string
                 example: X-Custom-Header1, X-Custom-Header2
           description: OK
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: Error message
+                    type: string
+                  more_info:
+                    description: Link to Error Code References
+                    type: string
+                  status:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+              examples:
+                optimisticLockingConflict:
+                  value:
+                    code: 20409
+                    message: The account was modified by another request. Please refresh
+                      and retry.
+                    more_info: https://www.twilio.com/docs/errors/20409
+                    status: 409
+          description: The account was modified by another request
       security:
       - accountSid_authToken: []
       operationId: UpdateAccount
@@ -11538,6 +11628,11 @@ paths:
                   - POST
                   description: 'The HTTP method we should use when calling the `async_amd_status_callback`
                     URL. Can be: `GET` or `POST` and the default is `POST`.'
+                Passports:
+                  type: string
+                  description: The STIR/SHAKEN passport for this call, provided as
+                    a base64 encoded string. Multiple passports (at max 5) are comma
+                    separated and provided as base64 encoded string
                 Byoc:
                   type: string
                   minLength: 34
@@ -23104,6 +23199,11 @@ paths:
                     call via the call_token parameter when creating a new call. A
                     forwarded call should bear the same CallerID of the original incoming
                     call.
+                Passports:
+                  type: string
+                  description: The STIR/SHAKEN passport for this call, provided as
+                    a base64 encoded string. Multiple passports (at max 5) are comma
+                    separated and provided as base64 encoded string
                 ClientNotificationUrl:
                   type: string
                   format: uri
@@ -23113,6 +23213,98 @@ paths:
                   description: The name that populates the display name in the From
                     header. Must be between 2 and 255 characters. Only applicable
                     for calls to sip address.
+                EmergencyCallerPosition:
+                  type: string
+                  description: 'The emergency caller''s GPS coordinates in decimal
+                    degrees format.
+
+                    Format: "latitude longitude" (space-separated)
+
+                    - Latitude: decimal degrees, range -90.0 to +90.0 (negative for
+                    South, positive for North)
+
+                    - Longitude: decimal degrees, range -180.0 to +180.0 (negative
+                    for West, positive for East)
+
+                    - Precision: up to 6 decimal places recommended for meter-level
+                    accuracy
+
+
+                    Note: If the value exceeds 150 characters, only the first 150
+                    characters will be used.
+
+                    '
+                EmergencyCallerLocation:
+                  type: string
+                  description: 'The emergency caller''s physical location description
+                    within a building or facility.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
+                EmergencyName:
+                  type: string
+                  description: 'The emergency caller''s organization or entity name.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
+                EmergencyAddress:
+                  type: string
+                  description: 'The emergency caller''s street address including street
+                    number and street name.
+
+
+                    Note: If the value exceeds 60 characters, only the first 60 characters
+                    will be used.
+
+                    '
+                EmergencyZipCode:
+                  type: string
+                  description: 'The emergency caller''s postal code or ZIP code.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
+                EmergencyCity:
+                  type: string
+                  description: 'The emergency caller''s city or municipality name.
+
+                    Should be the official city name as recognized by local authorities.
+
+                    Used in combination with state and country for emergency call
+                    routing.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
+                EmergencyState:
+                  type: string
+                  description: 'The emergency caller''s state or province.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
+                EmergencyCountry:
+                  type: string
+                  description: 'The emergency caller''s country. Currently supported
+                    US and CA only.
+
+
+                    Note: If the value exceeds 20 characters, only the first 20 characters
+                    will be used.
+
+                    '
               required:
               - From
               - To
@@ -35857,6 +36049,7 @@ tags:
 - name: Api20100401SipIpAddress
 - name: Api20100401Siprec
 - name: Api20100401Sms
+- name: Api20100401SmsVerification
 - name: Api20100401SmsFeedback
 - name: Api20100401SmsMessage
 - name: Api20100401Stream
@@ -35872,6 +36065,7 @@ tags:
 - name: Api20100401UserDefinedMessage
 - name: Api20100401UserDefinedMessageSubscription
 - name: Api20100401ValidationRequest
+- name: Api20100401VerificationCheck
 - name: Api20100401VersionNode
 - name: Api20100401Voip
 - name: Api20100401Yearly

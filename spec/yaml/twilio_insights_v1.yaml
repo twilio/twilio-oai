@@ -281,6 +281,14 @@ components:
             or after a Call. Annotations can be updated as long as the Call Summary
             record is addressable via the API. See [Details: Call Summary](https://www.twilio.com/docs/voice/voice-insights/api/call/details-call-summary#annotation-object)
             for the object properties.'
+        agent_session_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/call_summary_agent_session_summary'
+          nullable: true
+          description: '`array[object]` List of agent session summaries for conversation
+            relay. See [Details: Call Summary](https://www.twilio.com/docs/voice/voice-insights/api/call/details-call-summary#conversation-relay-object)
+            for the object properties.'
     call_summaries_enum_answered_by:
       type: string
       enum:
@@ -782,6 +790,20 @@ components:
             The events here describe the call lifecycle as reported by Twilio''s Voice
             SDK media gateways. See [Details: Call Summary](https://www.twilio.com/docs/voice/voice-insights/api/call/details-call-summary#edges-and-their-properties)
             for the object properties.'
+        conversation_relay_data:
+          oneOf:
+          - $ref: '#/components/schemas/base_relay_data'
+          - $ref: '#/components/schemas/tts_latency_relay_data'
+          - $ref: '#/components/schemas/stt_latency_relay_data'
+          - $ref: '#/components/schemas/interrupt_relay_data'
+          - $ref: '#/components/schemas/last_token_received_relay_data'
+          - $ref: '#/components/schemas/configurations_relay_data'
+          - $ref: '#/components/schemas/language_changed_relay_data'
+          - $ref: '#/components/schemas/call_wrap_up_relay_data'
+          - $ref: '#/components/schemas/error_relay_data'
+          nullable: true
+          description: Contains information about the Conversation Relay (CRelay)
+            connection used in calls.
     latency_event:
       type: object
       properties:
@@ -1214,6 +1236,14 @@ components:
             Developers can update the Call Summary records with Annotation during
             or after a Call. Annotations can be updated as long as the Call Summary
             record is addressable via the API. See [Details: Call Summary](https://www.twilio.com/docs/voice/voice-insights/api/call/details-call-summary#annotation-object)
+            for the object properties.'
+        agent_session_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/call_summary_agent_session_summary'
+          nullable: true
+          description: '`object` List of session summaries for conversation relay.
+            See [Details: Call Summary](https://www.twilio.com/docs/voice/voice-insights/api/call/details-call-summary#conversation-relay-object)
             for the object properties.'
     summary_enum_answered_by:
       type: string
@@ -1663,6 +1693,127 @@ components:
       - failure
       - ended
       - hung_up
+    insights.v1.call_stats.window:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+          description: Bucket start time (ISO 8601)
+        start_millis:
+          type: integer
+          format: int64
+          description: Bucket start time as epoch milliseconds
+        end:
+          type: string
+          format: date-time
+          description: Bucket end time (ISO 8601)
+        end_millis:
+          type: integer
+          format: int64
+          description: Bucket end time as epoch milliseconds
+        interval:
+          type: string
+          description: Bucket interval (e.g. "1h")
+    insights.v1.call_stats.metrics:
+      type: object
+      description: Numeric aggregate with avg/max/min, rounded to 2 decimal places
+      properties:
+        avg:
+          type: number
+          format: double
+        max:
+          type: number
+          format: double
+        min:
+          type: number
+          format: double
+    insights.v1.call_stats.stats_bucket:
+      type: object
+      properties:
+        window:
+          $ref: '#/components/schemas/insights.v1.call_stats.window'
+        calls:
+          type: object
+          description: Call counts keyed by call direction/kind (dynamic keys)
+          additionalProperties:
+            type: integer
+        pdd:
+          $ref: '#/components/schemas/insights.v1.call_stats.metrics'
+          description: Post-dial delay in seconds
+        duration:
+          $ref: '#/components/schemas/insights.v1.call_stats.metrics'
+          description: Call duration in seconds
+        call_states:
+          type: object
+          description: Count of calls per call state
+          additionalProperties:
+            type: integer
+        direction:
+          type: object
+          description: Count of calls per direction
+          additionalProperties:
+            type: integer
+        disconnected:
+          type: object
+          description: Count of calls by who disconnected (caller / callee / unknown)
+          additionalProperties:
+            type: integer
+        last_sip_response:
+          type: object
+          description: Count of calls by last SIP response code
+          additionalProperties:
+            type: integer
+        callee_country:
+          type: object
+          description: Count of calls by callee country code
+          additionalProperties:
+            type: integer
+        caller_country:
+          type: object
+          description: Count of calls by caller country code
+          additionalProperties:
+            type: integer
+        insight_tags:
+          type: object
+          description: Count of calls per insight tag
+          additionalProperties:
+            type: integer
+        sdk_tags:
+          type: object
+          description: Count of calls per SDK tag
+          additionalProperties:
+            type: integer
+        sli_tags:
+          type: object
+          description: Count of calls per SLI error tag
+          additionalProperties:
+            type: integer
+        in_conference:
+          type: object
+          description: Count of calls split by whether they were in a conference
+          additionalProperties:
+            type: integer
+        call_direction:
+          type: object
+          description: Count of calls per call direction
+          additionalProperties:
+            type: integer
+    insights.v1.call_stats:
+      type: object
+      properties:
+        account_sid:
+          type: string
+          pattern: ^AC[0-9a-fA-F]{32}$
+          description: Account SID the stats belong to
+        window:
+          $ref: '#/components/schemas/insights.v1.call_stats.window'
+          description: Overall time window covering all buckets
+        stats:
+          type: array
+          description: One StatsBucket per interval within the requested window
+          items:
+            $ref: '#/components/schemas/insights.v1.call_stats.stats_bucket'
 info:
   title: Twilio - Insights
   description: This is the public Twilio REST API.
@@ -2431,12 +2582,12 @@ paths:
       - name: PageSize
         in: query
         description: How many resources to return in each list page. The default is
-          50, and the maximum is 1000.
+          25, and the maximum is 25.
         schema:
           type: integer
           format: int64
           minimum: 1
-          maximum: 1000
+          maximum: 25
       - name: Page
         in: query
         description: The page index. This value is simply for client state.
@@ -2595,6 +2746,7 @@ paths:
                           bundle_sid: BU5ceeea51b1424478fc541dfef0e2b167
                           use_case: customer_support
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -2683,6 +2835,7 @@ paths:
                           bundle_sid: BU5ceeea51b1424478fc541dfef0e2b167
                           use_case: customer_support
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                 readWithSubaccount:
                   value:
@@ -2753,6 +2906,7 @@ paths:
                         direction: inbound
                       trust: null
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
@@ -2817,6 +2971,7 @@ paths:
                         direction: outbound_api
                       trust: null
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                 readWithTrust:
                   value:
@@ -2904,6 +3059,7 @@ paths:
                         verified_caller:
                           verified: true
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -2974,6 +3130,7 @@ paths:
                         verified_caller:
                           verified: true
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3027,6 +3184,7 @@ paths:
                         direction: outbound_dial
                       trust: null
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                 readWithAbnormalSession:
                   value:
@@ -3105,6 +3263,7 @@ paths:
                         direction: outbound_dial
                       trust: null
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3181,6 +3340,7 @@ paths:
                         verified_caller:
                           verified: true
                       annotation: null
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                 readWithAnnotationParameters:
                   value:
@@ -3265,6 +3425,7 @@ paths:
                         quality_issues:
                         - choppy_robotic
                         call_score: 1
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3347,6 +3508,7 @@ paths:
                         quality_issues:
                         - choppy_robotic
                         call_score: 1
+                      agent_session_summaries: null
                       url: https://insights.twilio.com/v1/Voice/Summaries
                     - call_sid: CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                       account_sid: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3429,6 +3591,45 @@ paths:
                         quality_issues:
                         - choppy_robotic
                         call_score: 1
+                      agent_session_summaries:
+                      - session_id: session-123
+                        tts_latency_ms:
+                          min: 100.0
+                          max: 200.0
+                          avg: 150.0
+                        stt_latency_ms:
+                          min: 100.0
+                          max: 200.0
+                          avg: 150.0
+                        time_to_first_audio_ms:
+                          min: 50.0
+                          max: 80.0
+                          avg: 65.0
+                        application_latency_ms:
+                          min: 120.0
+                          max: 180.0
+                          avg: 150.0
+                        network_latency_ms:
+                          min: 10.0
+                          max: 20.0
+                          avg: 15.0
+                        tokens:
+                          total: 500
+                          tokens_per_second:
+                            min: 5.0
+                            max: 10.0
+                            avg: 7.5
+                        words:
+                          total: 300
+                          words_per_minute:
+                            min: 60.0
+                            max: 120.0
+                            avg: 90.0
+                        turns: 10
+                        interruptions:
+                          customer_to_agent: 2
+                          agent_to_customer: 1
+                        session_state: ended
                       url: https://insights.twilio.com/v1/Voice/Summaries
           headers:
             Access-Control-Allow-Origin:
@@ -3724,10 +3925,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences?CreatedAfter=2021-10-09T17%3A20%3A53Z&CreatedBefore=2021-10-12T18%3A37%3A53Z&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences?CreatedAfter=2021-10-09T17%3A20%3A53Z&CreatedBefore=2021-10-12T18%3A37%3A53Z&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences?CreatedAfter=2021-10-09T17%3A20%3A53Z&CreatedBefore=2021-10-12T18%3A37%3A53Z&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences?CreatedAfter=2021-10-09T17%3A20%3A53Z&CreatedBefore=2021-10-12T18%3A37%3A53Z&PageSize=50&Page=0
                       next_page_url: null
                       key: conferences
                     conferences:
@@ -3791,10 +3992,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences?MixerRegion=au1&Status=completed&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences?MixerRegion=au1&Status=completed&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences?MixerRegion=au1&Status=completed&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences?MixerRegion=au1&Status=completed&PageSize=50&Page=0
                       next_page_url: null
                       key: conferences
                     conferences:
@@ -3860,10 +4061,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences?FriendlyName=outboundConfCallTransferThrice_1&Status=not_started&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences?FriendlyName=outboundConfCallTransferThrice_1&Status=not_started&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences?FriendlyName=outboundConfCallTransferThrice_1&Status=not_started&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences?FriendlyName=outboundConfCallTransferThrice_1&Status=not_started&PageSize=50&Page=0
                       next_page_url: null
                       key: conferences
                     conferences:
@@ -3902,10 +4103,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences?Tags=duplicate_identity&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences?Tags=duplicate_identity&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences?Tags=duplicate_identity&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences?Tags=duplicate_identity&PageSize=50&Page=0
                       next_page_url: null
                       key: conferences
                     conferences:
@@ -3943,10 +4144,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences?DetectedIssues=call_quality&EndReason=participant_with_end_conference_on_exit_left&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences?DetectedIssues=call_quality&EndReason=participant_with_end_conference_on_exit_left&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences?DetectedIssues=call_quality&EndReason=participant_with_end_conference_on_exit_left&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences?DetectedIssues=call_quality&EndReason=participant_with_end_conference_on_exit_left&PageSize=50&Page=0
                       next_page_url: null
                       key: conferences
                     conferences:
@@ -4266,10 +4467,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?PageSize=50&Page=0
                       next_page_url: null
                       key: participants
                     participants:
@@ -4391,10 +4592,10 @@ paths:
                   value:
                     meta:
                       page: 0
-                      page_size: 25
-                      first_page_url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Label=client&PageSize=25&Page=0
+                      page_size: 50
+                      first_page_url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Label=client&PageSize=50&Page=0
                       previous_page_url: null
-                      url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Label=client&PageSize=25&Page=0
+                      url: https://insights.twilio.com/v1/Conferences/CFaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Participants?Label=client&PageSize=50&Page=0
                       next_page_url: null
                       key: participants
                     participants:
@@ -4587,6 +4788,7 @@ paths:
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
+                      conversation_relay_data: null
                       edge: sdk_edge
                       group: connection
                       name: error
@@ -4630,6 +4832,34 @@ paths:
                       carrier_edge: null
                       level: null
                       edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 1
+                        configurations:
+                          configurations:
+                            voice: UgBBYS2sOqTuMpoF3BR0
+                            ttsProvider: block_elevenlabs
+                            transcriptionProvider: google
+                            debug: '[]'
+                            speechProvider: telephony
+                            transcriptionLanguage: en-US
+                            welcomeGreetingInterruptible: 'TRUE'
+                            partialPromptOnHangup: 'false'
+                            interruptible: 'TRUE'
+                            partialPrompts: 'false'
+                            interruptOptions: InterruptOptions{interruptConfidenceThreshold=0.7,
+                              skipInterruptOnFeedbackWords=false, interruptCheckThresholdType=by-chars,
+                              interruptInputLengthThreshold=3}
+                            preemptible: 'FALSE'
+                            dtmfDetection: 'false'
+                            ttsLanguage: en-US
+                            reportInputDuringAgentSpeech: NONE
+                          languages:
+                            en:
+                              tts_provider: block_elevenlabs
+                              voice: UgBBYS2sOqTuMpoF3BR0
+                              transcription_provider: google
+                              speech_model: telephony
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4641,6 +4871,12 @@ paths:
                       carrier_edge: null
                       edge: null
                       level: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 11
+                        call_wrap_up:
+                          duration_in_seconds: 17
+                          end_status: hung_up
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4651,6 +4887,12 @@ paths:
                       client_edge: null
                       carrier_edge: null
                       level: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 7
+                        last_token_received:
+                          total_tokens: 6
+                          total_words: 5
                 readDeep:
                   value:
                     meta:
@@ -4667,6 +4909,7 @@ paths:
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
                       edge: sdk_edge
                       group: connection
+                      conversation_relay_data: null
                       name: error
                       level: ERROR
                       sdk_edge:
@@ -4708,6 +4951,34 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 1
+                        configurations:
+                          configurations:
+                            voice: UgBBYS2sOqTuMpoF3BR0
+                            ttsProvider: block_elevenlabs
+                            transcriptionProvider: google
+                            debug: '[]'
+                            speechProvider: telephony
+                            transcriptionLanguage: en-US
+                            welcomeGreetingInterruptible: 'TRUE'
+                            partialPromptOnHangup: 'false'
+                            interruptible: 'TRUE'
+                            partialPrompts: 'false'
+                            interruptOptions: InterruptOptions{interruptConfidenceThreshold=0.7,
+                              skipInterruptOnFeedbackWords=false, interruptCheckThresholdType=by-chars,
+                              interruptInputLengthThreshold=3}
+                            preemptible: 'FALSE'
+                            dtmfDetection: 'false'
+                            ttsLanguage: en-US
+                            reportInputDuringAgentSpeech: NONE
+                          languages:
+                            en:
+                              tts_provider: block_elevenlabs
+                              voice: UgBBYS2sOqTuMpoF3BR0
+                              transcription_provider: google
+                              speech_model: telephony
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4719,6 +4990,12 @@ paths:
                       carrier_edge: null
                       edge: null
                       level: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 11
+                        call_wrap_up:
+                          duration_in_seconds: 17
+                          end_status: hung_up
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4730,6 +5007,12 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 7
+                        last_token_received:
+                          total_tokens: 6
+                          total_words: 5
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4741,6 +5024,11 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 8
+                        tts_latency:
+                          latency_ms: 150
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4752,6 +5040,11 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 9
+                        stt_latency:
+                          latency_ms: 200
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4763,6 +5056,11 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 10
+                        interrupt:
+                          type: SPEECH
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4774,6 +5072,12 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 12
+                        language_changed:
+                          tts_language_code: en-US
+                          transcription_language_code: en-US
                     - timestamp: '2019-09-19T22:15:23Z'
                       call_sid: CA03a02b156c6faa96c86906f7e9ad0f38
                       account_sid: AC998c10b68cbfda9f67277f7d8f4439c9
@@ -4785,6 +5089,12 @@ paths:
                       sdk_edge: null
                       sip_edge: null
                       client_edge: null
+                      conversation_relay_data:
+                        session_id: VXce0a58d9f117d5df4af782aa8a8defb6
+                        sequence_number: 13
+                        error:
+                          error_code: 1001
+                          message: Connection timeout
           headers:
             Access-Control-Allow-Origin:
               description: Specify the origin(s) allowed to access the resource
@@ -5080,16 +5390,136 @@ paths:
                     end_time: '2015-07-30T20:00:00Z'
                     duration: 100
                     connect_duration: 99
-                    from: {}
-                    to: {}
-                    carrier_edge: {}
-                    client_edge: {}
-                    sdk_edge: {}
-                    sip_edge: {}
+                    from:
+                      caller: '+15555555555'
+                      carrier: T-Mobile USA, Inc.
+                      connection: mobile
+                      number_prefix: '1555'
+                      location:
+                        lat: 40.83885
+                        lon: -74.04568
+                      country_code: US
+                    to:
+                      callee: '+15555555556'
+                      carrier: AT&T Wireless
+                      connection: mobile
+                      number_prefix: '1555'
+                      location:
+                        lat: 33.42767
+                        lon: -86.886475
+                      country_code: US
+                    carrier_edge:
+                      properties:
+                        media_region: us1
+                        signaling_region: us1
+                        edge_location: xxxxx
+                        direction: inbound
+                      metrics:
+                        inbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_received: 202
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 1.48209
+                            avg: 0.483035
+                        outbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_sent: 218
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 0.51868
+                            avg: 0.364434
+                    client_edge:
+                      properties:
+                        media_region: us1
+                        signaling_region: us1
+                        twilio_media_ip: 54.xxx.xx.xxx
+                        external_media_ip: 54.xxx.xx.xxx
+                        edge_location: xxxxxx
+                        direction: inbound
+                      metrics:
+                        inbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_received: 252
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 5.60994
+                            avg: 0.933334
+                        outbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_sent: 229
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 0.960786
+                            avg: 0.399859
+                    sdk_edge:
+                      properties:
+                        media_region: us1
+                        signaling_region: us1
+                        edge_location: xxxxx
+                        direction: inbound
+                      metrics:
+                        inbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_received: 3900
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 5.60994
+                            avg: 0.933334
+                        outbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_sent: 3934
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 0.960786
+                            avg: 0.399859
+                    sip_edge:
+                      properties:
+                        media_region: us1
+                        signaling_region: us1
+                        twilio_media_ip: 54.xxx.xx.xx
+                        twilio_signaling_ip: 54.xxx.xx.xx
+                        external_signaling_ip: 54.xxx.xx.xx
+                        sip_call_id: xxxxx@0.0.0.0
+                        user_agent: xxxx
+                        edge_location: xxxxx
+                        trunk_sid: xxxxxxx
+                        direction: inbound
+                      metrics:
+                        outbound:
+                          codec: 0
+                          codec_name: pcmu
+                          packets_sent: 1953
+                          packets_lost: 0
+                          packets_loss_percentage: 0.0
+                          jitter:
+                            max: 1.76407
+                            avg: 0.23138
+                          latency:
+                            max: 0.386
+                            avg: 0.3765
                     tags:
-                    - tags
-                    attributes: {}
-                    properties: {}
+                    - high_packet_loss
+                    - high_jitter
+                    attributes:
+                      conference_participant: false
+                    properties:
+                      last_sip_response_num: 200
+                      pdd_ms: 121
+                      disconnected_by: callee
+                      direction: inbound
                     trust:
                       verified_caller:
                         verified: true
@@ -5122,6 +5552,45 @@ paths:
                       call_score: 2
                       comment: this is a call
                       incident: https://twilio.zendesk.com/support/tickets/17353089
+                    agent_session_summaries:
+                    - session_id: session-123
+                      tts_latency_ms:
+                        min: 100.0
+                        max: 200.0
+                        avg: 150.0
+                      stt_latency_ms:
+                        min: 100.0
+                        max: 200.0
+                        avg: 150.0
+                      time_to_first_audio_ms:
+                        min: 50.0
+                        max: 80.0
+                        avg: 65.0
+                      application_latency_ms:
+                        min: 120.0
+                        max: 180.0
+                        avg: 150.0
+                      network_latency_ms:
+                        min: 10.0
+                        max: 20.0
+                        avg: 15.0
+                      tokens:
+                        total: 500
+                        tokens_per_second:
+                          min: 5.0
+                          max: 10.0
+                          avg: 7.5
+                      words:
+                        total: 300
+                        words_per_minute:
+                          min: 60.0
+                          max: 120.0
+                          avg: 90.0
+                      turns: 10
+                      interruptions:
+                        customer_to_agent: 2
+                        agent_to_customer: 1
+                      session_state: ended
                     url: https://insights.twilio.com/v1/Voice/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Summary
           headers:
             Access-Control-Allow-Origin:
@@ -5662,12 +6131,6 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: ListVideoRoomSummary
-  /v1/InsightsDomains/Flex/Reports/Metadata:
-    servers:
-    - url: https://insights.twilio.com
-  /v1/InsightsDomains/Flex/Reports/Query:
-    servers:
-    - url: https://insights.twilio.com
 servers:
 - url: https://insights.twilio.com
 tags:
@@ -5682,5 +6145,6 @@ tags:
 - name: InsightsV1Participant
 - name: InsightsV1Room
 - name: InsightsV1Setting
+- name: InsightsV1CallStats
 security:
 - accountSid_authToken: []
