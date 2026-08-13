@@ -1147,11 +1147,11 @@
           }
         },
         "required": [
-          "updatedAt",
-          "createdAt",
-          "status",
           "id",
-          "name"
+          "status",
+          "name",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "KnowledgeChunk": {
@@ -1296,6 +1296,64 @@
           }
         }
       },
+      "KnowledgeErrorInstance": {
+        "type": "object",
+        "description": "Represents a single error instance for a specific URL or resource.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "A URI reference identifying the problem type, resolving to human-readable documentation (e.g., https://www.twilio.com/docs/api/errors/420018).",
+            "maxLength": 200,
+            "example": "https://www.twilio.com/docs/api/errors/420018"
+          },
+          "code": {
+            "type": "integer",
+            "description": "Twilio-specific numeric error code for programmatic handling.",
+            "example": 420022
+          },
+          "instance": {
+            "type": "string",
+            "description": "The specific URL or resource that caused the error.",
+            "maxLength": 500,
+            "example": "https://docs.example.com/old-page"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed explanation of the error.",
+            "maxLength": 1000,
+            "example": "Page does not exist"
+          }
+        },
+        "required": [
+          "type",
+          "code",
+          "instance"
+        ]
+      },
+      "KnowledgeErrorGroup": {
+        "type": "object",
+        "description": "Groups error instances by error type/title.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The error type or reason (e.g., \"404 Not Found\", \"500 Internal Server Error\").",
+            "maxLength": 100,
+            "example": "404 Not Found"
+          },
+          "instances": {
+            "type": "array",
+            "description": "Array of error instances for this error title. Required when an error group is present.",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeErrorInstance"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "instances"
+        ]
+      },
       "WebSourceDetails": {
         "type": "object",
         "additionalProperties": false,
@@ -1334,6 +1392,14 @@
             "default": "NEVER",
             "description": "Frequency of re-crawling the website for updated content",
             "example": "WEEKLY"
+          },
+          "errors": {
+            "description": "Processing errors encountered during web crawling, grouped by title.\nArray of error groups, where each group has a title and list of error instances.\nOnly present when crawl errors occurred.",
+            "type": "array",
+            "maxItems": 2000,
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeErrorGroup"
+            }
           }
         },
         "required": [
@@ -1516,11 +1582,11 @@
         },
         "required": [
           "displayName",
-          "updatedAt",
-          "createdAt",
+          "id",
           "status",
           "version",
-          "id"
+          "createdAt",
+          "updatedAt"
         ]
       },
       "KnowledgeBaseList": {

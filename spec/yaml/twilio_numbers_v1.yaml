@@ -1267,10 +1267,10 @@ components:
           nullable: true
           description: Sid associated with brand compliance registration
       required:
-      - phoneNumberSid
-      - accountSid
-      - phoneNumber
       - externalPhoneNumberStatus
+      - phoneNumberSid
+      - phoneNumber
+      - accountSid
     numbers.v1.a2p_registration_details_campaign_list:
       type: object
       required:
@@ -1427,6 +1427,85 @@ components:
         sessionToken:
           type: string
           description: Ephemeral session token for the compliance embeddable.
+    numbers.v1.sms_verification:
+      type: object
+      properties:
+        to:
+          type: string
+          description: The phone number being verified in E.164 format.
+        verificationSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^VE[0-9a-fA-F]{32}$
+          description: The unique SID of this verification resource.
+        sendCodeAttempts:
+          type: array
+          items:
+            type: object
+            properties:
+              attemptSid:
+                type: string
+              time:
+                type: string
+          description: An array of verification attempt objects.
+    numbers.v1.sms_verification_check:
+      type: object
+      properties:
+        to:
+          type: string
+          description: The phone number that was verified in E.164 format.
+        verificationSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^VE[0-9a-fA-F]{32}$
+          description: The unique SID of this verification resource.
+        status:
+          type: string
+          description: The status of the verification (pending, approved, canceled).
+        callerIdSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          description: The Caller ID SID created upon successful verification.
+          nullable: true
+    numbers.v1.voice_verification:
+      type: object
+      properties:
+        accountSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-fA-F]{32}$
+          description: The Account SID that owns this verification.
+        phoneNumber:
+          type: string
+          description: The phone number being verified in E.164 format.
+        friendlyName:
+          type: string
+          nullable: true
+          description: A human-readable name for this caller ID.
+        validationCode:
+          type: string
+          description: The 6-digit validation code to be entered during the call.
+        callSid:
+          type: string
+          description: The Call SID for the verification call.
+    numbers.v1.voice_verification_check:
+      type: object
+      properties:
+        to:
+          type: string
+          description: The phone number that was verified in E.164 format.
+        callerIdSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^PN[0-9a-fA-F]{32}$
+          description: The Caller ID SID created upon successful verification.
+          nullable: true
 info:
   title: Twilio - Numbers
   description: This is the public Twilio REST API.
@@ -2937,6 +3016,66 @@ paths:
       security:
       - accountSid_authToken: []
       operationId: CreateSenderIdRegistrationEmbeddedSession
+  /v1/CallerIds/SmsVerifications:
+    post:
+      summary: Initiate SMS verification for a caller ID
+      operationId: CreateSmsVerification
+      tags:
+      - V1CallerIds
+      responses:
+        '201':
+          description: SMS verification initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.sms_verification'
+      security:
+      - accountSid_authToken: []
+  /v1/CallerIds/SmsVerificationChecks:
+    post:
+      summary: Check SMS verification code
+      operationId: CreateSmsVerificationCheck
+      tags:
+      - V1CallerIds
+      responses:
+        '200':
+          description: Verification check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.sms_verification_check'
+      security:
+      - accountSid_authToken: []
+  /v1/CallerIds/VoiceVerifications:
+    post:
+      summary: Initiate voice verification for a caller ID
+      operationId: CreateVoiceVerification
+      tags:
+      - V1CallerIds
+      responses:
+        '201':
+          description: Voice verification initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.voice_verification'
+      security:
+      - accountSid_authToken: []
+  /v1/CallerIds/VoiceVerificationChecks:
+    post:
+      summary: Check voice verification code
+      operationId: CreateVoiceVerificationCheck
+      tags:
+      - V1CallerIds
+      responses:
+        '200':
+          description: Verification check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/numbers.v1.voice_verification_check'
+      security:
+      - accountSid_authToken: []
 servers:
 - url: https://numbers.twilio.com
 tags:
@@ -2958,5 +3097,6 @@ tags:
 - name: NumbersV1A2pRegistrationDetails
 - name: NumbersV1SenderIdRegistration
 - name: NumbersV1SenderIdRegistrationEmbeddedSession
+- name: V1CallerIds
 security:
 - accountSid_authToken: []

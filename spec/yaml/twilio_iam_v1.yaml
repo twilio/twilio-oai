@@ -1732,6 +1732,152 @@ components:
           type: string
           description: The social identity provider to disconnect (e.g. google-oauth2,
             github, apple)
+    iam.v1.SubaccountBatchWorkflowType:
+      type: string
+      enum:
+      - BULK_SUBACCOUNT_SUSPEND
+      - BULK_SUBACCOUNT_UNSUSPEND
+      - BULK_SUBACCOUNT_CLOSE
+      example: BULK_SUBACCOUNT_SUSPEND
+    iam.v1.SubaccountBatchStatus:
+      type: string
+      enum:
+      - SCHEDULED
+      - PROCESSING
+      - COMPLETED
+      - FAILED
+      - CANCELLED
+      example: PROCESSING
+    iam.v1.SubaccountBatch:
+      type: object
+      required:
+      - batchId
+      - accountId
+      - workflowType
+      - status
+      - actorUserId
+      - dateCreated
+      - dateUpdated
+      properties:
+        batchId:
+          type: string
+          minLength: 40
+          maxLength: 40
+          pattern: ^iam_operation_[0-9a-hjkmnp-tv-z]{26}$
+          description: The unique identifier for this batch operation, also used as
+            the public Job ID.
+          example: iam_operation_00000000000000000000000000
+        accountId:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^AC[0-9a-f]{32}$
+          description: The ID of the parent account that owns this batch.
+          example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        workflowType:
+          $ref: '#/components/schemas/iam.v1.SubaccountBatchWorkflowType'
+        status:
+          $ref: '#/components/schemas/iam.v1.SubaccountBatchStatus'
+        actorUserId:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^US[0-9a-f]{32}$
+          description: The ID of the user who submitted the batch.
+          example: USaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        actorUserEmail:
+          type: string
+          nullable: true
+          description: The email of the user who submitted the batch.
+          example: someone@example.com
+        totalCount:
+          type: integer
+          format: int32
+          nullable: true
+          description: The total number of subaccounts in the batch.
+          example: 250
+        successCount:
+          type: integer
+          format: int32
+          nullable: true
+          description: The number of subaccounts processed successfully.
+          example: 248
+        failureCount:
+          type: integer
+          format: int32
+          nullable: true
+          description: The number of subaccounts that failed processing.
+          example: 2
+        dateCreated:
+          type: string
+          format: date-time
+          description: The date the batch was submitted, given in RFC 3339 format.
+          example: '2026-07-27T12:00:00Z'
+        dateUpdated:
+          type: string
+          format: date-time
+          description: The date the batch was last updated, given in RFC 3339 format.
+          example: '2026-07-27T12:05:00Z'
+        dateCompleted:
+          type: string
+          format: date-time
+          nullable: true
+          description: The date the batch reached a terminal state, given in RFC 3339
+            format.
+          example: '2026-07-27T12:10:00Z'
+    iam.v1.SubaccountBatchAccepted:
+      type: object
+      required:
+      - batchId
+      properties:
+        batchId:
+          type: string
+          minLength: 40
+          maxLength: 40
+          pattern: ^iam_operation_[0-9a-hjkmnp-tv-z]{26}$
+          description: The generated batch identifier, also used as the public Job
+            ID.
+          example: iam_operation_00000000000000000000000000
+    iam.v1.CreateSubaccountBatchRequest:
+      type: object
+      required:
+      - workflowType
+      - subaccountIds
+      properties:
+        workflowType:
+          $ref: '#/components/schemas/iam.v1.SubaccountBatchWorkflowType'
+        subaccountIds:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          description: The subaccount IDs to act on. A maximum of 1000 may be submitted
+            per batch.
+          items:
+            type: string
+            minLength: 34
+            maxLength: 34
+            pattern: ^AC[0-9a-f]{32}$
+          example:
+          - ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          - ACbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    iam.v1.BatchDownloadUrl:
+      type: object
+      required:
+      - downloadUrl
+      - expiresAt
+      properties:
+        downloadUrl:
+          type: string
+          description: A pre-signed, time-limited S3 URL for the CSV. The lifetime
+            is short and server-configured; read `expiresAt` rather than assuming
+            a fixed duration.
+          example: https://com-twilio-iam-prod-us1-icp-subaccount-batches.s3.amazonaws.com/results/iam_operation_00000000000000000000000000.csv?X-Amz-Signature=...
+        expiresAt:
+          type: string
+          format: date-time
+          description: The time the pre-signed URL stops being valid, given in RFC
+            3339 format.
+          example: '2026-07-15T14:30:00Z'
 info:
   title: Twilio - Iam
   description: This is the public Twilio REST API.

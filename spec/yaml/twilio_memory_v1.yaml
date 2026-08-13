@@ -3394,12 +3394,12 @@ components:
           description: The timestamp when the summary was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - occurredAt
-      - updatedAt
       - conversationId
-      - content
-      - createdAt
       - id
+      - createdAt
+      - occurredAt
+      - content
+      - updatedAt
     Participant:
       type: object
       required:
@@ -3542,9 +3542,9 @@ components:
                 - COMPLETED
                 - FAILED
             required:
-            - address
             - channel
             - name
+            - address
             - id
       required:
       - id
@@ -3967,10 +3967,10 @@ components:
           example: 3
       required:
       - displayName
+      - id
+      - intelligenceServiceId
       - version
       - status
-      - intelligenceServiceId
-      - id
     ServiceList:
       type: object
       additionalProperties: false
@@ -4550,12 +4550,19 @@ components:
           example: eyJlYXN0ZXIiOiJlZ2cifQ
     DataMappingType:
       type: string
-      description: The type of data mapping defining how data flows into the Memory
+      description: 'The type of data mapping defining how data flows into the Memory
         Store.
+
+        `CSV` and `DATASET` are deprecated aliases being replaced by `INGRESS`,
+
+        `DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` respectively.'
       enum:
       - CSV
       - DATASET
-      example: DATASET
+      - INGRESS
+      - DATASET_CLOUDAPP
+      - DATASET_WAREHOUSE
+      example: DATASET_WAREHOUSE
     DataMappingFromTypes:
       type: object
       description: 'Details of where to map data items from. Each data mapping from
@@ -4564,14 +4571,20 @@ components:
         parameters and source specific properties.'
       oneOf:
       - $ref: '#/components/schemas/DataMappingFromCSV'
+      - $ref: '#/components/schemas/DataMappingFromIngress'
       - $ref: '#/components/schemas/DataMappingFromDataSet'
+      - $ref: '#/components/schemas/DataMappingFromCloudAppDataSet'
+      - $ref: '#/components/schemas/DataMappingFromWarehouseDataSet'
       discriminator:
         propertyName: type
         mapping:
           CSV: '#/components/schemas/DataMappingFromCSV'
+          INGRESS: '#/components/schemas/DataMappingFromIngress'
           DATASET: '#/components/schemas/DataMappingFromDataSet'
+          DATASET_CLOUDAPP: '#/components/schemas/DataMappingFromCloudAppDataSet'
+          DATASET_WAREHOUSE: '#/components/schemas/DataMappingFromWarehouseDataSet'
       example:
-        type: DATASET
+        type: DATASET_WAREHOUSE
         datasetId: tdi_dataset_00000000000000000000000000
     DataMappingFromDataSet:
       type: object
@@ -4782,12 +4795,12 @@ components:
           example: 3
       required:
       - displayName
-      - updatedAt
-      - mappingFrom
+      - id
+      - createdAt
       - version
       - mappingTo
-      - createdAt
-      - id
+      - updatedAt
+      - mappingFrom
     DataMappingList:
       type: object
       additionalProperties: false
@@ -4855,12 +4868,12 @@ components:
           maximum: 1
           example: 0.82
       required:
-      - occurredAt
-      - updatedAt
-      - content
+      - id
       - source
       - createdAt
-      - id
+      - occurredAt
+      - content
+      - updatedAt
     RecallSummaryInfo:
       type: object
       description: A summary memory derived from conversations.
@@ -4911,12 +4924,12 @@ components:
           maximum: 1
           example: 0.78
       required:
-      - occurredAt
-      - updatedAt
       - conversationId
-      - content
-      - createdAt
       - id
+      - createdAt
+      - occurredAt
+      - content
+      - updatedAt
     SummaryCorePatch:
       type: object
       description: Core mutable properties for updating summary objects. All fields
@@ -5089,9 +5102,9 @@ components:
           items:
             $ref: '#/components/schemas/ConversationID'
       required:
-      - content
-      - occurredAt
       - source
+      - occurredAt
+      - content
     DataMappingFromCSV:
       type: object
       additionalProperties: false
@@ -5278,6 +5291,78 @@ components:
           description: List of suggested mappings generated for the Memory Store.
         meta:
           $ref: '#/components/schemas/Meta'
+    DataMappingFromIngress:
+      type: object
+      additionalProperties: false
+      description: Configuration for mapping from ingress column names provided directly
+        in the request.
+      properties:
+        type:
+          type: string
+          description: The source data type, which determines the source of the data
+            and the required configuration parameters.
+          enum:
+          - INGRESS
+          example: INGRESS
+        columns:
+          type: array
+          description: The list of ingress column names that serve as the source fields.
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
+          example:
+          - first_name
+          - last_name
+          - email
+          - favorite_color
+      required:
+      - type
+      - columns
+    DataMappingFromCloudAppDataSet:
+      type: object
+      additionalProperties: false
+      description: Configuration for mapping from a TDI dataset backed by a cloud
+        app (CRM) source.
+      properties:
+        type:
+          type: string
+          description: The source data type, which determines the source of the data
+            and the required configuration parameters.
+          enum:
+          - DATASET_CLOUDAPP
+          example: DATASET_CLOUDAPP
+        datasetId:
+          type: string
+          description: The unique identifier of the TDI dataset to connect.
+          pattern: ^tdi_dataset_[0-7][0-9a-z]{25}$
+          example: tdi_dataset_00000000000000000000000000
+      required:
+      - type
+      - datasetId
+    DataMappingFromWarehouseDataSet:
+      type: object
+      additionalProperties: false
+      description: Configuration for mapping from a TDI dataset backed by a warehouse
+        source.
+      properties:
+        type:
+          type: string
+          description: The source data type, which determines the source of the data
+            and the required configuration parameters.
+          enum:
+          - DATASET_WAREHOUSE
+          example: DATASET_WAREHOUSE
+        datasetId:
+          type: string
+          description: The unique identifier of the TDI dataset to connect.
+          pattern: ^tdi_dataset_[0-7][0-9a-z]{25}$
+          example: tdi_dataset_00000000000000000000000000
+      required:
+      - type
+      - datasetId
   parameters:
     PageSize:
       name: pageSize
