@@ -1,6 +1,28 @@
 twilio-oai changelog
 ====================
 
+[2026-08-13] Version 2.7.1
+--------------------------
+**Destinations**
+- ## 2026-08-12
+- **Content updates**:
+- Added properties to `DestinationType`: releaseStatus
+- Removed properties from `DestinationType`: maturity
+
+**Memory**
+- No path changes (updated metadata only)
+- `DataMappingType` gains `INGRESS`, `DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE`.
+- `CSV` and `DATASET` remain valid and unchanged; they are deprecated aliases and
+- will be removed in a follow-up change.
+- `DataMappingFromTypes` gains three `oneOf` members and three discriminator keys:
+- `DataMappingFromIngress` (renames `DataMappingFromCSV`),
+- `DataMappingFromCloudAppDataSet` and `DataMappingFromWarehouseDataSet`
+- (both split from `DataMappingFromDataSet`, distinguishing a cloud-app-backed
+- TDI dataset from a warehouse-backed one).
+- Additive and backwards compatible: existing `CSV` and `DATASET` payloads are
+- unaffected.
+- ## 2026-08-10
+
 [2026-08-11] Version 2.7.0
 --------------------------
 **Library - Chore**
