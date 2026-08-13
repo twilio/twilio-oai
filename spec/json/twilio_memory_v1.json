@@ -4651,9 +4651,9 @@
           }
         },
         "required": [
+          "id",
           "createdAt",
-          "updatedAt",
-          "id"
+          "updatedAt"
         ]
       },
       "SummaryCore": {
@@ -4734,12 +4734,12 @@
           }
         },
         "required": [
-          "updatedAt",
-          "conversationId",
-          "createdAt",
           "occurredAt",
           "id",
-          "content"
+          "createdAt",
+          "updatedAt",
+          "content",
+          "conversationId"
         ]
       },
       "Participant": {
@@ -4912,10 +4912,10 @@
                 }
               },
               "required": [
-                "name",
-                "channel",
                 "address",
-                "id"
+                "name",
+                "id",
+                "channel"
               ]
             }
           }
@@ -5407,10 +5407,10 @@
         },
         "required": [
           "displayName",
-          "intelligenceServiceId",
+          "id",
           "status",
           "version",
-          "id"
+          "intelligenceServiceId"
         ]
       },
       "ServiceList": {
@@ -6006,12 +6006,15 @@
       },
       "DataMappingType": {
         "type": "string",
-        "description": "The type of data mapping defining how data flows into the Memory Store.",
+        "description": "The type of data mapping defining how data flows into the Memory Store.\n`CSV` and `DATASET` are deprecated aliases being replaced by `INGRESS`,\n`DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` respectively.",
         "enum": [
           "CSV",
-          "DATASET"
+          "DATASET",
+          "INGRESS",
+          "DATASET_CLOUDAPP",
+          "DATASET_WAREHOUSE"
         ],
-        "example": "DATASET"
+        "example": "DATASET_WAREHOUSE"
       },
       "DataMappingFromTypes": {
         "type": "object",
@@ -6021,18 +6024,30 @@
             "$ref": "#/components/schemas/DataMappingFromCSV"
           },
           {
+            "$ref": "#/components/schemas/DataMappingFromIngress"
+          },
+          {
             "$ref": "#/components/schemas/DataMappingFromDataSet"
+          },
+          {
+            "$ref": "#/components/schemas/DataMappingFromCloudAppDataSet"
+          },
+          {
+            "$ref": "#/components/schemas/DataMappingFromWarehouseDataSet"
           }
         ],
         "discriminator": {
           "propertyName": "type",
           "mapping": {
             "CSV": "#/components/schemas/DataMappingFromCSV",
-            "DATASET": "#/components/schemas/DataMappingFromDataSet"
+            "INGRESS": "#/components/schemas/DataMappingFromIngress",
+            "DATASET": "#/components/schemas/DataMappingFromDataSet",
+            "DATASET_CLOUDAPP": "#/components/schemas/DataMappingFromCloudAppDataSet",
+            "DATASET_WAREHOUSE": "#/components/schemas/DataMappingFromWarehouseDataSet"
           }
         },
         "example": {
-          "type": "DATASET",
+          "type": "DATASET_WAREHOUSE",
           "datasetId": "tdi_dataset_00000000000000000000000000"
         }
       },
@@ -6212,9 +6227,9 @@
           }
         },
         "required": [
+          "mappingFrom",
           "displayName",
-          "mappingTo",
-          "mappingFrom"
+          "mappingTo"
         ]
       },
       "DataMapping": {
@@ -6268,13 +6283,13 @@
           }
         },
         "required": [
-          "displayName",
-          "updatedAt",
           "mappingTo",
-          "createdAt",
+          "id",
+          "displayName",
           "version",
           "mappingFrom",
-          "id"
+          "createdAt",
+          "updatedAt"
         ]
       },
       "DataMappingList": {
@@ -6352,11 +6367,11 @@
           }
         },
         "required": [
-          "updatedAt",
-          "createdAt",
           "occurredAt",
           "id",
           "source",
+          "createdAt",
+          "updatedAt",
           "content"
         ]
       },
@@ -6412,12 +6427,12 @@
           }
         },
         "required": [
-          "updatedAt",
-          "conversationId",
-          "createdAt",
           "occurredAt",
           "id",
-          "content"
+          "createdAt",
+          "updatedAt",
+          "content",
+          "conversationId"
         ]
       },
       "SummaryCorePatch": {
@@ -6628,9 +6643,9 @@
           }
         },
         "required": [
+          "occurredAt",
           "source",
-          "content",
-          "occurredAt"
+          "content"
         ]
       },
       "DataMappingFromCSV": {
@@ -6864,6 +6879,92 @@
             "$ref": "#/components/schemas/Meta"
           }
         }
+      },
+      "DataMappingFromIngress": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration for mapping from ingress column names provided directly in the request.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
+            "enum": [
+              "INGRESS"
+            ],
+            "example": "INGRESS"
+          },
+          "columns": {
+            "type": "array",
+            "description": "The list of ingress column names that serve as the source fields.",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "example": [
+              "first_name",
+              "last_name",
+              "email",
+              "favorite_color"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "columns"
+        ]
+      },
+      "DataMappingFromCloudAppDataSet": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration for mapping from a TDI dataset backed by a cloud app (CRM) source.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
+            "enum": [
+              "DATASET_CLOUDAPP"
+            ],
+            "example": "DATASET_CLOUDAPP"
+          },
+          "datasetId": {
+            "type": "string",
+            "description": "The unique identifier of the TDI dataset to connect.",
+            "pattern": "^tdi_dataset_[0-7][0-9a-z]{25}$",
+            "example": "tdi_dataset_00000000000000000000000000"
+          }
+        },
+        "required": [
+          "type",
+          "datasetId"
+        ]
+      },
+      "DataMappingFromWarehouseDataSet": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Configuration for mapping from a TDI dataset backed by a warehouse source.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
+            "enum": [
+              "DATASET_WAREHOUSE"
+            ],
+            "example": "DATASET_WAREHOUSE"
+          },
+          "datasetId": {
+            "type": "string",
+            "description": "The unique identifier of the TDI dataset to connect.",
+            "pattern": "^tdi_dataset_[0-7][0-9a-z]{25}$",
+            "example": "tdi_dataset_00000000000000000000000000"
+          }
+        },
+        "required": [
+          "type",
+          "datasetId"
+        ]
       }
     },
     "parameters": {

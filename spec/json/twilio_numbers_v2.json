@@ -157,10 +157,10 @@
           }
         },
         "required": [
-          "accountSid",
-          "phoneNumber",
+          "externalPhoneNumberStatus",
           "phoneNumberSid",
-          "externalPhoneNumberStatus"
+          "phoneNumber",
+          "accountSid"
         ]
       },
       "numbers.v2.address": {
@@ -3115,6 +3115,47 @@
             "maxLength": 34,
             "pattern": "^BU[0-9a-fA-F]{32}$",
             "description": "Bundle SID"
+          }
+        }
+      },
+      "numbers.v2.caller_id": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PN[0-9a-fA-F]{32}$",
+            "description": "The unique SID of this Caller ID resource."
+          },
+          "accountSid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "description": "The Account SID that owns this Caller ID."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The phone number in E.164 format."
+          },
+          "friendlyName": {
+            "type": "string",
+            "nullable": true,
+            "description": "A human-readable name for this caller ID."
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date this resource was created."
+          },
+          "dateUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date this resource was last updated."
           }
         }
       }
@@ -10386,6 +10427,110 @@
         ],
         "operationId": "FetchShortCodeApplication"
       }
+    },
+    "/v2/CallerIds": {
+      "get": {
+        "summary": "List verified caller IDs for an account",
+        "operationId": "ListCallerIds",
+        "tags": [
+          "V2CallerIds"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of caller IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "callerIds": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/numbers.v2.caller_id"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
+    },
+    "/v2/CallerIds/{CallerIdSid}": {
+      "parameters": [
+        {
+          "name": "CallerIdSid",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^PN[0-9a-fA-F]{32}$"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Update a caller ID",
+        "operationId": "UpdateCallerId",
+        "tags": [
+          "V2CallerIds"
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated caller ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/numbers.v2.caller_id"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete a caller ID",
+        "operationId": "DeleteCallerId",
+        "tags": [
+          "V2CallerIds"
+        ],
+        "responses": {
+          "204": {
+            "description": "Caller ID deleted successfully"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
     }
   },
   "servers": [
@@ -10477,6 +10622,9 @@
     },
     {
       "name": "V2ShortCodeDocuments"
+    },
+    {
+      "name": "V2CallerIds"
     }
   ],
   "security": [
