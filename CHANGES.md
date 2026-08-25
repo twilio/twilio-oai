@@ -1,6 +1,34 @@
 twilio-oai changelog
 ====================
 
+[2026-08-25] Version 2.7.3
+--------------------------
+**Destinations**
+- Minor updates (formatting, metadata)
+- ## 2026-08-12
+
+**Memory**
+- ## 2026-08-18
+- **Breaking change**:
+- Removed the deprecated `CSV` and `DATASET` values from the `DataMappingType` enum.
+- `INGRESS`, `DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` are the only valid values now.
+- Removed the `DataMappingFromCSV` and `DataMappingFromDataSet` schemas and their
+- `oneOf`/discriminator entries on `DataMappingFromTypes`, along with the corresponding
+- `CSV`/`DATASET` discriminator mapping keys.
+- Any caller still sending `type: CSV` or `type: DATASET` on `CreateDataMapping` or
+- `UpdateDataMapping` (or filtering `ListDataMappings`/`ListDataMappingSuggestions` by
+- those values) will get a 400.
+
+**Voice**
+- ## 2026-08-05
+- Added GET /v3/Transcriptions to list and filter transcriptions (status, sourceId, languageCode, createdAfter/createdBefore) with pageSize/pageToken pagination. createdAfter is inclusive and createdBefore exclusive. Returns 422 (error code 17535) when a sourceId's historical item count exceeds the service scan cap
+
+**Webhooks**
+- # API Changes
+- ## 2026-08-24
+- **Changed**: Created Webhooks Config API ( https://docs.google.com/document/d/1zkAJD8a8MgoxWifdYDl_d465Az3W6CcD9fuCC2xlSXE/edit?tab=t.0#heading=h.u9e0ry6oe89j ), that includes 7 new resource(s)**: SharedKeys, AuthProfiles, Settings, Rules, Operations, Tests, EdgeZones in /v1/Webhooks referencing webhooks-config downstream.
+
+
 [2026-08-13] Version 2.7.1
 --------------------------
 **Destinations**
