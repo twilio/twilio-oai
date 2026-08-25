@@ -1,8 +1,12 @@
 twilio-oai changelog
 ====================
 
-[2026-08-25] Version 2.7.3
+[2026-08-25] Version 2.8.0
 --------------------------
+**Twiml**
+- Remove `<Assistant>` noun from `<Connect>` verb as part of the AI Assistants deprecation **(breaking change)**
+- Add `passports` attribute to `<Dial>` verb for SHAKEN/STIR passport passthrough
+
 **Destinations**
 - Minor updates (formatting, metadata)
 - ## 2026-08-12
