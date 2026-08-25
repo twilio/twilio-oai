@@ -2429,7 +2429,7 @@ paths:
                       traitGroup: Contact
                       traitName: email
                   mappingFrom:
-                    type: DATASET
+                    type: DATASET_CLOUDAPP
                     datasetId: tdi_dataset_00000000000000000000000000
                 meta:
                   key: dataMappings
@@ -2450,7 +2450,8 @@ paths:
       description: 'Create a new data mapping to connect an external data source to
         this Memory Store.
 
-        For DATASET types, validates that all mapped Trait Groups and traits exist
+        For `DATASET_CLOUDAPP` and `DATASET_WAREHOUSE` types, validates that all mapped
+        Trait Groups and traits exist
 
         and that dataset field data types match their respective mapped trait data
         types.'
@@ -2543,7 +2544,8 @@ paths:
         including replacing the entire contents of the `mappings` array.
 
 
-        For DATASET types, validates that all mapped Trait Groups and traits exist
+        For `DATASET_CLOUDAPP` and `DATASET_WAREHOUSE` types, validates that all mapped
+        Trait Groups and traits exist
 
         and that dataset field data types match their respective mapped trait data
         types.'
@@ -3322,9 +3324,9 @@ components:
           description: The timestamp when the observation was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
+      - id
       - createdAt
       - updatedAt
-      - id
     SummaryCore:
       type: object
       description: Core mutable properties for creating summary objects.
@@ -3394,12 +3396,12 @@ components:
           description: The timestamp when the summary was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - conversationId
-      - id
       - createdAt
-      - occurredAt
-      - content
       - updatedAt
+      - occurredAt
+      - conversationId
+      - content
+      - id
     Participant:
       type: object
       required:
@@ -3542,10 +3544,10 @@ components:
                 - COMPLETED
                 - FAILED
             required:
+            - id
             - channel
             - name
             - address
-            - id
       required:
       - id
       - author
@@ -3966,11 +3968,11 @@ components:
             on each successful update.
           example: 3
       required:
-      - displayName
-      - id
       - intelligenceServiceId
       - version
       - status
+      - id
+      - displayName
     ServiceList:
       type: object
       additionalProperties: false
@@ -4070,9 +4072,9 @@ components:
             Incremented on each successful update.
           example: 3
       required:
+      - version
       - identifierConfigs
       - matchingRules
-      - version
     IdentifierConfig:
       type: object
       additionalProperties: false
@@ -4319,8 +4321,8 @@ components:
             on each successful update.
           example: 3
       required:
-      - displayName
       - version
+      - displayName
     TraitGroupRequest:
       type: object
       additionalProperties: false
@@ -4550,15 +4552,9 @@ components:
           example: eyJlYXN0ZXIiOiJlZ2cifQ
     DataMappingType:
       type: string
-      description: 'The type of data mapping defining how data flows into the Memory
+      description: The type of data mapping defining how data flows into the Memory
         Store.
-
-        `CSV` and `DATASET` are deprecated aliases being replaced by `INGRESS`,
-
-        `DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` respectively.'
       enum:
-      - CSV
-      - DATASET
       - INGRESS
       - DATASET_CLOUDAPP
       - DATASET_WAREHOUSE
@@ -4570,43 +4566,18 @@ components:
 
         parameters and source specific properties.'
       oneOf:
-      - $ref: '#/components/schemas/DataMappingFromCSV'
       - $ref: '#/components/schemas/DataMappingFromIngress'
-      - $ref: '#/components/schemas/DataMappingFromDataSet'
       - $ref: '#/components/schemas/DataMappingFromCloudAppDataSet'
       - $ref: '#/components/schemas/DataMappingFromWarehouseDataSet'
       discriminator:
         propertyName: type
         mapping:
-          CSV: '#/components/schemas/DataMappingFromCSV'
           INGRESS: '#/components/schemas/DataMappingFromIngress'
-          DATASET: '#/components/schemas/DataMappingFromDataSet'
           DATASET_CLOUDAPP: '#/components/schemas/DataMappingFromCloudAppDataSet'
           DATASET_WAREHOUSE: '#/components/schemas/DataMappingFromWarehouseDataSet'
       example:
         type: DATASET_WAREHOUSE
         datasetId: tdi_dataset_00000000000000000000000000
-    DataMappingFromDataSet:
-      type: object
-      additionalProperties: false
-      description: Configuration for mapping from a TDI dataset.
-      properties:
-        type:
-          type: string
-          description: The source data type, which determines the source of the data
-            and the required configuration parameters.
-          enum:
-          - DATASET
-          default: DATASET
-          example: DATASET
-        datasetId:
-          type: string
-          description: The unique identifier of the TDI dataset to connect.
-          pattern: ^tdi_dataset_[0-7][0-9a-z]{25}$
-          example: tdi_dataset_00000000000000000000000000
-      required:
-      - type
-      - datasetId
     DataMappingToTypes:
       type: object
       description: 'Details of where to map data items to. Each data mapping to type
@@ -4744,8 +4715,8 @@ components:
           $ref: '#/components/schemas/DataMappingFromTypes'
       required:
       - mappingFrom
-      - displayName
       - mappingTo
+      - displayName
     DataMapping:
       type: object
       properties:
@@ -4794,12 +4765,12 @@ components:
             on each successful update.
           example: 3
       required:
-      - displayName
-      - id
-      - createdAt
-      - version
       - mappingTo
+      - createdAt
+      - displayName
       - updatedAt
+      - version
+      - id
       - mappingFrom
     DataMappingList:
       type: object
@@ -4868,12 +4839,12 @@ components:
           maximum: 1
           example: 0.82
       required:
-      - id
       - source
       - createdAt
+      - updatedAt
       - occurredAt
       - content
-      - updatedAt
+      - id
     RecallSummaryInfo:
       type: object
       description: A summary memory derived from conversations.
@@ -4924,12 +4895,12 @@ components:
           maximum: 1
           example: 0.78
       required:
-      - conversationId
-      - id
       - createdAt
-      - occurredAt
-      - content
       - updatedAt
+      - occurredAt
+      - conversationId
+      - content
+      - id
     SummaryCorePatch:
       type: object
       description: Core mutable properties for updating summary objects. All fields
@@ -5105,36 +5076,6 @@ components:
       - source
       - occurredAt
       - content
-    DataMappingFromCSV:
-      type: object
-      additionalProperties: false
-      description: Configuration for mapping from CSV column names provided directly
-        in the request.
-      properties:
-        type:
-          type: string
-          description: The source data type, which determines the source of the data
-            and the required configuration parameters.
-          enum:
-          - CSV
-          example: CSV
-        columns:
-          type: array
-          description: The list of CSV column names that serve as the source fields.
-          minItems: 1
-          maxItems: 100
-          items:
-            type: string
-            minLength: 1
-            maxLength: 256
-          example:
-          - first_name
-          - last_name
-          - email
-          - favorite_color
-      required:
-      - type
-      - columns
     DataMappingSuggestionToTypes:
       type: object
       description: Destination configuration for a suggested mapping request.
