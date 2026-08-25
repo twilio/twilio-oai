@@ -3432,7 +3432,7 @@
                         ]
                       },
                       "mappingFrom": {
-                        "type": "DATASET",
+                        "type": "DATASET_CLOUDAPP",
                         "datasetId": "tdi_dataset_00000000000000000000000000"
                       }
                     }
@@ -3465,7 +3465,7 @@
       "post": {
         "operationId": "CreateDataMapping",
         "summary": "Create a Data Mapping",
-        "description": "Create a new data mapping to connect an external data source to this Memory Store.\nFor DATASET types, validates that all mapped Trait Groups and traits exist\nand that dataset field data types match their respective mapped trait data types.",
+        "description": "Create a new data mapping to connect an external data source to this Memory Store.\nFor `DATASET_CLOUDAPP` and `DATASET_WAREHOUSE` types, validates that all mapped Trait Groups and traits exist\nand that dataset field data types match their respective mapped trait data types.",
         "tags": [
           "DataMapping"
         ],
@@ -3600,7 +3600,7 @@
           }
         ],
         "summary": "Update a Data Mapping",
-        "description": "Partially update a data mapping. Only the fields provided in the request body will be updated,\nincluding replacing the entire contents of the `mappings` array.\n\nFor DATASET types, validates that all mapped Trait Groups and traits exist\nand that dataset field data types match their respective mapped trait data types.",
+        "description": "Partially update a data mapping. Only the fields provided in the request body will be updated,\nincluding replacing the entire contents of the `mappings` array.\n\nFor `DATASET_CLOUDAPP` and `DATASET_WAREHOUSE` types, validates that all mapped Trait Groups and traits exist\nand that dataset field data types match their respective mapped trait data types.",
         "tags": [
           "DataMapping"
         ],
@@ -4651,9 +4651,9 @@
           }
         },
         "required": [
-          "id",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "id"
         ]
       },
       "SummaryCore": {
@@ -4736,10 +4736,10 @@
         "required": [
           "occurredAt",
           "id",
-          "createdAt",
-          "updatedAt",
           "content",
-          "conversationId"
+          "conversationId",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "Participant": {
@@ -4912,10 +4912,10 @@
                 }
               },
               "required": [
+                "channel",
                 "address",
-                "name",
                 "id",
-                "channel"
+                "name"
               ]
             }
           }
@@ -5406,11 +5406,11 @@
           }
         },
         "required": [
-          "displayName",
           "id",
+          "intelligenceServiceId",
           "status",
-          "version",
-          "intelligenceServiceId"
+          "displayName",
+          "version"
         ]
       },
       "ServiceList": {
@@ -5508,8 +5508,8 @@
           }
         },
         "required": [
-          "identifierConfigs",
           "version",
+          "identifierConfigs",
           "matchingRules"
         ]
       },
@@ -6006,10 +6006,8 @@
       },
       "DataMappingType": {
         "type": "string",
-        "description": "The type of data mapping defining how data flows into the Memory Store.\n`CSV` and `DATASET` are deprecated aliases being replaced by `INGRESS`,\n`DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` respectively.",
+        "description": "The type of data mapping defining how data flows into the Memory Store.",
         "enum": [
-          "CSV",
-          "DATASET",
           "INGRESS",
           "DATASET_CLOUDAPP",
           "DATASET_WAREHOUSE"
@@ -6021,13 +6019,7 @@
         "description": "Details of where to map data items from. Each data mapping from type has its own set of configuration\nparameters and source specific properties.",
         "oneOf": [
           {
-            "$ref": "#/components/schemas/DataMappingFromCSV"
-          },
-          {
             "$ref": "#/components/schemas/DataMappingFromIngress"
-          },
-          {
-            "$ref": "#/components/schemas/DataMappingFromDataSet"
           },
           {
             "$ref": "#/components/schemas/DataMappingFromCloudAppDataSet"
@@ -6039,9 +6031,7 @@
         "discriminator": {
           "propertyName": "type",
           "mapping": {
-            "CSV": "#/components/schemas/DataMappingFromCSV",
             "INGRESS": "#/components/schemas/DataMappingFromIngress",
-            "DATASET": "#/components/schemas/DataMappingFromDataSet",
             "DATASET_CLOUDAPP": "#/components/schemas/DataMappingFromCloudAppDataSet",
             "DATASET_WAREHOUSE": "#/components/schemas/DataMappingFromWarehouseDataSet"
           }
@@ -6050,32 +6040,6 @@
           "type": "DATASET_WAREHOUSE",
           "datasetId": "tdi_dataset_00000000000000000000000000"
         }
-      },
-      "DataMappingFromDataSet": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "Configuration for mapping from a TDI dataset.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
-            "enum": [
-              "DATASET"
-            ],
-            "default": "DATASET",
-            "example": "DATASET"
-          },
-          "datasetId": {
-            "type": "string",
-            "description": "The unique identifier of the TDI dataset to connect.",
-            "pattern": "^tdi_dataset_[0-7][0-9a-z]{25}$",
-            "example": "tdi_dataset_00000000000000000000000000"
-          }
-        },
-        "required": [
-          "type",
-          "datasetId"
-        ]
       },
       "DataMappingToTypes": {
         "type": "object",
@@ -6227,9 +6191,9 @@
           }
         },
         "required": [
-          "mappingFrom",
           "displayName",
-          "mappingTo"
+          "mappingTo",
+          "mappingFrom"
         ]
       },
       "DataMapping": {
@@ -6283,13 +6247,13 @@
           }
         },
         "required": [
-          "mappingTo",
+          "mappingFrom",
           "id",
           "displayName",
-          "version",
-          "mappingFrom",
           "createdAt",
-          "updatedAt"
+          "version",
+          "updatedAt",
+          "mappingTo"
         ]
       },
       "DataMappingList": {
@@ -6369,10 +6333,10 @@
         "required": [
           "occurredAt",
           "id",
-          "source",
+          "content",
           "createdAt",
-          "updatedAt",
-          "content"
+          "source",
+          "updatedAt"
         ]
       },
       "RecallSummaryInfo": {
@@ -6429,10 +6393,10 @@
         "required": [
           "occurredAt",
           "id",
-          "createdAt",
-          "updatedAt",
           "content",
-          "conversationId"
+          "conversationId",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "SummaryCorePatch": {
@@ -6644,44 +6608,8 @@
         },
         "required": [
           "occurredAt",
-          "source",
-          "content"
-        ]
-      },
-      "DataMappingFromCSV": {
-        "type": "object",
-        "additionalProperties": false,
-        "description": "Configuration for mapping from CSV column names provided directly in the request.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "The source data type, which determines the source of the data and the required configuration parameters.",
-            "enum": [
-              "CSV"
-            ],
-            "example": "CSV"
-          },
-          "columns": {
-            "type": "array",
-            "description": "The list of CSV column names that serve as the source fields.",
-            "minItems": 1,
-            "maxItems": 100,
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "example": [
-              "first_name",
-              "last_name",
-              "email",
-              "favorite_color"
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "columns"
+          "content",
+          "source"
         ]
       },
       "DataMappingSuggestionToTypes": {

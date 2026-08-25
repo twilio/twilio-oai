@@ -1,6 +1,27 @@
 twilio-oai changelog
 ====================
 
+[2026-08-25] Version 2.8.0
+--------------------------
+**Twiml**
+- Remove `<Assistant>` noun from `<Connect>` verb as part of the AI Assistants deprecation **(breaking change)**
+- Add `passports` attribute to `<Dial>` verb for SHAKEN/STIR passport passthrough
+
+**Destinations**
+- Minor updates (formatting, metadata)
+
+**Memory**
+- **Breaking change**: Removed the deprecated `CSV` and `DATASET` values from the `DataMappingType` enum. `INGRESS`, `DATASET_CLOUDAPP`, and `DATASET_WAREHOUSE` are the only valid values now.
+- Removed the `DataMappingFromCSV` and `DataMappingFromDataSet` schemas and their `oneOf`/discriminator entries on `DataMappingFromTypes`, along with the corresponding `CSV`/`DATASET` discriminator mapping keys.
+- Any caller still sending `type: CSV` or `type: DATASET` on `CreateDataMapping` or `UpdateDataMapping` (or filtering `ListDataMappings`/`ListDataMappingSuggestions` by those values) will get a 400.
+
+**Voice**
+- Added GET /v3/Transcriptions to list and filter transcriptions (status, sourceId, languageCode, createdAfter/createdBefore) with pageSize/pageToken pagination. createdAfter is inclusive and createdBefore exclusive. Returns 422 (error code 17535) when a sourceId's historical item count exceeds the service scan cap.
+
+**Webhooks**
+- Created Webhooks Config API with 7 new resources: SharedKeys, AuthProfiles, Settings, Rules, Operations, Tests, EdgeZones in /v1/Webhooks referencing webhooks-config downstream.
+
+
 [2026-08-13] Version 2.7.1
 --------------------------
 **Destinations**
