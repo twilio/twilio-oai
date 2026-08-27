@@ -1,6 +1,31 @@
 twilio-oai changelog
 ====================
 
+[2026-08-27] Version 2.8.1
+--------------------------
+**Conversations**
+- Restructured the `StartConversation` request body: removed the top-level `channel`, `from`, `to`, `content`, and `orchestratorPolicy` fields in favor of a `participants` roster plus a single dispatched `action` (`SEND_MESSAGE`, `START_FLOW`, or `CALL`) **(breaking change)**
+- Removed the `VOICE` value from the `start_conversation_channel` enum and dropped the `orchestratorPolicy`/`orchestratorPolicyAction` schemas; voice calls are now placed via the new `CALL` action and Studio Flow dispatch via the new `START_FLOW` action **(breaking change)**
+- Added AI agent calling support: a new `agentConnectConnectionId` on participants and an `AGENT_CONNECT` call handler that connects an answered call to an AI agent over ConversationRelay
+- Added `callSettings` (curated passthrough to Voice's `POST /Calls`) and per-conversation `configuration` overrides (`intelligenceConfigurationIds`, `statusCallbacks`) to `StartConversation`
+- Added `READ` to the `recipient_delivery_status` enum for channels that support read receipts (e.g. WhatsApp/RCS); `COMPLETED` is now deprecated
+
+**Messaging**
+- Removed the `whatsapp_template_enum_category` enum and the WhatsApp Template resource from the spec **(breaking change)**
+
+**Intelligence**
+- Minor updates (metadata only)
+
+**Knowledge**
+- Minor updates (metadata only)
+
+**Memory**
+- Minor updates (metadata only)
+
+**Numbers**
+- Minor updates (metadata only)
+
+
 [2026-08-25] Version 2.8.0
 --------------------------
 **Twiml**
