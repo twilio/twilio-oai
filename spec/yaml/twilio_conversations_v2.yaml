@@ -275,7 +275,6 @@ components:
       - id
       - conversationId
       - accountId
-      - name
       properties:
         id:
           type: string
@@ -291,6 +290,7 @@ components:
           example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         name:
           type: string
+          nullable: true
           description: Participant display name.
           example: Dana S.
         type:
@@ -794,16 +794,14 @@ components:
     conversations.v2.start_conversation_participant:
       type: object
       description: A party on the Conversation. The dispatched `action` refers to
-        Participants by `ref`.
+        Participants by `name`.
+      required:
+      - name
       properties:
-        ref:
-          type: string
-          description: Caller-assigned handle used by the action's `from` and `to`.
-            Request-scoped; not persisted.
-          example: customer
         name:
           type: string
-          description: Display name for this Participant.
+          description: Display name for this Participant, and the handle the action's
+            `from` and `to` select it by. Must be unique within the request.
           example: Alice
         type:
           $ref: '#/components/schemas/conversations.v2.participant_type'
@@ -827,7 +825,6 @@ components:
           items:
             $ref: '#/components/schemas/conversations.v2.start_conversation_address'
       example:
-        ref: customer
         name: Alice
         type: CUSTOMER
         addresses:
@@ -854,32 +851,21 @@ components:
         address: '+18005550100'
     conversations.v2.start_conversation_participant_selector:
       type: object
-      description: Points at one entry in `participants` by its `ref`.
+      description: Points at one entry in `participants` by its `name`.
       required:
-      - ref
+      - name
       properties:
-        ref:
+        name:
           type: string
-          description: The `ref` of a Participant declared in `participants`.
-          example: customer
+          description: The `name` of a Participant declared in `participants`.
+          example: Alice
       example:
-        ref: customer
+        name: Alice
     conversations.v2.start_conversation_configuration:
       type: object
       description: Per-Conversation overrides applied on top of the Configuration
         named by `configurationId`.
       properties:
-        intelligenceConfigurationIds:
-          type: array
-          description: A list of Conversational Intelligence configuration IDs to
-            apply to this Conversation.
-          maxItems: 5
-          uniqueItems: true
-          items:
-            type: string
-          example:
-          - agent1
-          - agent2
         statusCallbacks:
           type: array
           description: Webhook configurations for Conversation-level events on this
@@ -888,8 +874,6 @@ components:
           items:
             $ref: '#/components/schemas/conversations.v2.status_callback_config'
       example:
-        intelligenceConfigurationIds:
-        - agent1
         statusCallbacks:
         - url: https://webhook.example.com/conversation/status
           method: POST
@@ -1172,14 +1156,12 @@ components:
         configurationId: conv_configuration_00000000000000000000000000
         name: Order updates
         participants:
-        - ref: agent
-          name: Acme
+        - name: Acme
           type: AGENT
           addresses:
           - channel: SMS
             address: '+18005550100'
-        - ref: customer
-          name: Alice
+        - name: Alice
           type: CUSTOMER
           addresses:
           - channel: SMS
@@ -1841,6 +1823,7 @@ components:
       - RCS
       - WHATSAPP
       - CHAT
+      - VIDEO
       description: Channel type for a Communication address.
     conversations.v2.send_channel:
       type: string
@@ -3068,6 +3051,7 @@ paths:
                               - RCS
                               - WHATSAPP
                               - CHAT
+                              - VIDEO
                               description: Channel type for a Communication address.
                             address:
                               type: string
@@ -3889,6 +3873,8 @@ paths:
   /v2/Conversations/{ConversationId}/Actions/{ActionId}:
     servers:
     - url: https://conversations.twilio.com
+    x-twilio:
+      pathType: instance
     parameters:
     - name: ConversationId
       in: path
@@ -4070,7 +4056,6 @@ paths:
                       - id
                       - conversationId
                       - accountId
-                      - name
                       properties:
                         id:
                           type: string
@@ -4086,6 +4071,7 @@ paths:
                           example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                         name:
                           type: string
+                          nullable: true
                           description: Participant display name.
                           example: Dana S.
                         type:
@@ -4210,6 +4196,7 @@ paths:
                         - RCS
                         - WHATSAPP
                         - CHAT
+                        - VIDEO
                         description: Channel type for a Communication address.
                       address:
                         type: string
@@ -4226,7 +4213,6 @@ paths:
                 - id
                 - conversationId
                 - accountId
-                - name
                 properties:
                   id:
                     type: string
@@ -4242,6 +4228,7 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   name:
                     type: string
+                    nullable: true
                     description: Participant display name.
                     example: Dana S.
                   type:
@@ -4350,7 +4337,6 @@ paths:
                 - id
                 - conversationId
                 - accountId
-                - name
                 properties:
                   id:
                     type: string
@@ -4366,6 +4352,7 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   name:
                     type: string
+                    nullable: true
                     description: Participant display name.
                     example: Dana S.
                   type:
@@ -4475,6 +4462,7 @@ paths:
                         - RCS
                         - WHATSAPP
                         - CHAT
+                        - VIDEO
                         description: Channel type for a Communication address.
                       address:
                         type: string
@@ -4491,7 +4479,6 @@ paths:
                 - id
                 - conversationId
                 - accountId
-                - name
                 properties:
                   id:
                     type: string
@@ -4507,6 +4494,7 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   name:
                     type: string
+                    nullable: true
                     description: Participant display name.
                     example: Dana S.
                   type:
@@ -4776,6 +4764,7 @@ paths:
                       - RCS
                       - WHATSAPP
                       - CHAT
+                      - VIDEO
                       description: Channel type for a Communication address.
                     participantId:
                       type: string
@@ -4837,6 +4826,7 @@ paths:
                         - RCS
                         - WHATSAPP
                         - CHAT
+                        - VIDEO
                         description: Channel type for a Communication address.
                       participantId:
                         type: string

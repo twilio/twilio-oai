@@ -2253,6 +2253,113 @@
           }
         }
       },
+      "iam.v1.PostLoginActionUserContext": {
+        "type": "object",
+        "description": "Details about the user completing the Whitney auth_flow.checkpoint event that triggered this webhook",
+        "properties": {
+          "user_sid": {
+            "type": "string",
+            "description": "The Whitney user identifier"
+          },
+          "email_address": {
+            "type": "string",
+            "description": "The user's email address, used to resolve their Twilio unified user record"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "The user's phone number, if available"
+          },
+          "is_first_login": {
+            "type": "boolean",
+            "description": "Whether this is the user's first successful login"
+          }
+        }
+      },
+      "iam.v1.PostLoginActionRequestContext": {
+        "type": "object",
+        "description": "Request metadata for the Whitney auth_flow.checkpoint event, carried through for future blocklist/status-check use",
+        "properties": {
+          "ip_address": {
+            "type": "string",
+            "description": "The IP address the login request originated from"
+          },
+          "user_agent": {
+            "type": "string",
+            "description": "The User-Agent header from the login request"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Whitney's request identifier for the login attempt"
+          }
+        }
+      },
+      "iam.v1.PostLoginActionRequest": {
+        "type": "object",
+        "description": "The auth_flow.checkpoint webhook payload Whitney sends for a post-login action",
+        "required": [
+          "user_context"
+        ],
+        "properties": {
+          "event": {
+            "type": "string",
+            "description": "The Whitney event name (e.g. auth_flow.checkpoint)"
+          },
+          "account_sid": {
+            "type": "string",
+            "description": "The Twilio account SID associated with the login"
+          },
+          "node_id": {
+            "type": "string",
+            "description": "The Whitney auth flow node identifier for this action"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp (seconds) of the login event"
+          },
+          "user_context": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionUserContext"
+          },
+          "request_context": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionRequestContext"
+          }
+        }
+      },
+      "iam.v1.PostLoginActionTokenClaims": {
+        "type": "object",
+        "description": "Custom claims to attach to the id_token or access_token",
+        "properties": {
+          "custom_claims": {
+            "type": "object",
+            "description": "Map of custom claim name to value",
+            "additionalProperties": true
+          }
+        }
+      },
+      "iam.v1.PostLoginActionResponse": {
+        "type": "object",
+        "description": "The verdict UAS returns for a Whitney post-login action",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Whether the login should be allowed or denied",
+            "enum": [
+              "allow",
+              "deny"
+            ]
+          },
+          "id_token": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionTokenClaims"
+          },
+          "access_token": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionTokenClaims"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Machine-readable reason when action is deny"
+          }
+        }
+      },
       "iam.v1.SubaccountBatchWorkflowType": {
         "type": "string",
         "enum": [
