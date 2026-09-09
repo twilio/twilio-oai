@@ -355,8 +355,7 @@
         "required": [
           "id",
           "conversationId",
-          "accountId",
-          "name"
+          "accountId"
         ],
         "properties": {
           "id": {
@@ -376,6 +375,7 @@
           },
           "name": {
             "type": "string",
+            "nullable": true,
             "description": "Participant display name.",
             "example": "Dana S."
           },
@@ -951,16 +951,14 @@
       },
       "conversations.v2.start_conversation_participant": {
         "type": "object",
-        "description": "A party on the Conversation. The dispatched `action` refers to Participants by `ref`.",
+        "description": "A party on the Conversation. The dispatched `action` refers to Participants by `name`.",
+        "required": [
+          "name"
+        ],
         "properties": {
-          "ref": {
-            "type": "string",
-            "description": "Caller-assigned handle used by the action's `from` and `to`. Request-scoped; not persisted.",
-            "example": "customer"
-          },
           "name": {
             "type": "string",
-            "description": "Display name for this Participant.",
+            "description": "Display name for this Participant, and the handle the action's `from` and `to` select it by. Must be unique within the request.",
             "example": "Alice"
           },
           "type": {
@@ -973,12 +971,6 @@
             "description": "Profile to associate with this Participant, instead of resolving one from the addresses.",
             "example": "mem_profile_00000000000000000000000000"
           },
-          "agentConnectConnectionId": {
-            "type": "string",
-            "description": "Agent Connect connection backing an AI_AGENT Participant. Becomes a path segment of the relay endpoint, so it is constrained to an opaque handle.",
-            "pattern": "^[A-Za-z0-9_-]{1,128}$",
-            "example": "agent_connect_connection_XXXX"
-          },
           "addresses": {
             "type": "array",
             "description": "Channel addresses this Participant can be reached on.",
@@ -988,7 +980,6 @@
           }
         },
         "example": {
-          "ref": "customer",
           "name": "Alice",
           "type": "CUSTOMER",
           "addresses": [
@@ -1025,38 +1016,25 @@
       },
       "conversations.v2.start_conversation_participant_selector": {
         "type": "object",
-        "description": "Points at one entry in `participants` by its `ref`.",
+        "description": "Points at one entry in `participants` by its `name`.",
         "required": [
-          "ref"
+          "name"
         ],
         "properties": {
-          "ref": {
+          "name": {
             "type": "string",
-            "description": "The `ref` of a Participant declared in `participants`.",
-            "example": "customer"
+            "description": "The `name` of a Participant declared in `participants`.",
+            "example": "Alice"
           }
         },
         "example": {
-          "ref": "customer"
+          "name": "Alice"
         }
       },
       "conversations.v2.start_conversation_configuration": {
         "type": "object",
         "description": "Per-Conversation overrides applied on top of the Configuration named by `configurationId`.",
         "properties": {
-          "intelligenceConfigurationIds": {
-            "type": "array",
-            "description": "A list of Conversational Intelligence configuration IDs to apply to this Conversation.",
-            "maxItems": 5,
-            "uniqueItems": true,
-            "items": {
-              "type": "string"
-            },
-            "example": [
-              "agent1",
-              "agent2"
-            ]
-          },
           "statusCallbacks": {
             "type": "array",
             "description": "Webhook configurations for Conversation-level events on this Conversation.",
@@ -1067,9 +1045,6 @@
           }
         },
         "example": {
-          "intelligenceConfigurationIds": [
-            "agent1"
-          ],
           "statusCallbacks": [
             {
               "url": "https://webhook.example.com/conversation/status",
@@ -1238,7 +1213,8 @@
           "type": "CALL",
           "payload": {
             "handler": {
-              "type": "AGENT_CONNECT"
+              "type": "AGENT_CONNECT",
+              "relayUrl": "wss://example.ngrok.io/agent_connect_connection_XXXX"
             }
           }
         }
@@ -1252,7 +1228,7 @@
         "properties": {
           "handler": {
             "$ref": "#/components/schemas/conversations.v2.agent_connect_handler",
-            "description": "Where the answered call's instructions come from. Requires an `agentConnectConnectionId` on the sending Participant."
+            "description": "Where the answered call's instructions come from."
           },
           "from": {
             "$ref": "#/components/schemas/conversations.v2.start_conversation_participant_selector",
@@ -1277,6 +1253,7 @@
         "example": {
           "handler": {
             "type": "AGENT_CONNECT",
+            "relayUrl": "wss://example.ngrok.io/agent_connect_connection_XXXX",
             "greeting": {
               "text": "Hi, calling about your order."
             }
@@ -1285,9 +1262,10 @@
       },
       "conversations.v2.agent_connect_handler": {
         "type": "object",
-        "description": "Connects the answered call to an AI agent over ConversationRelay. The agent's identity comes from the sending Participant's `agentConnectConnectionId`; this carries session settings only.",
+        "description": "Connects the answered call to an AI agent over ConversationRelay.",
         "required": [
-          "type"
+          "type",
+          "relayUrl"
         ],
         "properties": {
           "type": {
@@ -1304,7 +1282,7 @@
           },
           "relayUrl": {
             "type": "string",
-            "description": "Relay endpoint for the answered call. When set, this full URL is used instead of the configured default.",
+            "description": "Relay endpoint the answered call connects to. This is what addresses the agent, so it is supplied whole.",
             "pattern": "^wss://.+",
             "maxLength": 2048,
             "example": "wss://example.ngrok.io/agent_connect_connection_XXXX"
@@ -1315,6 +1293,7 @@
         },
         "example": {
           "type": "AGENT_CONNECT",
+          "relayUrl": "wss://example.ngrok.io/agent_connect_connection_XXXX",
           "greeting": {
             "text": "Hi, calling about your order."
           }
@@ -1445,7 +1424,6 @@
           "name": "Order updates",
           "participants": [
             {
-              "ref": "agent",
               "name": "Acme",
               "type": "AGENT",
               "addresses": [
@@ -1456,7 +1434,6 @@
               ]
             },
             {
-              "ref": "customer",
               "name": "Alice",
               "type": "CUSTOMER",
               "addresses": [
@@ -2008,6 +1985,7 @@
         "properties": {
           "statusCallbacks": {
             "type": "array",
+            "nullable": true,
             "description": "List of webhook configurations for this conversation. Send an empty array to clear all callbacks and stop webhook delivery.",
             "maxItems": 20,
             "items": {
@@ -2200,7 +2178,8 @@
           "SMS",
           "RCS",
           "WHATSAPP",
-          "CHAT"
+          "CHAT",
+          "VIDEO"
         ],
         "description": "Channel type for a Communication address."
       },
@@ -3298,6 +3277,263 @@
           }
         }
       },
+      "patch": {
+        "summary": "Patch Configuration",
+        "description": "Partially update a Configuration. Only fields present in the request body are changed; omitted fields are left untouched. For `channelSettings`, an omitted channel key is preserved, a channel key mapped to a value replaces that channel's settings, and a channel key explicitly mapped to `null` removes it.",
+        "tags": [
+          "ConversationsV2Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ],
+        "operationId": "PatchConfiguration",
+        "requestBody": {
+          "description": "The partial configuration update.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "A human-readable name for the configuration. Limited to 32 characters.",
+                    "maxLength": 32,
+                    "pattern": "^[a-zA-Z0-9-_ ]+$",
+                    "example": "My Support Config"
+                  },
+                  "description": {
+                    "type": "string",
+                    "nullable": true,
+                    "maxLength": 512,
+                    "description": "Human-readable description for the configuration.",
+                    "example": "Updated Customer Support Configuration"
+                  },
+                  "conversationGroupingType": {
+                    "type": "string",
+                    "enum": [
+                      "GROUP_BY_PROFILE",
+                      "GROUP_BY_PARTICIPANT_ADDRESSES",
+                      "GROUP_BY_PARTICIPANT_ADDRESSES_AND_CHANNEL_TYPE"
+                    ],
+                    "description": "Type of Conversation grouping strategy:\n- `GROUP_BY_PROFILE`: Groups Communications by resolved Profile from the Memory Store.\n  A Profile is looked up or created for `CUSTOMER` Participant types. All Communications from the same Profile are in the same Conversation, regardless of address or channel.\n- `GROUP_BY_PARTICIPANT_ADDRESSES`: Groups Communications by Participant addresses across all channels.\n  A customer using +18005550100 will be in the same Conversation whether they contact by SMS, WhatsApp, or RCS.\n- `GROUP_BY_PARTICIPANT_ADDRESSES_AND_CHANNEL_TYPE`: Groups Communications by both Participant addresses AND channel.\n  A customer using +18005550100 by SMS will be in a different Conversation than the same customer by Voice.\n",
+                    "example": "GROUP_BY_PROFILE"
+                  },
+                  "memoryStoreId": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "The Memory Store ID for profile resolution.",
+                    "example": "memora_service_123"
+                  },
+                  "channelSettings": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object",
+                      "nullable": true,
+                      "properties": {
+                        "statusTimeouts": {
+                          "type": "object",
+                          "properties": {
+                            "inactive": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "example": 10
+                            },
+                            "closed": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "example": 15
+                            }
+                          }
+                        },
+                        "captureRules": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "required": [
+                              "from",
+                              "to"
+                            ],
+                            "properties": {
+                              "from": {
+                                "type": "string",
+                                "example": "+18005550100"
+                              },
+                              "to": {
+                                "type": "string",
+                                "example": "+18005550101"
+                              },
+                              "metadata": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "description": "Channel-specific settings to merge onto the existing channelSettings map. A channel key mapped to a value replaces that channel's settings; a channel key explicitly mapped to null removes it; an omitted channel key is left untouched."
+                  },
+                  "statusCallbacks": {
+                    "type": "array",
+                    "nullable": true,
+                    "maxItems": 2,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "url"
+                      ],
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "method": {
+                          "type": "string",
+                          "default": "POST",
+                          "enum": [
+                            "POST",
+                            "GET"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "intelligenceConfigurationIds": {
+                    "type": "array",
+                    "nullable": true,
+                    "description": "A list of Conversational Intelligence configuration IDs.",
+                    "maxItems": 5,
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "agent1",
+                      "agent2"
+                    ]
+                  },
+                  "memoryExtractionEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Whether memory extraction is enabled for conversations under this configuration.",
+                    "example": false
+                  },
+                  "conversationsV1Bridge": {
+                    "nullable": true,
+                    "description": "Configuration for Conversations V1 bridge. When set, messaging channels route through Conversations V1. Use this to integrate with existing Conversations V1 applications.",
+                    "type": "object",
+                    "required": [
+                      "serviceId"
+                    ],
+                    "properties": {
+                      "serviceId": {
+                        "type": "string",
+                        "description": "The Conversations V1 Service SID (IS prefix). One configuration per V1 Service SID.",
+                        "pattern": "^IS[0-9a-f]{32}$",
+                        "example": "IS00000000000000000000000000000000"
+                      }
+                    },
+                    "example": {
+                      "serviceId": "IS00000000000000000000000000000000"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted - Operation created for asynchronous processing",
+            "headers": {
+              "Operation-Id": {
+                "description": "Unique identifier for the long-running operation",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Retry-After": {
+                "description": "Suggested number of seconds before polling operation status",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              },
+              "Location": {
+                "description": "URI of the operation status endpoint",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Slim response for an accepted long-running operation.",
+                  "additionalProperties": true,
+                  "required": [
+                    "statusUrl"
+                  ],
+                  "properties": {
+                    "statusUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "URL to poll for operation status.",
+                      "example": "https://conversations.twilio.com/v2/ControlPlane/Operations/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+                    },
+                    "related": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      },
+                      "nullable": true,
+                      "description": "Named resource identifiers associated with this operation. Keys depend on the operation type:\n- config-create, config-update, config-delete: configurationId\n- conversation-delete: conversationId\n",
+                      "example": {
+                        "configurationId": "cfg_configuration_01h9d8r0vte3hz8tykdj329t7r"
+                      }
+                    }
+                  },
+                  "example": {
+                    "statusUrl": "https://conversations.twilio.com/v2/ControlPlane/Operations/proc_job_01h9d8r0vte3hz8tykdj329t7r",
+                    "related": {
+                      "configurationId": "cfg_configuration_01h9d8r0vte3hz8tykdj329t7r"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          }
+        }
+      },
       "delete": {
         "summary": "Delete Configuration",
         "description": "Delete a Configuration",
@@ -3747,7 +3983,8 @@
                                   "SMS",
                                   "RCS",
                                   "WHATSAPP",
-                                  "CHAT"
+                                  "CHAT",
+                                  "VIDEO"
                                 ],
                                 "description": "Channel type for a Communication address."
                               },
@@ -4419,6 +4656,7 @@
                 "properties": {
                   "name": {
                     "type": "string",
+                    "nullable": true,
                     "description": "The name of the Conversation.",
                     "example": "Support Chat"
                   },
@@ -4437,6 +4675,7 @@
                     "properties": {
                       "statusCallbacks": {
                         "type": "array",
+                        "nullable": true,
                         "description": "List of webhook configurations for this conversation. Send an empty array to clear all callbacks and stop webhook delivery.",
                         "maxItems": 20,
                         "items": {
@@ -4806,6 +5045,9 @@
           "url": "https://conversations.twilio.com"
         }
       ],
+      "x-twilio": {
+        "pathType": "instance"
+      },
       "parameters": [
         {
           "name": "ConversationId",
@@ -5033,8 +5275,7 @@
                         "required": [
                           "id",
                           "conversationId",
-                          "accountId",
-                          "name"
+                          "accountId"
                         ],
                         "properties": {
                           "id": {
@@ -5054,6 +5295,7 @@
                           },
                           "name": {
                             "type": "string",
+                            "nullable": true,
                             "description": "Participant display name.",
                             "example": "Dana S."
                           },
@@ -5208,7 +5450,8 @@
                             "SMS",
                             "RCS",
                             "WHATSAPP",
-                            "CHAT"
+                            "CHAT",
+                            "VIDEO"
                           ],
                           "description": "Channel type for a Communication address."
                         },
@@ -5236,8 +5479,7 @@
                   "required": [
                     "id",
                     "conversationId",
-                    "accountId",
-                    "name"
+                    "accountId"
                   ],
                   "properties": {
                     "id": {
@@ -5257,6 +5499,7 @@
                     },
                     "name": {
                       "type": "string",
+                      "nullable": true,
                       "description": "Participant display name.",
                       "example": "Dana S."
                     },
@@ -5396,8 +5639,7 @@
                   "required": [
                     "id",
                     "conversationId",
-                    "accountId",
-                    "name"
+                    "accountId"
                   ],
                   "properties": {
                     "id": {
@@ -5417,6 +5659,7 @@
                     },
                     "name": {
                       "type": "string",
+                      "nullable": true,
                       "description": "Participant display name.",
                       "example": "Dana S."
                     },
@@ -5547,7 +5790,8 @@
                             "SMS",
                             "RCS",
                             "WHATSAPP",
-                            "CHAT"
+                            "CHAT",
+                            "VIDEO"
                           ],
                           "description": "Channel type for a Communication address."
                         },
@@ -5575,8 +5819,7 @@
                   "required": [
                     "id",
                     "conversationId",
-                    "accountId",
-                    "name"
+                    "accountId"
                   ],
                   "properties": {
                     "id": {
@@ -5596,6 +5839,7 @@
                     },
                     "name": {
                       "type": "string",
+                      "nullable": true,
                       "description": "Participant display name.",
                       "example": "Dana S."
                     },
@@ -5955,7 +6199,8 @@
                           "SMS",
                           "RCS",
                           "WHATSAPP",
-                          "CHAT"
+                          "CHAT",
+                          "VIDEO"
                         ],
                         "description": "Channel type for a Communication address."
                       },
@@ -6045,7 +6290,8 @@
                             "SMS",
                             "RCS",
                             "WHATSAPP",
-                            "CHAT"
+                            "CHAT",
+                            "VIDEO"
                           ],
                           "description": "Channel type for a Communication address."
                         },

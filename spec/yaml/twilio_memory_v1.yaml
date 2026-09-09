@@ -17,6 +17,20 @@ info:
 servers:
 - url: https://memory.twilio.com
 tags:
+- name: TraitExtractionStrategies
+  description: 'A Trait Extraction Strategy lists the traits to infer from a conversation,
+    each with optional free-text instructions telling the extractor how to infer it.
+    Use it to capture durable profile facts that the default extraction behaviour
+    does not cover.
+
+
+    Each strategy names the Memory Store whose Trait Registry its definitions resolve
+    against, so every definition in one strategy targets the same store. Trait keys
+    are unique within a strategy rather than globally, so two strategies may cover
+    the same trait with different instructions and a conversation configuration picks
+    one.
+
+    '
 - name: Store
   description: "The Memory Store is the parent container for all Conversation Memory\
     \ data. Profiles, identifiers, traits, observations, and summaries all live inside\
@@ -3396,12 +3410,12 @@ components:
           description: The timestamp when the summary was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
+      - content
+      - id
       - updatedAt
       - occurredAt
-      - content
-      - createdAt
-      - id
       - conversationId
+      - createdAt
     Participant:
       type: object
       required:
@@ -3544,8 +3558,8 @@ components:
                 - COMPLETED
                 - FAILED
             required:
-            - name
             - channel
+            - name
             - id
             - address
       required:
@@ -3968,11 +3982,11 @@ components:
             on each successful update.
           example: 3
       required:
-      - status
-      - intelligenceServiceId
       - id
+      - intelligenceServiceId
       - version
       - displayName
+      - status
     ServiceList:
       type: object
       additionalProperties: false
@@ -4072,9 +4086,9 @@ components:
             Incremented on each successful update.
           example: 3
       required:
-      - matchingRules
-      - version
       - identifierConfigs
+      - version
+      - matchingRules
     IdentifierConfig:
       type: object
       additionalProperties: false
@@ -4321,8 +4335,8 @@ components:
             on each successful update.
           example: 3
       required:
-      - version
       - displayName
+      - version
     TraitGroupRequest:
       type: object
       additionalProperties: false
@@ -4714,9 +4728,9 @@ components:
         mappingFrom:
           $ref: '#/components/schemas/DataMappingFromTypes'
       required:
+      - displayName
       - mappingTo
       - mappingFrom
-      - displayName
     DataMapping:
       type: object
       properties:
@@ -4765,11 +4779,11 @@ components:
             on each successful update.
           example: 3
       required:
-      - mappingFrom
+      - id
       - updatedAt
       - mappingTo
       - createdAt
-      - id
+      - mappingFrom
       - version
       - displayName
     DataMappingList:
@@ -4839,12 +4853,12 @@ components:
           maximum: 1
           example: 0.82
       required:
-      - source
+      - content
+      - id
       - updatedAt
       - occurredAt
-      - content
       - createdAt
-      - id
+      - source
     RecallSummaryInfo:
       type: object
       description: A summary memory derived from conversations.
@@ -4895,12 +4909,12 @@ components:
           maximum: 1
           example: 0.78
       required:
+      - content
+      - id
       - updatedAt
       - occurredAt
-      - content
-      - createdAt
-      - id
       - conversationId
+      - createdAt
     SummaryCorePatch:
       type: object
       description: Core mutable properties for updating summary objects. All fields
@@ -5304,6 +5318,207 @@ components:
       required:
       - type
       - datasetId
+    TraitExtractionDefinition:
+      type: object
+      additionalProperties: false
+      description: 'One trait to infer, and how. Trait keys are unique within a strategy,
+        so two strategies may both
+
+        cover the same trait with different instructions.'
+      properties:
+        traitGroup:
+          type: string
+          description: The name of the Trait Group containing the trait to infer.
+          minLength: 1
+          maxLength: 64
+          pattern: ^[a-zA-Z0-9_\-\.]+$
+          example: Contact
+        traitName:
+          type: string
+          description: The name of the trait within the Trait Group to infer. Must
+            be 1-128 characters, camelCase (start with a lowercase letter, followed
+            by letters and numbers only).
+          minLength: 1
+          maxLength: 128
+          pattern: ^[a-z][a-zA-Z0-9]*$
+          example: email
+        instructions:
+          type: string
+          description: Free-text guidance telling the extractor how to infer this
+            trait.
+          minLength: 1
+          maxLength: 1024
+          example: Only set this when the customer states the value explicitly.
+      required:
+      - traitGroup
+      - traitName
+    TraitExtractionStrategyName:
+      type: string
+      description: Unique, immutable name identifying a Trait Extraction Strategy
+        within the account.
+      minLength: 1
+      maxLength: 64
+      pattern: ^[a-zA-Z][a-zA-Z0-9\-.]*$
+      example: retail-support-traits
+    TraitExtractionStrategyCore:
+      type: object
+      description: 'Mutable fields of a Trait Extraction Strategy. Used directly as
+        the PATCH request body
+
+        (all fields optional). Composed into CreateTraitExtractionStrategyInput via
+        allOf.
+
+        `displayName` and `storeId` are deliberately absent because they are immutable
+        after creation:
+
+        re-pointing a strategy at a different Memory Store would orphan every definition
+        it holds.'
+      properties:
+        description:
+          type: string
+          description: A human readable description of this strategy. May be empty.
+          maxLength: 1024
+          example: Traits inferred from retail support conversations.
+        isEnabled:
+          type: boolean
+          description: 'Flag indicating whether the strategy is active. When false,
+            conversation configurations that
+
+            reference it fall back to the default extraction behaviour.'
+          default: true
+          example: true
+        definitions:
+          type: array
+          description: The traits this strategy infers. Replaces the existing list
+            on update.
+          maxItems: 25
+          items:
+            $ref: '#/components/schemas/TraitExtractionDefinition'
+    CreateTraitExtractionStrategyInput:
+      type: object
+      description: 'Payload for creating a Trait Extraction Strategy. `displayName`
+        must be unique within the account
+
+        for this resource type and cannot be changed afterwards.'
+      properties:
+        description:
+          type: string
+          description: A human readable description of this strategy. May be empty.
+          maxLength: 1024
+          example: Traits inferred from retail support conversations.
+        isEnabled:
+          type: boolean
+          description: 'Flag indicating whether the strategy is active. When false,
+            conversation configurations that
+
+            reference it fall back to the default extraction behaviour.'
+          default: true
+          example: true
+        definitions:
+          type: array
+          description: The traits this strategy infers. Replaces the existing list
+            on update.
+          maxItems: 25
+          items:
+            $ref: '#/components/schemas/TraitExtractionDefinition'
+        displayName:
+          $ref: '#/components/schemas/TraitExtractionStrategyName'
+        storeId:
+          type: string
+          description: 'The Memory Store whose Trait Registry every definition in
+            this strategy resolves against.
+
+            The store is a property of the strategy, not of an individual definition,
+            and is
+
+            immutable after creation.'
+          pattern: ^mem_store_[0-7][0-9a-z]{25}$
+          example: mem_store_00000000000000000000000000
+      required:
+      - displayName
+      - storeId
+    TraitExtractionStrategy:
+      type: object
+      description: 'A Trait Extraction Strategy lists the traits to infer from a conversation
+        and how to infer them.
+
+        It is account scoped and names the Memory Store its definitions resolve against.'
+      properties:
+        description:
+          type: string
+          description: A human readable description of this strategy. May be empty.
+          maxLength: 1024
+          example: Traits inferred from retail support conversations.
+        isEnabled:
+          type: boolean
+          description: 'Flag indicating whether the strategy is active. When false,
+            conversation configurations that
+
+            reference it fall back to the default extraction behaviour.'
+          default: true
+          example: true
+        definitions:
+          type: array
+          description: The traits this strategy infers. Replaces the existing list
+            on update.
+          maxItems: 25
+          items:
+            $ref: '#/components/schemas/TraitExtractionDefinition'
+        displayName:
+          $ref: '#/components/schemas/TraitExtractionStrategyName'
+        storeId:
+          type: string
+          description: 'The Memory Store whose Trait Registry every definition in
+            this strategy resolves against.
+
+            The store is a property of the strategy, not of an individual definition,
+            and is
+
+            immutable after creation.'
+          pattern: ^mem_store_[0-7][0-9a-z]{25}$
+          example: mem_store_00000000000000000000000000
+        id:
+          type: string
+          description: The unique identifier for the Trait Extraction Strategy.
+          pattern: ^mem_traitextraction_[0-7][0-9a-z]{25}$
+          example: mem_traitextraction_00000000000000000000000000
+        createdAt:
+          type: string
+          format: date-time
+          description: The ISO 8601 timestamp when the strategy was created.
+          example: '2026-01-15T10:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: The ISO 8601 timestamp when the strategy was last updated.
+          example: '2026-01-15T11:45:00Z'
+        version:
+          type: integer
+          minimum: 1
+          description: The current version number of the strategy. Incremented on
+            each successful update.
+          example: 3
+      required:
+      - id
+      - updatedAt
+      - storeId
+      - createdAt
+      - version
+      - displayName
+    TraitExtractionStrategyList:
+      type: object
+      additionalProperties: false
+      description: A page of Trait Extraction Strategies belonging to the Twilio account.
+      properties:
+        traitExtractionStrategies:
+          type: array
+          maxItems: 25
+          items:
+            $ref: '#/components/schemas/TraitExtractionStrategy'
+          description: List of Trait Extraction Strategies associated with the Twilio
+            account.
+        meta:
+          $ref: '#/components/schemas/Meta'
   parameters:
     PageSize:
       name: pageSize
@@ -5513,6 +5728,16 @@ components:
         type: string
         pattern: ^mem_mapsuggestion_[0-7][0-9a-z]{25}$
         example: mem_mapsuggestion_00000000000000000000000000
+    TraitStrategyId:
+      name: traitStrategyId
+      in: path
+      required: true
+      description: A unique Trait Extraction Strategy ID using Twilio Type ID (TTID)
+        format
+      schema:
+        type: string
+        pattern: ^mem_traitextraction_[0-7][0-9a-z]{25}$
+        example: mem_traitextraction_00000000000000000000000000
   responses:
     BadRequest:
       description: Bad Request
