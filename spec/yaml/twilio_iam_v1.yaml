@@ -302,6 +302,172 @@ components:
           type: string
           format: date-time
           description: Creation date of the organization
+    iam.v1.OrganizationToJoin:
+      type: object
+      properties:
+        organizationSid:
+          pattern: OR[0-9a-f]{32}
+          type: string
+          format: OrganizationSid
+          example: OR33f4f3aa6fffe840d000f8ef22e883db
+          description: Unique Twilio organization sid
+        name:
+          type: string
+          description: Friendly name of the organization
+        ownerEmail:
+          type: string
+          description: Email address of the organization owner
+        domainVerified:
+          type: boolean
+          description: Whether the organization has verified the domain
+    iam.v1.RequestToJoinOrg:
+      type: object
+      properties:
+        notificationSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^NF[0-9a-fA-F]{32}$
+        email:
+          type: string
+          maxLength: 160
+          minLength: 2
+          format: email
+          description: Email address of the requesting user
+        firstName:
+          type: string
+          maxLength: 160
+          minLength: 2
+          description: First name of the requesting user
+        lastName:
+          type: string
+          maxLength: 160
+          minLength: 2
+          description: Last name of the requesting user
+        dateCreated:
+          type: string
+          format: date-time
+          description: Date the join request was created
+        scope:
+          type: string
+          description: "The SID of the entity requested to join (OR\u2026, AC\u2026\
+            , etc)"
+        scopeType:
+          type: string
+          description: Type of the scope entity for the requested role
+          enum:
+          - organization
+          - account
+          - subaccount
+          - resource
+        scopeName:
+          type: string
+          description: Scope Name e.g. Account or Organization friendly name
+        roles:
+          type: array
+          description: The requested roles
+          items:
+            type: object
+            properties:
+              roleSid:
+                type: string
+                description: SID of the requested role
+                pattern: ^IX[0-9a-fA-F]{32}$
+                format: IamRoleSid
+              roleName:
+                type: string
+                description: Name of the requested role
+        status:
+          type: string
+          description: Display status of the join request (e.g. Active, Expired),
+            derived by the downstream service from the underlying notification's state
+            and expiry. Does not map 1:1 to the notification's internal status.
+    iam.v1.RequestToJoinOrgRequest:
+      type: object
+      required:
+      - organizationSid
+      - roleSids
+      properties:
+        organizationSid:
+          pattern: OR[0-9a-f]{32}
+          type: string
+          format: OrganizationSid
+          example: OR33f4f3aa6fffe840d000f8ef22e883db
+          description: Unique Twilio sid of the organization to request to join
+        roleSids:
+          type: array
+          description: SIDs of the requested roles
+          items:
+            type: string
+            pattern: ^IX[0-9a-fA-F]{32}$
+            format: IamRoleSid
+          example:
+          - IX8b69703c2a65ec199f061b0ae2974511
+    iam.v1.RequestToJoinOrgResponse:
+      type: object
+      properties:
+        notificationSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^NF[0-9a-fA-F]{32}$
+          description: SID of the created join-org request notification
+    iam.v1.RequestToJoinOrgSelf:
+      type: object
+      properties:
+        notificationSid:
+          type: string
+          minLength: 34
+          maxLength: 34
+          pattern: ^NF[0-9a-fA-F]{32}$
+        scope:
+          type: string
+          description: "The SID of the entity requested to join (OR\u2026, AC\u2026\
+            , etc)"
+        scopeType:
+          type: string
+          description: Type of the scope entity for the requested role
+          enum:
+          - organization
+          - account
+          - subaccount
+          - resource
+        scopeName:
+          type: string
+          description: Scope Name e.g. Account or Organization friendly name
+        roles:
+          type: array
+          description: The requested roles
+          items:
+            type: object
+            properties:
+              roleSid:
+                type: string
+                description: SID of the requested role
+                pattern: ^IX[0-9a-fA-F]{32}$
+                format: IamRoleSid
+              roleName:
+                type: string
+                description: Name of the requested role
+        dateCreated:
+          type: string
+          format: date-time
+          description: Date the join request was created
+        status:
+          type: string
+          description: Display status of the join request (e.g. Active, Expired, Declined,
+            Accepted), derived by the downstream service from the underlying notification's
+            state and expiry. Does not map 1:1 to the notification's internal status.
+    iam.v1.AcceptRequestToJoinOrgResponse:
+      type: object
+      properties:
+        executionSid:
+          type: string
+          pattern: WX[0-9a-f]{32}
+          format: WorkflowExecutionSid
+          example: WXe0c97ff86651669fefcd6cc4ecd96e9a
+          description: The SID of the workflow that will handle accepting the join
+            request
     iam.v1.OrganizationFeatures:
       type: object
       properties:
@@ -1732,6 +1898,125 @@ components:
           type: string
           description: The social identity provider to disconnect (e.g. google-oauth2,
             github, apple)
+    iam.v1.PostLoginActionUserContext:
+      type: object
+      description: Details about the user completing the Whitney auth_flow.checkpoint
+        event that triggered this webhook
+      properties:
+        user_id:
+          type: string
+          description: Whitney's own identifier for the user. This is not a Twilio
+            user SID - the Twilio user record is resolved by email instead
+        emails:
+          type: array
+          description: The user's email addresses. The first entry is used to resolve
+            their Twilio unified user record
+          items:
+            type: string
+        phones:
+          type: array
+          description: The user's phone numbers, if any are on file
+          items:
+            type: string
+        is_first_login:
+          type: boolean
+          description: Whether this is the user's first successful login
+    iam.v1.PostLoginActionRequestContext:
+      type: object
+      description: Request metadata for the Whitney auth_flow.checkpoint event, carried
+        through for future blocklist/status-check use
+      properties:
+        ip_address:
+          type: string
+          description: The IP address the login request originated from
+        user_agent:
+          type: string
+          description: The User-Agent header from the login request
+        request_id:
+          type: string
+          description: Whitney's request identifier for the login attempt
+    iam.v1.PostLoginActionOAuthContext:
+      type: object
+      description: Details of the OAuth authorization request the user is logging
+        in for
+      properties:
+        client_id:
+          type: string
+          description: The OAuth client the user is authenticating to
+        scope:
+          type: string
+          description: The space-delimited scopes requested by the client
+        authorization_details:
+          type: string
+          description: RFC 9396 authorization_details sent with the authorization
+            request, if any
+    iam.v1.PostLoginActionRequest:
+      type: object
+      description: The auth_flow.checkpoint webhook payload Whitney sends for a post-login
+        action
+      required:
+      - user_context
+      properties:
+        version:
+          type: string
+          description: The version of the Whitney webhook payload contract
+        event:
+          type: string
+          description: The Whitney event name (e.g. auth_flow.checkpoint)
+        account_sid:
+          type: string
+          description: The Twilio account SID associated with the login
+        node_id:
+          type: string
+          description: The Whitney auth flow node identifier for this action
+        action_id:
+          type: string
+          description: Whitney's identifier for this action invocation
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp (seconds) of the login event
+        oauth:
+          $ref: '#/components/schemas/iam.v1.PostLoginActionOAuthContext'
+        acr:
+          type: string
+          description: The authentication context class reference the login satisfied
+        completed_factors:
+          type: array
+          description: The authentication factors the user completed, as RFC 8176
+            authentication method reference values (e.g. pwd, otp, mfa)
+          items:
+            type: string
+        user_context:
+          $ref: '#/components/schemas/iam.v1.PostLoginActionUserContext'
+        request_context:
+          $ref: '#/components/schemas/iam.v1.PostLoginActionRequestContext'
+    iam.v1.PostLoginActionTokenClaims:
+      type: object
+      description: Custom claims to attach to the id_token or access_token
+      properties:
+        custom_claims:
+          type: object
+          description: Map of custom claim name to value
+          additionalProperties: true
+    iam.v1.PostLoginActionResponse:
+      type: object
+      description: The verdict UAS returns for a Whitney post-login action
+      properties:
+        action:
+          type: string
+          description: Whether the login should be allowed or denied
+          enum:
+          - allow
+          - deny
+        id_token:
+          $ref: '#/components/schemas/iam.v1.PostLoginActionTokenClaims'
+        access_token:
+          $ref: '#/components/schemas/iam.v1.PostLoginActionTokenClaims'
+        reason:
+          type: string
+          description: The customer-facing message explaining why the login was denied.
+            Present only when action is deny
     iam.v1.SubaccountBatchWorkflowType:
       type: string
       enum:
