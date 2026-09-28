@@ -29,6 +29,8 @@ tags:
 - name: TwilioInsightsAsync
   description: Twilio Insights asynchronous QueryJobs resource (long-running query
     operations).
+- name: TwilioInsightsConfig
+  description: Twilio Insights Config API for custom measure field mapping registration.
 components:
   securitySchemes:
     basic_apikey_or_accountsid:
@@ -710,6 +712,196 @@ components:
             $ref: '#/components/schemas/QueryJobStatusResponse'
         meta:
           $ref: '#/components/schemas/PaginationMeta'
+    MappingCategory:
+      type: string
+      description: The type of field being registered. Only `MEASURE` is supported.
+      enum:
+      - MEASURE
+    SourceType:
+      type: string
+      description: "The kind of upstream entity that sources this field. The value\
+        \ names the\nentity type itself, so the identifier carried in `entityMetadata`\
+        \ is\nunambiguous without a lookup (`INTELLIGENCE_OPERATOR` carries an\n`operatorId`).\n\
+        \nAdding a new upstream means adding a value here plus its own\n`entityMetadata`\
+        \ variant \u2014 the request shape is unchanged.\n"
+      enum:
+      - INTELLIGENCE_OPERATOR
+    EntityMetadataBase:
+      type: object
+      description: 'Fields common to every `entityMetadata` variant. Exists so that
+        generated
+
+        clients get a stable base type: a variant added in a later revision
+
+        degrades to this rather than breaking deserialization.
+
+        '
+      required:
+      - sourceType
+      properties:
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+    IntelligenceOperatorEntityMetadata:
+      description: "Entity reference for a custom field sourced from a Conversational\n\
+        Intelligence operator. `field` is required \u2014 Intelligence is the source\
+        \ of\ntruth for resolving it against the operator's output schema.\n"
+      type: object
+      properties:
+        sourceType:
+          $ref: '#/components/schemas/SourceType'
+        operatorId:
+          type: string
+          description: "The Intelligence operator ID. Part of the owner check for\n\
+            idempotent upserts \u2014 a mismatch against the existing\nregistration's\
+            \ `(sourceType, operatorId)` returns `409`.\n"
+          example: OPxxxx
+        operatorName:
+          type: string
+          description: 'Optional, display-only name of the operator as supplied at
+
+            registration time. Not part of any uniqueness or validation logic.
+
+            '
+          example: Sentiment Analysis
+        field:
+          type: string
+          description: 'Annotation fieldPath key; generic identifier that determines
+            the
+
+            output-schema field. Resolved against the operator identified by
+
+            `operatorId`.
+
+            '
+          pattern: ^[A-Za-z0-9_.]+$
+          example: leadScore
+      required:
+      - sourceType
+      - operatorId
+      - field
+    EntityMetadata:
+      description: "Reference to the upstream entity that sources this field. Shape\
+        \ is\nselected by the `sourceType` discriminator and owned by that upstream,\
+        \ not\nby this API \u2014 adding a new upstream means adding a variant here,\
+        \ not\nchanging the request shape.\n\nEvery variant carries `sourceType` via\
+        \ `EntityMetadataBase`, so a client\nthat does not recognise a newly added\
+        \ variant can still deserialize the\ncommon fields rather than failing outright.\n\
+        \nThe owner check for idempotent upserts is scoped to `sourceType` plus that\n\
+        variant's own identity field (`operatorId` for `INTELLIGENCE_OPERATOR`); a\n\
+        mismatch against an existing registration's owner returns `409`.\n"
+      oneOf:
+      - $ref: '#/components/schemas/IntelligenceOperatorEntityMetadata'
+      discriminator:
+        propertyName: sourceType
+        mapping:
+          INTELLIGENCE_OPERATOR: '#/components/schemas/IntelligenceOperatorEntityMetadata'
+    CustomFieldMappingRequest:
+      type: object
+      description: 'Registration payload for a single custom field sourced from an
+        upstream
+
+        entity. The target account is supplied via the I-Twilio-Auth-Account
+
+        header, not this body.
+
+        '
+      required:
+      - category
+      - name
+      - entityMetadata
+      properties:
+        category:
+          $ref: '#/components/schemas/MappingCategory'
+        name:
+          type: string
+          description: "Customer-facing name for the field; becomes the ClickHouse\
+            \ Map key and\nthe platform field alias. Unique per account across every\n\
+            `sourceType` \u2014 the Map key namespace is account-global.\n"
+          pattern: ^[A-Za-z0-9_]+$
+          example: LeadScore
+        description:
+          type: string
+          description: "Optional, free-text description of this custom field mapping.\n\
+            Display-only \u2014 not part of any uniqueness check.\n"
+          maxLength: 150
+          example: Lead quality score derived from sentiment analysis
+        entityMetadata:
+          $ref: '#/components/schemas/EntityMetadata'
+    CustomFieldMappingResponse:
+      type: object
+      description: A registered custom field mapping.
+      required:
+      - category
+      - name
+      - entityMetadata
+      properties:
+        id:
+          type: string
+          description: TTID for conversation insights custom field mapping
+          example: convinsights_mapping_01m31967b7em08vh1pqgbam3mj
+        category:
+          $ref: '#/components/schemas/MappingCategory'
+        name:
+          type: string
+        description:
+          type: string
+          description: "Optional, free-text description supplied at registration time.\n\
+            Display-only \u2014 not part of any uniqueness check.\n"
+          maxLength: 150
+          example: Lead quality score derived from sentiment analysis
+        entityMetadata:
+          $ref: '#/components/schemas/EntityMetadata'
+        createdAt:
+          type: string
+          format: date-time
+          description: When the mapping was registered.
+          example: '2026-08-13T14:30:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the mapping was last materially modified in-place. Null
+            until the first update-in-place.
+          example: '2026-08-13T14:30:00Z'
+    CustomFieldMappingsList:
+      type: object
+      description: All custom field mappings registered for an account.
+      required:
+      - mappings
+      properties:
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomFieldMappingResponse'
+    CustomFieldCapacity:
+      type: object
+      description: 'Custom field mapping slot capacity for the account. Only the `measure`
+
+        category is supported for now; it is an empty object when custom
+
+        measures are not applicable for the account.
+
+        '
+      properties:
+        measure:
+          $ref: '#/components/schemas/CategoryCapacity'
+    CategoryCapacity:
+      type: object
+      description: 'Slots consumed and remaining for the measure category. Empty when
+        not
+
+        applicable for the account.
+
+        '
+      properties:
+        consumed:
+          type: integer
+          description: Number of custom field mapping slots already registered.
+          example: 1
+        remaining:
+          type: integer
+          description: Number of custom field mapping slots still available.
+          example: 2
 paths:
   /v3/InsightsDomains/Conversations/Query:
     servers:
@@ -1815,6 +2007,671 @@ paths:
                   nextToken: eyJwYWdlIjoyLCJxdWVyeSI6ImJvb2tzIn0=
         404:
           description: Resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        429:
+          description: Too Many requests (rate limit exceeded for request originating
+            from public API)
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of requests allowed in the time window
+              schema:
+                type: integer
+              example: 5
+            X-RateLimit-Remaining:
+              description: Number of requests remaining in the current time window
+              schema:
+                type: integer
+              example: 0
+            X-RateLimit-Reset:
+              description: Time in seconds until the rate limit resets
+              schema:
+                type: integer
+              example: 45
+            X-Rate-Limit-Limit:
+              $ref: '#/components/headers/X-Rate-Limit-Limit'
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/X-Rate-Limit-Remaining'
+            X-Rate-Limit-Config:
+              $ref: '#/components/headers/X-Rate-Limit-Config'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+      security:
+      - basic_apikey_or_accountsid: []
+  /v3/ControlPlane/ConversationInsights/CustomFieldMappings:
+    servers:
+    - url: https://insights.twilio.com
+    post:
+      summary: Register a custom measure field mapping
+      description: "Registers a custom field for an account under a category, sourced\
+        \ from an\nupstream entity \u2014 selected via the `entityMetadata.sourceType`\n\
+        discriminator, which determines the required shape of `entityMetadata`.\n\
+        Only the `MEASURE` category is supported for now.\n\nFor sources with a resolvable\
+        \ field-path concept, validates that\n`entityMetadata.field` resolves on the\
+        \ entity's latest active version by\ncalling that source's own resolution\
+        \ API (the Intelligence fetch-operator\nAPI for `sourceType: INTELLIGENCE_OPERATOR`),\
+        \ then performs an idempotent\nupsert keyed on (accountSid, category, name).\n\
+        `entityMetadata.sourceType` plus that variant's own identity field\n(`operatorId`\
+        \ for `INTELLIGENCE_OPERATOR`) must match the existing\nregistration's owner\
+        \ for the upsert to succeed \u2014 a mismatch returns\n`409`. Enforces the\
+        \ per-account, per-category capacity limit.\n"
+      tags:
+      - TwilioInsightsConfig
+      operationId: CreateCustomFieldMapping
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomFieldMappingRequest'
+            examples:
+              measure_from_intelligence_operator:
+                summary: Register a custom measure sourced from an Intelligence operator
+                value:
+                  category: MEASURE
+                  name: LeadScore
+                  description: Lead quality score derived from sentiment analysis
+                  entityMetadata:
+                    sourceType: INTELLIGENCE_OPERATOR
+                    operatorId: OPxxxx
+                    operatorName: Sentiment Analysis
+                    field: leadScore
+      responses:
+        '200':
+          description: The `name` was already registered for this operator and was
+            updated in-place.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomFieldMappingResponse'
+        '201':
+          description: Newly registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomFieldMappingResponse'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        401:
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        403:
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        '409':
+          description: 'The `name` is already registered for this account with different
+
+            attributes. Names are unique per account, so a name can only be
+
+            re-registered idempotently by the same owner.
+
+            '
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+              example:
+                code: 20052
+                message: The name 'LeadScore' is already registered to a different
+                  operator.
+                httpStatusCode: 409
+        429:
+          description: Too Many requests (rate limit exceeded for request originating
+            from public API)
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of requests allowed in the time window
+              schema:
+                type: integer
+              example: 5
+            X-RateLimit-Remaining:
+              description: Number of requests remaining in the current time window
+              schema:
+                type: integer
+              example: 0
+            X-RateLimit-Reset:
+              description: Time in seconds until the rate limit resets
+              schema:
+                type: integer
+              example: 45
+            X-Rate-Limit-Limit:
+              $ref: '#/components/headers/X-Rate-Limit-Limit'
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/X-Rate-Limit-Remaining'
+            X-Rate-Limit-Config:
+              $ref: '#/components/headers/X-Rate-Limit-Config'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+      security:
+      - basic_apikey_or_accountsid: []
+    get:
+      summary: Fetch custom measure field mappings for an account
+      description: 'Returns custom field mappings registered for the account.
+
+        '
+      tags:
+      - TwilioInsightsConfig
+      operationId: FetchCustomFieldMappings
+      responses:
+        '200':
+          description: Custom field mappings registered for the account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomFieldMappingsList'
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        401:
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        403:
+          description: Forbidden request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        429:
+          description: Too Many requests (rate limit exceeded for request originating
+            from public API)
+          headers:
+            X-RateLimit-Limit:
+              description: Maximum number of requests allowed in the time window
+              schema:
+                type: integer
+              example: 5
+            X-RateLimit-Remaining:
+              description: Number of requests remaining in the current time window
+              schema:
+                type: integer
+              example: 0
+            X-RateLimit-Reset:
+              description: Time in seconds until the rate limit resets
+              schema:
+                type: integer
+              example: 45
+            X-Rate-Limit-Limit:
+              $ref: '#/components/headers/X-Rate-Limit-Limit'
+            X-Rate-Limit-Remaining:
+              $ref: '#/components/headers/X-Rate-Limit-Remaining'
+            X-Rate-Limit-Config:
+              $ref: '#/components/headers/X-Rate-Limit-Config'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+      security:
+      - basic_apikey_or_accountsid: []
+  /v3/ControlPlane/ConversationInsights/CustomFieldMappings/Capacity:
+    servers:
+    - url: https://insights.twilio.com
+    get:
+      summary: Get custom field mapping capacity for an account
+      description: "Returns the account's custom measure slot capacity \u2014 slots\
+        \ consumed and\nremaining. Only the `measure` category is supported for now.\n"
+      tags:
+      - TwilioInsightsConfig
+      operationId: FetchCustomFieldMappingCapacity
+      responses:
+        '200':
+          description: Custom field mapping capacity for the account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomFieldCapacity'
+        401:
+          description: Unauthorized request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    description: Twilio-specific error code
+                    type: integer
+                    format: int32
+                  message:
+                    description: A human readable error message
+                    type: string
+                  httpStatusCode:
+                    description: HTTP response status code
+                    type: integer
+                    format: int32
+                  userError:
+                    description: Whether the error is a user error (true) or a system
+                      error (false)
+                    type: boolean
+                  params:
+                    description: A map of parameters related to the error, for example,
+                      a `params.twilioErrorCodeUrl` might hold a URL or link to additional
+                      information
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                - code
+                - message
+                - httpStatusCode
+        403:
+          description: Forbidden request
           content:
             application/json:
               schema:
