@@ -717,17 +717,17 @@ components:
               type: string
               description: The plaintext result produced by the Language Operator.
       required:
-      - dateCreated
       - id
-      - intelligenceConfiguration
-      - outputFormat
       - result
-      - metadata
       - referenceIds
+      - intelligenceConfiguration
       - accountId
       - conversationId
+      - metadata
       - operator
       - executionDetails
+      - outputFormat
+      - dateCreated
     JSONResult:
       title: JSON result
       type: object
@@ -782,17 +782,17 @@ components:
             on the Operator.
           additionalProperties: true
       required:
-      - dateCreated
       - id
-      - intelligenceConfiguration
-      - outputFormat
       - result
-      - metadata
       - referenceIds
+      - intelligenceConfiguration
       - accountId
       - conversationId
+      - metadata
       - operator
       - executionDetails
+      - outputFormat
+      - dateCreated
     ClassificationResult:
       title: Classification result
       type: object
@@ -851,17 +851,17 @@ components:
               type: string
               description: The predicted label assigned by the Language Operator.
       required:
-      - dateCreated
       - id
-      - intelligenceConfiguration
-      - outputFormat
       - result
-      - metadata
       - referenceIds
+      - intelligenceConfiguration
       - accountId
       - conversationId
+      - metadata
       - operator
       - executionDetails
+      - outputFormat
+      - dateCreated
     ExtractionResult:
       title: Extraction result
       type: object
@@ -934,17 +934,17 @@ components:
                     description: The label for the extracted entity (e.g., `PERSON`,
                       `LOCATION`).
       required:
-      - dateCreated
       - id
-      - intelligenceConfiguration
-      - outputFormat
       - result
-      - metadata
       - referenceIds
+      - intelligenceConfiguration
       - accountId
       - conversationId
+      - metadata
       - operator
       - executionDetails
+      - outputFormat
+      - dateCreated
     ResolvedContext:
       type: object
       description: The context that was actually used by the operator during execution
@@ -1822,8 +1822,8 @@ components:
           format: date-time
           description: Timestamp of when this version was created.
       required:
-      - dateCreated
       - status
+      - dateCreated
     CreateOrUpdateOperatorRequest:
       type: object
       properties:
@@ -1879,9 +1879,9 @@ components:
         parameters:
           $ref: '#/components/schemas/OperatorParameters'
       required:
-      - displayName
-      - prompt
       - outputFormat
+      - prompt
+      - displayName
     LanguageOperator:
       description: A Language Operator resource.
       type: object
@@ -2420,6 +2420,41 @@ components:
           allOf:
           - $ref: '#/components/schemas/ConversationTtid'
           description: The Conversation identifier to execute the Rule against.
+        rule:
+          $ref: '#/components/schemas/RuleOverride'
+    RuleOverride:
+      type: object
+      description: 'Optional per-execution overrides applied to the stored rule before
+        execution. When omitted, the stored rule executes unchanged. Only operators[].parameters
+        is overridable; any other field is not part of this schema and is ignored.
+
+        '
+      required:
+      - operators
+      properties:
+        operators:
+          type: array
+          description: 'Operator parameter overrides, merged key-by-key into the stored
+            operator''s parameters (override wins on matching keys; unspecified keys
+            retain their stored values). Operators in the stored rule not referenced
+            here execute with their stored parameters unchanged.
+
+            '
+          items:
+            $ref: '#/components/schemas/OperatorOverride'
+    OperatorOverride:
+      type: object
+      required:
+      - id
+      - parameters
+      properties:
+        id:
+          type: string
+          description: The operator id (as configured in the stored rule) to override.
+        parameters:
+          type: object
+          description: Parameter overrides merged into the stored operator's parameters.
+          additionalProperties: true
 servers:
 - url: https://intelligence.twilio.com
   description: Twilio Intelligence API
@@ -4629,8 +4664,8 @@ paths:
                     format: date-time
                     description: Timestamp of when this version was created.
                 required:
-                - dateCreated
                 - status
+                - dateCreated
               examples:
                 fetchOperatorVersionResponse:
                   $ref: '#/components/examples/LanguageOperatorVersionExample'
@@ -5896,10 +5931,12 @@ paths:
     post:
       tags:
       - RuleExecutions
-      summary: Manually queue a rule execution
+      summary: On-demand Rule execution
       description: 'Resolves the given configuration, rule, and conversation, derives
         the memoryStoreId from the conversation''s configuration. Then executes the
-        rule on the conversation.
+        rule on the conversation. Optionally, `rule.operators[]` can be provided to
+        override specific operator parameters for this execution only; the stored
+        rule configuration is not modified.
 
         '
       operationId: CreateRuleExecution
@@ -5930,13 +5967,19 @@ paths:
                   allOf:
                   - $ref: '#/components/schemas/ConversationTtid'
                   description: The Conversation identifier to execute the Rule against.
+                rule:
+                  $ref: '#/components/schemas/RuleOverride'
       responses:
         '202':
           description: Rule execution queued.
         '400':
           description: 'The request is malformed: the request body fails schema validation
             (a required field is missing, or a field does not match its expected pattern)
-            or the request body is not valid JSON.
+            or the request body is not valid JSON. For RuleExecutions creation with
+            `rule` overrides: `rule.operators` is missing, an operator `id` in `rule.operators`
+            does not exist in the stored rule, a parameter name is not defined by
+            the operator, a parameter value provided for an operator override is invalid
+            for that parameter, or a required parameter with no default is left blank.
 
             '
           content:

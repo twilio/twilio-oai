@@ -163,6 +163,133 @@ components:
         pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
       example: 01890a5d-aa0f-7c80-b8e6-0242ac140004
   schemas:
+    conversations.v2.capability:
+      type: object
+      description: A cross-domain operation or data flow that accounts can subscribe
+        to.
+      required:
+      - id
+      - name
+      - domain
+      - status
+      - visibility
+      - policyRef
+      - schemaRef
+      - version
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+          pattern: ^cap_capability_[0-9a-z]{26}$
+          description: Unique Capability identifier.
+          example: cap_capability_01j2a1b2c3d4e5f6g7h8j9k0m1
+        name:
+          type: string
+          description: Human-readable Capability name.
+          example: Email Event Exhaust
+        domain:
+          type: string
+          description: Domain that owns the Capability.
+          example: Email
+        description:
+          type: string
+          description: Human-readable description of the Capability.
+          example: Relays inbound email events to subscribing domains
+        status:
+          type: string
+          description: Lifecycle status of the Capability.
+          enum:
+          - ACTIVE
+          - DEPRECATED
+          example: ACTIVE
+        visibility:
+          type: string
+          description: Whether the Capability is available publicly or only to internal
+            consumers.
+          enum:
+          - PUBLIC
+          - INTERNAL
+          example: PUBLIC
+        policyRef:
+          type: string
+          description: Identifier for the Cedar policy that controls this Capability.
+          example: cedar/email/policy.cedar
+        schemaRef:
+          type: string
+          description: Identifier for the Cedar schema that defines this Capability.
+          example: cedar/email/schema.cedarschema.json
+        version:
+          type: integer
+          description: Optimistic-locking version.
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the Capability was created.
+          example: '2026-06-02T10:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the Capability was last updated.
+          example: '2026-06-02T10:00:00Z'
+        subscriptionPrincipalSchema:
+          type: object
+          additionalProperties: true
+          description: JSON Schema describing the principal accepted by subscriptions
+            to this Capability.
+    conversations.v2.capability_list:
+      type: object
+      required:
+      - capabilities
+      properties:
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.capability'
+    conversations.v2.create_capability_request:
+      type: object
+      required:
+      - name
+      - domain
+      - policyRef
+      - schemaRef
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Human-readable Capability name.
+          example: Email Event Exhaust
+        domain:
+          type: string
+          minLength: 1
+          description: Domain that owns the Capability.
+          example: Email
+        description:
+          type: string
+          description: Human-readable description of the Capability.
+          example: Relays inbound email events to subscribing domains
+        visibility:
+          type: string
+          description: Whether the Capability is available publicly or only to internal
+            consumers.
+          enum:
+          - PUBLIC
+          - INTERNAL
+          default: PUBLIC
+          example: PUBLIC
+        policyRef:
+          type: string
+          minLength: 1
+          description: Identifier for a pre-registered Cedar policy supported by the
+            Capabilities API.
+          example: cedar/email/policy.cedar
+        schemaRef:
+          type: string
+          minLength: 1
+          description: Identifier for a pre-registered Cedar schema supported by the
+            Capabilities API.
+          example: cedar/email/schema.cedarschema.json
     conversations.v2.conversation:
       type: object
       required:
@@ -256,6 +383,9 @@ components:
               description: Configuration for Conversations V1 bridge. When set, messaging
                 channels route through Conversations V1. Use this to integrate with
                 existing Conversations V1 applications.
+        metadata:
+          $ref: '#/components/schemas/conversations.v2.metadata'
+          description: Customer-managed key-value metadata for this Conversation.
         participants:
           type: array
           description: Participants in this Conversation.
@@ -269,6 +399,8 @@ components:
         name: Customer Support - Multi-channel
         createdAt: '2023-07-01T12:00:00Z'
         updatedAt: '2023-07-01T12:30:00Z'
+        metadata:
+          zendesk_ticket_id: TKT-456
     conversations.v2.participant:
       type: object
       required:
@@ -842,6 +974,20 @@ components:
       example:
         channel: SMS
         address: '+18005550100'
+    conversations.v2.conversation_workflow:
+      title: ConversationWorkflow
+      type: object
+      description: A Workflow associated with a Conversation.
+      required:
+      - flowId
+      properties:
+        flowId:
+          type: string
+          description: The Studio Flow to run.
+          pattern: ^FW[0-9a-fA-F]{32}$
+          example: FW00000000000000000000000000000000
+      example:
+        flowId: FW00000000000000000000000000000000
     conversations.v2.start_conversation_participant_selector:
       type: object
       description: Points at one entry in `participants` by its `name`.
@@ -1644,6 +1790,17 @@ components:
           maxItems: 20
           items:
             $ref: '#/components/schemas/conversations.v2.status_callback_config'
+    conversations.v2.metadata:
+      type: object
+      description: Customer-managed key-value pairs. Maximum 8 entries; keys up to
+        128 characters allowing alphanumeric characters, periods, underscores, and
+        dashes; values up to 512 characters.
+      maxProperties: 8
+      additionalProperties:
+        type: string
+        maxLength: 512
+      example:
+        zendesk_ticket_id: TKT-456
     conversations.v2.conversations_v1_bridge:
       type: object
       description: Configuration for Conversations V1 bridge. When set, messaging
@@ -1901,6 +2058,9 @@ tags:
 - name: ConversationsV2Action
   description: Perform actions within a Conversation. Actions trigger side effects
     such as sending messages and return 202 Accepted.
+- name: ConversationsV2Capability
+  description: Register cross-domain capabilities that can be subscribed to by Twilio
+    accounts.
 - name: ConversationsV2Operation
   description: Poll the status of a long-running operation.
 paths:
@@ -3140,11 +3300,28 @@ paths:
                                 When set, messaging channels route through Conversations
                                 V1. Use this to integrate with existing Conversations
                                 V1 applications.
+                        metadata:
+                          $ref: '#/components/schemas/conversations.v2.metadata'
+                          description: Customer-managed key-value metadata for this
+                            Conversation.
                         participants:
                           type: array
                           description: Participants in this Conversation.
                           items:
                             $ref: '#/components/schemas/conversations.v2.participant'
+                        actionId:
+                          type: string
+                          description: 'The Action created for the request''s `action`,
+                            present only on the create response that
+
+                            dispatched one. Poll `GET /v2/Conversations/{ConversationId}/Actions/{ActionId}`
+                            for its status.
+
+                            '
+                          example: conv_action_00000000000000000000000001
+                          x-twilio:
+                            betaFeature: api.conversation.orchestrator.actions
+                            libraryVisibility: private
                       example:
                         id: conv_conversation_00000000000000000000000001
                         accountId: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3153,6 +3330,8 @@ paths:
                         name: Customer Support - Multi-channel
                         createdAt: '2023-07-01T12:00:00Z'
                         updatedAt: '2023-07-01T12:30:00Z'
+                        metadata:
+                          zendesk_ticket_id: TKT-456
                   meta:
                     type: object
                     required:
@@ -3219,6 +3398,28 @@ paths:
                         type: string
                       description: A list of Conversational Intelligence configuration
                         IDs.
+                    workflows:
+                      type: array
+                      maxItems: 5
+                      items:
+                        title: ConversationWorkflow
+                        type: object
+                        description: A Workflow associated with a Conversation.
+                        required:
+                        - flowId
+                        properties:
+                          flowId:
+                            type: string
+                            description: The Studio Flow to run.
+                            pattern: ^FW[0-9a-fA-F]{32}$
+                            example: FW00000000000000000000000000000000
+                        example:
+                          flowId: FW00000000000000000000000000000000
+                      description: The Workflows to associate with this Conversation.
+                        Overrides the Configuration's own.
+                      x-twilio:
+                        betaFeature: api.conversation.orchestrator.actions
+                        libraryVisibility: private
                 participants:
                   type: array
                   description: Optional list of Participants to create with the Conversation.
@@ -3264,6 +3465,18 @@ paths:
                               type: string
                             channelId:
                               type: string
+                metadata:
+                  type: object
+                  description: Optional customer-managed key-value metadata for this
+                    Conversation. Maximum 8 entries; keys up to 128 characters allowing
+                    alphanumeric characters, periods, underscores, and dashes; values
+                    up to 512 characters.
+                  maxProperties: 8
+                  additionalProperties:
+                    type: string
+                    maxLength: 512
+                  example:
+                    zendesk_ticket_id: TKT-456
       responses:
         '201':
           description: Created
@@ -3362,11 +3575,27 @@ paths:
                         description: Configuration for Conversations V1 bridge. When
                           set, messaging channels route through Conversations V1.
                           Use this to integrate with existing Conversations V1 applications.
+                  metadata:
+                    $ref: '#/components/schemas/conversations.v2.metadata'
+                    description: Customer-managed key-value metadata for this Conversation.
                   participants:
                     type: array
                     description: Participants in this Conversation.
                     items:
                       $ref: '#/components/schemas/conversations.v2.participant'
+                  actionId:
+                    type: string
+                    description: 'The Action created for the request''s `action`,
+                      present only on the create response that
+
+                      dispatched one. Poll `GET /v2/Conversations/{ConversationId}/Actions/{ActionId}`
+                      for its status.
+
+                      '
+                    example: conv_action_00000000000000000000000001
+                    x-twilio:
+                      betaFeature: api.conversation.orchestrator.actions
+                      libraryVisibility: private
                 example:
                   id: conv_conversation_00000000000000000000000001
                   accountId: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3375,6 +3604,8 @@ paths:
                   name: Customer Support - Multi-channel
                   createdAt: '2023-07-01T12:00:00Z'
                   updatedAt: '2023-07-01T12:30:00Z'
+                  metadata:
+                    zendesk_ticket_id: TKT-456
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -3507,11 +3738,27 @@ paths:
                         description: Configuration for Conversations V1 bridge. When
                           set, messaging channels route through Conversations V1.
                           Use this to integrate with existing Conversations V1 applications.
+                  metadata:
+                    $ref: '#/components/schemas/conversations.v2.metadata'
+                    description: Customer-managed key-value metadata for this Conversation.
                   participants:
                     type: array
                     description: Participants in this Conversation.
                     items:
                       $ref: '#/components/schemas/conversations.v2.participant'
+                  actionId:
+                    type: string
+                    description: 'The Action created for the request''s `action`,
+                      present only on the create response that
+
+                      dispatched one. Poll `GET /v2/Conversations/{ConversationId}/Actions/{ActionId}`
+                      for its status.
+
+                      '
+                    example: conv_action_00000000000000000000000001
+                    x-twilio:
+                      betaFeature: api.conversation.orchestrator.actions
+                      libraryVisibility: private
                 example:
                   id: conv_conversation_00000000000000000000000001
                   accountId: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3520,6 +3767,8 @@ paths:
                   name: Customer Support - Multi-channel
                   createdAt: '2023-07-01T12:00:00Z'
                   updatedAt: '2023-07-01T12:30:00Z'
+                  metadata:
+                    zendesk_ticket_id: TKT-456
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -3558,6 +3807,18 @@ paths:
                   - ACTIVE
                   - INACTIVE
                   - CLOSED
+                metadata:
+                  type: object
+                  description: Customer-managed key-value metadata for this Conversation.
+                    Maximum 8 entries; keys up to 128 characters allowing alphanumeric
+                    characters, periods, underscores, and dashes; values up to 512
+                    characters.
+                  maxProperties: 8
+                  additionalProperties:
+                    type: string
+                    maxLength: 512
+                  example:
+                    zendesk_ticket_id: TKT-456
       responses:
         '200':
           description: OK
@@ -3656,11 +3917,27 @@ paths:
                         description: Configuration for Conversations V1 bridge. When
                           set, messaging channels route through Conversations V1.
                           Use this to integrate with existing Conversations V1 applications.
+                  metadata:
+                    $ref: '#/components/schemas/conversations.v2.metadata'
+                    description: Customer-managed key-value metadata for this Conversation.
                   participants:
                     type: array
                     description: Participants in this Conversation.
                     items:
                       $ref: '#/components/schemas/conversations.v2.participant'
+                  actionId:
+                    type: string
+                    description: 'The Action created for the request''s `action`,
+                      present only on the create response that
+
+                      dispatched one. Poll `GET /v2/Conversations/{ConversationId}/Actions/{ActionId}`
+                      for its status.
+
+                      '
+                    example: conv_action_00000000000000000000000001
+                    x-twilio:
+                      betaFeature: api.conversation.orchestrator.actions
+                      libraryVisibility: private
                 example:
                   id: conv_conversation_00000000000000000000000001
                   accountId: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3669,6 +3946,8 @@ paths:
                   name: Customer Support - Multi-channel
                   createdAt: '2023-07-01T12:00:00Z'
                   updatedAt: '2023-07-01T12:30:00Z'
+                  metadata:
+                    zendesk_ticket_id: TKT-456
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -3797,6 +4076,16 @@ paths:
                       maxItems: 20
                       items:
                         $ref: '#/components/schemas/conversations.v2.status_callback_config'
+                metadata:
+                  type: object
+                  description: Merge patch for customer-managed metadata (max 8 entries
+                    after merge). Provided keys are added or updated; keys set to
+                    null are removed; keys not mentioned are preserved.
+                  maxProperties: 8
+                  additionalProperties:
+                    type: string
+                    nullable: true
+                    maxLength: 512
       responses:
         '200':
           description: OK
@@ -3895,11 +4184,27 @@ paths:
                         description: Configuration for Conversations V1 bridge. When
                           set, messaging channels route through Conversations V1.
                           Use this to integrate with existing Conversations V1 applications.
+                  metadata:
+                    $ref: '#/components/schemas/conversations.v2.metadata'
+                    description: Customer-managed key-value metadata for this Conversation.
                   participants:
                     type: array
                     description: Participants in this Conversation.
                     items:
                       $ref: '#/components/schemas/conversations.v2.participant'
+                  actionId:
+                    type: string
+                    description: 'The Action created for the request''s `action`,
+                      present only on the create response that
+
+                      dispatched one. Poll `GET /v2/Conversations/{ConversationId}/Actions/{ActionId}`
+                      for its status.
+
+                      '
+                    example: conv_action_00000000000000000000000001
+                    x-twilio:
+                      betaFeature: api.conversation.orchestrator.actions
+                      libraryVisibility: private
                 example:
                   id: conv_conversation_00000000000000000000000001
                   accountId: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -3908,6 +4213,8 @@ paths:
                   name: Customer Support - Multi-channel
                   createdAt: '2023-07-01T12:00:00Z'
                   updatedAt: '2023-07-01T12:30:00Z'
+                  metadata:
+                    zendesk_ticket_id: TKT-456
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
