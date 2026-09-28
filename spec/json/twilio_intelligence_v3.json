@@ -1033,17 +1033,17 @@
           }
         },
         "required": [
-          "dateCreated",
-          "id",
-          "result",
-          "executionDetails",
-          "conversationId",
           "intelligenceConfiguration",
-          "referenceIds",
           "metadata",
-          "accountId",
+          "executionDetails",
+          "id",
           "outputFormat",
-          "operator"
+          "result",
+          "dateCreated",
+          "conversationId",
+          "operator",
+          "referenceIds",
+          "accountId"
         ]
       },
       "JSONResult": {
@@ -1113,17 +1113,17 @@
           }
         },
         "required": [
-          "dateCreated",
-          "id",
-          "result",
-          "executionDetails",
-          "conversationId",
           "intelligenceConfiguration",
-          "referenceIds",
           "metadata",
-          "accountId",
+          "executionDetails",
+          "id",
           "outputFormat",
-          "operator"
+          "result",
+          "dateCreated",
+          "conversationId",
+          "operator",
+          "referenceIds",
+          "accountId"
         ]
       },
       "ClassificationResult": {
@@ -1201,17 +1201,17 @@
           }
         },
         "required": [
-          "dateCreated",
-          "id",
-          "result",
-          "executionDetails",
-          "conversationId",
           "intelligenceConfiguration",
-          "referenceIds",
           "metadata",
-          "accountId",
+          "executionDetails",
+          "id",
           "outputFormat",
-          "operator"
+          "result",
+          "dateCreated",
+          "conversationId",
+          "operator",
+          "referenceIds",
+          "accountId"
         ]
       },
       "ExtractionResult": {
@@ -1306,17 +1306,17 @@
           }
         },
         "required": [
-          "dateCreated",
-          "id",
-          "result",
-          "executionDetails",
-          "conversationId",
           "intelligenceConfiguration",
-          "referenceIds",
           "metadata",
-          "accountId",
+          "executionDetails",
+          "id",
           "outputFormat",
-          "operator"
+          "result",
+          "dateCreated",
+          "conversationId",
+          "operator",
+          "referenceIds",
+          "accountId"
         ]
       },
       "ResolvedContext": {
@@ -2243,9 +2243,9 @@
           }
         },
         "required": [
+          "outputFormat",
           "prompt",
-          "displayName",
-          "outputFormat"
+          "displayName"
         ]
       },
       "LanguageOperator": {
@@ -2817,6 +2817,43 @@
               }
             ],
             "description": "The Conversation identifier to execute the Rule against."
+          },
+          "rule": {
+            "$ref": "#/components/schemas/RuleOverride"
+          }
+        }
+      },
+      "RuleOverride": {
+        "type": "object",
+        "description": "Optional per-execution overrides applied to the stored rule before execution. When omitted, the stored rule executes unchanged. Only operators[].parameters is overridable; any other field is not part of this schema and is ignored.\n",
+        "required": [
+          "operators"
+        ],
+        "properties": {
+          "operators": {
+            "type": "array",
+            "description": "Operator parameter overrides, merged key-by-key into the stored operator's parameters (override wins on matching keys; unspecified keys retain their stored values). Operators in the stored rule not referenced here execute with their stored parameters unchanged.\n",
+            "items": {
+              "$ref": "#/components/schemas/OperatorOverride"
+            }
+          }
+        }
+      },
+      "OperatorOverride": {
+        "type": "object",
+        "required": [
+          "id",
+          "parameters"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The operator id (as configured in the stored rule) to override."
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameter overrides merged into the stored operator's parameters.",
+            "additionalProperties": true
           }
         }
       }
@@ -7085,8 +7122,8 @@
         "tags": [
           "RuleExecutions"
         ],
-        "summary": "Manually queue a rule execution",
-        "description": "Resolves the given configuration, rule, and conversation, derives the memoryStoreId from the conversation's configuration. Then executes the rule on the conversation.\n",
+        "summary": "On-demand Rule execution",
+        "description": "Resolves the given configuration, rule, and conversation, derives the memoryStoreId from the conversation's configuration. Then executes the rule on the conversation. Optionally, `rule.operators[]` can be provided to override specific operator parameters for this execution only; the stored rule configuration is not modified.\n",
         "operationId": "CreateRuleExecution",
         "security": [
           {
@@ -7128,6 +7165,9 @@
                       }
                     ],
                     "description": "The Conversation identifier to execute the Rule against."
+                  },
+                  "rule": {
+                    "$ref": "#/components/schemas/RuleOverride"
                   }
                 }
               }
@@ -7139,7 +7179,7 @@
             "description": "Rule execution queued."
           },
           "400": {
-            "description": "The request is malformed: the request body fails schema validation (a required field is missing, or a field does not match its expected pattern) or the request body is not valid JSON.\n",
+            "description": "The request is malformed: the request body fails schema validation (a required field is missing, or a field does not match its expected pattern) or the request body is not valid JSON. For RuleExecutions creation with `rule` overrides: `rule.operators` is missing, an operator `id` in `rule.operators` does not exist in the stored rule, a parameter name is not defined by the operator, a parameter value provided for an operator override is invalid for that parameter, or a required parameter with no default is left blank.\n",
             "content": {
               "application/json": {
                 "schema": {
