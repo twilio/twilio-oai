@@ -38,6 +38,90 @@
           "profile": {
             "$ref": "#/components/schemas/messaging.v2.channels_sender.profile_generic_response"
           },
+          "pending_display_name": {
+            "type": "string",
+            "description": "WhatsApp only. The display name the most recent change applies to \u2014 awaiting Meta review, approved by Meta and awaiting re-registration, or, once `pending_display_name_status` is `COMPLETED`, the name now in effect (identical to `name`). Absent when no display name change has been made, and once a completed change stops being reported.\n",
+            "nullable": true
+          },
+          "pending_display_name_status": {
+            "type": "string",
+            "description": "WhatsApp only. The status of the most recent display name change. `PENDING_REVIEW`, `APPROVED` and `DECLINED` are reported by Meta. `PIN_MISMATCH` and `REGISTRATION_FAILED` mean Meta approved the name but it could not be applied; `EXPIRED` means Meta's 14-day window to apply an approved name elapsed. In all three cases, re-submit the same `profile.name` to retry. `COMPLETED` means the name was approved and applied \u2014 `name` now returns it. A `COMPLETED` change is reported for 14 days after it completes and is absent afterwards, so treat its presence as \"recently completed\" rather than a permanent flag; use `pending_display_name_status_date` to tell how recent. Absent when no display name change has been made.\n",
+            "nullable": true,
+            "enum": [
+              "PENDING_REVIEW",
+              "APPROVED",
+              "DECLINED",
+              "PIN_MISMATCH",
+              "REGISTRATION_FAILED",
+              "EXPIRED",
+              "COMPLETED"
+            ]
+          },
+          "pending_display_name_status_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "WhatsApp only. The date and time in UTC when `pending_display_name_status` last changed, specified in ISO 8601 format. Absent whenever `pending_display_name_status` is absent, so the three `pending_display_name*` fields are always present or absent together.\n",
+            "nullable": true
+          },
+          "properties": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.properties"
+          },
+          "offline_reasons": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.offline_reasons"
+          },
+          "compliance": {
+            "$ref": "#/components/schemas/messaging.v2.rcs_compliance_response"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL of the resource."
+          }
+        }
+      },
+      "messaging.v2.channels_sender_update_response": {
+        "type": "object",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^XE[0-9a-fA-F]{32}$",
+            "nullable": true,
+            "description": "The SID of the sender."
+          },
+          "status": {
+            "$ref": "#/components/schemas/channels_sender_enum_status"
+          },
+          "sender_id": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.fields.sender_id"
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional display label for the sender in the Twilio Console."
+          },
+          "configuration": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.configuration"
+          },
+          "webhook": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.webhook"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/messaging.v2.channels_sender.profile_generic_response"
+          },
+          "display_name_status": {
+            "type": "string",
+            "description": "WhatsApp only. The outcome of the display name operation in this request. Present only when the request included `profile.name`. `updating` \u2014 accepted; either submitted to Meta for review, or, when Meta had already approved this exact name, routed straight to re-registration. `no_change` \u2014 the name already matches the sender's active display name; nothing was submitted to Meta. `pending_review` \u2014 the same name is already under review at Meta; the existing request continues unchanged. `error` \u2014 the display name could not be processed, while other profile fields in the same request were still applied. Returned with a 202 and carries no error code or message. This covers every failure mode, including the case where Meta accepted the name but tracking could not be started \u2014 poll `pending_display_name_status` to establish the real state rather than assuming the name was rejected. When `profile.name` is the only field in the request, the failure is returned as an error response with a specific code instead of this status.\n",
+            "nullable": true,
+            "enum": [
+              "updating",
+              "no_change",
+              "pending_review",
+              "error"
+            ]
+          },
           "properties": {
             "$ref": "#/components/schemas/messaging.v2.channels_sender.properties"
           },
@@ -359,7 +443,9 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the sender. Required for WhatsApp senders and must follow [Meta's display name guidelines](https://www.facebook.com/business/help/757569725593362).",
+            "description": "The name of the sender. Required for WhatsApp senders and must follow [Meta's display name guidelines](https://www.facebook.com/business/help/757569725593362). On update, a WhatsApp sender's name is not changed synchronously: it is submitted to Meta for review, and `profile.name` continues to report the current active name until Meta approves the new one and the sender is automatically re-registered. Track progress with `pending_display_name_status` on Fetch Sender, and see `display_name_status` on the update response for the immediate outcome. Re-submitting the same name is how you retry applying a name Meta has already approved, for example after correcting the sender's two-step verification PIN. Meta permits a limited number of display name changes per 30-day period.\n",
+            "minLength": 1,
+            "maxLength": 255,
             "nullable": true
           },
           "about": {
@@ -2031,7 +2117,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/messaging.v2.channels_sender_response"
+                  "$ref": "#/components/schemas/messaging.v2.channels_sender_update_response"
                 },
                 "examples": {
                   "update": {
@@ -2084,7 +2170,8 @@
                         "terms_of_service_url": null,
                         "accent_color": null,
                         "phone_numbers": null
-                      }
+                      },
+                      "display_name_status": "updating"
                     }
                   }
                 }
