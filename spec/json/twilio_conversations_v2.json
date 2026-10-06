@@ -231,7 +231,7 @@
         "required": [
           "id",
           "name",
-          "domain",
+          "domainId",
           "status",
           "visibility",
           "policyRef",
@@ -252,9 +252,9 @@
             "description": "Human-readable Capability name.",
             "example": "Email Event Exhaust"
           },
-          "domain": {
+          "domainId": {
             "type": "string",
-            "description": "Domain that owns the Capability.",
+            "description": "Identifier of the domain that owns the Capability.",
             "example": "Email"
           },
           "description": {
@@ -332,7 +332,7 @@
         "type": "object",
         "required": [
           "name",
-          "domain",
+          "domainId",
           "policyRef",
           "schemaRef"
         ],
@@ -343,10 +343,10 @@
             "description": "Human-readable Capability name.",
             "example": "Email Event Exhaust"
           },
-          "domain": {
+          "domainId": {
             "type": "string",
             "minLength": 1,
-            "description": "Domain that owns the Capability.",
+            "description": "Identifier of the domain that owns the Capability.",
             "example": "Email"
           },
           "description": {
@@ -472,6 +472,30 @@
                   "agent1",
                   "agent2"
                 ]
+              },
+              "traitExtractionStrategyIds": {
+                "type": "array",
+                "description": "A list of Trait Extraction Strategy IDs.",
+                "maxItems": 1,
+                "items": {
+                  "type": "string"
+                },
+                "x-twilio": {
+                  "libraryVisibility": "private",
+                  "betaFeature": "api.memory.2026Q3"
+                }
+              },
+              "observationExtractionStrategyIds": {
+                "type": "array",
+                "description": "A list of Observation Extraction Strategy IDs.",
+                "maxItems": 1,
+                "items": {
+                  "type": "string"
+                },
+                "x-twilio": {
+                  "libraryVisibility": "private",
+                  "betaFeature": "api.memory.2026Q4"
+                }
               },
               "memoryExtractionEnabled": {
                 "type": "boolean",
@@ -1053,12 +1077,12 @@
           },
           "type": {
             "type": "string",
-            "description": "The type of action. Accepted values: SEND_MESSAGE.",
-            "example": "SEND_MESSAGE"
+            "description": "The type of action: action-send-message or action-start-flow.",
+            "example": "action-send-message"
           },
           "status": {
             "$ref": "#/components/schemas/conversations.v2.action_status",
-            "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action\n- FAILED: Downstream backend reported a failure\n",
+            "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action (for START_FLOW, the Studio Flow was triggered)\n- FAILED: Downstream backend reported a failure\n",
             "example": "PENDING"
           },
           "conversationId": {
@@ -1071,7 +1095,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\n",
+            "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\nFor START_FLOW:\n- executionSid: The Studio Flow execution SID (present when COMPLETED)\n",
             "example": {
               "messageSid": "SM1234567890abcdef1234567890abcdef",
               "communicationId": "conv_communication_00000000000000000000000000"
@@ -1094,11 +1118,17 @@
             "format": "date-time",
             "description": "Timestamp when the action reached a terminal status.",
             "example": "2026-03-30T10:30:02Z"
+          },
+          "failureReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Human-readable failure reason. Null unless status is FAILED.",
+            "example": "Could not find flow FW00000000000000000000000000000000"
           }
         },
         "example": {
           "id": "conv_action_00000000000000000000000000",
-          "type": "SEND_MESSAGE",
+          "type": "action-send-message",
           "status": "COMPLETED",
           "conversationId": "conv_conversation_00000000000000000000000000",
           "related": {
@@ -1530,6 +1560,33 @@
           "timeout": 30
         }
       },
+      "conversations.v2.create_conversation_action_request": {
+        "description": "The single action dispatched once the Conversation is created, selected by `type`.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/conversations.v2.start_conversation_send_message_action"
+          },
+          {
+            "$ref": "#/components/schemas/conversations.v2.start_conversation_start_flow_action"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "SEND_MESSAGE": "#/components/schemas/conversations.v2.start_conversation_send_message_action",
+            "START_FLOW": "#/components/schemas/conversations.v2.start_conversation_start_flow_action"
+          }
+        },
+        "example": {
+          "type": "START_FLOW",
+          "payload": {
+            "flowId": "FW00000000000000000000000000000000",
+            "parameters": {
+              "orderNumber": "12345"
+            }
+          }
+        }
+      },
       "conversations.v2.start_conversation_action_request": {
         "description": "The single action dispatched once the Conversation is created, selected by `type`.",
         "oneOf": [
@@ -1634,29 +1691,6 @@
           }
         }
       },
-      "conversations.v2.update_start_conversation_action_request": {
-        "type": "object",
-        "description": "Reports the outcome of an outbound call back to its Action.",
-        "required": [
-          "callStatus"
-        ],
-        "properties": {
-          "callStatus": {
-            "$ref": "#/components/schemas/conversations.v2.call_status",
-            "description": "Outcome of the outbound call."
-          },
-          "callId": {
-            "type": "string",
-            "description": "The Call SID of the outbound call.",
-            "pattern": "^CA[0-9a-fA-F]{32}$",
-            "example": "CA00000000000000000000000000000000"
-          }
-        },
-        "example": {
-          "callStatus": "ANSWERED",
-          "callId": "CA00000000000000000000000000000000"
-        }
-      },
       "conversations.v2.start_conversation_action": {
         "type": "object",
         "description": "The Action created by the StartConversation action. Type-less: the created\nConversation and downstream channel identifiers live in the `related` map (not at\nthe top level) so they remain valid across the full lifecycle.\n",
@@ -1681,7 +1715,7 @@
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Named identifiers, populated as the asynchronous work completes and varying by action type:\n- conversationId: The created Conversation\n- channelId: The downstream channel identifier, for SEND_MESSAGE\n- executionSid: The Studio Flow execution started for the Conversation, for START_FLOW\n- callId: The Call SID of the outbound call, for CALL and for START_FLOW once its Flow reports back\n\nAbsent from the 202 response (returned as an empty map).\n",
+            "description": "Named identifiers, populated as the asynchronous work completes and varying by action type:\n- conversationId: The created Conversation\n- channelId: The downstream channel identifier, for SEND_MESSAGE\n- executionSid: The Studio Flow execution started for the Conversation, for START_FLOW\n- callId: The Call SID of the outbound call, for CALL\n\nAbsent from the 202 response (returned as an empty map).\n",
             "example": {
               "conversationId": "conv_conversation_00000000000000000000000000",
               "channelId": "SM1234567890abcdef1234567890abcdef"
@@ -2384,18 +2418,6 @@
         ],
         "description": "Channel type for sending a Communication. Note: VOICE is receive-only and not supported for send operations."
       },
-      "conversations.v2.call_status": {
-        "type": "string",
-        "enum": [
-          "ANSWERED",
-          "BUSY",
-          "NO_ANSWER",
-          "FAILED",
-          "CANCELED"
-        ],
-        "description": "Outcome of an outbound call placed by a CALL StartConversation Action.",
-        "example": "ANSWERED"
-      },
       "conversations.v2.recipient_delivery_status": {
         "type": "string",
         "enum": [
@@ -2596,6 +2618,30 @@
                               "agent1",
                               "agent2"
                             ]
+                          },
+                          "traitExtractionStrategyIds": {
+                            "type": "array",
+                            "description": "A list of Trait Extraction Strategy IDs.",
+                            "maxItems": 1,
+                            "items": {
+                              "type": "string"
+                            },
+                            "x-twilio": {
+                              "libraryVisibility": "private",
+                              "betaFeature": "api.memory.2026Q3"
+                            }
+                          },
+                          "observationExtractionStrategyIds": {
+                            "type": "array",
+                            "description": "A list of Observation Extraction Strategy IDs.",
+                            "maxItems": 1,
+                            "items": {
+                              "type": "string"
+                            },
+                            "x-twilio": {
+                              "libraryVisibility": "private",
+                              "betaFeature": "api.memory.2026Q4"
+                            }
                           },
                           "memoryExtractionEnabled": {
                             "type": "boolean",
@@ -3104,6 +3150,30 @@
                         "agent1",
                         "agent2"
                       ]
+                    },
+                    "traitExtractionStrategyIds": {
+                      "type": "array",
+                      "description": "A list of Trait Extraction Strategy IDs.",
+                      "maxItems": 1,
+                      "items": {
+                        "type": "string"
+                      },
+                      "x-twilio": {
+                        "libraryVisibility": "private",
+                        "betaFeature": "api.memory.2026Q3"
+                      }
+                    },
+                    "observationExtractionStrategyIds": {
+                      "type": "array",
+                      "description": "A list of Observation Extraction Strategy IDs.",
+                      "maxItems": 1,
+                      "items": {
+                        "type": "string"
+                      },
+                      "x-twilio": {
+                        "libraryVisibility": "private",
+                        "betaFeature": "api.memory.2026Q4"
+                      }
                     },
                     "memoryExtractionEnabled": {
                       "type": "boolean",
@@ -4010,6 +4080,30 @@
                                   "agent2"
                                 ]
                               },
+                              "traitExtractionStrategyIds": {
+                                "type": "array",
+                                "description": "A list of Trait Extraction Strategy IDs.",
+                                "maxItems": 1,
+                                "items": {
+                                  "type": "string"
+                                },
+                                "x-twilio": {
+                                  "libraryVisibility": "private",
+                                  "betaFeature": "api.memory.2026Q3"
+                                }
+                              },
+                              "observationExtractionStrategyIds": {
+                                "type": "array",
+                                "description": "A list of Observation Extraction Strategy IDs.",
+                                "maxItems": 1,
+                                "items": {
+                                  "type": "string"
+                                },
+                                "x-twilio": {
+                                  "libraryVisibility": "private",
+                                  "betaFeature": "api.memory.2026Q4"
+                                }
+                              },
                               "memoryExtractionEnabled": {
                                 "type": "boolean",
                                 "default": false,
@@ -4148,6 +4242,30 @@
                           "type": "string"
                         },
                         "description": "A list of Conversational Intelligence configuration IDs."
+                      },
+                      "traitExtractionStrategyIds": {
+                        "type": "array",
+                        "description": "A list of Trait Extraction Strategy IDs.",
+                        "maxItems": 1,
+                        "items": {
+                          "type": "string"
+                        },
+                        "x-twilio": {
+                          "libraryVisibility": "private",
+                          "betaFeature": "api.memory.2026Q3"
+                        }
+                      },
+                      "observationExtractionStrategyIds": {
+                        "type": "array",
+                        "description": "A list of Observation Extraction Strategy IDs.",
+                        "maxItems": 1,
+                        "items": {
+                          "type": "string"
+                        },
+                        "x-twilio": {
+                          "libraryVisibility": "private",
+                          "betaFeature": "api.memory.2026Q4"
+                        }
                       },
                       "workflows": {
                         "type": "array",
@@ -4356,6 +4474,30 @@
                             "agent2"
                           ]
                         },
+                        "traitExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Trait Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q3"
+                          }
+                        },
+                        "observationExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Observation Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q4"
+                          }
+                        },
                         "memoryExtractionEnabled": {
                           "type": "boolean",
                           "default": false,
@@ -4560,6 +4702,30 @@
                             "agent1",
                             "agent2"
                           ]
+                        },
+                        "traitExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Trait Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q3"
+                          }
+                        },
+                        "observationExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Observation Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q4"
+                          }
                         },
                         "memoryExtractionEnabled": {
                           "type": "boolean",
@@ -4779,6 +4945,30 @@
                             "agent1",
                             "agent2"
                           ]
+                        },
+                        "traitExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Trait Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q3"
+                          }
+                        },
+                        "observationExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Observation Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q4"
+                          }
                         },
                         "memoryExtractionEnabled": {
                           "type": "boolean",
@@ -5110,6 +5300,30 @@
                             "agent2"
                           ]
                         },
+                        "traitExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Trait Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q3"
+                          }
+                        },
+                        "observationExtractionStrategyIds": {
+                          "type": "array",
+                          "description": "A list of Observation Extraction Strategy IDs.",
+                          "maxItems": 1,
+                          "items": {
+                            "type": "string"
+                          },
+                          "x-twilio": {
+                            "libraryVisibility": "private",
+                            "betaFeature": "api.memory.2026Q4"
+                          }
+                        },
                         "memoryExtractionEnabled": {
                           "type": "boolean",
                           "default": false,
@@ -5289,12 +5503,12 @@
                     },
                     "type": {
                       "type": "string",
-                      "description": "The type of action. Accepted values: SEND_MESSAGE.",
-                      "example": "SEND_MESSAGE"
+                      "description": "The type of action: action-send-message or action-start-flow.",
+                      "example": "action-send-message"
                     },
                     "status": {
                       "$ref": "#/components/schemas/conversations.v2.action_status",
-                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action\n- FAILED: Downstream backend reported a failure\n",
+                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action (for START_FLOW, the Studio Flow was triggered)\n- FAILED: Downstream backend reported a failure\n",
                       "example": "PENDING"
                     },
                     "conversationId": {
@@ -5307,7 +5521,7 @@
                       "additionalProperties": {
                         "type": "string"
                       },
-                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\n",
+                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\nFor START_FLOW:\n- executionSid: The Studio Flow execution SID (present when COMPLETED)\n",
                       "example": {
                         "messageSid": "SM1234567890abcdef1234567890abcdef",
                         "communicationId": "conv_communication_00000000000000000000000000"
@@ -5330,11 +5544,17 @@
                       "format": "date-time",
                       "description": "Timestamp when the action reached a terminal status.",
                       "example": "2026-03-30T10:30:02Z"
+                    },
+                    "failureReason": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Human-readable failure reason. Null unless status is FAILED.",
+                      "example": "Could not find flow FW00000000000000000000000000000000"
                     }
                   },
                   "example": {
                     "id": "conv_action_00000000000000000000000000",
-                    "type": "SEND_MESSAGE",
+                    "type": "action-send-message",
                     "status": "COMPLETED",
                     "conversationId": "conv_conversation_00000000000000000000000000",
                     "related": {
@@ -5445,12 +5665,12 @@
                     },
                     "type": {
                       "type": "string",
-                      "description": "The type of action. Accepted values: SEND_MESSAGE.",
-                      "example": "SEND_MESSAGE"
+                      "description": "The type of action: action-send-message or action-start-flow.",
+                      "example": "action-send-message"
                     },
                     "status": {
                       "$ref": "#/components/schemas/conversations.v2.action_status",
-                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action\n- FAILED: Downstream backend reported a failure\n",
+                      "description": "Current status of the Action.\n- PENDING: Action accepted, awaiting downstream confirmation\n- COMPLETED: Downstream backend confirmed the action (for START_FLOW, the Studio Flow was triggered)\n- FAILED: Downstream backend reported a failure\n",
                       "example": "PENDING"
                     },
                     "conversationId": {
@@ -5463,7 +5683,7 @@
                       "additionalProperties": {
                         "type": "string"
                       },
-                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\n",
+                      "description": "Named identifiers from downstream. For SEND_MESSAGE:\n- messageSid: The downstream message SID (present when PENDING or COMPLETED)\n- communicationId: The Communication ID (present when COMPLETED)\nFor START_FLOW:\n- executionSid: The Studio Flow execution SID (present when COMPLETED)\n",
                       "example": {
                         "messageSid": "SM1234567890abcdef1234567890abcdef",
                         "communicationId": "conv_communication_00000000000000000000000000"
@@ -5486,11 +5706,17 @@
                       "format": "date-time",
                       "description": "Timestamp when the action reached a terminal status.",
                       "example": "2026-03-30T10:30:02Z"
+                    },
+                    "failureReason": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Human-readable failure reason. Null unless status is FAILED.",
+                      "example": "Could not find flow FW00000000000000000000000000000000"
                     }
                   },
                   "example": {
                     "id": "conv_action_00000000000000000000000000",
-                    "type": "SEND_MESSAGE",
+                    "type": "action-send-message",
                     "status": "COMPLETED",
                     "conversationId": "conv_conversation_00000000000000000000000000",
                     "related": {
@@ -6605,6 +6831,12 @@
                   },
                   "channelId": {
                     "type": "string"
+                  },
+                  "resourceId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "External resource identifier for this Communication (e.g. MessageSid for SMS/RCS/WhatsApp, TranscriptionSid + MessageIndex for Voice). If a Communication with the same resourceId already exists in the Conversation, it is updated instead of a new one being created.",
+                    "example": "SM12345678901234567890123456789012"
                   },
                   "recipients": {
                     "type": "array",
