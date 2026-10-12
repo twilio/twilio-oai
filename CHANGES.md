@@ -1,6 +1,28 @@
 twilio-oai changelog
 ====================
 
+[2026-10-12] Version 2.10.0
+---------------------------
+**Library - Fix**
+- [PR #167](https://github.com/twilio/twilio-oai/pull/167): upgrade version. Thanks to [@shrutiburman](https://github.com/shrutiburman)!
+
+**Audiences**
+- ## 2026-10-06
+- Minor updates (formatting, metadata)
+- ## 2026-10-05
+- Minor updates (formatting, metadata)
+
+**Conversations**
+- Add PATCH /v2/Imports/{id} to cancel an import, and the `CANCELED` import status (dev-us1 and stage-us1)
+- Add Imports endpoints for 1console (private visibility, dev-us1 and stage-us1)
+
+**Events**
+- Remove the Replays API (`/v1/Replays`, beta feature `api.eventstreams.replay`); the feature was never GA and is being sunset **(breaking change)**
+
+**Messaging**
+- Enable messaging service add-ons, update messaging service, and opt-out configuration admin endpoints in prod-us1 and prod-ie1
+
+
 [2026-10-06] Version 2.9.0
 --------------------------
 **Audiences**

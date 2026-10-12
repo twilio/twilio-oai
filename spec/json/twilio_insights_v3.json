@@ -735,7 +735,7 @@
             "description": "Additional context about the failure",
             "type": "string",
             "nullable": true,
-            "example": "ClickHouse query exceeded the 120s execution limit."
+            "example": "Query exceeded the 120s execution limit."
           }
         }
       },
@@ -861,77 +861,64 @@
       },
       "MappingCategory": {
         "type": "string",
-        "description": "The type of field being registered. Only `MEASURE` is supported.",
+        "description": "The category of the custom field. Supported values:\n- `MEASURE`: a numeric value that can be aggregated and queried as a\n  measure in Conversations Insights.\n",
         "enum": [
           "MEASURE"
         ]
       },
       "SourceType": {
         "type": "string",
-        "description": "The kind of upstream entity that sources this field. The value names the\nentity type itself, so the identifier carried in `entityMetadata` is\nunambiguous without a lookup (`INTELLIGENCE_OPERATOR` carries an\n`operatorId`).\n\nAdding a new upstream means adding a value here plus its own\n`entityMetadata` variant \u2014 the request shape is unchanged.\n",
+        "description": "The kind of entity that supplies the custom field's value. Each value has\na matching property on `entityMetadata` that carries that source's\ndetails. Supported values:\n- `INTELLIGENCE_OPERATOR`: the value is read from the output of a\n  Conversational Intelligence operator. Details go in\n  `entityMetadata.intelligenceOperator`.\n",
         "enum": [
           "INTELLIGENCE_OPERATOR"
         ]
       },
-      "EntityMetadataBase": {
+      "IntelligenceOperatorSource": {
         "type": "object",
-        "description": "Fields common to every `entityMetadata` variant. Exists so that generated\nclients get a stable base type: a variant added in a later revision\ndegrades to this rather than breaking deserialization.\n",
+        "description": "Details of a custom field whose value is read from a Conversational\nIntelligence operator's output. The operator must:\n- have an active version;\n- have `outputFormat` `JSON` (`TEXT` and `CLASSIFICATION` operators\n  are rejected).\n\nRequests that reference an ineligible operator are rejected with `400`.\n",
+        "required": [
+          "operatorId",
+          "field"
+        ],
+        "properties": {
+          "operatorId": {
+            "type": "string",
+            "description": "The ID of the Conversational Intelligence operator whose output\nsupplies this field's value. Must match\n`^intelligence_operator_[0-7][0-9a-z]{25}$`. Cannot be changed after\nregistration.\n",
+            "pattern": "^intelligence_operator_[0-7][0-9a-z]{25}$",
+            "example": "intelligence_operator_01kcgy1ew0e9x8re6jq542zt8b"
+          },
+          "operatorName": {
+            "type": "string",
+            "description": "Optional, display-only name of the operator. Stored as supplied and\nnot validated against the operator.\n",
+            "example": "Sentiment Analysis"
+          },
+          "field": {
+            "type": "string",
+            "description": "Path to the property in the operator's output schema that supplies\nthis field's value. Rules:\n- one or two segments separated by `.` \u2014 a top-level property\n  (`leadScore`) or one level of nesting (`scores.leadScore`);\n- each segment contains only letters, digits and `_`; array\n  indexing (such as `items[0]`) is not supported;\n- the path must exist in the output schema of the operator's\n  latest active version and resolve to a property of type `number`\n  or `integer`.\n",
+            "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)?$",
+            "example": "leadScore"
+          }
+        }
+      },
+      "EntityMetadata": {
+        "type": "object",
+        "description": "Identifies the entity that supplies this field's value. `sourceType`\nselects the source, and the property named for that source carries its\ndetails. Exactly that one source property must be present:\n\n| `sourceType` | Required property |\n|---|---|\n| `INTELLIGENCE_OPERATOR` | `intelligenceOperator` |\n\nA request whose `sourceType` doesn't match the source property it sends,\nor that sends any other property, is rejected with `400`.\n",
+        "additionalProperties": false,
         "required": [
           "sourceType"
         ],
         "properties": {
           "sourceType": {
             "$ref": "#/components/schemas/SourceType"
-          }
-        }
-      },
-      "IntelligenceOperatorEntityMetadata": {
-        "description": "Entity reference for a custom field sourced from a Conversational\nIntelligence operator. `field` is required \u2014 Intelligence is the source of\ntruth for resolving it against the operator's output schema.\n",
-        "type": "object",
-        "properties": {
-          "sourceType": {
-            "$ref": "#/components/schemas/SourceType"
           },
-          "operatorId": {
-            "type": "string",
-            "description": "The Intelligence operator ID. Part of the owner check for\nidempotent upserts \u2014 a mismatch against the existing\nregistration's `(sourceType, operatorId)` returns `409`.\n",
-            "example": "OPxxxx"
-          },
-          "operatorName": {
-            "type": "string",
-            "description": "Optional, display-only name of the operator as supplied at\nregistration time. Not part of any uniqueness or validation logic.\n",
-            "example": "Sentiment Analysis"
-          },
-          "field": {
-            "type": "string",
-            "description": "Annotation fieldPath key; generic identifier that determines the\noutput-schema field. Resolved against the operator identified by\n`operatorId`.\n",
-            "pattern": "^[A-Za-z0-9_.]+$",
-            "example": "leadScore"
-          }
-        },
-        "required": [
-          "operatorId",
-          "sourceType",
-          "field"
-        ]
-      },
-      "EntityMetadata": {
-        "description": "Reference to the upstream entity that sources this field. Shape is\nselected by the `sourceType` discriminator and owned by that upstream, not\nby this API \u2014 adding a new upstream means adding a variant here, not\nchanging the request shape.\n\nEvery variant carries `sourceType` via `EntityMetadataBase`, so a client\nthat does not recognise a newly added variant can still deserialize the\ncommon fields rather than failing outright.\n\nThe owner check for idempotent upserts is scoped to `sourceType` plus that\nvariant's own identity field (`operatorId` for `INTELLIGENCE_OPERATOR`); a\nmismatch against an existing registration's owner returns `409`.\n",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/IntelligenceOperatorEntityMetadata"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "sourceType",
-          "mapping": {
-            "INTELLIGENCE_OPERATOR": "#/components/schemas/IntelligenceOperatorEntityMetadata"
+          "intelligenceOperator": {
+            "$ref": "#/components/schemas/IntelligenceOperatorSource"
           }
         }
       },
       "CustomFieldMappingRequest": {
         "type": "object",
-        "description": "Registration payload for a single custom field sourced from an upstream\nentity. The target account is supplied via the I-Twilio-Auth-Account\nheader, not this body.\n",
+        "description": "Registration payload for a single custom field. The mapping is created in\nthe account identified by the request's credentials.\n",
         "required": [
           "category",
           "name",
@@ -943,18 +930,59 @@
           },
           "name": {
             "type": "string",
-            "description": "Customer-facing name for the field; becomes the ClickHouse Map key and\nthe platform field alias. Unique per account across every\n`sourceType` \u2014 the Map key namespace is account-global.\n",
+            "description": "Name of the custom field, used to reference it in Insights queries.\nContains only letters, digits and `_`, and must not be empty.\nMust be unique within the account across every `sourceType`;\nregistering an existing name returns `409`. Cannot be changed after\nregistration.\n",
             "pattern": "^[A-Za-z0-9_]+$",
             "example": "LeadScore"
           },
           "description": {
             "type": "string",
-            "description": "Optional, free-text description of this custom field mapping.\nDisplay-only \u2014 not part of any uniqueness check.\n",
+            "description": "Optional, free-text description of this custom field mapping, up to\n150 characters. Display-only \u2014 not part of any uniqueness check.\n",
             "maxLength": 150,
             "example": "Lead quality score derived from sentiment analysis"
           },
           "entityMetadata": {
             "$ref": "#/components/schemas/EntityMetadata"
+          }
+        }
+      },
+      "CustomFieldMappingUpdateRequest": {
+        "type": "object",
+        "description": "Partial update of a custom field mapping. Only properties present in the\nbody are changed; absent properties keep their current value. The body\nmust contain at least one change: an empty body is rejected with `400`.\nProperties that cannot be updated (such as `name`, `category` or\n`operatorId`) are rejected with `400` rather than ignored.\n",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "entityMetadata": {
+            "$ref": "#/components/schemas/EntityMetadataUpdate"
+          }
+        }
+      },
+      "EntityMetadataUpdate": {
+        "type": "object",
+        "description": "Updatable subset of `entityMetadata`. `sourceType` must equal the\nmapping's current `sourceType` (it cannot be changed), and the property\nnamed for that source carries the fields to update:\n\n| `sourceType` | Update property | Updatable fields |\n|---|---|---|\n| `INTELLIGENCE_OPERATOR` | `intelligenceOperator` | `field` |\n",
+        "additionalProperties": false,
+        "required": [
+          "sourceType"
+        ],
+        "properties": {
+          "sourceType": {
+            "$ref": "#/components/schemas/SourceType"
+          },
+          "intelligenceOperator": {
+            "$ref": "#/components/schemas/IntelligenceOperatorSourceUpdate"
+          }
+        }
+      },
+      "IntelligenceOperatorSourceUpdate": {
+        "type": "object",
+        "description": "Updatable fields of a custom field mapping sourced from a Conversational\nIntelligence operator. At least one field must be present. Currently\nonly `field` can be modified; `operatorId` and `operatorName` cannot be\nupdated.\n",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "New path to the property in the operator's output schema. Follows the\nsame rules as `field` at registration: one or two `.`-separated\nsegments of letters, digits and `_`, resolving to a `number` or\n`integer` property on the operator's latest active version.\n",
+            "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)?$",
+            "example": "scores.leadScore"
           }
         }
       },
@@ -969,14 +997,16 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "TTID for conversation insights custom field mapping",
+            "description": "The unique identifier of the custom field mapping.",
             "example": "convinsights_mapping_01m31967b7em08vh1pqgbam3mj"
           },
           "category": {
             "$ref": "#/components/schemas/MappingCategory"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the custom field, unique within the account.",
+            "example": "LeadScore"
           },
           "description": {
             "type": "string",
@@ -997,29 +1027,33 @@
             "type": "string",
             "format": "date-time",
             "nullable": true,
-            "description": "When the mapping was last materially modified in-place. Null until the first update-in-place.",
-            "example": "2026-08-13T14:30:00Z"
+            "description": "When the mapping was last modified via `PATCH`. Null until the first update.",
+            "example": "2026-09-30T10:00:00Z"
           }
         }
       },
       "CustomFieldMappingsList": {
         "type": "object",
-        "description": "All custom field mappings registered for an account.",
+        "description": "A page of custom field mappings registered for the account. The mappings\nare under `items`, and `meta.key` is `items`.\n",
         "required": [
-          "mappings"
+          "items",
+          "meta"
         ],
         "properties": {
-          "mappings": {
+          "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CustomFieldMappingResponse"
             }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
           }
         }
       },
       "CustomFieldCapacity": {
         "type": "object",
-        "description": "Custom field mapping slot capacity for the account. Only the `measure`\ncategory is supported for now; it is an empty object when custom\nmeasures are not applicable for the account.\n",
+        "description": "Custom field mapping slot capacity for the account, by category. Only the\n`measure` category is supported for now; the object is empty when custom\nmeasures are not available for the account.\n",
         "properties": {
           "measure": {
             "$ref": "#/components/schemas/CategoryCapacity"
@@ -1028,15 +1062,21 @@
       },
       "CategoryCapacity": {
         "type": "object",
-        "description": "Slots consumed and remaining for the measure category. Empty when not\napplicable for the account.\n",
+        "description": "Slots consumed and remaining for the measure category. By default an\naccount can register up to 3 custom measures, so `consumed + remaining`\nis the account's limit. Registering a new mapping when `remaining` is\n`0` returns `403`.\n",
+        "required": [
+          "consumed",
+          "remaining"
+        ],
         "properties": {
           "consumed": {
             "type": "integer",
+            "minimum": 0,
             "description": "Number of custom field mapping slots already registered.",
             "example": 1
           },
           "remaining": {
             "type": "integer",
+            "minimum": 0,
             "description": "Number of custom field mapping slots still available.",
             "example": 2
           }
@@ -2228,7 +2268,7 @@
                         "code": 50001,
                         "message": "Query execution timeout exceeded",
                         "httpStatusCode": 504,
-                        "detail": "ClickHouse query exceeded the 120s execution limit for this account."
+                        "detail": "Query exceeded the 120s execution limit for this account."
                       }
                     }
                   }
@@ -2665,7 +2705,7 @@
       ],
       "post": {
         "summary": "Register a custom measure field mapping",
-        "description": "Registers a custom field for an account under a category, sourced from an\nupstream entity \u2014 selected via the `entityMetadata.sourceType`\ndiscriminator, which determines the required shape of `entityMetadata`.\nOnly the `MEASURE` category is supported for now.\n\nFor sources with a resolvable field-path concept, validates that\n`entityMetadata.field` resolves on the entity's latest active version by\ncalling that source's own resolution API (the Intelligence fetch-operator\nAPI for `sourceType: INTELLIGENCE_OPERATOR`), then performs an idempotent\nupsert keyed on (accountSid, category, name).\n`entityMetadata.sourceType` plus that variant's own identity field\n(`operatorId` for `INTELLIGENCE_OPERATOR`) must match the existing\nregistration's owner for the upsert to succeed \u2014 a mismatch returns\n`409`. Enforces the per-account, per-category capacity limit.\n",
+        "description": "Registers a custom field for the account. `entityMetadata.sourceType`\nselects where the field's value comes from, and the matching property on\n`entityMetadata` (`intelligenceOperator` for `INTELLIGENCE_OPERATOR`)\ncarries its details. Only the `MEASURE` category is supported for now.\n\nThe request is validated before the mapping is created:\n- `name` contains only letters, digits and `_`, and is not already\n  registered for the account (otherwise `409`);\n- `description`, when present, is at most 150 characters;\n- for `INTELLIGENCE_OPERATOR`, the operator has an active version with\n  `outputFormat` `JSON`, and `entityMetadata.intelligenceOperator.field`\n  is one or two `.`-separated segments that resolve to a `number` or\n  `integer` property in that version's output schema (otherwise `400`);\n- the account has a free slot in the category; by default an account can\n  register up to 3 custom measures (otherwise `403`). Use\n  `GET /v3/ControlPlane/ConversationInsights/CustomFieldMappingsCapacity`\n  to check the remaining slots.\n\nCreate-only: if a mapping with the same `name` already exists for the\naccount, `409` is returned with the existing mapping's `id` and nothing\nis changed. To modify an existing mapping, use\n`PATCH /v3/ControlPlane/ConversationInsights/CustomFieldMappings/{mappingId}`.\n",
         "tags": [
           "TwilioInsightsConfig"
         ],
@@ -2686,9 +2726,11 @@
                     "description": "Lead quality score derived from sentiment analysis",
                     "entityMetadata": {
                       "sourceType": "INTELLIGENCE_OPERATOR",
-                      "operatorId": "OPxxxx",
-                      "operatorName": "Sentiment Analysis",
-                      "field": "leadScore"
+                      "intelligenceOperator": {
+                        "operatorId": "intelligence_operator_01kcgy1ew0e9x8re6jq542zt8b",
+                        "operatorName": "Sentiment Analysis",
+                        "field": "leadScore"
+                      }
                     }
                   }
                 }
@@ -2697,18 +2739,17 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "The `name` was already registered for this operator and was updated in-place.",
-            "content": {
-              "application/json": {
+          "201": {
+            "description": "The custom field mapping was created.",
+            "headers": {
+              "ETag": {
+                "description": "ETag of the new mapping; supply it as `If-Match` on `PATCH`.",
                 "schema": {
-                  "$ref": "#/components/schemas/CustomFieldMappingResponse"
+                  "type": "string",
+                  "example": "\"2026-08-13T14:30:00Z\""
                 }
               }
-            }
-          },
-          "201": {
-            "description": "Newly registered.",
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -2718,7 +2759,7 @@
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "The request is invalid. One of:\n- a required property (`category`, `name`, `entityMetadata`,\n  `entityMetadata.sourceType`, `operatorId`, `field`) is missing, or\n  `category` / `sourceType` is not a supported value;\n- `name` is empty or contains characters other than letters,\n  digits and `_`, or `description` is longer than 150 characters;\n- `entityMetadata` does not carry the property that matches its\n  `sourceType`, or carries any other property;\n- `operatorId` is not a valid operator ID;\n- the operator has no active version or its `outputFormat` is not\n  `JSON`;\n- `field` has more than two segments, contains unsupported\n  characters, or does not resolve to a `number` or `integer`\n  property in the operator's output schema.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2755,6 +2796,12 @@
                     "message",
                     "httpStatusCode"
                   ]
+                },
+                "example": {
+                  "code": 20050,
+                  "message": "The 'field' value 'leadScore' does not resolve on the latest active version of operator 'intelligence_operator_01kcgy1ew0e9x8re6jq542zt8b'.",
+                  "httpStatusCode": 400,
+                  "userError": true
                 }
               }
             }
@@ -2802,7 +2849,7 @@
             }
           },
           "403": {
-            "description": "Forbidden request",
+            "description": "The account has reached its limit of custom measures (default 3), or\ndoes not have access to custom field mappings.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2839,12 +2886,18 @@
                     "message",
                     "httpStatusCode"
                   ]
+                },
+                "example": {
+                  "code": 20051,
+                  "message": "The account has reached its custom mapping capacity for category 'MEASURE'.",
+                  "httpStatusCode": 403,
+                  "userError": true
                 }
               }
             }
           },
           "409": {
-            "description": "The `name` is already registered for this account with different\nattributes. Names are unique per account, so a name can only be\nre-registered idempotently by the same owner.\n",
+            "description": "A mapping with this `name` already exists for the account. Names are\nunique per account across every `sourceType`, so this applies\nregardless of which entity either mapping is sourced from or whether\nthe payload matches. Nothing is changed. `params.id` carries the\nexisting mapping's `id`; use `PATCH` on it to modify the mapping.\n",
             "content": {
               "application/json": {
                 "schema": {
@@ -2884,8 +2937,14 @@
                 },
                 "example": {
                   "code": 20052,
-                  "message": "The name 'LeadScore' is already registered to a different operator.",
-                  "httpStatusCode": 409
+                  "message": "A custom field mapping named 'LeadScore' already exists for this account.",
+                  "httpStatusCode": 409,
+                  "userError": true,
+                  "params": {
+                    "category": "MEASURE",
+                    "name": "LeadScore",
+                    "id": "convinsights_mapping_01m31967b7em08vh1pqgbam3mj"
+                  }
                 }
               }
             }
@@ -3005,6 +3064,63 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "The operator details needed to validate the registration could not\nbe retrieved from Conversational Intelligence. No mapping was\ncreated; retry after the `Retry-After` interval.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Number of seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                },
+                "example": {
+                  "code": 20503,
+                  "message": "The service is temporarily unavailable. Please retry after a short delay.",
+                  "httpStatusCode": 503,
+                  "userError": false
+                }
+              }
+            }
           }
         },
         "security": [
@@ -3014,15 +3130,38 @@
         ]
       },
       "get": {
-        "summary": "Fetch custom measure field mappings for an account",
-        "description": "Returns custom field mappings registered for the account.\n",
+        "summary": "List custom measure field mappings for an account",
+        "description": "Returns the custom field mappings registered for the account, one page at\na time. Use `pageSize` to limit the number of mappings returned, and pass\n`meta.nextToken` from a response as `pageToken` to fetch the next page.\nOn the last page, `meta.nextToken` is `null`.\n",
         "tags": [
           "TwilioInsightsConfig"
         ],
-        "operationId": "FetchCustomFieldMappings",
+        "operationId": "ListCustomFieldMappings",
+        "parameters": [
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The maximum number of resources to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          },
+          {
+            "name": "pageToken",
+            "in": "query",
+            "description": "Token for pagination",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Custom field mappings registered for the account.",
+            "description": "A page of custom field mappings registered for the account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3281,7 +3420,851 @@
         ]
       }
     },
-    "/v3/ControlPlane/ConversationInsights/CustomFieldMappings/Capacity": {
+    "/v3/ControlPlane/ConversationInsights/CustomFieldMappings/{mappingId}": {
+      "servers": [
+        {
+          "url": "https://insights.twilio.com"
+        }
+      ],
+      "get": {
+        "summary": "Fetch a custom field mapping",
+        "description": "Returns a single custom field mapping by its `mappingId`. The `ETag`\nresponse header identifies the mapping's current version; supply it as\n`If-Match` on `PATCH` to guard against concurrent updates.\n",
+        "tags": [
+          "TwilioInsightsConfig"
+        ],
+        "operationId": "FetchCustomFieldMapping",
+        "parameters": [
+          {
+            "name": "mappingId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the custom field mapping, as returned in `id` when the mapping was created.",
+            "schema": {
+              "type": "string",
+              "example": "convinsights_mapping_01m31967b7em08vh1pqgbam3mj"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The custom field mapping.",
+            "headers": {
+              "ETag": {
+                "description": "Current ETag of the mapping; supply it as `If-Match` on `PATCH`.",
+                "schema": {
+                  "type": "string",
+                  "example": "\"2026-08-13T14:30:00Z\""
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomFieldMappingResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update a custom field mapping",
+        "description": "Partially updates an existing custom field mapping. Only the properties\npresent in the body are changed. The updatable properties depend on the\nmapping's `sourceType`; for `INTELLIGENCE_OPERATOR`, only\n`entityMetadata.intelligenceOperator.field` can be updated today.\n\nThe new `field` is validated the same way as at registration: it must be\none or two `.`-separated segments of letters, digits and `_`, and resolve\nto a `number` or `integer` property in the output schema of the\noperator's latest active version.\n\nThe mapping's `id`, `name`, `category`, `createdAt` and owning entity\nnever change. Sending a `field` value equal to the current one is a no-op that\nreturns `200` without modifying the mapping, so the operation is\nidempotent. Supply `If-Match` with the `ETag` returned by `GET`, `POST`\nor a previous `PATCH` to guard against concurrent updates.\n\nValues already ingested are not recomputed; results processed after the\nupdate use the new `field`.\n",
+        "tags": [
+          "TwilioInsightsConfig"
+        ],
+        "operationId": "PatchCustomFieldMapping",
+        "parameters": [
+          {
+            "name": "mappingId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the custom field mapping, as returned in `id` when the mapping was created.",
+            "schema": {
+              "type": "string",
+              "example": "convinsights_mapping_01m31967b7em08vh1pqgbam3mj"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "description": "ETag of the custom field mapping, as returned in the `ETag` response header.\nWhen supplied, the update is applied only if the mapping has not changed\nsince that ETag was issued; otherwise `412` is returned.\n",
+            "schema": {
+              "type": "string",
+              "example": "\"2026-08-13T14:30:00Z\""
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomFieldMappingUpdateRequest"
+              },
+              "examples": {
+                "update_intelligence_operator_field": {
+                  "summary": "Point a custom measure at a different operator output field",
+                  "value": {
+                    "entityMetadata": {
+                      "sourceType": "INTELLIGENCE_OPERATOR",
+                      "intelligenceOperator": {
+                        "field": "scores.leadScore"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The mapping was updated, or the supplied values already matched and\nnothing changed.\n",
+            "headers": {
+              "ETag": {
+                "description": "Current ETag of the mapping; supply it as `If-Match` on the next update.",
+                "schema": {
+                  "type": "string",
+                  "example": "\"2026-09-30T10:00:00Z\""
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomFieldMappingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request is invalid. One of:\n- a malformed body, an empty body or source object (nothing to\n  update), a missing `entityMetadata.sourceType`, or a `field` that\n  fails its pattern;\n- a property that cannot be updated (for example `name`,\n  `category`, `operatorId`) is present;\n- `entityMetadata.sourceType` does not match the mapping's current\n  `sourceType`, or is not supported for updates;\n- the new `field` does not resolve to a `number` or `integer`\n  property on the operator's latest active version, or the operator\n  no longer has an active `JSON` version.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                },
+                "examples": {
+                  "field_not_resolvable": {
+                    "value": {
+                      "code": 20050,
+                      "message": "The 'field' value 'scores.leadScore' does not resolve on the latest active version of operator 'intelligence_operator_01kcgy1ew0e9x8re6jq542zt8b'.",
+                      "httpStatusCode": 400,
+                      "userError": true
+                    }
+                  },
+                  "field_not_updatable": {
+                    "value": {
+                      "code": 20053,
+                      "message": "The property 'name' cannot be updated.",
+                      "httpStatusCode": 400,
+                      "userError": true,
+                      "params": {
+                        "field": "name"
+                      }
+                    }
+                  },
+                  "source_type_mismatch": {
+                    "value": {
+                      "code": 20054,
+                      "message": "The 'sourceType' does not match the mapping's current source type.",
+                      "httpStatusCode": 400,
+                      "userError": true,
+                      "params": {
+                        "expected": "INTELLIGENCE_OPERATOR",
+                        "actual": "OTHER_SOURCE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The mapping was modified by a concurrent request while this update\nwas being applied. Fetch the mapping and retry.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                },
+                "example": {
+                  "code": 20409,
+                  "message": "The custom field mapping was modified concurrently. Please retry.",
+                  "httpStatusCode": 409,
+                  "userError": true
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "The `If-Match` value does not match the mapping's current `ETag`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                },
+                "example": {
+                  "code": 20412,
+                  "message": "The custom field mapping has changed since the supplied ETag was issued.",
+                  "httpStatusCode": 412,
+                  "userError": true
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many requests (rate limit exceeded for request originating from public API)",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum number of requests allowed in the time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 5
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Number of requests remaining in the current time window",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 0
+              },
+              "X-RateLimit-Reset": {
+                "description": "Time in seconds until the rate limit resets",
+                "schema": {
+                  "type": "integer"
+                },
+                "example": 45
+              },
+              "X-Rate-Limit-Limit": {
+                "$ref": "#/components/headers/X-Rate-Limit-Limit"
+              },
+              "X-Rate-Limit-Remaining": {
+                "$ref": "#/components/headers/X-Rate-Limit-Remaining"
+              },
+              "X-Rate-Limit-Config": {
+                "$ref": "#/components/headers/X-Rate-Limit-Config"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The operator details needed to validate the update could not be\nretrieved from Conversational Intelligence. The mapping was not\nchanged; retry after the `Retry-After` interval.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Number of seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer",
+                  "example": 5
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "A human readable error message",
+                      "type": "string"
+                    },
+                    "httpStatusCode": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "userError": {
+                      "description": "Whether the error is a user error (true) or a system error (false)",
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "description": "A map of parameters related to the error, for example, a `params.twilioErrorCodeUrl` might hold a URL or link to additional information",
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "message",
+                    "httpStatusCode"
+                  ]
+                },
+                "example": {
+                  "code": 20503,
+                  "message": "The service is temporarily unavailable. Please retry after a short delay.",
+                  "httpStatusCode": 503,
+                  "userError": false
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic_apikey_or_accountsid": []
+          }
+        ]
+      }
+    },
+    "/v3/ControlPlane/ConversationInsights/CustomFieldMappingsCapacity": {
       "servers": [
         {
           "url": "https://insights.twilio.com"
