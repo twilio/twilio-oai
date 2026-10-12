@@ -2052,6 +2052,127 @@ components:
       - COMPLETED
       - FAILED
       description: Lifecycle status of a long-running operation.
+    conversations.v2.import_status:
+      type: string
+      enum:
+      - PENDING
+      - COMPLETED
+      - FAILED
+      - CANCELED
+      description: Lifecycle status of an import or one of its sources.
+    conversations.v2.update_import_request:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          enum:
+          - CANCELED
+          description: The status to move the import to. Only CANCELED is supported.
+    conversations.v2.import_source_type:
+      type: string
+      enum:
+      - VOICE_RECORDINGS
+      - CONVERSATIONS_CLASSIC
+      description: Where the import reads data from.
+    conversations.v2.create_import_request:
+      type: object
+      required:
+      - sources
+      properties:
+        sources:
+          type: array
+          minItems: 1
+          description: Sources to import from. Each type can appear once.
+          items:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                $ref: '#/components/schemas/conversations.v2.import_source_type'
+    conversations.v2.import_progress:
+      type: object
+      description: Item counts for one source.
+      properties:
+        completed:
+          type: integer
+        skipped:
+          type: integer
+        failed:
+          type: integer
+        inFlight:
+          type: integer
+    conversations.v2.import_source:
+      type: object
+      required:
+      - type
+      - status
+      - progress
+      properties:
+        type:
+          $ref: '#/components/schemas/conversations.v2.import_source_type'
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_status'
+        progress:
+          $ref: '#/components/schemas/conversations.v2.import_progress'
+        failureReason:
+          type: string
+          description: Why this source failed. Only present when status is FAILED.
+    conversations.v2.import:
+      type: object
+      required:
+      - id
+      - status
+      - sources
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+          example: conv_import_01k1etx3jbfx88476ccja0889f
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_status'
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.import_source'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          description: Only present once the import has finished.
+        failureReason:
+          type: string
+          description: Why the import failed. Only present when status is FAILED.
+    conversations.v2.import_list:
+      type: object
+      required:
+      - imports
+      - meta
+      properties:
+        imports:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.import'
+        meta:
+          type: object
+          required:
+          - key
+          - pageSize
+          properties:
+            key:
+              type: string
+              example: imports
+            pageSize:
+              type: integer
+              example: 1
 security:
 - basic_apikey_or_accountsid: []
 tags:
@@ -2079,6 +2200,9 @@ tags:
     accounts.
 - name: ConversationsV2Operation
   description: Poll the status of a long-running operation.
+- name: ConversationsV2Import
+  description: Import an account's past voice recordings and conversations into Conversation
+    Orchestrator.
 paths:
   /v2/ControlPlane/Configurations:
     servers:
