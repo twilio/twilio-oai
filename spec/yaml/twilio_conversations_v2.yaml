@@ -170,7 +170,7 @@ components:
       required:
       - id
       - name
-      - domain
+      - domainId
       - status
       - visibility
       - policyRef
@@ -188,9 +188,9 @@ components:
           type: string
           description: Human-readable Capability name.
           example: Email Event Exhaust
-        domain:
+        domainId:
           type: string
-          description: Domain that owns the Capability.
+          description: Identifier of the domain that owns the Capability.
           example: Email
         description:
           type: string
@@ -251,7 +251,7 @@ components:
       type: object
       required:
       - name
-      - domain
+      - domainId
       - policyRef
       - schemaRef
       properties:
@@ -260,10 +260,10 @@ components:
           minLength: 1
           description: Human-readable Capability name.
           example: Email Event Exhaust
-        domain:
+        domainId:
           type: string
           minLength: 1
-          description: Domain that owns the Capability.
+          description: Identifier of the domain that owns the Capability.
           example: Email
         description:
           type: string
@@ -372,6 +372,24 @@ components:
               example:
               - agent1
               - agent2
+            traitExtractionStrategyIds:
+              type: array
+              description: A list of Trait Extraction Strategy IDs.
+              maxItems: 1
+              items:
+                type: string
+              x-twilio:
+                libraryVisibility: private
+                betaFeature: api.memory.2026Q3
+            observationExtractionStrategyIds:
+              type: array
+              description: A list of Observation Extraction Strategy IDs.
+              maxItems: 1
+              items:
+                type: string
+              x-twilio:
+                libraryVisibility: private
+                betaFeature: api.memory.2026Q4
             memoryExtractionEnabled:
               type: boolean
               default: false
@@ -866,15 +884,16 @@ components:
           example: conv_action_00000000000000000000000000
         type:
           type: string
-          description: 'The type of action. Accepted values: SEND_MESSAGE.'
-          example: SEND_MESSAGE
+          description: 'The type of action: action-send-message or action-start-flow.'
+          example: action-send-message
         status:
           $ref: '#/components/schemas/conversations.v2.action_status'
           description: 'Current status of the Action.
 
             - PENDING: Action accepted, awaiting downstream confirmation
 
-            - COMPLETED: Downstream backend confirmed the action
+            - COMPLETED: Downstream backend confirmed the action (for START_FLOW,
+            the Studio Flow was triggered)
 
             - FAILED: Downstream backend reported a failure
 
@@ -893,6 +912,10 @@ components:
             - messageSid: The downstream message SID (present when PENDING or COMPLETED)
 
             - communicationId: The Communication ID (present when COMPLETED)
+
+            For START_FLOW:
+
+            - executionSid: The Studio Flow execution SID (present when COMPLETED)
 
             '
           example:
@@ -913,9 +936,14 @@ components:
           format: date-time
           description: Timestamp when the action reached a terminal status.
           example: '2026-03-30T10:30:02Z'
+        failureReason:
+          type: string
+          nullable: true
+          description: Human-readable failure reason. Null unless status is FAILED.
+          example: Could not find flow FW00000000000000000000000000000000
       example:
         id: conv_action_00000000000000000000000000
-        type: SEND_MESSAGE
+        type: action-send-message
         status: COMPLETED
         conversationId: conv_conversation_00000000000000000000000000
         related:
@@ -1242,6 +1270,23 @@ components:
       example:
         machineDetection: DetectMessageEnd
         timeout: 30
+    conversations.v2.create_conversation_action_request:
+      description: The single action dispatched once the Conversation is created,
+        selected by `type`.
+      oneOf:
+      - $ref: '#/components/schemas/conversations.v2.start_conversation_send_message_action'
+      - $ref: '#/components/schemas/conversations.v2.start_conversation_start_flow_action'
+      discriminator:
+        propertyName: type
+        mapping:
+          SEND_MESSAGE: '#/components/schemas/conversations.v2.start_conversation_send_message_action'
+          START_FLOW: '#/components/schemas/conversations.v2.start_conversation_start_flow_action'
+      example:
+        type: START_FLOW
+        payload:
+          flowId: FW00000000000000000000000000000000
+          parameters:
+            orderNumber: '12345'
     conversations.v2.start_conversation_action_request:
       description: The single action dispatched once the Conversation is created,
         selected by `type`.
@@ -1312,23 +1357,6 @@ components:
           payload:
             content:
               text: Your order has shipped!
-    conversations.v2.update_start_conversation_action_request:
-      type: object
-      description: Reports the outcome of an outbound call back to its Action.
-      required:
-      - callStatus
-      properties:
-        callStatus:
-          $ref: '#/components/schemas/conversations.v2.call_status'
-          description: Outcome of the outbound call.
-        callId:
-          type: string
-          description: The Call SID of the outbound call.
-          pattern: ^CA[0-9a-fA-F]{32}$
-          example: CA00000000000000000000000000000000
-      example:
-        callStatus: ANSWERED
-        callId: CA00000000000000000000000000000000
     conversations.v2.start_conversation_action:
       type: object
       description: 'The Action created by the StartConversation action. Type-less:
@@ -1375,8 +1403,7 @@ components:
             - executionSid: The Studio Flow execution started for the Conversation,
             for START_FLOW
 
-            - callId: The Call SID of the outbound call, for CALL and for START_FLOW
-            once its Flow reports back
+            - callId: The Call SID of the outbound call, for CALL
 
 
             Absent from the 202 response (returned as an empty map).
@@ -1986,17 +2013,6 @@ components:
       - CHAT
       description: 'Channel type for sending a Communication. Note: VOICE is receive-only
         and not supported for send operations.'
-    conversations.v2.call_status:
-      type: string
-      enum:
-      - ANSWERED
-      - BUSY
-      - NO_ANSWER
-      - FAILED
-      - CANCELED
-      description: Outcome of an outbound call placed by a CALL StartConversation
-        Action.
-      example: ANSWERED
     conversations.v2.recipient_delivery_status:
       type: string
       enum:
@@ -2036,6 +2052,127 @@ components:
       - COMPLETED
       - FAILED
       description: Lifecycle status of a long-running operation.
+    conversations.v2.import_status:
+      type: string
+      enum:
+      - PENDING
+      - COMPLETED
+      - FAILED
+      - CANCELED
+      description: Lifecycle status of an import or one of its sources.
+    conversations.v2.update_import_request:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          type: string
+          enum:
+          - CANCELED
+          description: The status to move the import to. Only CANCELED is supported.
+    conversations.v2.import_source_type:
+      type: string
+      enum:
+      - VOICE_RECORDINGS
+      - CONVERSATIONS_CLASSIC
+      description: Where the import reads data from.
+    conversations.v2.create_import_request:
+      type: object
+      required:
+      - sources
+      properties:
+        sources:
+          type: array
+          minItems: 1
+          description: Sources to import from. Each type can appear once.
+          items:
+            type: object
+            required:
+            - type
+            properties:
+              type:
+                $ref: '#/components/schemas/conversations.v2.import_source_type'
+    conversations.v2.import_progress:
+      type: object
+      description: Item counts for one source.
+      properties:
+        completed:
+          type: integer
+        skipped:
+          type: integer
+        failed:
+          type: integer
+        inFlight:
+          type: integer
+    conversations.v2.import_source:
+      type: object
+      required:
+      - type
+      - status
+      - progress
+      properties:
+        type:
+          $ref: '#/components/schemas/conversations.v2.import_source_type'
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_status'
+        progress:
+          $ref: '#/components/schemas/conversations.v2.import_progress'
+        failureReason:
+          type: string
+          description: Why this source failed. Only present when status is FAILED.
+    conversations.v2.import:
+      type: object
+      required:
+      - id
+      - status
+      - sources
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+          example: conv_import_01k1etx3jbfx88476ccja0889f
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_status'
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.import_source'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          description: Only present once the import has finished.
+        failureReason:
+          type: string
+          description: Why the import failed. Only present when status is FAILED.
+    conversations.v2.import_list:
+      type: object
+      required:
+      - imports
+      - meta
+      properties:
+        imports:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.import'
+        meta:
+          type: object
+          required:
+          - key
+          - pageSize
+          properties:
+            key:
+              type: string
+              example: imports
+            pageSize:
+              type: integer
+              example: 1
 security:
 - basic_apikey_or_accountsid: []
 tags:
@@ -2063,6 +2200,9 @@ tags:
     accounts.
 - name: ConversationsV2Operation
   description: Poll the status of a long-running operation.
+- name: ConversationsV2Import
+  description: Import an account's past voice recordings and conversations into Conversation
+    Orchestrator.
 paths:
   /v2/ControlPlane/Configurations:
     servers:
@@ -2175,6 +2315,24 @@ paths:
                           example:
                           - agent1
                           - agent2
+                        traitExtractionStrategyIds:
+                          type: array
+                          description: A list of Trait Extraction Strategy IDs.
+                          maxItems: 1
+                          items:
+                            type: string
+                          x-twilio:
+                            libraryVisibility: private
+                            betaFeature: api.memory.2026Q3
+                        observationExtractionStrategyIds:
+                          type: array
+                          description: A list of Observation Extraction Strategy IDs.
+                          maxItems: 1
+                          items:
+                            type: string
+                          x-twilio:
+                            libraryVisibility: private
+                            betaFeature: api.memory.2026Q4
                         memoryExtractionEnabled:
                           type: boolean
                           default: false
@@ -2576,6 +2734,24 @@ paths:
                     example:
                     - agent1
                     - agent2
+                  traitExtractionStrategyIds:
+                    type: array
+                    description: A list of Trait Extraction Strategy IDs.
+                    maxItems: 1
+                    items:
+                      type: string
+                    x-twilio:
+                      libraryVisibility: private
+                      betaFeature: api.memory.2026Q3
+                  observationExtractionStrategyIds:
+                    type: array
+                    description: A list of Observation Extraction Strategy IDs.
+                    maxItems: 1
+                    items:
+                      type: string
+                    x-twilio:
+                      libraryVisibility: private
+                      betaFeature: api.memory.2026Q4
                   memoryExtractionEnabled:
                     type: boolean
                     default: false
@@ -3287,6 +3463,25 @@ paths:
                               example:
                               - agent1
                               - agent2
+                            traitExtractionStrategyIds:
+                              type: array
+                              description: A list of Trait Extraction Strategy IDs.
+                              maxItems: 1
+                              items:
+                                type: string
+                              x-twilio:
+                                libraryVisibility: private
+                                betaFeature: api.memory.2026Q3
+                            observationExtractionStrategyIds:
+                              type: array
+                              description: A list of Observation Extraction Strategy
+                                IDs.
+                              maxItems: 1
+                              items:
+                                type: string
+                              x-twilio:
+                                libraryVisibility: private
+                                betaFeature: api.memory.2026Q4
                             memoryExtractionEnabled:
                               type: boolean
                               default: false
@@ -3398,6 +3593,24 @@ paths:
                         type: string
                       description: A list of Conversational Intelligence configuration
                         IDs.
+                    traitExtractionStrategyIds:
+                      type: array
+                      description: A list of Trait Extraction Strategy IDs.
+                      maxItems: 1
+                      items:
+                        type: string
+                      x-twilio:
+                        libraryVisibility: private
+                        betaFeature: api.memory.2026Q3
+                    observationExtractionStrategyIds:
+                      type: array
+                      description: A list of Observation Extraction Strategy IDs.
+                      maxItems: 1
+                      items:
+                        type: string
+                      x-twilio:
+                        libraryVisibility: private
+                        betaFeature: api.memory.2026Q4
                     workflows:
                       type: array
                       maxItems: 5
@@ -3564,6 +3777,24 @@ paths:
                         example:
                         - agent1
                         - agent2
+                      traitExtractionStrategyIds:
+                        type: array
+                        description: A list of Trait Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q3
+                      observationExtractionStrategyIds:
+                        type: array
+                        description: A list of Observation Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q4
                       memoryExtractionEnabled:
                         type: boolean
                         default: false
@@ -3727,6 +3958,24 @@ paths:
                         example:
                         - agent1
                         - agent2
+                      traitExtractionStrategyIds:
+                        type: array
+                        description: A list of Trait Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q3
+                      observationExtractionStrategyIds:
+                        type: array
+                        description: A list of Observation Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q4
                       memoryExtractionEnabled:
                         type: boolean
                         default: false
@@ -3906,6 +4155,24 @@ paths:
                         example:
                         - agent1
                         - agent2
+                      traitExtractionStrategyIds:
+                        type: array
+                        description: A list of Trait Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q3
+                      observationExtractionStrategyIds:
+                        type: array
+                        description: A list of Observation Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q4
                       memoryExtractionEnabled:
                         type: boolean
                         default: false
@@ -4173,6 +4440,24 @@ paths:
                         example:
                         - agent1
                         - agent2
+                      traitExtractionStrategyIds:
+                        type: array
+                        description: A list of Trait Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q3
+                      observationExtractionStrategyIds:
+                        type: array
+                        description: A list of Observation Extraction Strategy IDs.
+                        maxItems: 1
+                        items:
+                          type: string
+                        x-twilio:
+                          libraryVisibility: private
+                          betaFeature: api.memory.2026Q4
                       memoryExtractionEnabled:
                         type: boolean
                         default: false
@@ -4310,15 +4595,16 @@ paths:
                     example: conv_action_00000000000000000000000000
                   type:
                     type: string
-                    description: 'The type of action. Accepted values: SEND_MESSAGE.'
-                    example: SEND_MESSAGE
+                    description: 'The type of action: action-send-message or action-start-flow.'
+                    example: action-send-message
                   status:
                     $ref: '#/components/schemas/conversations.v2.action_status'
                     description: 'Current status of the Action.
 
                       - PENDING: Action accepted, awaiting downstream confirmation
 
-                      - COMPLETED: Downstream backend confirmed the action
+                      - COMPLETED: Downstream backend confirmed the action (for START_FLOW,
+                      the Studio Flow was triggered)
 
                       - FAILED: Downstream backend reported a failure
 
@@ -4339,6 +4625,11 @@ paths:
 
                       - communicationId: The Communication ID (present when COMPLETED)
 
+                      For START_FLOW:
+
+                      - executionSid: The Studio Flow execution SID (present when
+                      COMPLETED)
+
                       '
                     example:
                       messageSid: SM1234567890abcdef1234567890abcdef
@@ -4358,9 +4649,15 @@ paths:
                     format: date-time
                     description: Timestamp when the action reached a terminal status.
                     example: '2026-03-30T10:30:02Z'
+                  failureReason:
+                    type: string
+                    nullable: true
+                    description: Human-readable failure reason. Null unless status
+                      is FAILED.
+                    example: Could not find flow FW00000000000000000000000000000000
                 example:
                   id: conv_action_00000000000000000000000000
-                  type: SEND_MESSAGE
+                  type: action-send-message
                   status: COMPLETED
                   conversationId: conv_conversation_00000000000000000000000000
                   related:
@@ -4436,15 +4733,16 @@ paths:
                     example: conv_action_00000000000000000000000000
                   type:
                     type: string
-                    description: 'The type of action. Accepted values: SEND_MESSAGE.'
-                    example: SEND_MESSAGE
+                    description: 'The type of action: action-send-message or action-start-flow.'
+                    example: action-send-message
                   status:
                     $ref: '#/components/schemas/conversations.v2.action_status'
                     description: 'Current status of the Action.
 
                       - PENDING: Action accepted, awaiting downstream confirmation
 
-                      - COMPLETED: Downstream backend confirmed the action
+                      - COMPLETED: Downstream backend confirmed the action (for START_FLOW,
+                      the Studio Flow was triggered)
 
                       - FAILED: Downstream backend reported a failure
 
@@ -4465,6 +4763,11 @@ paths:
 
                       - communicationId: The Communication ID (present when COMPLETED)
 
+                      For START_FLOW:
+
+                      - executionSid: The Studio Flow execution SID (present when
+                      COMPLETED)
+
                       '
                     example:
                       messageSid: SM1234567890abcdef1234567890abcdef
@@ -4484,9 +4787,15 @@ paths:
                     format: date-time
                     description: Timestamp when the action reached a terminal status.
                     example: '2026-03-30T10:30:02Z'
+                  failureReason:
+                    type: string
+                    nullable: true
+                    description: Human-readable failure reason. Null unless status
+                      is FAILED.
+                    example: Could not find flow FW00000000000000000000000000000000
                 example:
                   id: conv_action_00000000000000000000000000
-                  type: SEND_MESSAGE
+                  type: action-send-message
                   status: COMPLETED
                   conversationId: conv_conversation_00000000000000000000000000
                   related:
@@ -5322,6 +5631,15 @@ paths:
                             type: string
                 channelId:
                   type: string
+                resourceId:
+                  type: string
+                  minLength: 1
+                  description: External resource identifier for this Communication
+                    (e.g. MessageSid for SMS/RCS/WhatsApp, TranscriptionSid + MessageIndex
+                    for Voice). If a Communication with the same resourceId already
+                    exists in the Conversation, it is updated instead of a new one
+                    being created.
+                  example: SM12345678901234567890123456789012
                 recipients:
                   type: array
                   minItems: 1
