@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:22.23.4
 
 RUN mkdir /twilio
 WORKDIR /twilio
