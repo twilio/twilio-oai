@@ -12,7 +12,315 @@
         "type": "http"
       }
     },
+    "parameters": {
+      "numbers.v3.numbersSenders.identity": {
+        "name": "identity",
+        "in": "path",
+        "description": "The Numbers & Senders ID (`commsidentity_identity_...`) or the Phone Number SID (`PN...`).",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^(commsidentity_identity_[a-zA-Z0-9]{26}|PN[a-zA-Z0-9]{32})$",
+          "example": "commsidentity_identity_01kzvt6cxve81s3xdzv4eqr2pf"
+        }
+      },
+      "numbers.v3.numbersSenders.Idempotency-Key": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "description": "A key you generate, 1-255 characters; a UUID works. Retry with the same key to get the original\noperation back instead of starting a new one. Use a new key for each new request.\n",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "example": "01890a5d-aa0f-7c80-b8e6-0242ac140004"
+        }
+      }
+    },
+    "headers": {
+      "numbers.v3.numbersSenders.Retry-After": {
+        "description": "Seconds to wait before retrying.",
+        "schema": {
+          "type": "integer",
+          "example": 5
+        }
+      },
+      "numbers.v3.numbersSenders.Operation-Id": {
+        "description": "Equals `operationId` in the body.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+        }
+      }
+    },
     "schemas": {
+      "numbers.v3.numbersSenders.EnablementSummary": {
+        "type": "object",
+        "description": "One Compliance Registration associated with a Numbers & Senders resource.",
+        "required": [
+          "registrationId",
+          "accountId",
+          "status",
+          "errors",
+          "dateCreated",
+          "dateUpdated"
+        ],
+        "properties": {
+          "registrationId": {
+            "type": "string",
+            "description": "The Compliance Registration ID.",
+            "pattern": "^compliance_registration_[a-zA-Z0-9]{26}$",
+            "example": "compliance_registration_01kzvt6cxve81s3xdzv4eqr2aa"
+          },
+          "accountId": {
+            "type": "string",
+            "description": "The Account SID that created the association.",
+            "pattern": "^AC[a-zA-Z0-9]{32}$",
+            "example": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "status": {
+            "type": "string",
+            "description": "The association's status, set as the Compliance Registration changes state.",
+            "enum": [
+              "ENABLED",
+              "PENDING_ENABLED",
+              "PENDING_DISABLED",
+              "DISABLED"
+            ],
+            "example": "ENABLED"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Reserved for errors that block this association. Always empty today. Branch on `status`,\nnot on the presence of errors.\n",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "description"
+              ],
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "description": "Twilio error code.",
+                  "example": 40032
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Human-readable description of the error."
+                }
+              }
+            }
+          },
+          "regulationId": {
+            "type": "string",
+            "description": "The Regulation SID this association satisfies.",
+            "pattern": "^RN[a-zA-Z0-9]{32}$",
+            "example": "RNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "regulationName": {
+            "type": "string",
+            "description": "Human-readable name of the regulation.",
+            "example": "CA 10DLC"
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the association was created.",
+            "example": "2026-10-01T15:02:11Z"
+          },
+          "dateUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the association was last updated.",
+            "example": "2026-10-01T15:02:12Z"
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Operation": {
+        "type": "object",
+        "description": "A long-running operation. Returned by the GET and, with `status` `PENDING`, on every 202.\nIgnore fields you do not recognize; new ones may be added.\n",
+        "required": [
+          "operationId",
+          "status",
+          "createdAt",
+          "payload"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "description": "The operation ID. Treat it as opaque.",
+            "example": "proc_job_01h9d8r0vte3hz8tykdj329t7r"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "CANCELLED",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the request was accepted."
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The operation's URL. Follow it as returned."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the operation reached a final status."
+          },
+          "payload": {
+            "type": "object",
+            "description": "What the operation does.",
+            "required": [
+              "requestType",
+              "resourceType"
+            ],
+            "properties": {
+              "requestType": {
+                "type": "string",
+                "description": "`CREATE` for an association, `DELETE` for a removal.",
+                "enum": [
+                  "CREATE",
+                  "UPDATE",
+                  "DELETE"
+                ]
+              },
+              "resourceType": {
+                "type": "string",
+                "description": "`ComplianceRegistration`. More may be added.",
+                "example": "ComplianceRegistration"
+              },
+              "totalItems": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Bulk only. Null until known."
+              },
+              "processedItems": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Bulk only."
+              },
+              "failedItems": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Bulk only. Null when not counted."
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "Bulk only. When progress last changed."
+              }
+            }
+          },
+          "result": {
+            "type": "object",
+            "nullable": true,
+            "description": "Bulk only. Item counts of a completed operation.",
+            "properties": {
+              "totalItems": {
+                "type": "integer",
+                "nullable": true
+              },
+              "succeededItems": {
+                "type": "integer",
+                "nullable": true
+              },
+              "failedItems": {
+                "type": "integer",
+                "nullable": true
+              }
+            }
+          },
+          "resultId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The Compliance Registration ID of a `COMPLETED` association. `null` otherwise."
+          },
+          "resultUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The resource's ComplianceRegistrations URL, set with `resultId`. `null` otherwise."
+          },
+          "resultRetentionPeriod": {
+            "type": "string",
+            "format": "duration",
+            "nullable": true,
+            "description": "Bulk only. ISO 8601 duration, from `createdAt`, that the results stay available.",
+            "example": "P7D"
+          },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "description": "Set only when `status` is `FAILED`; `null` otherwise. Branch on `code`; `detail` is for display only.",
+            "required": [
+              "type",
+              "title",
+              "code",
+              "detail"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "format": "uri",
+                "example": "https://www.twilio.com/docs/api/errors/50001"
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 128,
+                "example": "Association failed"
+              },
+              "code": {
+                "type": "integer",
+                "description": "Twilio error code.",
+                "example": 50001
+              },
+              "detail": {
+                "type": "string",
+                "maxLength": 1024,
+                "example": "Failed to associate registration"
+              },
+              "instance": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "errors": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "detail",
+                    "pointer"
+                  ],
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                      "maxLength": 1024
+                    },
+                    "pointer": {
+                      "type": "string",
+                      "description": "JSON Pointer (RFC 6901) to the field in the request."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "numbers.v3.hostedNumbers.hostedNumberOrder": {
         "type": "object",
         "properties": {
@@ -333,6 +641,937 @@
           "phone-bill"
         ]
       }
+    },
+    "responses": {
+      "numbers.v3.numbersSenders.OperationAccepted": {
+        "description": "Accepted. The body is the operation with `status` `PENDING`.",
+        "headers": {
+          "Location": {
+            "description": "The operation's URL. Equals `statusUrl` in the body. Treat it as opaque.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "example": "https://numbers.twilio.com/v3/Operations/proc_job_01h9d8r0vte3hz8tykdj329t7r"
+            }
+          },
+          "Operation-Id": {
+            "$ref": "#/components/headers/numbers.v3.numbersSenders.Operation-Id"
+          },
+          "Retry-After": {
+            "description": "Seconds to wait before the first poll of `statusUrl`.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 5
+            }
+          },
+          "Access-Control-Allow-Origin": {
+            "description": "Specify the origin(s) allowed to access the resource",
+            "schema": {
+              "type": "string"
+            },
+            "example": "*"
+          },
+          "Access-Control-Allow-Methods": {
+            "description": "Specify the HTTP methods allowed when accessing the resource",
+            "schema": {
+              "type": "string"
+            },
+            "example": "POST, OPTIONS"
+          },
+          "Access-Control-Allow-Headers": {
+            "description": "Specify the headers allowed when accessing the resource",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Content-Type, Authorization"
+          },
+          "Access-Control-Allow-Credentials": {
+            "description": "Indicates whether the browser should include credentials",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          "Access-Control-Expose-Headers": {
+            "description": "Headers exposed to the client",
+            "schema": {
+              "type": "string",
+              "example": "X-Custom-Header1, X-Custom-Header2"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/numbers.v3.numbersSenders.Operation"
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-400": {
+        "description": "The body or registration ID is malformed, or the Idempotency-Key header is missing.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-401": {
+        "description": "Credentials are missing or invalid.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-403": {
+        "description": "The credentials are not allowed to make this request.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-404": {
+        "description": "The resource or operation does not exist on the account. A malformed operation ID reads the same.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-409": {
+        "description": "The number is not assigned, or a removal of the same registration is still in progress.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-429": {
+        "description": "Too many requests. Retry after `Retry-After` seconds.",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/numbers.v3.numbersSenders.Retry-After"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-500": {
+        "description": "Unexpected error. Retry the request.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-502": {
+        "description": "The request could not be completed because of an upstream failure. Retry the request with the same Idempotency-Key where one applies.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            },
+            "example": {
+              "type": "https://www.twilio.com/docs/api/errors/20502",
+              "title": "Bad gateway",
+              "status": 502,
+              "code": 20502,
+              "detail": "The downstream service failed to process the request."
+            }
+          }
+        }
+      },
+      "numbers.v3.numbersSenders.Error-503": {
+        "description": "Temporarily unavailable. Retry after `Retry-After` seconds with the same Idempotency-Key.",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/numbers.v3.numbersSenders.Retry-After"
+          }
+        },
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "description": "The error response from a Twilio service, compliant with RFC-9457 (Problem Details for HTTP APIs).\nSee https://www.rfc-editor.org/rfc/rfc9457.html for the specification.\n",
+              "type": "object",
+              "required": [
+                "type",
+                "title",
+                "status",
+                "code"
+              ],
+              "properties": {
+                "type": {
+                  "description": "A URI reference (RFC3986) that identifies the problem type. This URI should resolve to\nhuman-readable documentation for the problem type. When dereferenced, it SHOULD provide\nhuman-readable documentation for the problem type (e.g., using HTML).\nFor Twilio errors, this should be a URL to https://www.twilio.com/docs/api/errors/{code}\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": false,
+                  "example": "https://www.twilio.com/docs/api/errors/20001"
+                },
+                "title": {
+                  "description": "A short, human-readable summary of the problem type. It SHOULD NOT change from occurrence\nto occurrence of the problem, except for purposes of localization.\n",
+                  "type": "string",
+                  "nullable": false,
+                  "maxLength": 128,
+                  "example": "Invalid parameter"
+                },
+                "status": {
+                  "description": "The HTTP status code generated by the origin server for this occurrence of the problem.\nThis is the same as the HTTP status code returned in the response.\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 400
+                },
+                "detail": {
+                  "description": "A human-readable explanation specific to this occurrence of the problem. This field's value\ncan change between different occurrences of the same problem type to provide specific details.\n",
+                  "type": "string",
+                  "nullable": true,
+                  "maxLength": 1024,
+                  "example": "The 'PhoneNumber' parameter is required but was not provided."
+                },
+                "instance": {
+                  "description": "A URI reference that identifies the specific occurrence of the problem. It may or may not\nyield further information if dereferenced. This can be used for correlation and debugging.\n",
+                  "type": "string",
+                  "format": "uri-reference",
+                  "nullable": true,
+                  "example": "/api/v1/accounts/AC123/calls/CA456"
+                },
+                "code": {
+                  "description": "Twilio-specific error code (extension member). This numeric code uniquely identifies\nthe error type within Twilio's error taxonomy and can be used for programmatic handling.\nRegistered at https://www.twilio.com/docs/api/errors\n",
+                  "type": "integer",
+                  "nullable": false,
+                  "example": 20001
+                },
+                "errors": {
+                  "description": "Twilio-specific extension for validation errors (typically HTTP 400/422).\nContains an array of individual field-level validation errors, each with a\nhuman-readable detail message and a JSON Pointer (RFC 6901) indicating the\nlocation of the error in the request. This is particularly useful for\nrequest validation failures where multiple fields may have errors.\n",
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "detail",
+                      "pointer"
+                    ],
+                    "properties": {
+                      "detail": {
+                        "type": "string",
+                        "description": "A human-readable explanation of the validation error for this specific field.",
+                        "maxLength": 1024,
+                        "example": "must be a positive integer"
+                      },
+                      "pointer": {
+                        "type": "string",
+                        "description": "A JSON Pointer (RFC 6901) to the location in the request where the error occurred.",
+                        "example": "#/age"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "detail": "must be a positive integer",
+                      "pointer": "#/age"
+                    },
+                    {
+                      "detail": "must be 'green', 'red' or 'blue'",
+                      "pointer": "#/profile/color"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -356,6 +1595,16 @@
   "servers": [
     {
       "url": "https://numbers.twilio.com"
+    }
+  ],
+  "tags": [
+    {
+      "name": "NumbersV3ComplianceRegistrations",
+      "description": "Compliance Registrations associated with a Numbers & Senders resource"
+    },
+    {
+      "name": "NumbersV3Operations",
+      "description": "Status of asynchronous Numbers & Senders operations"
     }
   ],
   "paths": {

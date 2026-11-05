@@ -1,0 +1,4614 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Twilio - Webhooks Configuration",
+    "description": "Centralized webhook configuration with OAuth2 support, immutable resources, and zero-downtime credential rotation.\n",
+    "termsOfService": "https://www.twilio.com/legal/tos",
+    "contact": {
+      "name": "Twilio Support",
+      "url": "https://support.twilio.com",
+      "email": "support@twilio.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0",
+    "x-twilio": {
+      "apiStandards": "v1.0"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://webhooks.twilio.com"
+    }
+  ],
+  "security": [
+    {
+      "accountSid_authToken": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "SharedKeys",
+      "description": "Pre-shared keys for webhook signature validation."
+    },
+    {
+      "name": "AuthProfiles",
+      "description": "Reusable authentication credentials, queryable via GET /AuthProfiles (inline auth is not queryable)."
+    },
+    {
+      "name": "Settings",
+      "description": "Webhook configuration combining authentication, signature validation, and connection settings."
+    },
+    {
+      "name": "Rules",
+      "description": "Route webhook requests to Settings using URL patterns. Rule mutations are async (~30-60s propagation)."
+    },
+    {
+      "name": "Operations",
+      "description": "Track async Rule operations (create, update, delete)."
+    },
+    {
+      "name": "Tests",
+      "description": "Test webhook configurations before production."
+    },
+    {
+      "name": "EdgeZones",
+      "description": "Catalog of available edge zones for geographic webhook delivery control."
+    }
+  ],
+  "paths": {
+    "/v1/Webhooks/SharedKeys": {
+      "get": {
+        "operationId": "ListSharedKey",
+        "summary": "List all SharedKeys",
+        "description": "Returns paginated list of SharedKey summaries (secrets never included)",
+        "tags": [
+          "SharedKeys"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of SharedKeys",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedKeysList"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateSharedKey",
+        "summary": "Create a new SharedKey",
+        "description": "Creates a new Shared Key for webhook signature validation.\n\n**IMPORTANT**: The `secret` field is ONLY returned in this response and cannot be retrieved later.\nStore it securely in your secrets management system.\n",
+        "tags": [
+          "SharedKeys"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostSharedKey"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SharedKey created (secret included only in this response)",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedKeyWithSecret"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (friendlyName exceeds maximum length). friendlyName itself is optional and defaults to blank.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'friendlyName' exceeds maximum length of 255 characters",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "422": {
+            "description": "Account has reached maximum SharedKeys limit",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59200",
+                  "title": "Account Limit Reached",
+                  "status": 422,
+                  "detail": "Account has reached maximum SharedKeys limit (50). Delete unused SharedKeys or contact support.",
+                  "code": 59200
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/SharedKeys/{sharedKeyId}": {
+      "parameters": [
+        {
+          "name": "sharedKeyId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$",
+            "description": "SharedKey SID"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "FetchSharedKey",
+        "summary": "Get a SharedKey by ID",
+        "description": "Returns a SharedKey by its ID. The secret is never included in GET responses.",
+        "tags": [
+          "SharedKeys"
+        ],
+        "responses": {
+          "200": {
+            "description": "SharedKey details (secret not included)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "SharedKey not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "SharedKey webhooks_sharedkey_01jbyk7rb8xkm9pq5nabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchSharedKey",
+        "summary": "Update SharedKey friendlyName",
+        "description": "Update SharedKey's friendlyName only. SharedKeys are otherwise immutable.",
+        "tags": [
+          "SharedKeys"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchSharedKey"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SharedKey updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedKey"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'friendlyName' exceeds maximum length of 255 characters",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "SharedKey not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "SharedKey webhooks_sharedkey_01jbyk7rb8xkm9pq5nabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteSharedKey",
+        "summary": "Delete SharedKey (hard delete)",
+        "description": "Permanently deletes a Shared Key.\n\nThe API prevents deletion if any Settings reference this key. Delete the dependent Settings first, then delete the SharedKey.\n",
+        "tags": [
+          "SharedKeys"
+        ],
+        "responses": {
+          "204": {
+            "description": "SharedKey deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "SharedKey not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "SharedKey webhooks_sharedkey_01jbyk7rb8xkm9pq5nabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "SharedKey is still referenced by Settings resources",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59100",
+                  "title": "Resource Is Still In Use",
+                  "status": 409,
+                  "detail": "SharedKey webhooks_sharedkey_01jbyk7rb8xkm9pq5nabcdefgh is still being referenced by some setting",
+                  "code": 59100
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/AuthProfiles": {
+      "get": {
+        "operationId": "ListAuthProfile",
+        "summary": "List all AuthProfile resources",
+        "description": "Returns a paginated list of AuthProfile summaries. Secrets are never included in list responses.",
+        "tags": [
+          "AuthProfiles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of AuthProfile summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProfileList"
+                },
+                "examples": {
+                  "authprofile-list": {
+                    "summary": "List of AuthProfile resources",
+                    "value": {
+                      "authProfiles": [
+                        {
+                          "id": "webhooks_sharedauth_01jbyk2n8pqrst567890abcdef",
+                          "type": "OAUTH2",
+                          "friendlyName": "Production OAuth2",
+                          "createdAt": "2026-03-01T10:00:00Z",
+                          "updatedAt": "2026-03-15T14:30:00Z"
+                        },
+                        {
+                          "id": "webhooks_sharedauth_01jbyk3x7zvwxy567890abcdef",
+                          "type": "BASIC",
+                          "friendlyName": "Staging Basic Auth",
+                          "createdAt": "2026-02-10T08:00:00Z",
+                          "updatedAt": "2026-02-10T08:00:00Z"
+                        },
+                        {
+                          "id": "webhooks_sharedauth_01jbyk4m9qabcd567890efghij",
+                          "type": "DIGEST",
+                          "friendlyName": "Dev Digest Auth",
+                          "createdAt": "2026-01-05T12:00:00Z",
+                          "updatedAt": "2026-03-10T09:30:00Z"
+                        }
+                      ],
+                      "meta": {
+                        "key": "authProfiles",
+                        "pageSize": 20,
+                        "nextToken": null,
+                        "previousToken": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateAuthProfile",
+        "summary": "Create a new AuthProfile resource",
+        "description": "Creates a new reusable AuthProfile resource for use across multiple Settings.",
+        "tags": [
+          "AuthProfiles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAuthProfile"
+              },
+              "examples": {
+                "oauth2": {
+                  "summary": "Create OAuth2 AuthProfile",
+                  "value": {
+                    "type": "OAUTH2",
+                    "friendlyName": "Production OAuth2",
+                    "tokenUrl": "https://auth.example.com/oauth/token",
+                    "clientId": "client-abc-123",
+                    "clientSecret": "secret-xyz-789",
+                    "scope": "webhooks.write"
+                  }
+                },
+                "basic": {
+                  "summary": "Create Basic AuthProfile",
+                  "value": {
+                    "type": "BASIC",
+                    "friendlyName": "Staging Basic Auth",
+                    "username": "webhook_user",
+                    "password": "secret-password-123"
+                  }
+                },
+                "digest": {
+                  "summary": "Create Digest AuthProfile",
+                  "value": {
+                    "type": "DIGEST",
+                    "friendlyName": "Dev Digest Auth",
+                    "username": "digest_user",
+                    "password": "secret-digest-456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "AuthProfile created",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProfile"
+                },
+                "examples": {
+                  "oauth2": {
+                    "summary": "OAuth2 AuthProfile created",
+                    "value": {
+                      "id": "webhooks_sharedauth_01jbyk2n8pqrst567890abcdef",
+                      "type": "OAUTH2",
+                      "friendlyName": "Production OAuth2",
+                      "tokenUrl": "https://auth.example.com/oauth/token",
+                      "clientId": "client-abc-123",
+                      "scope": "webhooks.write",
+                      "createdAt": "2026-03-01T10:00:00Z",
+                      "updatedAt": "2026-03-01T10:00:00Z"
+                    }
+                  },
+                  "basic": {
+                    "summary": "Basic AuthProfile created",
+                    "value": {
+                      "id": "webhooks_sharedauth_01jbyk3x7zvwxy567890abcdef",
+                      "type": "BASIC",
+                      "friendlyName": "Staging Basic Auth",
+                      "username": "webhook_user",
+                      "createdAt": "2026-02-10T08:00:00Z",
+                      "updatedAt": "2026-02-10T08:00:00Z"
+                    }
+                  },
+                  "digest": {
+                    "summary": "Digest AuthProfile created",
+                    "value": {
+                      "id": "webhooks_sharedauth_01jbyk4m9qabcd567890efghij",
+                      "type": "DIGEST",
+                      "friendlyName": "Dev Digest Auth",
+                      "username": "digest_user",
+                      "createdAt": "2026-01-05T12:00:00Z",
+                      "updatedAt": "2026-01-05T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'type' is required and must be one of: OAUTH2, BASIC, DIGEST",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "422": {
+            "description": "Account has reached maximum Auth resources limit",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59200",
+                  "title": "Account Limit Reached",
+                  "status": 422,
+                  "detail": "Account has reached maximum Auth resources limit (50). Delete unused Auth resources or contact support.",
+                  "code": 59200
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/AuthProfiles/{authProfileId}": {
+      "parameters": [
+        {
+          "name": "authProfileId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "FetchAuthProfile",
+        "summary": "Get AuthProfile by ID",
+        "description": "Returns an AuthProfile resource by its ID. Secrets are never returned in GET responses.",
+        "tags": [
+          "AuthProfiles"
+        ],
+        "responses": {
+          "200": {
+            "description": "AuthProfile details (secrets NOT included)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProfile"
+                },
+                "examples": {
+                  "oauth2": {
+                    "summary": "OAuth2 AuthProfile",
+                    "value": {
+                      "id": "webhooks_sharedauth_01jbyk2n8pqrst567890abcdef",
+                      "type": "OAUTH2",
+                      "friendlyName": "Production OAuth2",
+                      "tokenUrl": "https://auth.example.com/oauth/token",
+                      "clientId": "client-abc-123",
+                      "scope": "webhooks.write",
+                      "createdAt": "2026-03-01T10:00:00Z",
+                      "updatedAt": "2026-03-15T14:30:00Z"
+                    }
+                  },
+                  "basic": {
+                    "summary": "Basic AuthProfile",
+                    "value": {
+                      "id": "webhooks_sharedauth_01jbyk3x7zvwxy567890abcdef",
+                      "type": "BASIC",
+                      "friendlyName": "Staging Auth",
+                      "username": "webhook_user",
+                      "createdAt": "2026-02-10T08:00:00Z",
+                      "updatedAt": "2026-02-10T08:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "AuthProfile not found or deleted",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "AuthProfile webhooks_sharedauth_01jbyk2n8pqrst567890abcdef not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchAuthProfile",
+        "summary": "Update AuthProfile friendlyName",
+        "description": "Updates only the friendlyName field. AuthProfile resources are immutable except for friendlyName.\nTo change auth configuration (clientId, tokenUrl, etc.), create a new AuthProfile resource.\n",
+        "tags": [
+          "AuthProfiles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAuthProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "AuthProfile friendlyName updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (friendlyName exceeds maximum length)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'friendlyName' exceeds maximum length of 255 characters",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "AuthProfile not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "AuthProfile webhooks_sharedauth_01jbyk2n8pqrst567890abcdef not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteAuthProfile",
+        "summary": "Delete AuthProfile (hard delete)",
+        "description": "Permanently deletes the AuthProfile resource.\nReturns 409 Conflict if the AuthProfile is still referenced by any Settings resource.\n\n**409 Resolution:**\n1. List dependencies: `GET /Settings?authProfileId={id}`\n2. Delete/update them\n3. Retry deletion\n",
+        "tags": [
+          "AuthProfiles"
+        ],
+        "responses": {
+          "204": {
+            "description": "AuthProfile deleted successfully"
+          },
+          "404": {
+            "description": "AuthProfile not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "AuthProfile webhooks_sharedauth_01jbyk2n8pqrst567890abcdef not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "409": {
+            "description": "AuthProfile is still referenced by Settings resources",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59100",
+                  "title": "Resource Is Still In Use",
+                  "status": 409,
+                  "detail": "AuthProfile webhooks_sharedauth_01jbyk2n8pqrst567890abcdef is referenced by Settings",
+                  "code": 59100
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Settings": {
+      "get": {
+        "operationId": "ListSetting",
+        "summary": "List all Settings",
+        "description": "Returns a paginated list of Setting summaries. Use query parameters to filter by authProfileId or sharedKeyId, or to list Twilio-managed system Settings instead of your own.",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          },
+          {
+            "name": "authProfileId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$"
+            },
+            "description": "Filter Settings that reference this AuthProfile ID"
+          },
+          {
+            "name": "sharedKeyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$"
+            },
+            "description": "Filter Settings that reference this SharedKey ID"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CUSTOMER",
+                "SYSTEM"
+              ],
+              "default": "CUSTOMER"
+            },
+            "description": "Whether to list your own Settings or Twilio-managed system Settings.\n- CUSTOMER (default): Settings created by you\n- SYSTEM: Twilio-managed Settings, such as the account's default legacy configuration\n"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsList"
+                },
+                "examples": {
+                  "settings-list": {
+                    "summary": "List of Settings",
+                    "value": {
+                      "settings": [
+                        {
+                          "id": "webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh",
+                          "type": "CUSTOMER",
+                          "friendlyName": "Production Webhook Settings",
+                          "description": "Webhook configuration for production API endpoints",
+                          "auth": {
+                            "source": "INLINE",
+                            "value": {
+                              "scheme": "OAUTH2",
+                              "tokenUrl": "https://auth.example.com/oauth/token",
+                              "clientId": "client-abc-123",
+                              "scope": "webhooks.write",
+                              "audience": null,
+                              "clientCredentialsAuthMethod": "CLIENT_SECRET_POST"
+                            }
+                          },
+                          "signature": {
+                            "type": "SHARED_KEY",
+                            "sharedKeyId": "webhooks_sharedkey_01jbyk9wr3zmqt8vcaabcdefgh",
+                            "algorithm": "HMAC_SHA256"
+                          },
+                          "connection": {
+                            "connectTimeoutMs": 5000,
+                            "readTimeoutMs": 10000,
+                            "totalTimeoutMs": 15000,
+                            "retryPolicy": {
+                              "retryCount": 3,
+                              "retryOn": [
+                                "HTTP_5XX",
+                                "CONNECTION_TIMEOUT"
+                              ]
+                            }
+                          },
+                          "edgeZones": {
+                            "zones": [
+                              "eu",
+                              "na"
+                            ],
+                            "allowZoneFallback": false
+                          },
+                          "createdAt": "2026-02-01T10:00:00Z",
+                          "updatedAt": "2026-03-20T15:30:00Z"
+                        },
+                        {
+                          "id": "webhooks_setting_01jbykg7p3xm8tz5wvabcdefgh",
+                          "type": "CUSTOMER",
+                          "friendlyName": "Staging Webhook Settings",
+                          "description": "Test configuration for staging environment",
+                          "auth": {
+                            "source": "REFERENCE",
+                            "authProfileId": "webhooks_sharedauth_01jbykm2n7qp4rs9tuabcdefgh"
+                          },
+                          "signature": {
+                            "type": "ACCOUNT_AUTH_TOKEN",
+                            "algorithm": "HMAC_SHA1"
+                          },
+                          "connection": {
+                            "connectTimeoutMs": 5000,
+                            "readTimeoutMs": 10000,
+                            "totalTimeoutMs": 15000,
+                            "retryPolicy": {
+                              "retryCount": 1,
+                              "retryOn": [
+                                "HTTP_5XX"
+                              ]
+                            }
+                          },
+                          "edgeZones": {
+                            "zones": [
+                              "na"
+                            ],
+                            "allowZoneFallback": true
+                          },
+                          "createdAt": "2026-03-10T12:00:00Z",
+                          "updatedAt": "2026-03-10T12:00:00Z"
+                        }
+                      ],
+                      "meta": {
+                        "key": "settings",
+                        "pageSize": 20,
+                        "nextToken": null,
+                        "previousToken": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateSetting",
+        "summary": "Create a new Setting",
+        "description": "Creates an immutable webhook configuration.\n\n### Authentication: Inline vs Shared\n\n**Inline (Recommended):**\n- Credentials directly in Setting (source: INLINE)\n- Use when: Each Setting has unique credentials\n\n**Shared (Advanced):**\n- Multiple Settings share one AuthProfile resource (source: REFERENCE)\n- Use when: Centralizing credentials, managing one AuthProfile instead of duplicating across Settings\n\n### Immutability\n\nSettings are immutable (except `friendlyName`, `description`).\n\n**To change configuration:** Create new Setting \u2192 Update Rule \u2192 Delete old Setting.\n\nThis enables safe testing before production cutover.\n",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostSetting"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Setting created",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (missing required fields, invalid enum values)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'auth.source' is required and must be one of: INLINE, REFERENCE",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Referenced resource not found or account limit reached",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "examples": {
+                  "authprofile-not-found": {
+                    "summary": "Referenced AuthProfile does not exist",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59201",
+                      "title": "Referenced Resource Not Found",
+                      "status": 422,
+                      "detail": "Resource AuthProfile with ID webhooks_sharedauth_01jbyk2n8pqrst567890abcdef not found",
+                      "code": 59201
+                    }
+                  },
+                  "sharedkey-not-found": {
+                    "summary": "Referenced SharedKey does not exist",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59201",
+                      "title": "Referenced Resource Not Found",
+                      "status": 422,
+                      "detail": "Resource SharedKey with ID webhooks_sharedkey_01jbyk9wr3zmqt8vcaabcdefgh not found",
+                      "code": 59201
+                    }
+                  },
+                  "account-limit": {
+                    "summary": "Account has reached maximum Settings limit",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59200",
+                      "title": "Account Limit Reached",
+                      "status": 422,
+                      "detail": "Account has reached maximum Settings limit (50). Delete unused Settings or contact support.",
+                      "code": 59200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Settings/{settingId}": {
+      "parameters": [
+        {
+          "name": "settingId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^webhooks_setting_[0-9a-z]{26}$"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "FetchSetting",
+        "summary": "Get Setting by ID",
+        "description": "Returns a Setting by its ID, including full auth, signature, connection, and edge configuration.",
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Setting details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                },
+                "examples": {
+                  "setting-embedded-auth": {
+                    "summary": "Setting with embedded OAuth2 auth",
+                    "value": {
+                      "id": "webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh",
+                      "type": "CUSTOMER",
+                      "friendlyName": "Production Webhook Settings",
+                      "description": "Webhook configuration for production API endpoints",
+                      "auth": {
+                        "source": "INLINE",
+                        "value": {
+                          "scheme": "OAUTH2",
+                          "tokenUrl": "https://auth.example.com/oauth/token",
+                          "clientId": "client-abc-123",
+                          "scope": "webhooks.write"
+                        }
+                      },
+                      "signature": {
+                        "type": "SHARED_KEY",
+                        "sharedKeyId": "webhooks_sharedkey_01jbyk9wr3zmqt8vcaabcdefgh",
+                        "algorithm": "HMAC_SHA256"
+                      },
+                      "connection": {
+                        "connectTimeoutMs": 5000,
+                        "readTimeoutMs": 10000,
+                        "totalTimeoutMs": 15000,
+                        "retryPolicy": {
+                          "retryCount": 3,
+                          "retryOn": [
+                            "HTTP_5XX",
+                            "CONNECTION_TIMEOUT"
+                          ]
+                        }
+                      },
+                      "edgeZones": {
+                        "zones": [
+                          "eu",
+                          "na"
+                        ],
+                        "allowZoneFallback": false
+                      },
+                      "createdAt": "2026-02-01T10:00:00Z",
+                      "updatedAt": "2026-03-20T15:30:00Z"
+                    }
+                  },
+                  "setting-shared-auth": {
+                    "summary": "Setting with referenced AuthProfile",
+                    "value": {
+                      "id": "webhooks_setting_01jbykg7p3xm8tz5wvabcdefgh",
+                      "type": "CUSTOMER",
+                      "friendlyName": "Staging Webhook Settings",
+                      "description": "Test configuration for staging environment",
+                      "auth": {
+                        "source": "REFERENCE",
+                        "authProfileId": "webhooks_sharedauth_01jbyk3x7zvwxy567890abcdef"
+                      },
+                      "signature": {
+                        "type": "SHARED_KEY",
+                        "sharedKeyId": "webhooks_sharedkey_01jbykb2m5pqx9rt7zabcdefgh",
+                        "algorithm": "HMAC_SHA256"
+                      },
+                      "connection": {
+                        "connectTimeoutMs": 3000,
+                        "readTimeoutMs": 8000,
+                        "totalTimeoutMs": 12000,
+                        "retryPolicy": {
+                          "retryCount": 2,
+                          "retryOn": [
+                            "HTTP_5XX"
+                          ]
+                        }
+                      },
+                      "edgeZones": null,
+                      "createdAt": "2026-03-10T12:00:00Z",
+                      "updatedAt": "2026-03-10T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "Setting not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchSetting",
+        "summary": "Update Setting friendlyName and description",
+        "description": "Updates only the friendlyName and/or description fields. Settings are immutable except for these fields.\nTo change configuration (auth, signature, connection, etc.), create a new Setting resource.\nReturns 409 Conflict if attempting to modify a system-created Setting.\n",
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchSetting"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (friendlyName or description exceeds maximum length)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'friendlyName' exceeds maximum length of 255 characters",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "Setting not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Cannot modify or delete system-created Settings",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59101",
+                  "title": "System Resource Cannot Be Modified",
+                  "status": 409,
+                  "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh is a system-created resource and cannot be modified",
+                  "code": 59101
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteSetting",
+        "summary": "Delete Setting (hard delete)",
+        "description": "Permanently deletes the Setting resource.\nReturns 409 Conflict if the Setting is still referenced by any Rule or if it's a system-created Setting.\n\n**409 Resolution:**\n1. List dependencies: `GET /Rules?settingId={id}`\n2. Delete/update them\n3. Retry deletion\n",
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "204": {
+            "description": "Setting deleted successfully"
+          },
+          "404": {
+            "description": "Setting not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Setting is still referenced by Rules or is a system-created resource",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "examples": {
+                  "in-use": {
+                    "summary": "Setting still referenced by Rules",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59100",
+                      "title": "Resource Is Still In Use",
+                      "status": 409,
+                      "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh is still being referenced by some rule",
+                      "code": 59100
+                    }
+                  },
+                  "system-resource": {
+                    "summary": "Cannot delete system-created Setting",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59101",
+                      "title": "System Resource Cannot Be Deleted",
+                      "status": 409,
+                      "detail": "Setting webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh is a system-created resource and cannot be deleted",
+                      "code": 59101
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Rules": {
+      "get": {
+        "operationId": "ListRule",
+        "summary": "List all Rules",
+        "description": "Returns paginated list of Rules sorted by evaluation order:\n1. exact-match rules (evaluated first, longest match first)\n2. prefix-match rules (longest prefix first)\n3. default rule (matches all incoming requests when no other rule matches)\n",
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          },
+          {
+            "name": "settingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^webhooks_setting_[0-9a-z]{26}$"
+            },
+            "description": "Filter Rules that reference this Setting ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RulesList"
+                },
+                "examples": {
+                  "rules-list": {
+                    "summary": "Rules list",
+                    "value": {
+                      "rules": [
+                        {
+                          "id": "webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh",
+                          "friendlyName": "Production Voice Webhooks",
+                          "description": "Routes voice inbound webhooks to production endpoint",
+                          "matchType": "EXACT_MATCH",
+                          "value": "https://api.example.com/webhooks/voice/inbound",
+                          "settings": [
+                            {
+                              "settingId": "webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh",
+                              "percentage": 100
+                            }
+                          ],
+                          "createdAt": "2026-02-15T10:00:00Z",
+                          "updatedAt": "2026-03-20T15:30:00Z"
+                        },
+                        {
+                          "id": "webhooks_rule_01jbykkc4p9nx8tv7zabcdefgh",
+                          "friendlyName": "Messaging Webhooks",
+                          "description": "Handles all SMS webhook callbacks",
+                          "matchType": "PREFIX_MATCH",
+                          "prefix": "https://api.example.com/webhooks/sms/",
+                          "settings": [
+                            {
+                              "settingId": "webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh",
+                              "percentage": 100
+                            }
+                          ],
+                          "createdAt": "2026-02-10T12:00:00Z",
+                          "updatedAt": "2026-02-10T12:00:00Z"
+                        },
+                        {
+                          "id": "webhooks_rule_01jbykm2x5qt8vx9rwabcdefgh",
+                          "friendlyName": "Default Handler",
+                          "description": "Fallback rule for all unmatched webhook URLs",
+                          "matchType": "DEFAULT",
+                          "settings": [
+                            {
+                              "settingId": "webhooks_setting_01jbykg7p3xm8tz5wvabcdefgh",
+                              "percentage": 100
+                            }
+                          ],
+                          "createdAt": "2026-01-05T08:00:00Z",
+                          "updatedAt": "2026-01-05T08:00:00Z"
+                        }
+                      ],
+                      "meta": {
+                        "key": "rules",
+                        "pageSize": 20,
+                        "nextToken": null,
+                        "previousToken": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateRule",
+        "summary": "Create a new Rule (async)",
+        "description": "Creates a URL matching rule. Returns immediately after validation, then propagates globally.\n\n### How It Works\n\n**Immediate:**\nRequest validated \u2192 202 Accepted (with `Operation-Id` header) or 4xx error\n\n**Async (30-60s):**\nPropagates globally. Poll `/Operations/{id}` for status (`pending` \u2192 `completed`)\n\n### During Propagation\n\nDuring propagation, matching webhooks may use other rules (e.g., default) until this rule is active.\n\n### Security Restrictions\n\nDefault rules (matchType: default) cannot use Basic Authentication. Use OAuth2, Digest, or create specific URL patterns instead.\n",
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostRule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Rule creation accepted",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              },
+              "Location": {
+                "$ref": "#/components/headers/LocationHeader"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfterHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleOperationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (missing required fields, wildcard in pattern, percentages not summing to 100)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Settings percentages must sum to 100, got 90",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Rule with same match key already exists",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59103",
+                  "title": "Resource Already Exists",
+                  "status": 409,
+                  "detail": "A rule with prefix 'https://api.example.com/webhooks/' already exists",
+                  "code": 59103
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Referenced Setting not found, security guardrail violation, or account limit reached",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "examples": {
+                  "setting-not-found": {
+                    "summary": "Referenced Setting does not exist",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59201",
+                      "title": "Referenced Resource Not Found",
+                      "status": 422,
+                      "detail": "Resource Setting with ID webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh not found",
+                      "code": 59201
+                    }
+                  },
+                  "default-basic-auth": {
+                    "summary": "Default rule cannot use Basic Authentication",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59202",
+                      "title": "Security Guardrail Violation",
+                      "status": 422,
+                      "detail": "The default rule cannot use Basic Authentication to prevent credential exposure. Use OAuth2, Digest, or more specific URL patterns.",
+                      "code": 59202
+                    }
+                  },
+                  "account-limit": {
+                    "summary": "Account has reached maximum Rules limit",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59200",
+                      "title": "Account Limit Reached",
+                      "status": 422,
+                      "detail": "Account has reached maximum Rules limit (50). Delete unused Rules or contact support.",
+                      "code": 59200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Rules/{ruleId}": {
+      "parameters": [
+        {
+          "name": "ruleId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^webhooks_rule_[0-9a-z]{26}$",
+            "description": "Rule SID"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "FetchRule",
+        "summary": "Get a Rule by ID",
+        "description": "Returns a Rule by its ID, including matchType, match value, and current traffic distribution settings.",
+        "tags": [
+          "Rules"
+        ],
+        "responses": {
+          "200": {
+            "description": "Rule details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rule"
+                },
+                "examples": {
+                  "exact-match-rule": {
+                    "summary": "Exact match rule",
+                    "value": {
+                      "id": "webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh",
+                      "friendlyName": "Production API Events",
+                      "description": "Routes voice inbound webhooks to production endpoint",
+                      "matchType": "EXACT_MATCH",
+                      "value": "https://api.example.com/webhooks/voice/inbound",
+                      "settings": [
+                        {
+                          "settingId": "webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh",
+                          "percentage": 100
+                        }
+                      ],
+                      "createdAt": "2026-02-15T10:00:00Z",
+                      "updatedAt": "2026-03-20T15:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "Rule not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Rule webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchRule",
+        "summary": "Update Rule (async)",
+        "description": "Updates rule configuration. Returns 202 Accepted, propagates in 30-60 seconds.\n\n### Gradual Rollout Pattern\n\nTest configuration changes with production traffic before full deployment.\n\n**Strategy:** Gradually shift traffic to new Setting, monitor, increase to 100%.\n\n**Flow:** 90/10 \u2192 50/50 \u2192 0/100 (rollback to 100/0 if issues)\n\n### During Propagation\n\nDuring propagation (~30-60s), webhooks may use previous or updated config until change is active.\n\n### Use Cases\n\n- **Credential rotation**: Verify new auth works before full cutover\n- **Timeout tuning**: Test connection settings with real traffic\n\n### What Can Change\n\n- `friendlyName`, `description`: Metadata\n- `settings`: Traffic distribution (percentages must sum to 100)\n- `matchType` + its companion value (`prefix` or `value`): changes the rule's match type and value together (async, same 30-60s propagation as any other patch). Returns `409` if the new match key collides with another Rule, same check `POST` runs on create. Patching a Rule to the match config it already has is not a collision.\n",
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchRule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Rule update accepted",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              },
+              "Location": {
+                "$ref": "#/components/headers/LocationHeader"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfterHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleOperationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (percentages not summing to 100, invalid fields)",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Settings percentages must sum to 100, got 90",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "New match key collides with another Rule",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59103",
+                  "title": "Resource Already Exists",
+                  "status": 409,
+                  "detail": "A rule with prefix 'https://api.example.com/webhooks/' already exists",
+                  "code": 59103
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Rule not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Rule webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Referenced Setting not found or security guardrail violation",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "examples": {
+                  "setting-not-found": {
+                    "summary": "Referenced Setting does not exist",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59201",
+                      "title": "Referenced Resource Not Found",
+                      "status": 422,
+                      "detail": "Resource Setting with ID webhooks_setting_01jbykf8m4nt9vx2qpabcdefgh not found",
+                      "code": 59201
+                    }
+                  },
+                  "default-basic-auth": {
+                    "summary": "Default rule cannot use Basic Authentication",
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/59202",
+                      "title": "Security Guardrail Violation",
+                      "status": 422,
+                      "detail": "The default rule cannot use Basic Authentication to prevent credential exposure. Use OAuth2, Digest, or more specific URL patterns.",
+                      "code": 59202
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteRule",
+        "summary": "Delete Rule (hard delete, async)",
+        "description": "Permanently deletes a Rule. Returns 202 Accepted; the deletion propagates globally in 30-60 seconds. Poll the returned Operation-Id for completion.",
+        "tags": [
+          "Rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKeyHeader"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Rule deletion accepted",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationIdHeader"
+              },
+              "Location": {
+                "$ref": "#/components/headers/LocationHeader"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfterHeader"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleOperationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "Rule not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Rule webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Operations": {
+      "get": {
+        "operationId": "ListOperation",
+        "summary": "List all Operations",
+        "description": "Returns a paginated list of async Rule operations.\n\nUse this endpoint to recover a lost `Operation-Id` \u2014 for example, after a process crash\nbefore the ID was persisted. Results are sorted by `createdAt` descending (newest first).\n",
+        "tags": [
+          "Operations"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "RUNNING",
+                "COMPLETED",
+                "CANCELLED",
+                "FAILED"
+              ]
+            },
+            "description": "Filter by operation state"
+          },
+          {
+            "name": "resourceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter operations affecting a specific resource ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of Operations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsList"
+                },
+                "examples": {
+                  "operations-list": {
+                    "summary": "List of Operations with mixed statuses",
+                    "value": {
+                      "operations": [
+                        {
+                          "id": "webhooks_operation_01jbyk7rb8xkm9pq5nabcdefgh",
+                          "statusUrl": "https://webhooks.twilio.com/v1/Webhooks/Operations/webhooks_operation_01jbyk7rb8xkm9pq5nabcdefgh",
+                          "status": "COMPLETED",
+                          "resourceId": "webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh",
+                          "createdAt": "2026-03-20T15:30:00Z",
+                          "completedAt": "2026-03-20T15:30:45Z",
+                          "retentionPeriod": "P7D",
+                          "error": null
+                        },
+                        {
+                          "id": "webhooks_operation_gmsif40yp3gappigpi64q1ktn0",
+                          "statusUrl": "https://webhooks.twilio.com/v1/Webhooks/Operations/webhooks_operation_gmsif40yp3gappigpi64q1ktn0",
+                          "status": "RUNNING",
+                          "resourceId": "webhooks_rule_01jbykkc4p9nx8tv7zabcdefgh",
+                          "createdAt": "2026-03-20T15:31:00Z",
+                          "completedAt": null,
+                          "retentionPeriod": "P7D",
+                          "error": null
+                        }
+                      ],
+                      "meta": {
+                        "key": "operations",
+                        "pageSize": 20,
+                        "nextToken": null,
+                        "previousToken": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Operations/{operationId}": {
+      "parameters": [
+        {
+          "name": "operationId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^webhooks_operation_[0-9a-z]{26}$",
+            "description": "Operation ID"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "FetchOperation",
+        "summary": "Get Operation status",
+        "description": "Check status of an async Rule operation.\n\n### Operation Lifecycle\n\nOperations transition from `PENDING` to `COMPLETED` status within 30-60 seconds of a Rule mutation being accepted (202 Accepted with `Operation-Id` header).\n",
+        "tags": [
+          "Operations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Operation"
+                },
+                "example": {
+                  "id": "webhooks_operation_01jbykq9s8ty1za5bqcdefghij",
+                  "statusUrl": "https://webhooks.twilio.com/v1/Webhooks/Operations/webhooks_operation_01jbykq9s8ty1za5bqcdefghij",
+                  "status": "COMPLETED",
+                  "resourceId": "webhooks_rule_01jbykj5v8mx9rt2zpabcdefgh",
+                  "createdAt": "2026-04-01T09:00:00Z",
+                  "completedAt": "2026-04-01T09:00:45Z",
+                  "retentionPeriod": "P7D",
+                  "error": null
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "404": {
+            "description": "Operation not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59003",
+                  "title": "Resource Not Found",
+                  "status": 404,
+                  "detail": "Operation webhooks_operation_01jbykq9s8ty1za5bqcdefghij not found",
+                  "code": 59003
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/Tests": {
+      "post": {
+        "operationId": "CreateTest",
+        "summary": "Test webhook delivery",
+        "description": "Send a test webhook to validate your configuration.\n\nRequires a `settingId` \u2014 tests end-to-end delivery using the specified Setting's\nauth, signature, and connection configuration.\n\n### When to Test\n\n- Before deploying Settings to production\n- When debugging webhook delivery issues\n",
+        "tags": [
+          "Tests"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Test completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResult"
+                },
+                "examples": {
+                  "delivered": {
+                    "summary": "Test webhook delivered successfully",
+                    "value": {
+                      "url": "https://example.com/webhooks/incoming",
+                      "result": {
+                        "outcome": "DELIVERED",
+                        "response": {
+                          "statusCode": 200,
+                          "headers": {
+                            "content-type": [
+                              "application/json"
+                            ]
+                          }
+                        },
+                        "timing": {
+                          "totalMs": 245
+                        }
+                      },
+                      "createdAt": "2026-04-05T12:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid configuration",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59000",
+                  "title": "Validation Error",
+                  "status": 400,
+                  "detail": "Field 'url' is required",
+                  "code": 59000
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "description": "Twilio internal error while attempting to deliver the test webhook.\n",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+                },
+                "example": {
+                  "type": "https://www.twilio.com/docs/api/errors/59005",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An internal error occurred while delivering the test webhook",
+                  "code": 59005
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/Webhooks/EdgeZones": {
+      "get": {
+        "operationId": "ListEdgeZone",
+        "summary": "List available edge zones",
+        "description": "Returns the edge zone catalog for webhook delivery. Supports pagination via `pageSize`\nand `pageToken` (see [Pagination](#section/Pagination)).\n\n**Read-only discovery endpoint** - use this to fetch available zone IDs\nbefore creating Settings.\n\n### Usage\n\nEdge zones control geographic webhook delivery. Twilio selects the best available\nPoP within the zone at delivery time.\n\n1. Call this endpoint to get available edge zones and their constituent PoPs\n2. Use the zone `id` values in `Settings.edgeZones` when creating Settings\n\nIf edge zones are not specified in Settings, webhooks use the home region (same as the processing region).\n",
+        "tags": [
+          "EdgeZones"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "$ref": "#/components/parameters/pageToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zone catalog with nested edge location inventory",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EdgeZonesList"
+                },
+                "examples": {
+                  "edge-zones-catalog": {
+                    "summary": "Full edge zone catalog with nested PoPs",
+                    "value": {
+                      "edgeZones": [
+                        {
+                          "id": "na",
+                          "friendlyName": "North America",
+                          "description": "North America edge zone",
+                          "edgeLocations": [
+                            {
+                              "id": "IAD-1",
+                              "city": "Ashburn",
+                              "country": "US"
+                            },
+                            {
+                              "id": "PDX-1",
+                              "city": "Umatilla",
+                              "country": "US"
+                            },
+                            {
+                              "id": "SJC-1",
+                              "city": "San Jose",
+                              "country": "US"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "eu",
+                          "friendlyName": "Europe",
+                          "description": "Europe edge zone",
+                          "edgeLocations": [
+                            {
+                              "id": "DUB-1",
+                              "city": "Dublin",
+                              "country": "IE"
+                            },
+                            {
+                              "id": "FRA-1",
+                              "city": "Frankfurt",
+                              "country": "DE"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "ap",
+                          "friendlyName": "Asia Pacific",
+                          "description": "Asia Pacific edge zone",
+                          "edgeLocations": [
+                            {
+                              "id": "SIN-1",
+                              "city": "Singapore",
+                              "country": "SG"
+                            },
+                            {
+                              "id": "NRT-1",
+                              "city": "Tokyo",
+                              "country": "JP"
+                            },
+                            {
+                              "id": "SYD-1",
+                              "city": "Sydney",
+                              "country": "AU"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "sa",
+                          "friendlyName": "South America",
+                          "description": "South America edge zone",
+                          "edgeLocations": [
+                            {
+                              "id": "GRU-1",
+                              "city": "Sao Paulo",
+                              "country": "BR"
+                            }
+                          ]
+                        }
+                      ],
+                      "meta": {
+                        "key": "edgeZones",
+                        "pageSize": 20,
+                        "nextToken": null,
+                        "previousToken": null
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "accountSid_authToken": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    },
+    "parameters": {
+      "pageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        },
+        "description": "Number of items per page (max 100, reflecting the 50-resource account limit per resource type)"
+      },
+      "pageToken": {
+        "name": "pageToken",
+        "in": "query",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Token for pagination"
+      },
+      "IdempotencyKeyHeader": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "description": "Idempotency key for mutation operations. Must be a UUIDv7 (other UUID versions are rejected with a 400)."
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Authentication failed",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+            },
+            "example": {
+              "type": "https://www.twilio.com/docs/api/errors/20003",
+              "title": "Authentication Failed",
+              "status": 401,
+              "detail": "Authentication credentials are missing or invalid",
+              "code": 20003
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Authenticated account does not have permission to perform this operation",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+            },
+            "example": {
+              "type": "https://www.twilio.com/docs/api/errors/403",
+              "title": "Access Forbidden",
+              "status": 403,
+              "detail": "Account does not have permission to access this resource",
+              "code": 403
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+            },
+            "example": {
+              "type": "https://www.twilio.com/docs/api/errors/59004",
+              "title": "Too Many Requests",
+              "status": 429,
+              "detail": "Rate limit exceeded. Please retry after the period indicated in the Retry-After header.",
+              "code": 59004
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "An unexpected server error occurred",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/TwilioServiceErrorResponse"
+            },
+            "example": {
+              "type": "https://www.twilio.com/docs/api/errors/59005",
+              "title": "Internal Server Error",
+              "status": 500,
+              "detail": "An unexpected error occurred. Please try again later.",
+              "code": 59005
+            }
+          }
+        }
+      }
+    },
+    "headers": {
+      "OperationIdHeader": {
+        "schema": {
+          "type": "string"
+        },
+        "description": "ID of the async operation"
+      },
+      "LocationHeader": {
+        "schema": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": "URL to poll for operation status"
+      },
+      "RetryAfterHeader": {
+        "schema": {
+          "type": "integer",
+          "example": 60
+        },
+        "description": "Recommended polling interval in seconds"
+      }
+    },
+    "schemas": {
+      "OperationError": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "code",
+          "detail"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI identifying the problem type"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short human-readable summary of the problem type"
+          },
+          "code": {
+            "type": "integer",
+            "description": "Twilio-specific numeric error code"
+          },
+          "detail": {
+            "type": "string",
+            "description": "Human-readable explanation specific to this occurrence"
+          }
+        }
+      },
+      "TwilioServiceErrorResponse": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "code"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 128
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 1024
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "description": "Pagination metadata containing navigation tokens and result information,\nthis schema should according to convention be added to the response\npayload's 'meta' attribute\n",
+        "required": [
+          "key",
+          "pageSize"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "nullable": false,
+            "description": "The key of the list property contains the actual data items.\nThis enables programmatic iteration over paginated results.\n",
+            "example": "items"
+          },
+          "pageSize": {
+            "type": "integer",
+            "nullable": false,
+            "description": "The page size used for this request (the requested value, or the\ndefault/max-capped value if none was requested). The number of\nitems actually returned in the list may be less than this on the\nlast page.\n",
+            "example": 20
+          },
+          "previousToken": {
+            "type": "string",
+            "nullable": true,
+            "description": "Token to fetch the previous page of results.\nOnly included if there is a previous page, otherwise omitted.\n",
+            "example": "eyJwYWdlIjowLCJxdWVyeSI6ImJvb2tzIn0="
+          },
+          "nextToken": {
+            "type": "string",
+            "nullable": true,
+            "description": "Token to fetch the next page of results.\nOnly included if there is a next page, otherwise omitted.\n",
+            "example": "eyJwYWdlIjoyLCJxdWVyeSI6ImJvb2tzIn0="
+          }
+        }
+      },
+      "SharedKey": {
+        "type": "object",
+        "description": "Webhook signing key for request signature validation",
+        "required": [
+          "id",
+          "friendlyName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique SharedKey identifier (TypeID/TTID format)"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "PostSharedKey": {
+        "type": "object",
+        "description": "Request body for creating a new SharedKey",
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for the signing key (optional, defaults to blank)"
+          }
+        }
+      },
+      "PatchSharedKey": {
+        "type": "object",
+        "description": "Request body for updating a SharedKey's friendlyName only",
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for the SharedKey"
+          }
+        }
+      },
+      "SharedKeySummary": {
+        "type": "object",
+        "description": "Summary of a SharedKey for list operations (secret never included)",
+        "required": [
+          "id",
+          "friendlyName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$",
+            "readOnly": true
+          },
+          "friendlyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "SharedKeysList": {
+        "type": "object",
+        "properties": {
+          "sharedKeys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SharedKeySummary"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "SharedKeyWithSecret": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique SharedKey identifier (TypeID/TTID format)"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "secret": {
+            "type": "string",
+            "description": "Signing secret (only returned on POST, cannot be retrieved later)"
+          }
+        },
+        "required": [
+          "id",
+          "secret",
+          "friendlyName",
+          "updatedAt",
+          "createdAt"
+        ]
+      },
+      "AuthProfile": {
+        "type": "object",
+        "description": "Authentication resource that can be shared across various settings",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "OAUTH2": "#/components/schemas/OAuth2AuthProfile",
+            "BASIC": "#/components/schemas/BasicAuthProfile",
+            "DIGEST": "#/components/schemas/DigestAuthProfile"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OAuth2AuthProfile"
+          },
+          {
+            "$ref": "#/components/schemas/BasicAuthProfile"
+          },
+          {
+            "$ref": "#/components/schemas/DigestAuthProfile"
+          }
+        ]
+      },
+      "OAuth2AuthProfile": {
+        "type": "object",
+        "description": "OAuth2 client credentials authentication",
+        "required": [
+          "id",
+          "type",
+          "friendlyName",
+          "createdAt",
+          "updatedAt",
+          "tokenUrl",
+          "clientId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique AuthProfile identifier (TypeID/TTID format)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OAUTH2"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "tokenUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth2 token endpoint URL"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "OAuth2 client identifier"
+          },
+          "clientSecret": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "OAuth2 client secret (never returned, stored securely as secret)"
+          },
+          "scope": {
+            "type": "string",
+            "description": "OAuth2 scope to request"
+          },
+          "audience": {
+            "type": "string",
+            "nullable": true,
+            "description": "OAuth2 audience parameter"
+          },
+          "clientCredentialsAuthMethod": {
+            "type": "string",
+            "enum": [
+              "CLIENT_SECRET_POST",
+              "CLIENT_SECRET_BASIC"
+            ],
+            "default": "CLIENT_SECRET_POST",
+            "description": "Client credentials authentication method (defaults to CLIENT_SECRET_POST)"
+          }
+        }
+      },
+      "BasicAuthProfile": {
+        "type": "object",
+        "description": "HTTP Basic authentication",
+        "required": [
+          "id",
+          "type",
+          "friendlyName",
+          "createdAt",
+          "updatedAt",
+          "username"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique AuthProfile identifier (TypeID/TTID format)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Basic auth username"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Basic auth password (never returned, stored securely as secret)"
+          }
+        }
+      },
+      "DigestAuthProfile": {
+        "type": "object",
+        "description": "HTTP Digest authentication",
+        "required": [
+          "id",
+          "type",
+          "friendlyName",
+          "createdAt",
+          "updatedAt",
+          "username"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique AuthProfile identifier (TypeID/TTID format)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "DIGEST"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "username": {
+            "type": "string",
+            "description": "Digest auth username"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Digest auth password (never returned, stored securely as secret)"
+          }
+        }
+      },
+      "PostAuthProfile": {
+        "description": "Request body for creating a new AuthProfile resource",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "OAUTH2": "#/components/schemas/PostOAuth2AuthProfile",
+            "BASIC": "#/components/schemas/PostBasicAuthProfile",
+            "DIGEST": "#/components/schemas/PostDigestAuthProfile"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PostOAuth2AuthProfile"
+          },
+          {
+            "$ref": "#/components/schemas/PostBasicAuthProfile"
+          },
+          {
+            "$ref": "#/components/schemas/PostDigestAuthProfile"
+          }
+        ]
+      },
+      "PostOAuth2AuthProfile": {
+        "type": "object",
+        "description": "OAuth2 client credentials authentication",
+        "required": [
+          "type",
+          "tokenUrl",
+          "clientId",
+          "clientSecret"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "OAUTH2"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for identification (optional, defaults to blank)"
+          },
+          "tokenUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth2 token endpoint URL"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "OAuth2 client identifier"
+          },
+          "clientSecret": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "OAuth2 client secret (never returned, stored securely as secret)"
+          },
+          "scope": {
+            "type": "string",
+            "description": "OAuth2 scope to request"
+          },
+          "audience": {
+            "type": "string",
+            "description": "OAuth2 audience parameter"
+          },
+          "clientCredentialsAuthMethod": {
+            "type": "string",
+            "enum": [
+              "CLIENT_SECRET_POST",
+              "CLIENT_SECRET_BASIC"
+            ],
+            "default": "CLIENT_SECRET_POST",
+            "description": "Client credentials authentication method (defaults to CLIENT_SECRET_POST)"
+          }
+        }
+      },
+      "PostBasicAuthProfile": {
+        "type": "object",
+        "description": "HTTP Basic authentication",
+        "required": [
+          "type",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for identification (optional, defaults to blank)"
+          },
+          "username": {
+            "type": "string",
+            "description": "Basic auth username"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Basic auth password  (never returned, stored securely as secret)"
+          }
+        }
+      },
+      "PostDigestAuthProfile": {
+        "type": "object",
+        "description": "HTTP Digest authentication",
+        "required": [
+          "type",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DIGEST"
+            ],
+            "description": "Authentication type"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for identification (optional, defaults to blank)"
+          },
+          "username": {
+            "type": "string",
+            "description": "Digest auth username"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Digest auth password  (never returned, stored securely as secret)"
+          }
+        }
+      },
+      "PatchAuthProfile": {
+        "type": "object",
+        "description": "Request body for PATCH AuthProfile - only friendlyName can be updated",
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          }
+        }
+      },
+      "AuthProfileSummary": {
+        "type": "object",
+        "description": "Summary of an AuthProfile resource for list operations",
+        "required": [
+          "id",
+          "type",
+          "friendlyName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$",
+            "readOnly": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OAUTH2",
+              "BASIC",
+              "DIGEST"
+            ]
+          },
+          "friendlyName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "AuthProfileList": {
+        "type": "object",
+        "properties": {
+          "authProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthProfileSummary"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "Setting": {
+        "type": "object",
+        "description": "Reusable webhook configuration combining auth, signing, and connection settings",
+        "required": [
+          "id",
+          "type",
+          "friendlyName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_setting_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique Setting identifier (TypeID/TTID format)"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SYSTEM",
+              "CUSTOMER"
+            ],
+            "readOnly": true,
+            "description": "Setting ownership (read-only):\n\n- **system**: Managed by Twilio\n  - Twilio provides managed Settings to simplify your onboarding journey\n  - Cannot be modified or deleted\n  - Used for default account configuration\n\n- **customer**: Created by you\n  - Can update friendlyName via PATCH\n  - Can delete via DELETE (if not in use)\n  - Core config (auth, signature) is immutable\n"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Setting's purpose and usage"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/AuthSetting"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/SignatureSetting"
+          },
+          "connection": {
+            "description": "HTTP connection settings. If omitted, system defaults are applied.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConnectionSetting"
+              }
+            ]
+          },
+          "edgeZones": {
+            "description": "Edge zone configuration for webhook delivery. When omitted, all zones are eligible\nand Twilio selects freely. When set, `zones` lists preferred zones in priority order.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EdgeZones"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "AuthSetting": {
+        "description": "Authentication configuration for Settings.\nDiscriminated by 'source' field:\n- source: INLINE \u2192 credentials embedded in 'value' object; 'value.scheme' selects the auth type\n- source: REFERENCE \u2192 references an AuthProfile resource via authProfileId\n",
+        "discriminator": {
+          "propertyName": "source",
+          "mapping": {
+            "INLINE": "#/components/schemas/InlineAuth",
+            "REFERENCE": "#/components/schemas/AuthProfileRef"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/InlineAuth"
+          },
+          {
+            "$ref": "#/components/schemas/AuthProfileRef"
+          }
+        ]
+      },
+      "PostAuthSetting": {
+        "description": "Authentication configuration for creating a Setting.\nDiscriminated by 'source' field:\n- source: INLINE \u2192 credentials embedded in 'value' object; 'value.scheme' selects the auth type\n- source: REFERENCE \u2192 references an AuthProfile resource via authProfileId\n",
+        "discriminator": {
+          "propertyName": "source",
+          "mapping": {
+            "INLINE": "#/components/schemas/PostInlineAuth",
+            "REFERENCE": "#/components/schemas/AuthProfileRef"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PostInlineAuth"
+          },
+          {
+            "$ref": "#/components/schemas/AuthProfileRef"
+          }
+        ]
+      },
+      "InlineAuth": {
+        "type": "object",
+        "description": "Inline credentials embedded in the Setting. Credentials are in the 'value' object, discriminated by 'value.scheme'.",
+        "required": [
+          "source",
+          "value"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "INLINE"
+            ]
+          },
+          "value": {
+            "description": "Credential payload, discriminated by 'scheme'.",
+            "discriminator": {
+              "propertyName": "scheme",
+              "mapping": {
+                "OAUTH2": "#/components/schemas/OAuth2Credentials",
+                "BASIC": "#/components/schemas/BasicCredentials",
+                "DIGEST": "#/components/schemas/DigestCredentials",
+                "NONE": "#/components/schemas/NoCredentials"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OAuth2Credentials"
+              },
+              {
+                "$ref": "#/components/schemas/BasicCredentials"
+              },
+              {
+                "$ref": "#/components/schemas/DigestCredentials"
+              },
+              {
+                "$ref": "#/components/schemas/NoCredentials"
+              }
+            ]
+          }
+        }
+      },
+      "OAuth2Credentials": {
+        "type": "object",
+        "description": "OAuth2 client credentials",
+        "required": [
+          "scheme",
+          "tokenUrl",
+          "clientId"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "OAUTH2"
+            ]
+          },
+          "tokenUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth2 token endpoint URL"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "OAuth2 client identifier"
+          },
+          "clientSecret": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "OAuth2 client secret (write-only, never returned)"
+          },
+          "scope": {
+            "type": "string",
+            "description": "OAuth2 scope to request"
+          },
+          "audience": {
+            "type": "string",
+            "description": "OAuth2 audience parameter"
+          },
+          "clientCredentialsAuthMethod": {
+            "type": "string",
+            "enum": [
+              "CLIENT_SECRET_POST",
+              "CLIENT_SECRET_BASIC"
+            ],
+            "default": "CLIENT_SECRET_POST",
+            "description": "Client credentials authentication method (defaults to CLIENT_SECRET_POST)"
+          }
+        }
+      },
+      "BasicCredentials": {
+        "type": "object",
+        "description": "HTTP Basic auth credentials",
+        "required": [
+          "scheme",
+          "username"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Password (write-only, never returned)"
+          }
+        }
+      },
+      "DigestCredentials": {
+        "type": "object",
+        "description": "HTTP Digest auth credentials",
+        "required": [
+          "scheme",
+          "username"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "DIGEST"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Password (write-only, never returned)"
+          }
+        }
+      },
+      "NoCredentials": {
+        "type": "object",
+        "description": "Explicitly disables authentication",
+        "required": [
+          "scheme"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "NONE"
+            ]
+          }
+        }
+      },
+      "PostInlineAuth": {
+        "type": "object",
+        "description": "Inline credentials embedded in the Setting. Credentials are in the 'value' object, discriminated by 'value.scheme'.",
+        "required": [
+          "source",
+          "value"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "INLINE"
+            ]
+          },
+          "value": {
+            "description": "Credential payload, discriminated by 'scheme'.",
+            "discriminator": {
+              "propertyName": "scheme",
+              "mapping": {
+                "OAUTH2": "#/components/schemas/PostOAuth2Credentials",
+                "BASIC": "#/components/schemas/PostBasicCredentials",
+                "DIGEST": "#/components/schemas/PostDigestCredentials",
+                "NONE": "#/components/schemas/NoCredentials"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PostOAuth2Credentials"
+              },
+              {
+                "$ref": "#/components/schemas/PostBasicCredentials"
+              },
+              {
+                "$ref": "#/components/schemas/PostDigestCredentials"
+              },
+              {
+                "$ref": "#/components/schemas/NoCredentials"
+              }
+            ]
+          }
+        }
+      },
+      "PostOAuth2Credentials": {
+        "type": "object",
+        "description": "OAuth2 client credentials",
+        "required": [
+          "scheme",
+          "tokenUrl",
+          "clientId",
+          "clientSecret"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "OAUTH2"
+            ]
+          },
+          "tokenUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "OAuth2 token endpoint URL"
+          },
+          "clientId": {
+            "type": "string",
+            "description": "OAuth2 client identifier"
+          },
+          "clientSecret": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "OAuth2 client secret (write-only, never returned)"
+          },
+          "scope": {
+            "type": "string",
+            "description": "OAuth2 scope to request"
+          },
+          "audience": {
+            "type": "string",
+            "description": "OAuth2 audience parameter"
+          },
+          "clientCredentialsAuthMethod": {
+            "type": "string",
+            "enum": [
+              "CLIENT_SECRET_POST",
+              "CLIENT_SECRET_BASIC"
+            ],
+            "default": "CLIENT_SECRET_POST",
+            "description": "Client credentials authentication method (defaults to CLIENT_SECRET_POST)"
+          }
+        }
+      },
+      "PostBasicCredentials": {
+        "type": "object",
+        "description": "HTTP Basic auth credentials",
+        "required": [
+          "scheme",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "BASIC"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Password (write-only, never returned)"
+          }
+        }
+      },
+      "PostDigestCredentials": {
+        "type": "object",
+        "description": "HTTP Digest auth credentials",
+        "required": [
+          "scheme",
+          "username",
+          "password"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "DIGEST"
+            ]
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "Password (write-only, never returned)"
+          }
+        }
+      },
+      "AuthProfileRef": {
+        "type": "object",
+        "description": "References an AuthProfile resource. Use source: REFERENCE when multiple Settings share the same auth profile.\nThe auth scheme is determined by the referenced AuthProfile resource.\n",
+        "required": [
+          "source",
+          "authProfileId"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "REFERENCE"
+            ],
+            "description": "Indicates credentials come from an AuthProfile resource"
+          },
+          "authProfileId": {
+            "type": "string",
+            "pattern": "^webhooks_sharedauth_[0-9a-z]{26}$",
+            "description": "AuthProfile resource ID (TypeID/TTID format)"
+          }
+        }
+      },
+      "SignatureSetting": {
+        "type": "object",
+        "description": "Webhook request signing configuration.\nUses discriminator on 'type' field to determine required properties.\nUse type: none to explicitly disable signing.\n",
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "SHARED_KEY": "#/components/schemas/SharedKeySignature",
+            "ACCOUNT_AUTH_TOKEN": "#/components/schemas/AccountAuthTokenSignature",
+            "NONE": "#/components/schemas/NoSignature"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SharedKeySignature"
+          },
+          {
+            "$ref": "#/components/schemas/AccountAuthTokenSignature"
+          },
+          {
+            "$ref": "#/components/schemas/NoSignature"
+          }
+        ]
+      },
+      "SharedKeySignature": {
+        "type": "object",
+        "description": "Signature configuration using a SharedKey.\nThe sharedKeyId references a SharedKey resource for signing webhook requests.\n",
+        "required": [
+          "type",
+          "sharedKeyId",
+          "algorithm"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SHARED_KEY"
+            ],
+            "description": "Indicates SharedKey-based signing"
+          },
+          "sharedKeyId": {
+            "type": "string",
+            "pattern": "^webhooks_sharedkey_[0-9a-z]{26}$",
+            "description": "SharedKey SID to use for signing"
+          },
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "HMAC_SHA1",
+              "HMAC_SHA256"
+            ],
+            "description": "Signing algorithm used to compute the request signature. Must be specified when\ncreating a signature configuration via the v2 API; not modifiable afterward.\n"
+          }
+        }
+      },
+      "AccountAuthTokenSignature": {
+        "type": "object",
+        "description": "Signature configuration using the Twilio account auth token.\n\n**Legacy:** This method couples signing to the master account credential. It is supported for\nexisting integrations but new integrations should use `SHARED_KEY` instead, which provides\nsecurity isolation and supports key rotation without touching account credentials.\n",
+        "required": [
+          "type",
+          "algorithm"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ACCOUNT_AUTH_TOKEN"
+            ],
+            "description": "Indicates account auth token signing (legacy \u2014 prefer SHARED_KEY)"
+          },
+          "algorithm": {
+            "type": "string",
+            "enum": [
+              "HMAC_SHA1",
+              "HMAC_SHA256"
+            ],
+            "description": "Signing algorithm used to compute the request signature. Must be specified when\ncreating a signature configuration via the v2 API; not modifiable afterward.\n"
+          }
+        }
+      },
+      "NoSignature": {
+        "type": "object",
+        "description": "Explicitly indicates no request signing",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NONE"
+            ],
+            "description": "Indicates no signing"
+          }
+        }
+      },
+      "ConnectionSetting": {
+        "type": "object",
+        "description": "HTTP connection settings for webhook requests",
+        "required": [
+          "connectTimeoutMs",
+          "readTimeoutMs"
+        ],
+        "properties": {
+          "connectTimeoutMs": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 15000,
+            "description": "TCP connection timeout in milliseconds (100ms - 15s)"
+          },
+          "readTimeoutMs": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 15000,
+            "description": "Response read timeout in milliseconds (100ms - 15s)"
+          },
+          "totalTimeoutMs": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 60000,
+            "description": "Total request timeout including retries (100ms - 60s). Optional."
+          },
+          "retryPolicy": {
+            "$ref": "#/components/schemas/RetryPolicy"
+          }
+        }
+      },
+      "RetryPolicy": {
+        "type": "object",
+        "description": "Retry behavior for failed webhook requests.\nIf not specified, no retries are attempted (retryCount: 0 is the default).\n",
+        "required": [
+          "retryCount",
+          "retryOn"
+        ],
+        "properties": {
+          "retryCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5,
+            "default": 0,
+            "description": "Number of retry attempts (default: 0, no retries)"
+          },
+          "retryOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "HTTP_4XX",
+                "HTTP_5XX",
+                "CONNECTION_TIMEOUT",
+                "READ_TIMEOUT",
+                "ALL"
+              ]
+            },
+            "description": "Conditions that trigger retries:\n- HTTP_4XX: Retry on 4xx HTTP status codes\n- HTTP_5XX: Retry on 5xx HTTP status codes\n- CONNECTION_TIMEOUT: Retry on TCP/TLS connection failures\n- READ_TIMEOUT: Retry when server doesn't respond in time\n- ALL: Retry on all failure types\n"
+          }
+        }
+      },
+      "EdgeZones": {
+        "type": "object",
+        "description": "Edge zone configuration for webhook delivery. Omitting this field means all zones are\neligible and Twilio selects freely.\n",
+        "required": [
+          "zones"
+        ],
+        "properties": {
+          "zones": {
+            "type": "array",
+            "description": "Priority-ordered list of zone IDs. Twilio routes to the first available zone in order.\nIndividual PoP identifiers (e.g. `IAD-1`) are not valid \u2014 use zone IDs only\n(see `GET /EdgeZones` for available values).\n",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "eu",
+              "na"
+            ]
+          },
+          "allowZoneFallback": {
+            "type": "boolean",
+            "default": false,
+            "description": "Controls delivery when none of the configured zones have available PoPs.\n- `false` (default): delivery fails rather than routing through an unconfigured zone.\n- `true`: Twilio falls back to any available zone outside the configured list.\n"
+          }
+        }
+      },
+      "PostSetting": {
+        "type": "object",
+        "description": "Request body for creating a new Setting",
+        "required": [
+          "auth"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name (optional, defaults to blank)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Setting's purpose and usage"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/PostAuthSetting"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/SignatureSetting"
+          },
+          "connection": {
+            "description": "HTTP connection settings. If omitted, system defaults are applied.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConnectionSetting"
+              }
+            ]
+          },
+          "edgeZones": {
+            "description": "Edge zone configuration for webhook delivery. When omitted, all zones are eligible\nand Twilio selects freely. When set, `zones` lists preferred zones in priority order.\n",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EdgeZones"
+              }
+            ]
+          }
+        }
+      },
+      "PatchSetting": {
+        "type": "object",
+        "description": "Request body for PATCH Setting - only friendlyName and description can be updated",
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Setting's purpose and usage"
+          }
+        }
+      },
+      "SettingsList": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Setting"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "Rule": {
+        "description": "URL matching rule that applies Settings to webhook requests.\nRules are discriminated by matchType - each type has different required fields.\n",
+        "discriminator": {
+          "propertyName": "matchType",
+          "mapping": {
+            "PREFIX_MATCH": "#/components/schemas/PrefixMatchRule",
+            "EXACT_MATCH": "#/components/schemas/ExactMatchRule",
+            "DEFAULT": "#/components/schemas/DefaultRule"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PrefixMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/ExactMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/DefaultRule"
+          }
+        ]
+      },
+      "PrefixMatchRule": {
+        "type": "object",
+        "description": "Rule that matches URLs starting with a prefix",
+        "required": [
+          "id",
+          "matchType",
+          "settings",
+          "prefix"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_rule_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique Rule identifier (TypeID/TTID format)"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "PREFIX_MATCH"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "prefix": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "URL prefix to match. Must be unique - only one rule per prefix allowed.\nExample: 'https://api.example.com/webhooks/'\n"
+          }
+        }
+      },
+      "ExactMatchRule": {
+        "type": "object",
+        "description": "Rule that matches an exact URL",
+        "required": [
+          "id",
+          "matchType",
+          "settings",
+          "value"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_rule_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique Rule identifier (TypeID/TTID format)"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "EXACT_MATCH"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Exact URL to match. Must be unique - only one rule per value allowed.\nExample: 'https://api.example.com/webhooks/voice/incoming'\n"
+          }
+        }
+      },
+      "DefaultRule": {
+        "type": "object",
+        "description": "Rule that matches all incoming requests not matched by other rules.\nOnly ONE default rule allowed per account. Evaluated only when no exact-match or prefix-match rule matches.\n",
+        "required": [
+          "id",
+          "matchType",
+          "settings"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_rule_[0-9a-z]{26}$",
+            "readOnly": true,
+            "description": "Unique Rule identifier (TypeID/TTID format)"
+          },
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for identification"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "SettingReference": {
+        "type": "object",
+        "description": "Reference to a Setting with traffic percentage",
+        "required": [
+          "settingId",
+          "percentage"
+        ],
+        "properties": {
+          "settingId": {
+            "type": "string",
+            "pattern": "^webhooks_setting_[0-9a-z]{26}$",
+            "description": "Setting resource ID (TypeID format)"
+          },
+          "percentage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Percentage of traffic to route (all settings in rule must sum to 100)"
+          }
+        }
+      },
+      "PostRule": {
+        "description": "Request body for creating a new Rule.\nUses discriminator on matchType - each type has different required fields.\n",
+        "discriminator": {
+          "propertyName": "matchType",
+          "mapping": {
+            "PREFIX_MATCH": "#/components/schemas/PostPrefixMatchRule",
+            "EXACT_MATCH": "#/components/schemas/PostExactMatchRule",
+            "DEFAULT": "#/components/schemas/PostDefaultRule"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PostPrefixMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/PostExactMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/PostDefaultRule"
+          }
+        ]
+      },
+      "PostPrefixMatchRule": {
+        "type": "object",
+        "required": [
+          "matchType",
+          "settings",
+          "prefix"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for the Rule (optional, defaults to blank)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "PREFIX_MATCH"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          },
+          "prefix": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "URL prefix to match, MUST be unique across all prefix match rules and MUST end with `/`."
+          }
+        }
+      },
+      "PostExactMatchRule": {
+        "type": "object",
+        "required": [
+          "matchType",
+          "settings",
+          "value"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for the Rule (optional, defaults to blank)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "EXACT_MATCH"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Exact URL to match, MUST be unique across all exact match rules and MUST NOT end with `/`."
+          }
+        }
+      },
+      "PostDefaultRule": {
+        "type": "object",
+        "description": "Default rule - matches all incoming requests, no additional fields required, there can only be one default rule per account.",
+        "required": [
+          "matchType",
+          "settings"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true,
+            "description": "Human-readable name for the Rule (optional, defaults to blank)"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          }
+        }
+      },
+      "PatchRule": {
+        "description": "Request body for PATCH Rule - partially updates the rule.\nOmit matchType to leave match config unchanged (metadata/settings-only update).\nInclude matchType to change match type and value together (requires the companion field for that type).\n",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PatchPrefixMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/PatchExactMatchRule"
+          },
+          {
+            "$ref": "#/components/schemas/PatchDefaultRule"
+          },
+          {
+            "$ref": "#/components/schemas/PatchMetadataOnlyRule"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "matchType",
+          "mapping": {
+            "PREFIX_MATCH": "#/components/schemas/PatchPrefixMatchRule",
+            "EXACT_MATCH": "#/components/schemas/PatchExactMatchRule",
+            "DEFAULT": "#/components/schemas/PatchDefaultRule"
+          }
+        }
+      },
+      "PatchPrefixMatchRule": {
+        "type": "object",
+        "required": [
+          "matchType",
+          "prefix"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for the Rule"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "PREFIX_MATCH"
+            ]
+          },
+          "prefix": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "New URL prefix to match, MUST be unique across all prefix match rules and MUST end with `/`."
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          }
+        }
+      },
+      "PatchExactMatchRule": {
+        "type": "object",
+        "required": [
+          "matchType",
+          "value"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for the Rule"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "EXACT_MATCH"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "New exact URL to match, MUST be unique across all exact match rules and MUST NOT end with `/`."
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          }
+        }
+      },
+      "PatchDefaultRule": {
+        "type": "object",
+        "description": "Switches (or keeps) the rule as the account's default rule. Only one default rule allowed per account.",
+        "required": [
+          "matchType"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for the Rule"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "matchType": {
+            "type": "string",
+            "enum": [
+              "DEFAULT"
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          }
+        }
+      },
+      "PatchMetadataOnlyRule": {
+        "type": "object",
+        "description": "No matchType field - leaves current match config (matchType/prefix/value) unchanged.",
+        "additionalProperties": false,
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "Human-readable name for the Rule"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Optional description of the Rule's purpose and usage"
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettingReference"
+            },
+            "minItems": 1,
+            "maxItems": 2,
+            "description": "Settings to apply with traffic distribution (percentages must sum to 100)"
+          }
+        }
+      },
+      "RuleOperationResponse": {
+        "type": "object",
+        "description": "Response body for async Rule operations (202 Accepted).\nContains the Operation tracking object and, for create/update, the Rule state.\nFor delete operations, `rule` is omitted since the resource is being removed.\n",
+        "required": [
+          "operation"
+        ],
+        "properties": {
+          "operation": {
+            "description": "Operation tracking object \u2014 poll statusUrl for completion",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
+          },
+          "rule": {
+            "description": "State of the Rule resource at the time the operation was accepted (omitted for DELETE)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Rule"
+              }
+            ]
+          }
+        }
+      },
+      "RulesList": {
+        "type": "object",
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rule"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "Operation": {
+        "type": "object",
+        "description": "Tracks status of async Rule operations",
+        "required": [
+          "id",
+          "status",
+          "statusUrl",
+          "createdAt",
+          "retentionPeriod"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^webhooks_operation_[0-9a-z]{26}$",
+            "description": "Unique operation identifier (TypeID/TTID format)"
+          },
+          "statusUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to poll for operation status (same as Location header in 202 response)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "COMPLETED",
+              "CANCELLED",
+              "FAILED"
+            ],
+            "description": "Current state of the operation:\n- PENDING: Accepted, not yet started\n- RUNNING: Propagating to all regions (typically 30-60 seconds)\n- COMPLETED: Rule active globally\n- CANCELLED: Operation was cancelled before completion\n- FAILED: Operation could not complete; see error field for details\n"
+          },
+          "error": {
+            "description": "Present only when status is FAILED",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/OperationError"
+              }
+            ]
+          },
+          "resourceId": {
+            "type": "string",
+            "description": "ID of the affected resource"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "retentionPeriod": {
+            "type": "string",
+            "format": "duration",
+            "pattern": "^P\\d+D$",
+            "readOnly": true,
+            "example": "P7D",
+            "description": "ISO-8601 duration for how long this Operation record is retained after creation (fixed at 7 days)"
+          }
+        }
+      },
+      "OperationsList": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      },
+      "TestRequest": {
+        "type": "object",
+        "description": "Request to test webhook delivery",
+        "required": [
+          "url",
+          "settingId"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Target webhook URL to test"
+          },
+          "settingId": {
+            "type": "string",
+            "pattern": "^webhooks_setting_[0-9a-z]{26}$",
+            "description": "Setting to use for test configuration"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "default": "POST",
+            "description": "HTTP method to use when sending the test webhook request"
+          }
+        }
+      },
+      "TestDeliveryResult": {
+        "type": "object",
+        "description": "Delivery outcome of a webhook test",
+        "required": [
+          "outcome",
+          "response",
+          "timing"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "DELIVERED",
+              "FAILED"
+            ],
+            "description": "Whether the webhook was successfully delivered to the target endpoint"
+          },
+          "response": {
+            "type": "object",
+            "description": "HTTP response received from target endpoint with the result of the webhook call.\n",
+            "properties": {
+              "statusCode": {
+                "type": "integer"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "timing": {
+            "type": "object",
+            "description": "Delivery timing information",
+            "properties": {
+              "totalMs": {
+                "type": "integer",
+                "description": "Total time taken for the webhook delivery in milliseconds"
+              }
+            }
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable error message (present only when outcome is FAILED)"
+          }
+        }
+      },
+      "TestResult": {
+        "type": "object",
+        "description": "Result of a webhook test",
+        "required": [
+          "url",
+          "result",
+          "createdAt"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "result": {
+            "$ref": "#/components/schemas/TestDeliveryResult"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "EdgeLocation": {
+        "type": "object",
+        "description": "A physical PoP within an edge zone. Observable only; not used for configuration.",
+        "required": [
+          "id",
+          "city",
+          "country"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "PoP identifier in `{IATA}-{n}` format (e.g. `DUB-1`). Appears in\n`X-Twilio-Edge-Location` response header. Not valid for use in Settings.edgeZones.\n",
+            "example": "DUB-1"
+          },
+          "city": {
+            "type": "string",
+            "description": "City where the PoP is located.",
+            "example": "Dublin"
+          },
+          "country": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code.",
+            "example": "IE"
+          }
+        }
+      },
+      "EdgeZone": {
+        "type": "object",
+        "description": "A named geographic zone through which Twilio delivers webhooks.",
+        "required": [
+          "id",
+          "friendlyName",
+          "description",
+          "edgeLocations"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable zone identifier. Use this value in Settings.edgeZones.",
+            "example": "eu"
+          },
+          "friendlyName": {
+            "type": "string",
+            "description": "Human-readable zone name.",
+            "example": "European Union"
+          },
+          "description": {
+            "type": "string",
+            "description": "Routing guidance for this zone.",
+            "example": "Routes webhooks via European PoPs. Optimal for endpoints in EU member states and surrounding countries."
+          },
+          "edgeLocations": {
+            "type": "array",
+            "description": "PoPs currently active within this zone.",
+            "items": {
+              "$ref": "#/components/schemas/EdgeLocation"
+            }
+          }
+        }
+      },
+      "EdgeZonesList": {
+        "type": "object",
+        "description": "Response body for GET /EdgeZones.",
+        "required": [
+          "edgeZones"
+        ],
+        "properties": {
+          "edgeZones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EdgeZone"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          }
+        }
+      }
+    }
+  }
+}

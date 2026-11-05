@@ -1583,6 +1583,179 @@
           }
         }
       },
+      "iam.v1.organization.agentregistration": {
+        "type": "object",
+        "description": "An MCP agent (a CIMD client) an organization has registered.",
+        "properties": {
+          "registration_sid": {
+            "type": "string",
+            "pattern": "^OQ[a-zA-Z0-9]{32}$",
+            "description": "The agent's identity in the organization."
+          },
+          "friendly_name": {
+            "type": "string",
+            "nullable": true,
+            "description": "The agent's name, from its CIMD document. Null when there is none, and then the screens show the CIMD URL. It cannot be set or changed."
+          },
+          "client_url": {
+            "type": "string",
+            "description": "The agent's CIMD document URL, as registered."
+          },
+          "origin": {
+            "type": "string",
+            "description": "The host of the CIMD document URL."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether users in the organization can connect the agent."
+          },
+          "created_by": {
+            "type": "string",
+            "nullable": true,
+            "description": "The name of the user who registered the agent, looked up when the registration is read. Null when the registration was made before the user was recorded, or the name could not be looked up. A user who has since been deleted shows as (Deleted User)."
+          },
+          "created_by_sid": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^US[a-zA-Z0-9]{32}$",
+            "description": "The sid of the user who registered the agent. Null when the registration was made before the user was recorded."
+          },
+          "date_created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "date_updated": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "registration_sid",
+          "client_url",
+          "origin",
+          "enabled"
+        ]
+      },
+      "iam.v1.organization.AgentRegistrationRequest": {
+        "type": "object",
+        "properties": {
+          "clientUrl": {
+            "type": "string",
+            "maxLength": 2048,
+            "description": "The agent's CIMD document URL, which is its client id. Must start with https:// and have a host and a path, with no credentials, fragment or dot segments."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether users in the organization can connect the agent. Defaults to false."
+          }
+        },
+        "required": [
+          "clientUrl"
+        ]
+      },
+      "iam.v1.organization.AgentRegistrationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether users in the organization can connect the agent. Disabling revokes every consent for the agent in the organization."
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "iam.v1.organization.AgentPermissionPart": {
+        "type": "object",
+        "description": "One part of an organization's agent permissions.",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "ALL_READ",
+              "ALL_READ_WRITE",
+              "SPECIFIC"
+            ]
+          },
+          "permissions": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2000,
+            "description": "The selected permissions, as /namespace/product/name/action, at most 2000. Required and not empty for SPECIFIC, empty or absent for the other modes."
+          }
+        },
+        "required": [
+          "mode"
+        ]
+      },
+      "iam.v1.organization.AgentPermissionsRequest": {
+        "type": "object",
+        "minProperties": 1,
+        "description": "The parts to change. A part left out keeps its setting, and at least one part is required.",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          },
+          "organization": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          },
+          "user": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          }
+        }
+      },
+      "iam.v1.organization.AgentPermissions": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          },
+          "organization": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          },
+          "user": {
+            "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
+          },
+          "pools": {
+            "type": "object",
+            "description": "The permissions each context offers agents, for rendering a selection.",
+            "properties": {
+              "account": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "organization": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "user": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "account",
+              "organization",
+              "user"
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "organization",
+          "user",
+          "pools"
+        ]
+      },
       "iam.v1.organization.vendoroauthapp": {
         "type": "object",
         "properties": {
@@ -2396,18 +2569,18 @@
         "type": "object",
         "description": "Request metadata for the Whitney auth_flow.checkpoint event, carried through for future blocklist/status-check use",
         "required": [
-          "ip_address"
+          "ipAddress"
         ],
         "properties": {
-          "ip_address": {
+          "ipAddress": {
             "type": "string",
             "description": "The IP address the login request originated from"
           },
-          "user_agent": {
+          "userAgent": {
             "type": "string",
             "description": "The User-Agent header from the login request"
           },
-          "request_id": {
+          "requestId": {
             "type": "string",
             "description": "Whitney's request identifier for the login attempt"
           }
@@ -2417,7 +2590,7 @@
         "type": "object",
         "description": "Details of the OAuth authorization request the user is logging in for",
         "properties": {
-          "client_id": {
+          "clientId": {
             "type": "string",
             "description": "The OAuth client the user is authenticating to"
           },
@@ -2425,9 +2598,13 @@
             "type": "string",
             "description": "The space-delimited scopes requested by the client"
           },
-          "authorization_details": {
-            "type": "string",
-            "description": "RFC 9396 authorization_details sent with the authorization request, if any"
+          "authorizationDetails": {
+            "type": "array",
+            "description": "RFC 9396 authorization_details sent with the authorization request, if any",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         }
       },
@@ -2441,16 +2618,16 @@
           },
           "identifier": {
             "type": "string",
-            "description": "The contact value the factor resolved, from the user's verified factor directory. Omitted together with identifier_type when the factor resolved none, e.g. a passkey login"
+            "description": "The contact value the factor resolved, from the user's verified factor directory. Omitted together with identifierType when the factor resolved none, e.g. a passkey login"
           },
-          "identifier_type": {
+          "identifierType": {
             "type": "string",
             "description": "The kind of identifier, e.g. email or phone"
           },
-          "completed_at": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp (seconds) the factor completed at"
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 timestamp the factor completed at"
           }
         }
       },
@@ -2478,12 +2655,36 @@
           }
         }
       },
+      "iam.v1.PostLoginActionUser": {
+        "type": "object",
+        "description": "The user who is logging in, as the full Users API object. Only userId is read by the webhook receiver",
+        "additionalProperties": true,
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "The Whitney (CIAM) identifier of the user"
+          }
+        }
+      },
+      "iam.v1.PostLoginActionUserContext": {
+        "type": "object",
+        "description": "The user who is logging in. Null when no user resolved upstream",
+        "properties": {
+          "isFirstLogin": {
+            "type": "boolean",
+            "description": "Whether this is the user's first login"
+          },
+          "user": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionUser"
+          }
+        }
+      },
       "iam.v1.PostLoginActionRequest": {
         "type": "object",
         "description": "The auth_flow.checkpoint webhook payload Whitney sends for a post-login action",
         "required": [
-          "authentication_context",
-          "request_context"
+          "authenticationContext",
+          "requestContext"
         ],
         "properties": {
           "version": {
@@ -2494,30 +2695,33 @@
             "type": "string",
             "description": "The Whitney event name (e.g. auth_flow.checkpoint)"
           },
-          "account_sid": {
+          "accountSid": {
             "type": "string",
             "description": "The Twilio account SID associated with the login"
           },
-          "node_id": {
+          "nodeId": {
             "type": "string",
             "description": "The Whitney auth flow node identifier for this action"
           },
-          "action_id": {
+          "actionId": {
             "type": "string",
             "description": "Whitney's identifier for this action invocation"
           },
-          "timestamp": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unix timestamp (seconds) of the login event"
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "RFC 3339 timestamp the webhook was sent at"
           },
           "oauth": {
             "$ref": "#/components/schemas/iam.v1.PostLoginActionOAuthContext"
           },
-          "authentication_context": {
+          "userContext": {
+            "$ref": "#/components/schemas/iam.v1.PostLoginActionUserContext"
+          },
+          "authenticationContext": {
             "$ref": "#/components/schemas/iam.v1.PostLoginActionAuthenticationContext"
           },
-          "request_context": {
+          "requestContext": {
             "$ref": "#/components/schemas/iam.v1.PostLoginActionRequestContext"
           }
         }
@@ -2728,6 +2932,346 @@
             "format": "date-time",
             "description": "The time the pre-signed URL stops being valid, given in RFC 3339 format.",
             "example": "2026-07-15T14:30:00Z"
+          }
+        }
+      },
+      "iam.v1.account.ConnectApp": {
+        "type": "object",
+        "description": "A Connect App owned by a Twilio account.",
+        "properties": {
+          "sid": {
+            "type": "string",
+            "pattern": "^CN[0-9a-fA-F]{32}$",
+            "format": "ConnectAppSid",
+            "description": "The unique identifier of the Connect App.",
+            "example": "CNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "accountSid": {
+            "type": "string",
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "format": "AccountSid",
+            "description": "The account that owns the Connect App.",
+            "example": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the Connect App is active. Inactive apps are never returned by the list endpoint."
+          },
+          "friendlyName": {
+            "type": "string",
+            "nullable": true,
+            "description": "The name shown to a user being asked to authorize the Connect App.",
+            "example": "SmartScheduler"
+          },
+          "companyName": {
+            "type": "string",
+            "description": "The name of the company that publishes the Connect App.",
+            "example": "SmartScheduler Inc"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "A description of what the Connect App does."
+          },
+          "homepageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The public homepage of the Connect App.",
+            "example": "https://example.com"
+          },
+          "authorizeRedirectUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Where the user is sent after allowing or denying authorization.",
+            "example": "https://example.com/callback"
+          },
+          "deauthorizeCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The URL Twilio calls when an account deauthorizes the Connect App."
+          },
+          "deauthorizeCallbackMethod": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "nullable": true,
+            "description": "The HTTP method used for the deauthorize callback."
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "An internal storage reference for the app logo, as a relative path. It is not a browser-renderable URL; use presignedImageUrl to display the logo."
+          },
+          "presignedImageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "A short-lived URL to download the app logo. Returned only when fetching a single Connect App, and only if the app has a logo. Do not cache it."
+          },
+          "tosUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The terms of service for the Connect App."
+          },
+          "permissions": {
+            "type": "array",
+            "nullable": true,
+            "description": "The permissions the Connect App requests.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "get-all",
+                "post-all"
+              ]
+            }
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the Connect App was created."
+          },
+          "dateUpdated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When the Connect App was last updated."
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppPage": {
+        "type": "object",
+        "description": "A page of Connect Apps.",
+        "required": [
+          "content"
+        ],
+        "properties": {
+          "content": {
+            "type": "array",
+            "description": "The Connect Apps on this page.",
+            "items": {
+              "$ref": "#/components/schemas/iam.v1.account.ConnectApp"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "page_size": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The number of records on this page."
+              },
+              "next_token": {
+                "type": "string",
+                "nullable": true,
+                "description": "Pass as PageToken to fetch the next page. Null on the last page."
+              },
+              "previous_token": {
+                "type": "string",
+                "nullable": true,
+                "description": "Pass as PageToken to fetch the previous page. Null on the first page."
+              },
+              "list_key": {
+                "type": "string",
+                "description": "The response property holding the page content.",
+                "example": "content"
+              },
+              "direct_token": {
+                "type": "boolean",
+                "description": "Whether the page tokens are usable as-is."
+              }
+            }
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppImageUploadUrl": {
+        "type": "object",
+        "description": "A short-lived URL to upload a Connect App image to, and the key to pass on create or update.",
+        "properties": {
+          "presignedUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Presigned S3 URL to upload the image to with a PUT. The request must send exactly contentType and the requested FileSize. Valid until expiresAt."
+          },
+          "imageKey": {
+            "type": "string",
+            "description": "The key of the uploaded image. Pass it as imageKey when creating or updating the Connect App.",
+            "example": "images/temp/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/9f1c2e7b4a6d48e3b05c7a1d2e3f4a5b-logo.png"
+          },
+          "contentType": {
+            "type": "string",
+            "description": "The Content-Type the upload must be sent with.",
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/gif"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When presignedUrl stops accepting uploads (5 minutes after it is issued)."
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppRequest": {
+        "type": "object",
+        "description": "The body of a Connect App create or update. The owner is never taken from the body; it is the authenticated account.",
+        "required": [
+          "friendlyName",
+          "companyName",
+          "homepageUrl",
+          "authorizeRedirectUrl",
+          "permissions"
+        ],
+        "properties": {
+          "friendlyName": {
+            "type": "string",
+            "description": "The name of the Connect App."
+          },
+          "companyName": {
+            "type": "string",
+            "description": "The company that owns the Connect App."
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "A description of the Connect App."
+          },
+          "homepageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The public homepage of the Connect App."
+          },
+          "authorizeRedirectUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Where the user is sent after authorizing the Connect App."
+          },
+          "deauthorizeCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Called when an account deauthorizes the Connect App."
+          },
+          "deauthorizeCallbackMethod": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "GET",
+              "POST"
+            ],
+            "description": "The HTTP method for deauthorizeCallbackUrl. Defaults to POST."
+          },
+          "tosUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "The Connect App's terms of service."
+          },
+          "permissions": {
+            "type": "array",
+            "description": "The permissions the Connect App asks for.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "get-all",
+                "post-all"
+              ]
+            }
+          },
+          "imageKey": {
+            "type": "string",
+            "nullable": true,
+            "description": "The imageKey from POST /v1/Account/ConnectApps/image/presigned-url, after the image was uploaded. Omit on update to keep the current image."
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppAuthorizeRequest": {
+        "type": "object",
+        "description": "The user's decision on the consent page. The authorizing account is always the authenticated account.",
+        "required": [
+          "connectAppSid"
+        ],
+        "properties": {
+          "connectAppSid": {
+            "type": "string",
+            "pattern": "^CN[0-9a-fA-F]{32}$",
+            "format": "ConnectAppSid",
+            "description": "The sid of the Connect App being authorized.",
+            "example": "CNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "response": {
+            "type": "string",
+            "enum": [
+              "ALLOW",
+              "DENY"
+            ],
+            "default": "ALLOW",
+            "description": "ALLOW grants the app access; DENY returns an error redirect and changes nothing."
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppAuthorizeResponse": {
+        "type": "object",
+        "description": "Where to send the user next.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "On ALLOW, the authorizeRedirectUrl with AccountSid (the Connect subaccount) and state added. On DENY, the authorizeRedirectUrl with error=unauthorized_client and state added.",
+            "example": "https://example.com/callback?AccountSid=ACbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb&state=abc123"
+          }
+        }
+      },
+      "iam.v1.account.ConnectAppConsentView": {
+        "type": "object",
+        "description": "What the authorize (consent) page shows for a Connect App, for the authenticated account.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The Connect App's friendly name.",
+            "example": "SmartScheduler"
+          },
+          "company": {
+            "type": "string",
+            "description": "The company that owns the Connect App.",
+            "example": "SmartScheduler Inc"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "A description of the Connect App."
+          },
+          "permissions": {
+            "type": "array",
+            "description": "The permissions the Connect App asks for.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "get-all",
+                "post-all"
+              ]
+            }
+          },
+          "presignedImageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "A short-lived URL to download the app logo, or null if the app has no logo. Do not cache it."
+          },
+          "alreadyAuthorized": {
+            "type": "boolean",
+            "description": "Whether the authenticated account has already authorized this Connect App."
+          },
+          "redirectUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Set only when alreadyAuthorized is true. The authorizeRedirectUrl with AccountSid (the Connect subaccount) and state added; redirect the user here instead of showing the consent page."
           }
         }
       }
@@ -4193,6 +4737,9 @@
   "tags": [
     {
       "name": "IamV1Account"
+    },
+    {
+      "name": "IamV1AccountConnectApp"
     },
     {
       "name": "IamV1ApiKey"

@@ -2025,26 +2025,29 @@
         "responses": {
           "202": {
             "description": "Profiles batch accepted.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "message"
-                  ],
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "example": "Profile batch accepted for processing.",
-                      "maxLength": 255
-                    }
-                  },
-                  "maxProperties": 1
+                  "$ref": "#/components/schemas/BulkOperationCreatedResponse"
                 },
                 "examples": {
                   "Accepted": {
                     "value": {
-                      "message": "Profile batch accepted for processing."
+                      "message": "Events accepted for processing.",
+                      "operationId": "mem_profilesbulkop_00000000000000000000000000",
+                      "createdAt": "2023-08-15T14:25:00Z",
+                      "statusUrl": "/v1/ProfileOperations/mem_profilesbulkop_00000000000000000000000000"
                     }
                   }
                 }
@@ -4125,36 +4128,31 @@
         "responses": {
           "201": {
             "description": "Import task created.",
+            "headers": {
+              "Operation-Id": {
+                "$ref": "#/components/headers/OperationId"
+              },
+              "Location": {
+                "$ref": "#/components/headers/OperationLocation"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/OperationRetryAfter"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "importId",
-                    "url"
-                  ],
-                  "properties": {
-                    "importId": {
-                      "type": "string",
-                      "description": "ID of the import task.",
-                      "example": "mem_import_00000000000000000000000000",
-                      "maxLength": 39
-                    },
-                    "url": {
-                      "type": "string",
-                      "description": "Pre-signed URL to upload the CSV via a single PUT request.",
-                      "example": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234...",
-                      "maxLength": 2048
-                    }
-                  },
-                  "maxProperties": 2
+                  "$ref": "#/components/schemas/ProfileImportCreatedResponse"
                 },
                 "examples": {
                   "Created": {
                     "summary": "Example created import",
                     "value": {
                       "importId": "mem_import_00000000000000000000000000",
-                      "url": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234..."
+                      "url": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234...",
+                      "operationId": "mem_csvimportop_00000000000000000000000000",
+                      "createdAt": "2023-08-15T14:25:00Z",
+                      "statusUrl": "/v1/ProfileOperations/mem_csvimportop_00000000000000000000000000"
                     }
                   }
                 }
@@ -4663,9 +4661,9 @@
           }
         },
         "required": [
+          "updatedAt",
           "id",
-          "createdAt",
-          "updatedAt"
+          "createdAt"
         ]
       },
       "SummaryCore": {
@@ -4746,12 +4744,12 @@
           }
         },
         "required": [
-          "content",
-          "createdAt",
           "occurredAt",
           "id",
+          "content",
+          "updatedAt",
           "conversationId",
-          "updatedAt"
+          "createdAt"
         ]
       },
       "Participant": {
@@ -4924,10 +4922,10 @@
                 }
               },
               "required": [
-                "channel",
-                "id",
+                "address",
                 "name",
-                "address"
+                "id",
+                "channel"
               ]
             }
           }
@@ -5415,14 +5413,20 @@
             "minimum": 1,
             "description": "The current version number of the Memory Store. Incremented on each successful update.",
             "example": 3
+          },
+          "dataAsOf": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time up to which data sent to this Memory Store has been processed by downstream systems. Equals the time the Memory Store was created when no data has been processed yet. Omitted when no value is available. Represents a high water mark for ingested data.",
+            "example": "2026-10-07T12:00:00Z"
           }
         },
         "required": [
           "displayName",
           "status",
-          "intelligenceServiceId",
+          "id",
           "version",
-          "id"
+          "intelligenceServiceId"
         ]
       },
       "ServiceList": {
@@ -5520,8 +5524,8 @@
           }
         },
         "required": [
-          "matchingRules",
           "identifierConfigs",
+          "matchingRules",
           "version"
         ]
       },
@@ -6204,8 +6208,8 @@
         },
         "required": [
           "displayName",
-          "mappingFrom",
-          "mappingTo"
+          "mappingTo",
+          "mappingFrom"
         ]
       },
       "DataMapping": {
@@ -6260,12 +6264,12 @@
         },
         "required": [
           "displayName",
-          "createdAt",
-          "mappingTo",
-          "version",
           "id",
+          "version",
+          "mappingTo",
           "mappingFrom",
-          "updatedAt"
+          "updatedAt",
+          "createdAt"
         ]
       },
       "DataMappingList": {
@@ -6343,12 +6347,12 @@
           }
         },
         "required": [
-          "content",
-          "createdAt",
+          "source",
           "occurredAt",
           "id",
-          "source",
-          "updatedAt"
+          "content",
+          "updatedAt",
+          "createdAt"
         ]
       },
       "RecallSummaryInfo": {
@@ -6403,12 +6407,12 @@
           }
         },
         "required": [
-          "content",
-          "createdAt",
           "occurredAt",
           "id",
+          "content",
+          "updatedAt",
           "conversationId",
-          "updatedAt"
+          "createdAt"
         ]
       },
       "SummaryCorePatch": {
@@ -6619,9 +6623,9 @@
           }
         },
         "required": [
+          "source",
           "occurredAt",
-          "content",
-          "source"
+          "content"
         ]
       },
       "DataMappingSuggestionToTypes": {
@@ -7073,11 +7077,11 @@
         },
         "required": [
           "displayName",
-          "createdAt",
-          "version",
           "id",
+          "version",
           "storeId",
-          "updatedAt"
+          "updatedAt",
+          "createdAt"
         ]
       },
       "TraitExtractionStrategyList": {
@@ -7342,10 +7346,10 @@
         },
         "required": [
           "displayName",
-          "createdAt",
-          "version",
           "id",
-          "updatedAt"
+          "version",
+          "updatedAt",
+          "createdAt"
         ]
       },
       "ObservationExtractionStrategyList": {
@@ -7363,6 +7367,278 @@
           },
           "meta": {
             "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "BulkOperationCreatedResponse": {
+        "type": "object",
+        "description": "Response for bulk profile operations.",
+        "required": [
+          "message"
+        ],
+        "maxProperties": 4,
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Confirmation message for the operation.",
+            "maxLength": 255,
+            "example": "Events accepted for processing."
+          },
+          "operationId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileOperationID"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the operation was created.",
+            "example": "2023-08-15T14:25:00Z"
+          },
+          "statusUrl": {
+            "type": "string",
+            "description": "URL to query the operation status.",
+            "maxLength": 512,
+            "example": "/v1/ProfileOperations/mem_profilesbulkop_00000000000000000000000000"
+          }
+        }
+      },
+      "ProfileOperationID": {
+        "type": "string",
+        "pattern": "^mem_[a-z]{3,46}_[0-7][0-9a-z]{25}$",
+        "example": "mem_profileop_00000000000000000000000000",
+        "description": "The ID of an asynchronous profile domain operation."
+      },
+      "ProfileOperationStatusResponse": {
+        "type": "object",
+        "description": "Status and progress information for an asynchronous profile domain operation.",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "status",
+          "createdAt"
+        ],
+        "maxProperties": 6,
+        "properties": {
+          "operationId": {
+            "$ref": "#/components/schemas/ProfileOperationID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RUNNING",
+              "CANCELLED",
+              "COMPLETED",
+              "FAILED"
+            ],
+            "description": "Current operation status:\n- PENDING: Operation accepted but not yet started\n- RUNNING: Operation is actively processing\n- CANCELLED: Operation was cancelled by user\n- COMPLETED: Operation finished successfully\n- FAILED: Operation failed and cannot complete\n",
+            "example": "RUNNING"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the operation was created.",
+            "example": "2023-08-15T14:25:00Z"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the operation reached a terminal state. Null if still active.",
+            "nullable": true,
+            "example": "2023-08-15T14:30:00Z"
+          },
+          "error": {
+            "type": "object",
+            "description": "Error details when status is FAILED. Similar to RFC 9457 (Problem Details for HTTP APIs). Null for non-failed operations.",
+            "nullable": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "format": "uri",
+                "description": "A URI reference identifying the problem type.",
+                "maxLength": 256,
+                "example": "https://www.twilio.com/docs/api/errors/20504"
+              },
+              "title": {
+                "type": "string",
+                "description": "A short, human-readable summary of the problem type.",
+                "maxLength": 128,
+                "example": "Operation Timeout"
+              },
+              "code": {
+                "type": "integer",
+                "description": "The numeric Twilio error code.",
+                "example": 20504
+              },
+              "detail": {
+                "type": "string",
+                "description": "A human-readable explanation specific to this occurrence of the problem.",
+                "maxLength": 1024,
+                "example": "Operation did not complete within the configured timeout window of 3 hours."
+              }
+            }
+          },
+          "payload": {
+            "$ref": "#/components/schemas/OperationPayload"
+          }
+        }
+      },
+      "OperationPayload": {
+        "description": "Operation-specific progress and status details. The `type` field identifies which shape applies.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/BaseOperationPayload"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "BASE": "#/components/schemas/BaseOperationPayload"
+          }
+        }
+      },
+      "OperationPayloadBase": {
+        "type": "object",
+        "description": "Fields shared by every operation type, regardless of shape.",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Identifies which fields, if any, are present beyond the standard ones. `BASE` means only the standard fields are present.",
+            "maxLength": 64,
+            "example": "BASE"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of items to be processed.",
+            "example": 1000,
+            "minimum": 0
+          },
+          "succeededCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of items successfully processed.",
+            "example": 500,
+            "minimum": 0
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of items that failed processing.",
+            "example": 20,
+            "minimum": 0
+          },
+          "failedEventOrdinals": {
+            "type": "array",
+            "description": "List of ordinal identifiers (row indices or event coordinates) that failed processing.\nProvided for diagnostic purposes. May be truncated for large failure sets.\n",
+            "items": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "maxItems": 1000,
+            "example": [
+              "0",
+              "1",
+              "4"
+            ]
+          }
+        }
+      },
+      "BaseOperationPayload": {
+        "description": "Payload for operations with no fields beyond the standard ones, such as bulk trait updates and CSV imports.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "BASE"
+            ]
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total number of items to be processed.",
+            "example": 1000,
+            "minimum": 0
+          },
+          "succeededCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of items successfully processed.",
+            "example": 500,
+            "minimum": 0
+          },
+          "failedCount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Number of items that failed processing.",
+            "example": 20,
+            "minimum": 0
+          },
+          "failedEventOrdinals": {
+            "type": "array",
+            "description": "List of ordinal identifiers (row indices or event coordinates) that failed processing.\nProvided for diagnostic purposes. May be truncated for large failure sets.\n",
+            "items": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "maxItems": 1000,
+            "example": [
+              "0",
+              "1",
+              "4"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ProfileImportCreatedResponse": {
+        "type": "object",
+        "description": "Response for a successfully created profile import task.",
+        "required": [
+          "importId",
+          "url"
+        ],
+        "maxProperties": 5,
+        "properties": {
+          "importId": {
+            "type": "string",
+            "description": "ID of the import task.",
+            "example": "mem_import_00000000000000000000000000",
+            "maxLength": 39
+          },
+          "url": {
+            "type": "string",
+            "description": "Pre-signed URL to upload the CSV via a single PUT request.",
+            "example": "https://cell-1.us-east-1.profiles-import.s3.us-east-1.amazonaws.com/AC0001/store_0001/import_0001/profiles.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIA...&X-Amz-Date=20260101T000000Z&X-Amz-Expires=1800&X-Amz-SignedHeaders=host&X-Amz-Signature=abcd1234...",
+            "maxLength": 2048
+          },
+          "operationId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileOperationID"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the operation was created.",
+            "example": "2023-08-15T14:25:00Z"
+          },
+          "statusUrl": {
+            "type": "string",
+            "description": "URL to query the operation status.",
+            "maxLength": 512,
+            "example": "/v1/ProfileOperations/mem_csvimportop_00000000000000000000000000"
           }
         }
       }
@@ -7949,6 +8225,15 @@
           "format": "uri",
           "example": "https:///memory.twilio.com/v1/Stores/mem_store_00000000000000000000000000/Profiles/mem_profile_00000000000000000000000000",
           "description": "The URL of the new location for the resource."
+        }
+      },
+      "Retry-After": {
+        "description": "The minimum number of seconds to wait before reattempting the request.",
+        "schema": {
+          "type": "integer",
+          "minimum": 0,
+          "example": 5,
+          "description": "The minimum number of seconds to wait before reattempting the request."
         }
       }
     }

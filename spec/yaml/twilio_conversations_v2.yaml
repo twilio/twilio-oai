@@ -295,7 +295,6 @@ components:
       required:
       - id
       - accountId
-      - configurationId
       properties:
         id:
           type: string
@@ -307,7 +306,9 @@ components:
           example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         configurationId:
           type: string
-          description: Configuration ID.
+          nullable: true
+          description: Configuration ID. Null when the Conversation was created with
+            an inline configuration.
           example: conv_configuration_00000000000000000000000001
         status:
           $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -396,6 +397,10 @@ components:
               description: Whether memory extraction is enabled for conversations
                 under this configuration. Defaults to false.
               example: false
+            redactionConfigurationId:
+              $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+              x-twilio:
+                libraryVisibility: hidden
             conversationsV1Bridge:
               $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
               description: Configuration for Conversations V1 bridge. When set, messaging
@@ -1828,6 +1833,12 @@ components:
         maxLength: 512
       example:
         zendesk_ticket_id: TKT-456
+    conversations.v2.redaction_configuration_id:
+      type: string
+      pattern: ^redaction_configuration_[a-zA-Z0-9]{26}$
+      description: The ID of the redaction configuration applied to communications
+        in this configuration's conversations.
+      example: redaction_configuration_01m3xn201sezxr5494942ehek8
     conversations.v2.conversations_v1_bridge:
       type: object
       description: Configuration for Conversations V1 bridge. When set, messaging
@@ -2000,6 +2011,7 @@ components:
       - VOICE
       - SMS
       - RCS
+      - EMAIL
       - WHATSAPP
       - CHAT
       - VIDEO
@@ -2173,6 +2185,98 @@ components:
             pageSize:
               type: integer
               example: 1
+    conversations.v2.import_outcome_status:
+      type: string
+      enum:
+      - COMPLETED
+      - SKIPPED
+      - FAILED
+      description: 'What happened to one resource. COMPLETED: imported. SKIPPED: not
+        imported, by rule or limit. FAILED: an import was attempted, or could not
+        start, and did not succeed.'
+    conversations.v2.import_outcome_failure_reason:
+      type: string
+      enum:
+      - NOT_DUAL_CHANNEL
+      - DURATION_OUT_OF_RANGE
+      - OVER_LIMIT
+      - OVER_BYTE_CAP
+      - OVER_PAGE_CAP
+      - NOT_COMPLETED
+      - NOT_AVAILABLE
+      - PARTICIPANT_ADDRESS_UNRESOLVED
+      - NO_CALL
+      - TOO_FEW_PARTICIPANTS
+      - RECORDING_IMPORT_FAILED
+      - TRANSCRIPTION_FAILED
+      - TRANSCRIPTION_TIMEOUT
+      - SETUP_FAILED
+      - IMPORT_FAILED
+      description: Why a resource was skipped or failed.
+    conversations.v2.import_outcome:
+      type: object
+      description: What happened to one recording or Classic conversation in the import.
+      required:
+      - sourceType
+      - resourceId
+      - status
+      properties:
+        sourceType:
+          $ref: '#/components/schemas/conversations.v2.import_source_type'
+        resourceId:
+          type: string
+          description: The recording SID or Classic conversation SID.
+          example: RE0123456789abcdef0123456789abcdef
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_outcome_status'
+        failureReason:
+          $ref: '#/components/schemas/conversations.v2.import_outcome_failure_reason'
+        conversationId:
+          type: string
+          description: The conversation the resource was imported into, when there
+            is one.
+        importedCommunicationCount:
+          type: integer
+          minimum: 0
+          description: Communications created from the Classic conversation. Only
+            present for a completed Classic conversation.
+        conversationClosed:
+          type: boolean
+          description: Whether the import closed the conversation. Only present for
+            a completed Classic conversation.
+        audioSeconds:
+          type: integer
+          minimum: 0
+          description: Seconds of audio sent for transcription; 0 when none was sent.
+            Only present for a recording.
+    conversations.v2.import_outcome_list:
+      type: object
+      required:
+      - outcomes
+      - meta
+      properties:
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/conversations.v2.import_outcome'
+        meta:
+          type: object
+          required:
+          - key
+          - pageSize
+          properties:
+            key:
+              type: string
+              example: outcomes
+            pageSize:
+              type: integer
+              example: 50
+            nextToken:
+              type: string
+              description: Pass as pageToken to fetch the next page. Omitted on the
+                last page and while the import is pending.
+        status:
+          $ref: '#/components/schemas/conversations.v2.import_status'
 security:
 - basic_apikey_or_accountsid: []
 tags:
@@ -2339,6 +2443,10 @@ paths:
                           description: Whether memory extraction is enabled for conversations
                             under this configuration. Defaults to false.
                           example: false
+                        redactionConfigurationId:
+                          $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                          x-twilio:
+                            libraryVisibility: hidden
                         conversationsV1Bridge:
                           $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                           description: Configuration for Conversations V1 bridge.
@@ -2758,6 +2866,10 @@ paths:
                     description: Whether memory extraction is enabled for conversations
                       under this configuration. Defaults to false.
                     example: false
+                  redactionConfigurationId:
+                    $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                    x-twilio:
+                      libraryVisibility: hidden
                   conversationsV1Bridge:
                     $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                     description: Configuration for Conversations V1 bridge. When set,
@@ -3386,7 +3498,6 @@ paths:
                       required:
                       - id
                       - accountId
-                      - configurationId
                       properties:
                         id:
                           type: string
@@ -3398,7 +3509,9 @@ paths:
                           example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                         configurationId:
                           type: string
-                          description: Configuration ID.
+                          nullable: true
+                          description: Configuration ID. Null when the Conversation
+                            was created with an inline configuration.
                           example: conv_configuration_00000000000000000000000001
                         status:
                           $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -3489,6 +3602,10 @@ paths:
                                 conversations under this configuration. Defaults to
                                 false.
                               example: false
+                            redactionConfigurationId:
+                              $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                              x-twilio:
+                                libraryVisibility: hidden
                             conversationsV1Bridge:
                               $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                               description: Configuration for Conversations V1 bridge.
@@ -3571,12 +3688,11 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-              - configurationId
               properties:
                 configurationId:
                   type: string
-                  description: The ID of an existing configuration.
+                  description: The ID of an existing configuration. Omit it to define
+                    the configuration inline in `configuration`.
                   example: conv_configuration_00000000000000000000000002
                 name:
                   type: string
@@ -3584,8 +3700,66 @@ paths:
                   example: Support Chat
                 configuration:
                   type: object
-                  description: Conversation configuration settings.
+                  description: Conversation configuration settings. Without `configurationId`,
+                    `conversationGroupingType` and `memoryStoreId` are required. With
+                    `configurationId`, these settings override the Configuration's
+                    own for this Conversation only.
                   properties:
+                    conversationGroupingType:
+                      type: string
+                      enum:
+                      - GROUP_BY_PROFILE
+                      - GROUP_BY_PARTICIPANT_ADDRESSES
+                      - GROUP_BY_PARTICIPANT_ADDRESSES_AND_CHANNEL_TYPE
+                      description: "Type of Conversation grouping strategy:\n- `GROUP_BY_PROFILE`:\
+                        \ Groups Communications by resolved Profile from the Memory\
+                        \ Store.\n  A Profile is looked up or created for `CUSTOMER`\
+                        \ Participant types. All Communications from the same Profile\
+                        \ are in the same Conversation, regardless of address or channel.\n\
+                        - `GROUP_BY_PARTICIPANT_ADDRESSES`: Groups Communications\
+                        \ by Participant addresses across all channels.\n  A customer\
+                        \ using +18005550100 will be in the same Conversation whether\
+                        \ they contact by SMS, WhatsApp, or RCS.\n- `GROUP_BY_PARTICIPANT_ADDRESSES_AND_CHANNEL_TYPE`:\
+                        \ Groups Communications by both Participant addresses AND\
+                        \ channel.\n  A customer using +18005550100 by SMS will be\
+                        \ in a different Conversation than the same customer by Voice.\n"
+                      example: GROUP_BY_PROFILE
+                    memoryStoreId:
+                      type: string
+                      description: The memory store ID that Conversation Orchestrator
+                        uses for profile resolution.
+                      pattern: ^mem_(store|service)_[0-7][0-9a-z]{25}$
+                      example: mem_store_01k1etk2y5f1y9fpe2epfdtvv2
+                    channelSettings:
+                      type: object
+                      description: Status timeouts by channel type. Capture rules
+                        can only be set on a Configuration.
+                      additionalProperties:
+                        type: object
+                        properties:
+                          statusTimeouts:
+                            type: object
+                            description: Timeout settings for channel status transitions.
+                              `inactive` must be less than `closed`.
+                            required:
+                            - closed
+                            properties:
+                              inactive:
+                                type: integer
+                                description: Inactivity timeout in minutes.
+                                minimum: 1
+                                example: 10
+                              closed:
+                                type: integer
+                                description: Close timeout in minutes.
+                                minimum: 1
+                                example: 15
+                    memoryExtractionEnabled:
+                      type: boolean
+                      description: Whether memory extraction is enabled for this Conversation.
+                        Without `configurationId`, defaults to false; with it, defaults
+                        to the Configuration's value.
+                      example: false
                     intelligenceConfigurationIds:
                       type: array
                       maxItems: 5
@@ -3600,7 +3774,7 @@ paths:
                       items:
                         type: string
                       x-twilio:
-                        libraryVisibility: private
+                        libraryVisibility: hidden
                         betaFeature: api.memory.2026Q3
                     observationExtractionStrategyIds:
                       type: array
@@ -3609,8 +3783,31 @@ paths:
                       items:
                         type: string
                       x-twilio:
-                        libraryVisibility: private
+                        libraryVisibility: hidden
                         betaFeature: api.memory.2026Q4
+                    statusCallbacks:
+                      type: array
+                      maxItems: 2
+                      items:
+                        type: object
+                        description: Default webhook configuration for Conversation-level
+                          events under this Configuration.
+                        required:
+                        - url
+                        properties:
+                          url:
+                            type: string
+                            format: uri
+                            description: Destination URL for webhooks.
+                          method:
+                            type: string
+                            default: POST
+                            enum:
+                            - POST
+                            - GET
+                            description: HTTP method used to invoke the webhook URL.
+                      description: The webhook configurations for this Conversation.
+                        Overrides the Configuration's own.
                     workflows:
                       type: array
                       maxItems: 5
@@ -3632,7 +3829,7 @@ paths:
                         Overrides the Configuration's own.
                       x-twilio:
                         betaFeature: api.conversation.orchestrator.actions
-                        libraryVisibility: private
+                        libraryVisibility: hidden
                 participants:
                   type: array
                   description: Optional list of Participants to create with the Conversation.
@@ -3670,6 +3867,7 @@ paths:
                               - VOICE
                               - SMS
                               - RCS
+                              - EMAIL
                               - WHATSAPP
                               - CHAT
                               - VIDEO
@@ -3700,7 +3898,6 @@ paths:
                 required:
                 - id
                 - accountId
-                - configurationId
                 properties:
                   id:
                     type: string
@@ -3712,7 +3909,9 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   configurationId:
                     type: string
-                    description: Configuration ID.
+                    nullable: true
+                    description: Configuration ID. Null when the Conversation was
+                      created with an inline configuration.
                     example: conv_configuration_00000000000000000000000001
                   status:
                     $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -3801,6 +4000,10 @@ paths:
                         description: Whether memory extraction is enabled for conversations
                           under this configuration. Defaults to false.
                         example: false
+                      redactionConfigurationId:
+                        $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                        x-twilio:
+                          libraryVisibility: hidden
                       conversationsV1Bridge:
                         $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                         description: Configuration for Conversations V1 bridge. When
@@ -3881,7 +4084,6 @@ paths:
                 required:
                 - id
                 - accountId
-                - configurationId
                 properties:
                   id:
                     type: string
@@ -3893,7 +4095,9 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   configurationId:
                     type: string
-                    description: Configuration ID.
+                    nullable: true
+                    description: Configuration ID. Null when the Conversation was
+                      created with an inline configuration.
                     example: conv_configuration_00000000000000000000000001
                   status:
                     $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -3982,6 +4186,10 @@ paths:
                         description: Whether memory extraction is enabled for conversations
                           under this configuration. Defaults to false.
                         example: false
+                      redactionConfigurationId:
+                        $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                        x-twilio:
+                          libraryVisibility: hidden
                       conversationsV1Bridge:
                         $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                         description: Configuration for Conversations V1 bridge. When
@@ -4078,7 +4286,6 @@ paths:
                 required:
                 - id
                 - accountId
-                - configurationId
                 properties:
                   id:
                     type: string
@@ -4090,7 +4297,9 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   configurationId:
                     type: string
-                    description: Configuration ID.
+                    nullable: true
+                    description: Configuration ID. Null when the Conversation was
+                      created with an inline configuration.
                     example: conv_configuration_00000000000000000000000001
                   status:
                     $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -4179,6 +4388,10 @@ paths:
                         description: Whether memory extraction is enabled for conversations
                           under this configuration. Defaults to false.
                         example: false
+                      redactionConfigurationId:
+                        $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                        x-twilio:
+                          libraryVisibility: hidden
                       conversationsV1Bridge:
                         $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                         description: Configuration for Conversations V1 bridge. When
@@ -4363,7 +4576,6 @@ paths:
                 required:
                 - id
                 - accountId
-                - configurationId
                 properties:
                   id:
                     type: string
@@ -4375,7 +4587,9 @@ paths:
                     example: ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                   configurationId:
                     type: string
-                    description: Configuration ID.
+                    nullable: true
+                    description: Configuration ID. Null when the Conversation was
+                      created with an inline configuration.
                     example: conv_configuration_00000000000000000000000001
                   status:
                     $ref: '#/components/schemas/conversations.v2.conversation_status'
@@ -4464,6 +4678,10 @@ paths:
                         description: Whether memory extraction is enabled for conversations
                           under this configuration. Defaults to false.
                         example: false
+                      redactionConfigurationId:
+                        $ref: '#/components/schemas/conversations.v2.redaction_configuration_id'
+                        x-twilio:
+                          libraryVisibility: hidden
                       conversationsV1Bridge:
                         $ref: '#/components/schemas/conversations.v2.conversations_v1_bridge'
                         description: Configuration for Conversations V1 bridge. When
@@ -5019,6 +5237,7 @@ paths:
                         - VOICE
                         - SMS
                         - RCS
+                        - EMAIL
                         - WHATSAPP
                         - CHAT
                         - VIDEO
@@ -5285,6 +5504,7 @@ paths:
                         - VOICE
                         - SMS
                         - RCS
+                        - EMAIL
                         - WHATSAPP
                         - CHAT
                         - VIDEO
@@ -5587,6 +5807,7 @@ paths:
                       - VOICE
                       - SMS
                       - RCS
+                      - EMAIL
                       - WHATSAPP
                       - CHAT
                       - VIDEO
@@ -5658,6 +5879,7 @@ paths:
                         - VOICE
                         - SMS
                         - RCS
+                        - EMAIL
                         - WHATSAPP
                         - CHAT
                         - VIDEO
