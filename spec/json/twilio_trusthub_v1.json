@@ -42,7 +42,7 @@
           },
           "businessRegistrationAuthority": {
             "type": "string",
-            "description": "The authority with which the business is registered."
+            "description": "The authority with which the business is registered. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "businessRegistrationNumber": {
             "type": "string",
@@ -52,7 +52,7 @@
           },
           "businessIndustry": {
             "type": "string",
-            "description": "The industry of the business."
+            "description": "The industry of the business. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "businessWebsite": {
             "type": "string",
@@ -61,7 +61,7 @@
           },
           "businessType": {
             "type": "string",
-            "description": "The type of business entity."
+            "description": "The type of business entity. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "businessStockSymbol": {
             "type": "string",
@@ -70,12 +70,12 @@
           },
           "businessStockExchange": {
             "type": "string",
-            "description": "The stock exchange where the business is listed."
+            "description": "The stock exchange where the business is listed. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "businessTaxExemptStatus": {
             "type": "string",
             "example": "527",
-            "description": "Nonprofit/political organization tax-exempt status per the U.S. tax code (e.g. 501c3, 501c1, 527). A value of 527 (political organization) requires a Campaign Verify token in brandExternalVettingToken."
+            "description": "Nonprofit/political organization tax-exempt status per the U.S. tax code (e.g. 501c3, 501c1, 527). A value of 527 (political organization) requires a Campaign Verify token in brandExternalVettingToken. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "brandExternalVettingToken": {
             "type": "string",
@@ -170,14 +170,14 @@
             "minLength": 34,
             "maxLength": 34,
             "pattern": "^BN[0-9a-fA-F]{32}$",
-            "description": "The legacy Twilio A2P Brand SID (BN-prefixed) for the brand this campaign is registered under. This is a different identifier from the `id` returned by the Initialize Brand endpoint (which is formatted as `tri1.us1.account.AC.../registration.BU...`). Retrieve the BN brand SID via [GET /v1/a2p/BrandRegistrations/{Sid}](https://www.twilio.com/docs/messaging/api/brand-registration-resource) on `messaging.twilio.com`."
+            "description": "The legacy Twilio A2P Brand SID (BN-prefixed) for the brand this campaign is registered under. This is a different identifier from the `id` returned by the Initialize Brand endpoint (which is formatted as `tri1.us1.account.AC.../registration.BU...`). Retrieve the BN brand SID via [GET /v1/a2p/BrandRegistrations/{Sid}](https://www.twilio.com/docs/messaging/api/brand-registration-resource) on `messaging.twilio.com`. This field keeps the legacy Sid name because it carries a legacy Twilio SID (BN prefix) from messaging.twilio.com."
           },
           "messagingServiceSid": {
             "type": "string",
             "minLength": 34,
             "maxLength": 34,
             "pattern": "^MG[0-9a-fA-F]{32}$",
-            "description": "The SID of the Messaging Service."
+            "description": "The SID of the Messaging Service. This field keeps the legacy Sid name because it carries a legacy Twilio SID (MG prefix) from messaging.twilio.com."
           },
           "themeSetId": {
             "type": "string",
@@ -189,7 +189,7 @@
             "items": {
               "type": "string"
             },
-            "description": "The categories of the messaging use case."
+            "description": "The categories of the messaging use case. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "useCaseDescription": {
             "type": "string",
@@ -232,7 +232,7 @@
             "items": {
               "type": "string"
             },
-            "description": "The opt-in methods for the use case."
+            "description": "The opt-in methods for the use case. The value is validated by the service; see the Twilio docs for accepted values."
           },
           "useCaseOptInDescription": {
             "type": "string",
@@ -317,20 +317,22 @@
       },
       "trusthub.v1.a2p_embedded_session": {
         "type": "object",
+        "required": [
+          "id",
+          "sessionId",
+          "sessionToken"
+        ],
         "properties": {
           "id": {
             "type": "string",
-            "nullable": true,
             "description": "The unique A2P Brand or Campaign Registration identifier, formatted as `tri1.us1.account.AC.../registration.BU...`."
           },
           "sessionId": {
             "type": "string",
-            "nullable": true,
             "description": "The Persona inquiry ID used to start the embedded compliance session."
           },
           "sessionToken": {
             "type": "string",
-            "nullable": true,
             "description": "The Persona session token for embedding the compliance UI. Expires in 24 hours."
           }
         }
@@ -1451,7 +1453,7 @@
       },
       "post": {
         "description": "Create a new A2P Brand Registration and initialize an embedded compliance session.",
-        "summary": "Create a new A2P Brand Registration and initialize an embedded compliance session.",
+        "summary": "Create an A2P Brand Registration",
         "tags": [
           "TrusthubV1A2PBrandRegistrations"
         ],
@@ -1668,7 +1670,7 @@
       },
       "post": {
         "description": "Resume an A2P Brand Registration embedded compliance session. Returns the existing active session if one is still valid, or creates a new session if the previous one has expired.",
-        "summary": "Resume an A2P Brand Registration embedded compliance session. Returns the existing active session if one is still valid, or creates a new session if the previous one has expired.",
+        "summary": "Resume an A2P Brand Registration embedded session",
         "tags": [
           "TrusthubV1A2PBrandRegistrationEmbeddedSessions"
         ],
@@ -1677,9 +1679,10 @@
             "name": "Id",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the A2P Brand Registration.",
+            "description": "The unique identifier for the A2P Brand Registration, as returned in the `id` field when the brand registration was created.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^tri1\\.[a-z0-9-]+\\.account\\.AC[0-9a-fA-F]{32}\\.registration\\.BU[0-9a-fA-F]{32}$"
             }
           }
         ],
@@ -1737,7 +1740,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK - An active session was returned, either an existing one that was reused or a newly issued one"
           },
           "400": {
             "content": {
@@ -1767,7 +1770,7 @@
                 }
               }
             },
-            "description": "Bad Request - Registration is in a non-resumable state"
+            "description": "Bad Request - Invalid registration id or registration is in a non-resumable state"
           },
           "401": {
             "content": {
@@ -1916,7 +1919,7 @@
       },
       "post": {
         "description": "Create a new A2P Campaign Registration and initialize an embedded compliance session.",
-        "summary": "Create a new A2P Campaign Registration and initialize an embedded compliance session.",
+        "summary": "Create an A2P Campaign Registration",
         "tags": [
           "TrusthubV1A2PCampaignRegistrations"
         ],
@@ -2133,7 +2136,7 @@
       },
       "post": {
         "description": "Resume an A2P Campaign Registration embedded compliance session. Returns the existing active session if one is still valid, or creates a new session if the previous one has expired.",
-        "summary": "Resume an A2P Campaign Registration embedded compliance session. Returns the existing active session if one is still valid, or creates a new session if the previous one has expired.",
+        "summary": "Resume an A2P Campaign Registration embedded session",
         "tags": [
           "TrusthubV1A2PCampaignRegistrationEmbeddedSessions"
         ],
@@ -2142,7 +2145,7 @@
             "name": "Id",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the A2P Campaign Registration. This can be either an A2P Campaign Registration ID (formatted `tri1.us1.account.AC.../registration.BU...`) returned from the Initialize Campaign endpoint, or a Messaging Service SID (`MG...`) for campaigns created outside the embeddable.",
+            "description": "The unique identifier for the A2P Campaign Registration. This is the A2P Campaign Registration ID (formatted `tri1.us1.account.AC.../registration.BU...`) returned in the `id` field when the campaign registration was created. For a campaign in FAILED status, use the Messaging Service SID (`MG...`) of the campaign instead.",
             "schema": {
               "type": "string"
             }
@@ -2202,7 +2205,7 @@
                 }
               }
             },
-            "description": "OK"
+            "description": "OK - An active session was returned, either an existing one that was reused or a newly issued one"
           },
           "400": {
             "content": {
@@ -2232,7 +2235,7 @@
                 }
               }
             },
-            "description": "Bad Request - Registration is in a non-resumable state"
+            "description": "Bad Request - Invalid registration id or Messaging Service SID, or registration is in a non-resumable state"
           },
           "401": {
             "content": {

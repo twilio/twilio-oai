@@ -124,7 +124,10 @@
           "PHONE_NUMBER",
           "QUICK_REPLY",
           "COPY_CODE",
-          "VOICE_CALL"
+          "VOICE_CALL",
+          "PIX",
+          "BOLETO",
+          "PAYMENT_LINK"
         ]
       },
       "webviewSizeType": {
@@ -160,11 +163,13 @@
           },
           "webview_size": {
             "$ref": "#/components/schemas/webviewSizeType"
+          },
+          "digitable_line": {
+            "type": "string"
           }
         },
         "required": [
-          "type",
-          "title"
+          "type"
         ]
       },
       "carouselActions": {
@@ -694,6 +699,27 @@
           "send_ttl_seconds": {
             "description": "Time-to-live in seconds for attempting to send a message with this Content",
             "type": "integer"
+          },
+          "bid_amount": {
+            "description": "Maximum price per 1,000 message deliveries, expressed in the WABA currency's smallest unit (cents for USD). Only valid for MARKETING templates onboarded to Max Pricing.",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        }
+      },
+      "ContentApprovalUpdateRequest": {
+        "type": "object",
+        "description": "Content approval update request body. Only bid_amount can be updated.",
+        "required": [
+          "bid_amount"
+        ],
+        "properties": {
+          "bid_amount": {
+            "description": "Maximum price per 1,000 message deliveries, expressed in the WABA currency's smallest unit (cents for USD). Only valid for MARKETING templates onboarded to Max Pricing.",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
           }
         }
       },
@@ -832,6 +858,12 @@
             "format": "int32",
             "nullable": true,
             "description": "Time-to-live in seconds for attempting to send a message with this Content"
+          },
+          "bid_amount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "description": "Maximum price per 1,000 message deliveries, expressed in the WABA currency's smallest unit (cents for USD). Only set for MARKETING templates onboarded to Max Pricing."
           }
         }
       },
@@ -1194,6 +1226,104 @@
           }
         ],
         "operationId": "CreateApprovalCreate"
+      },
+      "patch": {
+        "description": "Update the optimization spec (bid amount) of a ContentApprovalRequest for a content item",
+        "summary": "Update Content Approval Request",
+        "tags": [
+          "Contentv1ApprovalCreate"
+        ],
+        "parameters": [
+          {
+            "name": "ContentSid",
+            "in": "path",
+            "description": "",
+            "schema": {
+              "type": "string",
+              "minLength": 34,
+              "maxLength": 34,
+              "pattern": "^HX[0-9a-fA-F]{32}$"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentApprovalUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/content.v1.content.approval_create"
+                },
+                "examples": {
+                  "updateApproval": {
+                    "value": {
+                      "name": "tree_fiddy",
+                      "category": "MARKETING",
+                      "content_type": "twilio/text",
+                      "status": "approved",
+                      "rejection_reason": "",
+                      "allow_category_change": true,
+                      "bid_amount": 6000
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "UpdateApprovalCreate"
       }
     },
     "/v1/Content/{Sid}/ApprovalRequests": {

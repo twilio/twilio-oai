@@ -18,6 +18,64 @@
         "x-twilio": {
           "shortDescription": "The Messaging API version"
         }
+      },
+      "CircuitBreakerAccountSid": {
+        "name": "AccountSid",
+        "in": "path",
+        "description": "The SID of the Account that owns the Messaging Service.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 34,
+          "maxLength": 34,
+          "pattern": "^AC[0-9a-fA-F]{32}$"
+        }
+      },
+      "CircuitBreakerMessagingServiceSid": {
+        "name": "MessagingServiceSid",
+        "in": "path",
+        "description": "The SID of the Messaging Service.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 34,
+          "maxLength": 34,
+          "pattern": "^MG[0-9a-fA-F]{32}$"
+        }
+      },
+      "CircuitBreakerSenderSid": {
+        "name": "SenderSid",
+        "in": "path",
+        "description": "The SID of the sender the circuit breaker throttles.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 34,
+          "maxLength": 34,
+          "pattern": "^[A-Z]{2}[0-9a-fA-F]{32}$"
+        }
+      },
+      "CircuitBreakerMcc": {
+        "name": "mccQueryParam",
+        "in": "query",
+        "description": "Mobile country code of the circuit breaker, three digits. Leave out for every network.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]{3}$",
+          "example": "310"
+        }
+      },
+      "CircuitBreakerMnc": {
+        "name": "mncQueryParam",
+        "in": "query",
+        "description": "Mobile network code of the circuit breaker, three digits. Leave out for every network.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]{3}$",
+          "example": "260"
+        }
       }
     },
     "schemas": {
@@ -1153,7 +1211,7 @@
           },
           "validity_period": {
             "type": "integer",
-            "default": 0,
+            "default": 36000,
             "description": "How long, in seconds, messages sent from the Service are valid. Can be an integer from `1` to `36,000`. Default value is `36,000`."
           },
           "url": {
@@ -2037,6 +2095,168 @@
             "description": "Human readable use case details (usecase, description and purpose) of Messaging Service Use Cases."
           }
         }
+      },
+      "messaging.v1.service.circuit_breaker_upsert_request": {
+        "description": "Request body for creating or updating a sender circuit breaker.",
+        "type": "object",
+        "properties": {
+          "mcc": {
+            "description": "Mobile country code, three digits. Leave out for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "310"
+          },
+          "mnc": {
+            "description": "Mobile network code, three digits. Leave out for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "260"
+          },
+          "throttle": {
+            "description": "Share of traffic, from 0 to 1, the sender is throttled to.",
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1,
+            "example": 0.25
+          }
+        },
+        "required": [
+          "throttle"
+        ]
+      },
+      "messaging.v1.service.circuit_breaker_upsert": {
+        "description": "The sender circuit breaker (RCS gradual rollout throttle) that was created or updated, as set from the RCS gradual rollout UI.",
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "description": "The SID of the Account that owns the Messaging Service.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "example": "ACacd80ac966043a43b62be6d67c635c98"
+          },
+          "messaging_service_sid": {
+            "description": "The SID of the Messaging Service.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "example": "MGacd80ac966043a43b62be6d67c635c88"
+          },
+          "sender_sid": {
+            "description": "The SID of the sender the circuit breaker throttles.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^[A-Z]{2}[0-9a-fA-F]{32}$",
+            "example": "XEdeadbeef55043a43b62be6d67c105b87"
+          },
+          "mcc": {
+            "description": "Mobile country code, or null for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "310"
+          },
+          "mnc": {
+            "description": "Mobile network code, or null for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "260"
+          },
+          "throttle": {
+            "description": "Share of traffic, from 0 to 1, the sender is throttled to.",
+            "type": "number",
+            "format": "double",
+            "example": 0.25
+          }
+        },
+        "required": [
+          "account_sid",
+          "messaging_service_sid",
+          "sender_sid",
+          "throttle"
+        ]
+      },
+      "messaging.v1.service.circuit_breaker": {
+        "description": "A sender circuit breaker (RCS gradual rollout throttle) of a Messaging Service, as shown in the RCS gradual rollout UI.",
+        "type": "object",
+        "properties": {
+          "account_sid": {
+            "description": "The SID of the Account that owns the Messaging Service.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^AC[0-9a-fA-F]{32}$",
+            "example": "ACacd80ac966043a43b62be6d67c635c98"
+          },
+          "messaging_service_sid": {
+            "description": "The SID of the Messaging Service.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^MG[0-9a-fA-F]{32}$",
+            "example": "MGacd80ac966043a43b62be6d67c635c88"
+          },
+          "sender_sid": {
+            "description": "The SID of the sender the circuit breaker throttles.",
+            "type": "string",
+            "minLength": 34,
+            "maxLength": 34,
+            "pattern": "^[A-Z]{2}[0-9a-fA-F]{32}$",
+            "example": "XEdeadbeef55043a43b62be6d67c105b87"
+          },
+          "mcc": {
+            "description": "Mobile country code, or null for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "310"
+          },
+          "mnc": {
+            "description": "Mobile network code, or null for every network.",
+            "type": "string",
+            "pattern": "^[0-9]{3}$",
+            "nullable": true,
+            "example": "260"
+          },
+          "throttle": {
+            "description": "Share of traffic, from 0 to 1, the sender is throttled to.",
+            "type": "number",
+            "format": "double",
+            "example": 0.25
+          },
+          "date_created": {
+            "description": "When the circuit breaker was created.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-01T09:30:00-07:00"
+          },
+          "date_updated": {
+            "description": "When the circuit breaker was last updated.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-10-02T10:45:00-07:00"
+          }
+        },
+        "required": [
+          "account_sid",
+          "messaging_service_sid",
+          "sender_sid",
+          "throttle",
+          "date_created",
+          "date_updated"
+        ]
+      },
+      "messaging.v1.service.circuit_breaker_delete_count": {
+        "description": "Number of circuit breakers deleted.",
+        "type": "integer",
+        "format": "int32"
       }
     }
   },
@@ -11716,6 +11936,10 @@
     },
     {
       "name": "MessagingV1Service"
+    },
+    {
+      "name": "MessagingV1ServiceCircuitBreakers",
+      "description": "Sender circuit breakers (RCS gradual rollout throttles) of a Messaging Service, for the RCS gradual rollout UI."
     },
     {
       "name": "MessagingV1ShortCode"
