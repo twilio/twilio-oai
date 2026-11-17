@@ -1438,6 +1438,8 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '429':
           $ref: '#/components/responses/TooManyRequests'
         '500':
@@ -3337,8 +3339,8 @@ components:
           description: The timestamp when the observation was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - updatedAt
       - id
+      - updatedAt
       - createdAt
     SummaryCore:
       type: object
@@ -3407,12 +3409,12 @@ components:
           description: The timestamp when the summary was last updated.
           example: '2025-01-15T10:30:45Z'
       required:
-      - createdAt
-      - content
       - conversationId
+      - content
+      - createdAt
       - id
-      - updatedAt
       - occurredAt
+      - updatedAt
     Participant:
       type: object
       required:
@@ -3555,10 +3557,10 @@ components:
                 - COMPLETED
                 - FAILED
             required:
-            - id
-            - channel
             - name
+            - id
             - address
+            - channel
       required:
       - id
       - author
@@ -3787,7 +3789,7 @@ components:
       title: Full Trait
       description: Full metadata about a trait, beyond the name value pair.
       additionalProperties: false
-      maxProperties: 4
+      maxProperties: 5
       required:
       - name
       - traitGroup
@@ -3809,6 +3811,14 @@ components:
           format: date-time
           description: The time the trait was created or last updated.
           example: '2025-01-01T12:00:00Z'
+        source:
+          type: string
+          description: Caller-set, descriptive, untrusted provenance metadata. Must
+            follow the {company}/{product}/{version}/* convention. "twilio" is a reserved
+            company name, only usable by authenticated internal callers.
+          maxLength: 128
+          pattern: ^[a-z0-9-]+/[a-z0-9-]+/v[0-9]{1,2}(/[a-z0-9-_]+)*$
+          example: twilio/inferred-traits/v0
     TraitGroups:
       type: object
       description: Multiple trait groups.
@@ -3987,11 +3997,11 @@ components:
             available. Represents a high water mark for ingested data.
           example: '2026-10-07T12:00:00Z'
       required:
-      - displayName
       - intelligenceServiceId
-      - id
       - status
       - version
+      - displayName
+      - id
     ServiceList:
       type: object
       additionalProperties: false
@@ -4091,8 +4101,8 @@ components:
             Incremented on each successful update.
           example: 3
       required:
-      - identifierConfigs
       - matchingRules
+      - identifierConfigs
       - version
     IdentifierConfig:
       type: object
@@ -4340,8 +4350,8 @@ components:
             on each successful update.
           example: 3
       required:
-      - version
       - displayName
+      - version
     TraitGroupRequest:
       type: object
       additionalProperties: false
@@ -4735,8 +4745,8 @@ components:
           $ref: '#/components/schemas/DataMappingFromTypes'
       required:
       - displayName
-      - mappingFrom
       - mappingTo
+      - mappingFrom
     DataMapping:
       type: object
       properties:
@@ -4785,13 +4795,13 @@ components:
             on each successful update.
           example: 3
       required:
-      - displayName
       - createdAt
-      - mappingFrom
-      - id
-      - updatedAt
-      - mappingTo
       - version
+      - displayName
+      - id
+      - mappingFrom
+      - mappingTo
+      - updatedAt
     DataMappingList:
       type: object
       additionalProperties: false
@@ -4858,12 +4868,12 @@ components:
           maximum: 1
           example: 0.82
       required:
-      - createdAt
       - content
-      - id
-      - updatedAt
-      - occurredAt
+      - createdAt
       - source
+      - id
+      - occurredAt
+      - updatedAt
     RecallSummaryInfo:
       type: object
       description: A summary memory derived from conversations.
@@ -4913,12 +4923,12 @@ components:
           maximum: 1
           example: 0.78
       required:
-      - createdAt
-      - content
       - conversationId
+      - content
+      - createdAt
       - id
-      - updatedAt
       - occurredAt
+      - updatedAt
     SummaryCorePatch:
       type: object
       description: Core mutable properties for updating summary objects. All fields
@@ -5088,9 +5098,9 @@ components:
           items:
             $ref: '#/components/schemas/ConversationID'
       required:
+      - occurredAt
       - content
       - source
-      - occurredAt
     DataMappingSuggestionToTypes:
       type: object
       description: Destination configuration for a suggested mapping request.
@@ -5500,12 +5510,12 @@ components:
             each successful update.
           example: 3
       required:
-      - displayName
       - createdAt
-      - id
-      - updatedAt
       - storeId
       - version
+      - displayName
+      - id
+      - updatedAt
     TraitExtractionStrategyList:
       type: object
       additionalProperties: false
@@ -5744,11 +5754,11 @@ components:
             each successful update.
           example: 3
       required:
-      - displayName
       - createdAt
+      - version
+      - displayName
       - id
       - updatedAt
-      - version
     ObservationExtractionStrategyList:
       type: object
       additionalProperties: false
@@ -5871,6 +5881,69 @@ components:
                 of 3 hours.
         payload:
           $ref: '#/components/schemas/OperationPayload'
+    TraitPatch:
+      type: object
+      title: TraitPatch
+      description: A single trait write, with optional source and occurredAt metadata.
+        Set the value to null to remove the trait.
+      additionalProperties: false
+      maxProperties: 5
+      required:
+      - name
+      - traitGroup
+      properties:
+        name:
+          type: string
+          description: The name of the trait.
+          example: firstName
+          maxLength: 64
+        traitGroup:
+          type: string
+          description: The trait group name to which this trait belongs.
+          example: Contact
+          maxLength: 64
+        value:
+          $ref: '#/components/schemas/TraitValue'
+        source:
+          type: string
+          description: Caller-set, descriptive, untrusted provenance metadata. Must
+            follow the {company}/{product}/{version}/* convention. "twilio" is a reserved
+            company name, only usable by authenticated internal callers.
+          maxLength: 128
+          pattern: ^[a-z0-9-]+/[a-z0-9-]+/v[0-9]{1,2}(/[a-z0-9-_]+)*$
+          example: twilio/inferred-traits/v0
+        occurredAt:
+          type: string
+          format: date-time
+          description: When the value was actually observed or produced, as distinct
+            from when the write was received. Optional; defaults to write time if
+            omitted.
+          example: '2025-01-01T12:00:00Z'
+    PatchProfileTraitsRequest:
+      type: object
+      description: A batch of trait writes.
+      additionalProperties: false
+      maxProperties: 1
+      required:
+      - traits
+      properties:
+        traits:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/TraitPatch'
+    AcceptedResponse:
+      type: object
+      description: Generic acceptance response for asynchronous operations.
+      required:
+      - message
+      maxProperties: 1
+      properties:
+        message:
+          type: string
+          description: Confirmation message for the operation.
+          maxLength: 255
+          example: Operation accepted for processing.
     OperationPayload:
       description: Operation-specific progress and status details. The `type` field
         identifies which shape applies.
@@ -6346,6 +6419,13 @@ components:
             status: 422
     Conflict:
       description: Conflict
+      headers:
+        Retry-After:
+          description: The number of seconds to wait before retrying the request.
+          schema:
+            type: integer
+            minimum: 0
+            example: 5
       content:
         application/json:
           schema:

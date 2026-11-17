@@ -1944,6 +1944,9 @@
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequests"
           },
@@ -4661,9 +4664,9 @@
           }
         },
         "required": [
+          "createdAt",
           "updatedAt",
-          "id",
-          "createdAt"
+          "id"
         ]
       },
       "SummaryCore": {
@@ -4745,9 +4748,9 @@
         },
         "required": [
           "occurredAt",
+          "updatedAt",
           "id",
           "content",
-          "updatedAt",
           "conversationId",
           "createdAt"
         ]
@@ -4924,8 +4927,8 @@
               "required": [
                 "address",
                 "name",
-                "id",
-                "channel"
+                "channel",
+                "id"
               ]
             }
           }
@@ -5193,7 +5196,7 @@
         "title": "Full Trait",
         "description": "Full metadata about a trait, beyond the name value pair.",
         "additionalProperties": false,
-        "maxProperties": 4,
+        "maxProperties": 5,
         "required": [
           "name",
           "traitGroup"
@@ -5219,6 +5222,13 @@
             "format": "date-time",
             "description": "The time the trait was created or last updated.",
             "example": "2025-01-01T12:00:00Z"
+          },
+          "source": {
+            "type": "string",
+            "description": "Caller-set, descriptive, untrusted provenance metadata. Must follow the {company}/{product}/{version}/* convention. \"twilio\" is a reserved company name, only usable by authenticated internal callers.",
+            "maxLength": 128,
+            "pattern": "^[a-z0-9-]+/[a-z0-9-]+/v[0-9]{1,2}(/[a-z0-9-_]+)*$",
+            "example": "twilio/inferred-traits/v0"
           }
         }
       },
@@ -5422,11 +5432,11 @@
           }
         },
         "required": [
+          "id",
           "displayName",
           "status",
-          "id",
-          "version",
-          "intelligenceServiceId"
+          "intelligenceServiceId",
+          "version"
         ]
       },
       "ServiceList": {
@@ -5524,8 +5534,8 @@
           }
         },
         "required": [
-          "identifierConfigs",
           "matchingRules",
+          "identifierConfigs",
           "version"
         ]
       },
@@ -6208,8 +6218,8 @@
         },
         "required": [
           "displayName",
-          "mappingTo",
-          "mappingFrom"
+          "mappingFrom",
+          "mappingTo"
         ]
       },
       "DataMapping": {
@@ -6263,13 +6273,13 @@
           }
         },
         "required": [
-          "displayName",
-          "id",
-          "version",
-          "mappingTo",
           "mappingFrom",
           "updatedAt",
-          "createdAt"
+          "mappingTo",
+          "id",
+          "displayName",
+          "createdAt",
+          "version"
         ]
       },
       "DataMappingList": {
@@ -6347,11 +6357,11 @@
           }
         },
         "required": [
-          "source",
           "occurredAt",
+          "updatedAt",
           "id",
           "content",
-          "updatedAt",
+          "source",
           "createdAt"
         ]
       },
@@ -6408,9 +6418,9 @@
         },
         "required": [
           "occurredAt",
+          "updatedAt",
           "id",
           "content",
-          "updatedAt",
           "conversationId",
           "createdAt"
         ]
@@ -6623,8 +6633,8 @@
           }
         },
         "required": [
-          "source",
           "occurredAt",
+          "source",
           "content"
         ]
       },
@@ -7076,12 +7086,12 @@
           }
         },
         "required": [
-          "displayName",
-          "id",
-          "version",
-          "storeId",
           "updatedAt",
-          "createdAt"
+          "id",
+          "displayName",
+          "storeId",
+          "createdAt",
+          "version"
         ]
       },
       "TraitExtractionStrategyList": {
@@ -7345,11 +7355,11 @@
           }
         },
         "required": [
-          "displayName",
-          "id",
-          "version",
           "updatedAt",
-          "createdAt"
+          "id",
+          "displayName",
+          "createdAt",
+          "version"
         ]
       },
       "ObservationExtractionStrategyList": {
@@ -7483,6 +7493,81 @@
           },
           "payload": {
             "$ref": "#/components/schemas/OperationPayload"
+          }
+        }
+      },
+      "TraitPatch": {
+        "type": "object",
+        "title": "TraitPatch",
+        "description": "A single trait write, with optional source and occurredAt metadata. Set the value to null to remove the trait.",
+        "additionalProperties": false,
+        "maxProperties": 5,
+        "required": [
+          "name",
+          "traitGroup"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the trait.",
+            "example": "firstName",
+            "maxLength": 64
+          },
+          "traitGroup": {
+            "type": "string",
+            "description": "The trait group name to which this trait belongs.",
+            "example": "Contact",
+            "maxLength": 64
+          },
+          "value": {
+            "$ref": "#/components/schemas/TraitValue"
+          },
+          "source": {
+            "type": "string",
+            "description": "Caller-set, descriptive, untrusted provenance metadata. Must follow the {company}/{product}/{version}/* convention. \"twilio\" is a reserved company name, only usable by authenticated internal callers.",
+            "maxLength": 128,
+            "pattern": "^[a-z0-9-]+/[a-z0-9-]+/v[0-9]{1,2}(/[a-z0-9-_]+)*$",
+            "example": "twilio/inferred-traits/v0"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the value was actually observed or produced, as distinct from when the write was received. Optional; defaults to write time if omitted.",
+            "example": "2025-01-01T12:00:00Z"
+          }
+        }
+      },
+      "PatchProfileTraitsRequest": {
+        "type": "object",
+        "description": "A batch of trait writes.",
+        "additionalProperties": false,
+        "maxProperties": 1,
+        "required": [
+          "traits"
+        ],
+        "properties": {
+          "traits": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/TraitPatch"
+            }
+          }
+        }
+      },
+      "AcceptedResponse": {
+        "type": "object",
+        "description": "Generic acceptance response for asynchronous operations.",
+        "required": [
+          "message"
+        ],
+        "maxProperties": 1,
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Confirmation message for the operation.",
+            "maxLength": 255,
+            "example": "Operation accepted for processing."
           }
         }
       },
@@ -8055,6 +8140,16 @@
       },
       "Conflict": {
         "description": "Conflict",
+        "headers": {
+          "Retry-After": {
+            "description": "The number of seconds to wait before retrying the request.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "example": 5
+            }
+          }
+        },
         "content": {
           "application/json": {
             "schema": {

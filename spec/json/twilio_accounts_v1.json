@@ -79,6 +79,109 @@
           }
         }
       },
+      "accounts.v1.compliance_signals_check": {
+        "type": "object",
+        "properties": {
+          "signals": {
+            "type": "object",
+            "nullable": true,
+            "description": "The results of the requested signals.",
+            "properties": {
+              "quietHours": {
+                "type": "object",
+                "nullable": true,
+                "description": "The quiet hours evaluation for the recipient.",
+                "properties": {
+                  "isActive": {
+                    "type": "boolean",
+                    "description": "Whether quiet hours are in effect for the recipient."
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "OUTSIDE_QUIET_HOURS",
+                      "EXEMPT_USE_CASE",
+                      "STATE_QUIET_HOURS",
+                      "FEDERAL_QUIET_HOURS"
+                    ],
+                    "description": "Why quiet hours are or are not in effect."
+                  },
+                  "evaluatedUseCase": {
+                    "type": "string",
+                    "nullable": true,
+                    "enum": [
+                      "ESSENTIAL",
+                      "NON_ESSENTIAL"
+                    ],
+                    "description": "Whether the evaluated use case is essential or non-essential. It is null when it does not apply."
+                  },
+                  "location": {
+                    "type": "object",
+                    "description": "The location of the recipient used for the evaluation.",
+                    "properties": {
+                      "countryIsoCode": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "The ISO 3166-1 alpha-2 country of the recipient."
+                      },
+                      "stateCode": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "The state of the recipient."
+                      }
+                    }
+                  },
+                  "sendingWindow": {
+                    "type": "object",
+                    "nullable": true,
+                    "description": "The time window in which the message can be sent outside quiet hours. When the requested time is already outside quiet hours, `startAt` is that time and `endAt` is when quiet hours begin. It is null when it does not apply or the use case is exempt.",
+                    "properties": {
+                      "startAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The start of the window in UTC."
+                      },
+                      "endAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The end of the window in UTC."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "accounts.v1.compliance_signals_check_problem": {
+        "type": "object",
+        "description": "An error response returned by the service. It follows RFC 9457 (`application/problem+json`).",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "A URI that identifies the error."
+          },
+          "title": {
+            "type": "string",
+            "description": "A short summary of the error."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The HTTP status code."
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The error code returned by the service. It is the same as the HTTP status code."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Details of the error, such as the failed checks."
+          }
+        }
+      },
       "accounts.v1.credential": {
         "type": "object",
         "properties": {}
@@ -532,6 +635,231 @@
                 "updateWithoutNotification": {
                   "value": {
                     "SuppressEmailNotification": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/ComplianceSignals/Check": {
+      "servers": [
+        {
+          "url": "https://accounts.twilio.com"
+        }
+      ],
+      "description": "",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "signals"
+        ],
+        "mountName": "compliance_signals_check",
+        "className": "compliance_signals_check"
+      },
+      "post": {
+        "description": "Evaluates compliance signals for a message to a phone number. Only the `QUIET_HOURS` signal is supported for now. The request and the response are JSON. The errors returned by the service are RFC 9457 problem details; errors raised before the request reaches the service, such as authentication failures, use the standard Twilio error format.",
+        "summary": "Evaluate compliance signals for a message",
+        "tags": [
+          "AccountsV1ComplianceSignalsCheck"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.compliance_signals_check"
+                },
+                "examples": {
+                  "post": {
+                    "value": {
+                      "signals": {
+                        "quietHours": {
+                          "isActive": false,
+                          "reason": "OUTSIDE_QUIET_HOURS",
+                          "evaluatedUseCase": null,
+                          "location": {
+                            "countryIsoCode": "US",
+                            "stateCode": "FL"
+                          },
+                          "sendingWindow": {
+                            "startAt": "2099-04-15T16:00:00Z",
+                            "endAt": "2099-04-16T00:00:00Z"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.compliance_signals_check_problem"
+                },
+                "examples": {
+                  "post": {
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/400",
+                      "title": "Invalid request",
+                      "status": 400,
+                      "code": 400,
+                      "detail": "INVALID_DESTINATION_COUNTRY"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Invalid request. The detail lists the failed checks, for example `INVALID_SIGNALS`, `INVALID_TO_NUMBER`, `BODY_OR_USE_CASE_REQUIRED`, `BODY_TOO_LONG`, `INVALID_USE_CASE`, `INVALID_CHANNEL`, `COUNTRY_ISO_CODE_REQUIRED`, `INVALID_DESTINATION_COUNTRY`, `INVALID_ZIP_CODE` or `INVALID_SEND_AT`."
+          },
+          "415": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.compliance_signals_check_problem"
+                }
+              }
+            },
+            "description": "Unsupported media type. The Content-Type header is not application/json."
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.compliance_signals_check_problem"
+                },
+                "examples": {
+                  "post": {
+                    "value": {
+                      "type": "https://www.twilio.com/docs/api/errors/429",
+                      "title": "Too many requests",
+                      "status": 429,
+                      "code": 429,
+                      "detail": "Too many requests. Try again later"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Too many requests."
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/accounts.v1.compliance_signals_check_problem"
+                }
+              }
+            },
+            "description": "Internal server error."
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ],
+        "operationId": "CreateComplianceSignalsCheck",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "title": "CreateComplianceSignalsCheckRequest",
+                "properties": {
+                  "signals": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The signals to evaluate. Only `QUIET_HOURS` is supported."
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "The recipient phone number in [E.164 format](https://www.twilio.com/docs/glossary/what-e164)."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "The content of the message, at most 1600 characters. Required if `useCase` is not provided."
+                  },
+                  "useCase": {
+                    "type": "string",
+                    "description": "The intent of the message, one of `OTP`, `NOTIFICATIONS`, `FRAUD`, `SECURITY`, `CUSTOMERCARE`, `DELIVERY`, `EDUCATION`, `EVENTS`, `POLLING`, `ANNOUNCEMENTS` or `MARKETING`. Required if `body` is not provided. It is used instead of the body when both are given."
+                  },
+                  "channel": {
+                    "type": "string",
+                    "description": "The channel the message is sent on, one of `SMS`, `MMS`, `RCS` or `CALL`. Defaults to `SMS`."
+                  },
+                  "countryIsoCode": {
+                    "type": "string",
+                    "description": "The ISO 3166-1 alpha-2 country of the recipient. Only `US` is supported."
+                  },
+                  "zipCode": {
+                    "type": "string",
+                    "description": "The US zip code of the recipient, 5 digits or ZIP+4. When it is not given or not known, the location is inferred from the phone number."
+                  },
+                  "sendAt": {
+                    "type": "string",
+                    "description": "An [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) timestamp, in UTC or with an offset, to evaluate a scheduled delivery instead of the current time. It must not be in the past."
+                  }
+                },
+                "required": [
+                  "signals",
+                  "to",
+                  "countryIsoCode"
+                ]
+              },
+              "examples": {
+                "post": {
+                  "value": {
+                    "signals": [
+                      "QUIET_HOURS"
+                    ],
+                    "to": "+16502530000",
+                    "useCase": "MARKETING",
+                    "countryIsoCode": "US",
+                    "zipCode": "33101",
+                    "sendAt": "2099-04-15T16:00:00Z"
                   }
                 }
               }
