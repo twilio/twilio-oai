@@ -36,6 +36,10 @@
     {
       "name": "MessagingV3WhatsappBusinessAccount",
       "description": "Retrieve the WhatsApp Business Account associated with a Twilio account."
+    },
+    {
+      "name": "MessagingV3WhatsappMessageCostEstimate",
+      "description": "Retrieve estimated cost and delivery ranges for WhatsApp marketing sends."
     }
   ],
   "paths": {
@@ -318,6 +322,256 @@
           }
         ]
       }
+    },
+    "/v3/MessageCostEstimate": {
+      "servers": [
+        {
+          "url": "https://messaging.twilio.com"
+        }
+      ],
+      "description": "Returns the estimated cost and delivery range for a WhatsApp marketing send at a series of bid levels, for the WhatsApp Business Account resolved from the calling account.",
+      "x-twilio": {
+        "defaultOutputProperties": [
+          "currency",
+          "estimates"
+        ],
+        "mountName": "message_cost_estimate",
+        "pathType": "list"
+      },
+      "get": {
+        "summary": "Fetch a WhatsApp message cost estimate",
+        "description": "Fetch the estimated cost and delivery ranges for WhatsApp Marketing Max Pricing messages sent to a single country, at multiple max price (bid) amounts. This applies to Marketing Max Pricing messages only. Estimates are generated from historical data over the requested lookback window and are informational only.",
+        "tags": [
+          "MessagingV3WhatsappMessageCostEstimate"
+        ],
+        "operationId": "FetchV3WhatsappMessageCostEstimate",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": true,
+            "description": "The ISO-3166-1 alpha-2 country code to estimate for. Exactly one country is accepted.",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z]{2}$"
+            },
+            "example": "IN"
+          },
+          {
+            "name": "lookbackWindow",
+            "in": "query",
+            "required": true,
+            "description": "The historical lookback window used to compute the estimate.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "L1D",
+                "L7D",
+                "L14D",
+                "L28D"
+              ]
+            },
+            "example": "L7D"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Message cost estimate was successfully computed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCostEstimateResponse"
+                },
+                "examples": {
+                  "fetch": {
+                    "value": {
+                      "currency": "USD",
+                      "country": "IN",
+                      "lookbackWindow": "L7D",
+                      "estimates": [
+                        {
+                          "bidAmount": 400,
+                          "targetedUsers": 1000,
+                          "estimatedDeliveries": {
+                            "lower": 500,
+                            "upper": 570
+                          },
+                          "estimatedCost": {
+                            "lower": 389.74,
+                            "upper": 390.74
+                          }
+                        }
+                      ],
+                      "disclaimer": "Estimates are historical and informational only; actual delivery and cost may vary."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "description": "Specify the origin(s) allowed to access the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "*"
+              },
+              "Access-Control-Allow-Methods": {
+                "description": "Specify the HTTP methods allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "POST, OPTIONS"
+              },
+              "Access-Control-Allow-Headers": {
+                "description": "Specify the headers allowed when accessing the resource",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "Content-Type, Authorization"
+              },
+              "Access-Control-Allow-Credentials": {
+                "description": "Indicates whether the browser should include credentials",
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "Access-Control-Expose-Headers": {
+                "description": "Headers exposed to the client",
+                "schema": {
+                  "type": "string",
+                  "example": "X-Custom-Header1, X-Custom-Header2"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. The country or lookbackWindow is missing or malformed, more than one country was supplied, or the country is not eligible for cost estimation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication credentials are missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No WhatsApp Business Account is configured for the account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The service is unavailable, the request timed out, or the WhatsApp API returned an error. The request should be retried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "description": "Twilio-specific error code",
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "message": {
+                      "description": "Error message",
+                      "type": "string"
+                    },
+                    "more_info": {
+                      "description": "Link to Error Code References",
+                      "type": "string"
+                    },
+                    "status": {
+                      "description": "HTTP response status code",
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accountSid_authToken": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -328,6 +582,79 @@
       }
     },
     "schemas": {
+      "MessageCostEstimateResponse": {
+        "type": "object",
+        "description": "Estimated cost and delivery ranges at a series of bid levels.",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "The WhatsApp Business Account's currency (e.g. `USD`). `bidAmount` and cost bounds are in this currency's smallest unit.",
+            "example": "USD"
+          },
+          "country": {
+            "type": "string",
+            "description": "The ISO-3166-1 alpha-2 country code the estimate was computed for.",
+            "example": "IN"
+          },
+          "lookbackWindow": {
+            "type": "string",
+            "description": "The historical lookback window used to compute the estimate.",
+            "enum": [
+              "L1D",
+              "L7D",
+              "L14D",
+              "L28D"
+            ]
+          },
+          "estimates": {
+            "type": "array",
+            "description": "One entry per bid level.",
+            "items": {
+              "$ref": "#/components/schemas/MessageCostEstimateBidLevel"
+            }
+          },
+          "disclaimer": {
+            "type": "string",
+            "description": "Estimates are historical and informational only; actual delivery and cost may vary."
+          }
+        }
+      },
+      "MessageCostEstimateBidLevel": {
+        "type": "object",
+        "description": "A single bid-level row in the message cost estimate.",
+        "properties": {
+          "bidAmount": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Max price per 1,000 message deliveries, in the smallest unit of `currency`.",
+            "example": 400
+          },
+          "targetedUsers": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The normalized user base the estimate is scaled to (fixed at 1,000 during beta).",
+            "example": 1000
+          },
+          "estimatedDeliveries": {
+            "$ref": "#/components/schemas/MessageCostEstimateRange"
+          },
+          "estimatedCost": {
+            "$ref": "#/components/schemas/MessageCostEstimateRange"
+          }
+        }
+      },
+      "MessageCostEstimateRange": {
+        "type": "object",
+        "description": "A lower/upper bound pair. For `estimatedCost`, the estimated average cost per 1,000 deliveries in the currency's smallest unit; for `estimatedDeliveries`, whole counts.",
+        "properties": {
+          "lower": {
+            "type": "number"
+          },
+          "upper": {
+            "type": "number"
+          }
+        }
+      },
       "TypingIndicatorRequest": {
         "type": "object",
         "description": "Request body for sending a typing indicator. The schema varies by channel. Use the `channel` field to determine which properties are required.\n",

@@ -1585,7 +1585,7 @@
       },
       "iam.v1.organization.agentregistration": {
         "type": "object",
-        "description": "An MCP agent (a CIMD client) an organization has registered.",
+        "description": "A CIMD client, an MCP agent or the Twilio CLI, that an organization has registered.",
         "properties": {
           "registration_sid": {
             "type": "string",
@@ -1608,6 +1608,11 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether users in the organization can connect the agent."
+          },
+          "cimd_category": {
+            "type": "string",
+            "nullable": true,
+            "description": "The CIMD category the agent is registered for, MCP or CLI. MCP for one registered before categories existed."
           },
           "created_by": {
             "type": "string",
@@ -1647,6 +1652,14 @@
           "enabled": {
             "type": "boolean",
             "description": "Whether users in the organization can connect the agent. Defaults to false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "MCP",
+              "CLI"
+            ],
+            "description": "The CIMD category to register the agent for. A URL a category lists may be registered in that category only, and a URL no category lists only as MCP. Defaults to the category that lists the URL, else MCP. A URL is registered in one category per organization."
           }
         },
         "required": [
@@ -1694,8 +1707,16 @@
       "iam.v1.organization.AgentPermissionsRequest": {
         "type": "object",
         "minProperties": 1,
-        "description": "The parts to change. A part left out keeps its setting, and at least one part is required.",
+        "description": "The parts to change. A part left out keeps its setting, and at least one part is required. A part the category does not have is a 400, so CLI takes account only.",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MCP",
+              "CLI"
+            ],
+            "description": "The CIMD category whose agent permissions to set. Defaults to MCP."
+          },
           "account": {
             "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
           },
@@ -1709,6 +1730,7 @@
       },
       "iam.v1.organization.AgentPermissions": {
         "type": "object",
+        "description": "What any agent of the category may do in the organization. A part the category does not have is null, so CLI has organization and user null.",
         "properties": {
           "account": {
             "$ref": "#/components/schemas/iam.v1.organization.AgentPermissionPart"
@@ -1721,7 +1743,7 @@
           },
           "pools": {
             "type": "object",
-            "description": "The permissions each context offers agents, for rendering a selection.",
+            "description": "The permissions each context offers agents of the category, for rendering a selection. A context the category does not have is empty.",
             "properties": {
               "account": {
                 "type": "array",
@@ -1751,8 +1773,6 @@
         },
         "required": [
           "account",
-          "organization",
-          "user",
           "pools"
         ]
       },
