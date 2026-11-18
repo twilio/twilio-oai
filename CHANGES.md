@@ -1,6 +1,13 @@
 twilio-oai changelog
 ====================
 
+[2026-11-18] Version 2.11.2
+---------------------------
+**Twiml**
+- Add `callerDisplayName` attribute to `<Dial>` verb for SIP From display name
+- Add support for `<Failover>` noun with `<Language>` children under `<ConversationRelay>`, and `turnMinSilence` attribute to `<ConversationRelay>`
+
+
 [2026-11-17] Version 2.11.1
 ---------------------------
 **Twiml**
